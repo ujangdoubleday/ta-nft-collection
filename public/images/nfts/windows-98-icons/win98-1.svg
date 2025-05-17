@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#c0c0c0" stroke="#808080" stroke-width="4"/>
+  
+  <!-- Windows 98 My Computer Icon -->
+  <g transform="translate(50, 40) scale(1.5)">
+    <!-- Monitor -->
+    <rect x="10" y="10" width="50" height="40" rx="2" ry="2" fill="#ffffce" stroke="#000" stroke-width="1"/>
+    <rect x="15" y="15" width="40" height="30" fill="#408080" stroke="#000" stroke-width="1"/>
+    
+    <!-- Screen Lines -->
+    <line x1="20" y1="20" x2="50" y2="20" stroke="#80ff80" stroke-width="1" />
+    <line x1="20" y1="25" x2="45" y2="25" stroke="#80ff80" stroke-width="1" />
+    <line x1="20" y1="30" x2="48" y2="30" stroke="#80ff80" stroke-width="1" />
+    <line x1="20" y1="35" x2="40" y2="35" stroke="#80ff80" stroke-width="1" />
+    
+    <!-- Stand -->
+    <polygon points="25,50 45,50 50,55 20,55" fill="#ffffce" stroke="#000" stroke-width="1" />
+    
+    <!-- Base -->
+    <rect x="15" y="55" width="40" height="3" rx="1" ry="1" fill="#ffffce" stroke="#000" stroke-width="1"/>
+    
+    <!-- Keyboard -->
+    <rect x="25" y="60" width="20" height="8" rx="1" ry="1" fill="#ffffce" stroke="#000" stroke-width="1"/>
+  </g>
+  
+  <text x="100" y="170" font-family="'MS Sans Serif', Arial, sans-serif" font-size="14" text-anchor="middle" fill="black">My Computer Icon</text>
+</svg> 

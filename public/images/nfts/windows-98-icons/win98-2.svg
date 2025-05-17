@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#c0c0c0" stroke="#808080" stroke-width="4"/>
+  
+  <!-- Windows 98 Folder Icon -->
+  <g transform="translate(40, 40) scale(1.5)">
+    <!-- Folder Tab -->
+    <path d="M10,15 L25,15 L30,20 L30,25 L10,25 Z" fill="#ffff99" stroke="#000" stroke-width="1"/>
+    
+    <!-- Main Folder -->
+    <path d="M10,25 L80,25 L80,70 L10,70 Z" fill="#ffff99" stroke="#000" stroke-width="1"/>
+    
+    <!-- Folder Shadow -->
+    <path d="M10,70 L80,70 L75,75 L5,75 Z" fill="#dddd77" stroke="#000" stroke-width="1"/>
+    <path d="M80,25 L80,70 L75,75 L75,30 Z" fill="#dddd77" stroke="#000" stroke-width="1"/>
+  </g>
+  
+  <text x="100" y="170" font-family="'MS Sans Serif', Arial, sans-serif" font-size="14" text-anchor="middle" fill="black">Folder Icon</text>
+</svg> 

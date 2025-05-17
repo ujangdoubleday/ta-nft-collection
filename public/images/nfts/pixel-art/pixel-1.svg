@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#c0c0c0" stroke="#808080" stroke-width="4"/>
+  <!-- 16x16 pixel art grid -->
+  <g transform="translate(50, 50) scale(6)">
+    <!-- background -->
+    <rect x="0" y="0" width="16" height="16" fill="#5b6ee1"/>
+    <!-- simple pixel art face -->
+    <rect x="4" y="4" width="2" height="2" fill="#222"/>
+    <rect x="10" y="4" width="2" height="2" fill="#222"/>
+    <rect x="6" y="10" width="4" height="2" fill="#222"/>
+  </g>
+  <text x="100" y="170" font-family="'MS Sans Serif', Arial, sans-serif" font-size="14" text-anchor="middle" fill="black">Pixel Art #1</text>
+</svg> 

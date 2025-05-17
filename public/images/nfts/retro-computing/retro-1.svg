@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="200" height="200" fill="#c0c0c0" stroke="#808080" stroke-width="4"/>
+  
+  <!-- Retro Computer -->
+  <g transform="translate(50, 40)">
+    <!-- Monitor -->
+    <rect x="0" y="0" width="100" height="80" rx="2" ry="2" fill="#eeeec0" stroke="#333" stroke-width="2"/>
+    <rect x="10" y="10" width="80" height="60" fill="#002200" stroke="#111" stroke-width="1"/>
+    <rect x="15" y="15" width="70" height="10" fill="#00ff00" stroke="none"/>
+    <rect x="15" y="30" width="35" height="5" fill="#00ff00" stroke="none"/>
+    <rect x="15" y="40" width="45" height="5" fill="#00ff00" stroke="none"/>
+    <rect x="15" y="50" width="25" height="5" fill="#00ff00" stroke="none"/>
+    
+    <!-- Base -->
+    <rect x="30" y="80" width="40" height="10" fill="#d0d0d0" stroke="#333" stroke-width="1"/>
+    
+    <!-- Keyboard -->
+    <rect x="20" y="90" width="60" height="20" rx="2" ry="2" fill="#e0e0e0" stroke="#333" stroke-width="1"/>
+    <rect x="25" y="95" width="50" height="10" fill="#d0d0d0" stroke="#777" stroke-width="1"/>
+  </g>
+  
+  <text x="100" y="170" font-family="'MS Sans Serif', Arial, sans-serif" font-size="14" text-anchor="middle" fill="black">Retro PC #1</text>
+</svg> 

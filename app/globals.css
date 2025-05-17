@@ -1,12 +1,72 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'MS Sans Serif';
+  src: url('/fonts/ms-sans-serif.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
 }
 
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 180 100% 25%; /* Windows 98 teal #008080 */
+    --foreground: 0 0% 0%;
+    --card: 0 0% 83.9%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 83.9%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 195 100% 33%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 0 0% 75.3%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 63.9%;
+    --muted-foreground: 0 0% 0%;
+    --accent: 0 0% 75.3%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0 0% 45.1%;
+    --input: 0 0% 83.9%;
+    --ring: 195 100% 33%;
+    --radius: 0px;
+  }
+
+  .dark {
+    --background: 180 100% 25%; /* Windows 98 teal #008080 for dark mode too */
+    --foreground: 0 0% 0%;
+    --card: 0 0% 83.9%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 83.9%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 195 100% 50%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 30%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 30%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 30%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 0 0% 45.1%;
+    --input: 0 0% 25%;
+    --ring: 195 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-0;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'MS Sans Serif', sans-serif;
+    cursor: default;
+  }
+  button, a, select, input[type="submit"], input[type="reset"], input[type="button"], [role="button"] {
+    cursor: default;
   }
 }
 
@@ -16,18 +76,8 @@ body {
   overflow-x: hidden;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
 a {
@@ -35,8 +85,126 @@ a {
   text-decoration: none;
 }
 
+.win98-shadow {
+  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
+}
+
+.win98-shadow-inset {
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  box-shadow: inset 1px 1px #000, inset -1px -1px #dfdfdf;
+}
+
+.win98-bar {
+  background: linear-gradient(90deg, #000080, #1084d0);
+}
+
+.win98-text {
+  color: #000000;
+}
+
+.win98-bg {
+  background-color: #008080; /* Windows 98 teal background */
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
 }
+
+/* Animation Effects */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes win98StartUp {
+  0% { opacity: 0; transform: scale(0.8); }
+  70% { opacity: 1; transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-startup {
+  animation: win98StartUp 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideInFromBottom 0.5s ease-out;
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
+
+/* Responsive Design */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .win98-bar {
+    height: 1.25rem;
+  }
+  
+  h2 {
+    font-size: 1rem;
+  }
+  
+  p {
+    font-size: 0.75rem;
+  }
+}
+
+/* Hover Effects */
+.hover-active:hover {
+  filter: brightness(110%);
+  transition: all 0.2s;
+}
+
+.press-effect:active {
+  transform: scale(0.98);
+  transition: transform 0.1s;
+}
+
+/* Startup Animation for Main Content */
+main > div {
+  animation: win98StartUp 0.6s ease-out;
+}
+
+/* Sequential Animation for Cards */
+.grid > div {
+  animation: fadeIn 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.grid > div:nth-child(1) { animation-delay: 0.1s; }
+.grid > div:nth-child(2) { animation-delay: 0.2s; }
+.grid > div:nth-child(3) { animation-delay: 0.3s; }
+.grid > div:nth-child(4) { animation-delay: 0.4s; }
+.grid > div:nth-child(5) { animation-delay: 0.5s; }
