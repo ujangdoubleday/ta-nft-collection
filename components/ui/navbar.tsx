@@ -38,7 +38,7 @@ export function Navbar() {
           </div>
         </div>
         <div className="flex items-center justify-between py-1">
-          <nav className="flex gap-1 overflow-x-auto px-1 py-1 scrollbar-hide">
+          <nav className="flex gap-1 overflow-x-auto px-1 py-1 win98-scrollbar">
             <Link
               href="/"
               className={cn(
