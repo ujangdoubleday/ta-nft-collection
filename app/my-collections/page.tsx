@@ -10,21 +10,21 @@ const collections = [
     description:
       "Classic pixel art celebrating the golden age of digital creativity",
     count: 16,
-    thumbnail: "/images/nfts/pixel-art/pixel-1.svg",
+    thumbnail: "/assets/images/nfts/pixel-art/pixel-1.svg",
   },
   {
     id: "3d-voxel",
     name: "3D Voxel",
     description: "Three-dimensional voxel art with depth and personality",
     count: 8,
-    thumbnail: "/images/nfts/3d-voxel/voxel-1.svg",
+    thumbnail: "/assets/images/nfts/3d-voxel/voxel-1.svg",
   },
   {
     id: "retro-computing",
     name: "Retro Computing",
     description: "Digital artifacts celebrating the history of computing",
     count: 12,
-    thumbnail: "/images/nfts/retro-computing/retro-1.svg",
+    thumbnail: "/assets/images/nfts/retro-computing/retro-1.svg",
   },
   {
     id: "windows-98-icons",
@@ -32,7 +32,7 @@ const collections = [
     description:
       "Nostalgic digital iconography from the dawn of the internet age",
     count: 24,
-    thumbnail: "/images/nfts/windows-98-icons/win98-1.svg",
+    thumbnail: "/assets/images/nfts/windows-98-icons/win98-1.svg",
   },
 ];
 
@@ -45,11 +45,6 @@ export default function MyCollectionsPage() {
             <span className="text-white text-xs font-semibold tracking-tight">
               Your Digital Gallery
             </span>
-            <Link href="/my-collections/create">
-              <Button size="sm" className="text-xs h-5 py-0 px-2 bg-[#c0c0c0]">
-                Create New
-              </Button>
-            </Link>
           </div>
 
           {collections.length === 0 ? (

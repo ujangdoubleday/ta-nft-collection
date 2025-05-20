@@ -21,8 +21,8 @@ const collections = {
       type: "Digital Art",
       image:
         i % 2 === 0
-          ? "/images/nfts/pixel-art/pixel-1.svg"
-          : "/images/nfts/pixel-art/pixel-2.svg",
+          ? "/assets/images/nfts/pixel-art/pixel-1.svg"
+          : "/assets/images/nfts/pixel-art/pixel-2.svg",
       attributes: {
         rarity: i < 3 ? "Rare" : i < 8 ? "Uncommon" : "Common",
         pixels: `${(i + 1) * 8}x${(i + 1) * 8}`,
@@ -38,8 +38,8 @@ const collections = {
       type: "3D Model",
       image:
         i % 2 === 0
-          ? "/images/nfts/3d-voxel/voxel-1.svg"
-          : "/images/nfts/3d-voxel/voxel-2.svg",
+          ? "/assets/images/nfts/3d-voxel/voxel-1.svg"
+          : "/assets/images/nfts/3d-voxel/voxel-2.svg",
       attributes: {
         dimensions: `${16 + i * 8}x${16 + i * 8}x${16 + i * 8}`,
         complexity: i < 2 ? "High" : i < 5 ? "Medium" : "Low",
@@ -55,8 +55,8 @@ const collections = {
       type: "Digital Art",
       image:
         i % 2 === 0
-          ? "/images/nfts/retro-computing/retro-1.svg"
-          : "/images/nfts/retro-computing/retro-2.svg",
+          ? "/assets/images/nfts/retro-computing/retro-1.svg"
+          : "/assets/images/nfts/retro-computing/retro-2.svg",
       attributes: {
         era: i < 3 ? "1970s" : i < 7 ? "1980s" : "1990s",
         style: i % 2 === 0 ? "Realistic" : "Stylized",
@@ -73,8 +73,8 @@ const collections = {
       type: "Icon Pack",
       image:
         i % 2 === 0
-          ? "/images/nfts/windows-98-icons/win98-1.svg"
-          : "/images/nfts/windows-98-icons/win98-2.svg",
+          ? "/assets/images/nfts/windows-98-icons/win98-1.svg"
+          : "/assets/images/nfts/windows-98-icons/win98-2.svg",
       attributes: {
         category:
           i < 4
