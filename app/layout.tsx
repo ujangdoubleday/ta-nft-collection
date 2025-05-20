@@ -5,6 +5,7 @@ import "./globals.css";
 import { Win98Taskbar } from "@/components/win98-taskbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/ui/navbar";
+import { NavbarSpacer } from "@/components/ui/navbar";
 
 export default function RootLayout({
   children,
@@ -121,6 +122,7 @@ export default function RootLayout({
           ) : (
             <div className="relative flex min-h-screen flex-col pb-10 animate-fade-in">
               <Navbar />
+              <NavbarSpacer />
               <div className="flex-1 pt-2 px-2 sm:px-4 md:px-6 win98-scrollbar overflow-auto">
                 {children}
               </div>
