@@ -85,10 +85,16 @@ export function Win98Taskbar() {
               )}
               variant="default"
             >
-              <div className="w-5 h-5 bg-green-600 flex items-center justify-center">
-                <span className="text-white font-bold text-xs">P</span>
+              <div className="w-5 h-5 bg-transparent flex items-center justify-center">
+                <img
+                  src="/assets/icons/windows.png"
+                  alt="Windows"
+                  className="w-4 h-4"
+                />
               </div>
-              <span className="text-black">Pixel Vault</span>
+              <span className="text-black">
+                <b>Home</b>
+              </span>
             </Button>
           </Link>
 
