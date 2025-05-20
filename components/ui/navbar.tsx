@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,10 +15,14 @@ import {
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Detect current active section
   const isActive = (path: string) => {
@@ -30,23 +34,32 @@ export function Navbar() {
 
   const isMyCollectionPage = pathname.startsWith("/my-collections");
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(
+        `/my-collections/search?q=${encodeURIComponent(searchQuery.trim())}`
+      );
+    }
+  };
+
   return (
     <header className="bg-[#c0c0c0] border-b-[2px] border-b-[#808080] sticky top-0 z-40 transition-all duration-300 shadow-md w-full">
       <div className="flex h-9 items-center px-4">
         <div className="win98-bar w-full h-5 flex items-center px-2">
-          <span className="text-white text-xs font-semibold tracking-tight">
-            Pixel Vault: Digital Art Creator
+          <span className="text-white text-base font-bold tracking-wide">
+            NFT Pixel Studio: Create & Collect Digital Art
           </span>
         </div>
       </div>
       <div className="flex flex-col px-4">
         {/* Main Menu Tabs */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pb-2">
           <nav className="flex gap-0">
             <Link
               href="/"
               className={cn(
-                "text-black text-sm px-3 py-2 relative transition-all duration-200 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 whitespace-nowrap",
+                "text-black text-xs px-2.5 py-1.5 relative transition-all duration-200 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 whitespace-nowrap",
                 isActive("/") &&
                   "bg-[#d2d2d2] border-t-[#808080] border-l-[#808080] border-r-white border-b-white translate-y-[2px]"
               )}
@@ -56,7 +69,7 @@ export function Navbar() {
             <Link
               href="/about"
               className={cn(
-                "text-black text-sm px-3 py-2 relative transition-all duration-200 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 whitespace-nowrap",
+                "text-black text-xs px-2.5 py-1.5 relative transition-all duration-200 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 whitespace-nowrap",
                 isActive("/about") &&
                   "bg-[#d2d2d2] border-t-[#808080] border-l-[#808080] border-r-white border-b-white translate-y-[2px]"
               )}
@@ -66,7 +79,7 @@ export function Navbar() {
             <Link
               href="/contact"
               className={cn(
-                "text-black text-sm px-3 py-2 relative transition-all duration-200 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 whitespace-nowrap",
+                "text-black text-xs px-2.5 py-1.5 relative transition-all duration-200 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 whitespace-nowrap",
                 isActive("/contact") &&
                   "bg-[#d2d2d2] border-t-[#808080] border-l-[#808080] border-r-white border-b-white translate-y-[2px]"
               )}
@@ -76,7 +89,7 @@ export function Navbar() {
             <Link
               href="/my-collections"
               className={cn(
-                "text-black text-sm px-3 py-2 relative transition-all duration-200 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 whitespace-nowrap",
+                "text-black text-xs px-2.5 py-1.5 relative transition-all duration-200 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 whitespace-nowrap",
                 isActive("/my-collections") &&
                   "bg-[#d2d2d2] border-t-[#808080] border-l-[#808080] border-r-white border-b-white translate-y-[2px]"
               )}
@@ -86,7 +99,7 @@ export function Navbar() {
           </nav>
           <Dialog open={isWalletModalOpen} onOpenChange={setIsWalletModalOpen}>
             <DialogTrigger asChild>
-              <Button className="text-black text-xs h-7 py-0 px-2 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] transition-all hover:brightness-95 hover:translate-y-[1px] active:border-t-[#808080] active:border-l-[#808080] active:border-r-white active:border-b-white active:translate-y-[2px]">
+              <Button className="text-black text-xs h-6 py-0 px-2 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] transition-all hover:brightness-95 hover:translate-y-[1px] active:border-t-[#808080] active:border-l-[#808080] active:border-r-white active:border-b-white active:translate-y-[2px]">
                 Connect Wallet
               </Button>
             </DialogTrigger>
@@ -121,61 +134,72 @@ export function Navbar() {
 
         {/* Submenu - Only show on My Collection pages */}
         {isMyCollectionPage && (
-          <div className="flex items-center border-t-[2px] border-t-[#808080] py-1">
-            <nav className="flex gap-1">
-              <Link
-                href="/my-collections/created"
-                className={cn(
-                  "text-black text-sm px-2 py-1 relative transition-all duration-200 hover:bg-[#d2d2d2] whitespace-nowrap",
-                  isActive("/my-collections/created") &&
-                    "bg-[#d2d2d2] font-semibold"
-                )}
+          <div className="flex items-center border-t-[2px] border-t-[#808080] py-1.5">
+            <nav className="flex items-center gap-2 px-2">
+              <Button
+                onClick={() => router.back()}
+                className="text-black text-xs h-6 py-0 px-2 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 hover:translate-y-[1px] active:border-t-[#808080] active:border-l-[#808080] active:border-r-white active:border-b-white active:translate-y-[2px] flex items-center gap-1"
               >
-                {isActive("/my-collections/created") && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-black animate-pulse"></span>
-                )}
-                <span className="underline decoration-1">C</span>reated NFTs
-              </Link>
-              <Link
-                href="/my-collections/collected"
-                className={cn(
-                  "text-black text-sm px-2 py-1 relative transition-all duration-200 hover:bg-[#d2d2d2] whitespace-nowrap",
-                  isActive("/my-collections/collected") &&
-                    "bg-[#d2d2d2] font-semibold"
-                )}
-              >
-                {isActive("/my-collections/collected") && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-black animate-pulse"></span>
-                )}
-                <span className="underline decoration-1">C</span>ollected NFTs
-              </Link>
-              <Link
-                href="/my-collections/favorites"
-                className={cn(
-                  "text-black text-sm px-2 py-1 relative transition-all duration-200 hover:bg-[#d2d2d2] whitespace-nowrap",
-                  isActive("/my-collections/favorites") &&
-                    "bg-[#d2d2d2] font-semibold"
-                )}
-              >
-                {isActive("/my-collections/favorites") && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-black animate-pulse"></span>
-                )}
-                <span className="underline decoration-1">F</span>avorites
-              </Link>
-              <div className="h-4 w-[2px] bg-[#808080] mx-1"></div>
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
+                </svg>
+                Back
+              </Button>
+
+              <div className="h-4 w-[2px] bg-[#808080]"></div>
+
               <Link
                 href="/my-collections/create"
                 className={cn(
-                  "text-black text-sm px-2 py-1 relative transition-all duration-200 hover:bg-[#d2d2d2] whitespace-nowrap",
-                  isActive("/my-collections/create") &&
-                    "bg-[#d2d2d2] font-semibold"
+                  "text-black text-xs px-2 py-1 h-6 flex items-center gap-1 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:brightness-95 hover:translate-y-[1px] active:border-t-[#808080] active:border-l-[#808080] active:border-r-white active:border-b-white active:translate-y-[2px]",
+                  isActive("/my-collections/create") && "bg-[#d2d2d2]"
                 )}
               >
-                {isActive("/my-collections/create") && (
-                  <span className="absolute left-0 top-0 bottom-0 w-1 bg-black animate-pulse"></span>
-                )}
-                <span className="underline decoration-1">C</span>reate New NFT
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Create Collection
               </Link>
+
+              <div className="h-4 w-[2px] bg-[#808080]"></div>
+
+              <form onSubmit={handleSearch} className="flex items-center gap-1">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Search collections..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-6 text-xs px-2 pr-8 bg-white border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white focus:outline-none focus:border-[#000080]"
+                  />
+                  <button
+                    type="submit"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+                  >
+                    <Search className="w-3 h-3" />
+                  </button>
+                </div>
+              </form>
             </nav>
           </div>
         )}
