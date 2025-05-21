@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import "./globals.css";
-import { Win98Taskbar } from "@/components/win98-taskbar";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Navbar } from "@/components/ui/navbar";
-import { NavbarSpacer } from "@/components/ui/navbar";
+import "@/styles/globals.css";
+import { Win98Taskbar } from "@/components/layout";
+import { ThemeProvider } from "@/components/common";
+import { Navbar, NavbarSpacer } from "@/components/layout";
+import { Win98WelcomeNotification } from "@/components/layout/notifications";
 
 export default function RootLayout({
   children,
@@ -16,7 +16,8 @@ export default function RootLayout({
   const [bootScreen, setBootScreen] = useState(true);
   const [progress, setProgress] = useState(0);
   const [loadingText, setLoadingText] = useState("Starting Windows 98...");
-  const [showWelcome, setShowWelcome] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [initialRenderComplete, setInitialRenderComplete] = useState(false);
 
   useEffect(() => {
     // First show boot screen for a moment
@@ -62,6 +63,34 @@ export default function RootLayout({
 
     return () => clearTimeout(bootTimer);
   }, []);
+
+  // Mark initial render complete - this helps avoid hydration issues
+  useEffect(() => {
+    setInitialRenderComplete(true);
+  }, []);
+
+  // Show welcome notification after loading is complete
+  useEffect(() => {
+    if (!loading && initialRenderComplete) {
+      // We specifically use sessionStorage instead of localStorage
+      // This will show welcome message on each page refresh/session
+      // but not when navigating between pages
+      const hasSeenWelcomeInSession =
+        sessionStorage.getItem("hasSeenWelcomeInSession") === "true";
+
+      if (!hasSeenWelcomeInSession) {
+        setShowWelcome(true);
+        // Don't set the session flag until they close the notification
+      }
+    }
+  }, [loading, initialRenderComplete]);
+
+  // Function to close welcome notification and save state to localStorage
+  const handleCloseWelcome = () => {
+    setShowWelcome(false);
+    // Mark as seen for this session
+    sessionStorage.setItem("hasSeenWelcomeInSession", "true");
+  };
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -130,25 +159,7 @@ export default function RootLayout({
 
               {/* Modal dialog effect that appears after loading */}
               {showWelcome && (
-                <div className="fixed bottom-20 right-4 bg-[#c0c0c0] border-t-white border-l-white border-r-[#808080] border-b-[#808080] border-[2px] p-2 shadow-md w-64 z-50 animate-slide-up md:w-80">
-                  <div className="win98-bar h-5 flex items-center px-2 mb-2">
-                    <span className="text-white text-xs font-semibold tracking-tight">
-                      Welcome
-                    </span>
-                  </div>
-                  <p className="text-black text-xs mb-2">
-                    Welcome to Pixel Vault! Create, collect, and share digital
-                    art in a retro-styled environment.
-                  </p>
-                  <div className="flex justify-end">
-                    <button
-                      className="text-black text-xs bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] px-4 py-1 hover-active press-effect"
-                      onClick={() => setShowWelcome(false)}
-                    >
-                      OK
-                    </button>
-                  </div>
-                </div>
+                <Win98WelcomeNotification onClose={handleCloseWelcome} />
               )}
             </div>
           )}
