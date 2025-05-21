@@ -5,6 +5,16 @@ import detectEthereumProvider from "@metamask/detect-provider";
 // Deklarasi tipe untuk window global
 declare global {
   interface Window {
+    ethereum: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>;
+      on: (eventName: string, handler: (...args: any[]) => void) => void;
+      removeListener: (
+        eventName: string,
+        handler: (...args: any[]) => void
+      ) => void;
+      removeAllListeners: (eventName: string) => void;
+      isMetaMask?: boolean;
+    };
     _forceWalletReconnect?: boolean;
   }
 }
@@ -25,6 +35,9 @@ const DISCONNECTED_KEY = "wallet_manually_disconnected";
 // Key untuk menyimpan status autentikasi
 const AUTHENTICATED_KEY = "wallet_authenticated";
 
+/**
+ * Hook untuk mengelola koneksi wallet dan autentikasi
+ */
 export function useWallet() {
   // Inisialisasi state dengan memeriksa local storage
   const [state, setState] = useState<WalletState>({
@@ -167,6 +180,9 @@ export function useWallet() {
     };
   }, []); // Remove dependency on state.manuallyDisconnected, use localStorage instead
 
+  /**
+   * Connect to the wallet
+   */
   const connect = useCallback(async () => {
     if (!provider || !window.ethereum) {
       setState((prev) => ({
@@ -249,64 +265,45 @@ export function useWallet() {
         isConnecting: false,
         isConnected: false,
         error: isUserRejected
-          ? "User rejected wallet connection"
-          : "Failed to connect wallet",
+          ? "Connection was rejected by user"
+          : `Error connecting: ${errorMessage}`,
       }));
 
-      // Ensure disconnected state in localStorage if connection fails
-      localStorage.setItem(DISCONNECTED_KEY, "true");
       return false;
     }
   }, [provider]);
 
-  const disconnect = useCallback(async () => {
-    // Store the disconnected state in localStorage to persist between sessions
-    localStorage.setItem(DISCONNECTED_KEY, "true");
-    localStorage.removeItem(AUTHENTICATED_KEY);
-
-    // Force MetaMask to forget the connection by clearing cached accounts
-    if (window.ethereum) {
-      try {
-        // Force disconnect by clearing permission cache (di beberapa wallet bisa berbeda caranya)
-        console.log("Forcing wallet disconnect");
-
-        // Cara 1: Coba revoke permissions (tidak didukung semua wallet)
-        try {
-          await window.ethereum.request({
-            method: "wallet_revokePermissions",
-            params: [{ eth_accounts: {} }],
-          });
-        } catch (e) {
-          console.log(
-            "wallet_revokePermissions not supported, trying alternative"
-          );
-        }
-
-        // Cara 2: Set flag khusus agar next connect memaksa request baru
-        window._forceWalletReconnect = true;
-      } catch (e) {
-        console.error("Error forcing wallet disconnect:", e);
-      }
-    }
-
-    // Update state
+  /**
+   * Disconnect from the wallet
+   */
+  const disconnect = useCallback(() => {
     setState((prev) => ({
       ...prev,
       address: null,
       chainId: null,
       isConnected: false,
-      manuallyDisconnected: true,
       isAuthenticated: false,
-      error: null, // Reset any errors
+      manuallyDisconnected: true,
+      error: null,
     }));
+
+    // Set flag to force reconnect on next attempt
+    window._forceWalletReconnect = true;
+
+    // Store disconnected state to prevent auto-reconnect
+    localStorage.setItem(DISCONNECTED_KEY, "true");
+    // Remove authenticated status
+    localStorage.removeItem(AUTHENTICATED_KEY);
   }, []);
 
-  // Tambahkan fungsi untuk autentikasi signature
+  /**
+   * Authenticate the connected wallet
+   */
   const authenticate = useCallback(async () => {
     if (!provider || !state.address) {
       setState((prev) => ({
         ...prev,
-        error: "Cannot authenticate: No wallet connected",
+        error: "Connect wallet before authenticating",
         isAuthenticating: false,
       }));
       return false;
@@ -319,69 +316,78 @@ export function useWallet() {
         error: null,
       }));
 
-      // Get the signer
+      // Get signer from provider
       const signer = await provider.getSigner();
 
-      // Create a message to sign
-      const timestamp = Date.now();
-      const message = `Welcome to NFT Pixel Studio!\n\nThis signature proves you own this wallet address.\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nWallet address: ${state.address}\nTimestamp: ${timestamp}`;
+      // Create signature message
+      const message = `Welcome to Pixel Vault!\n\nThis signature verifies your wallet ownership.\nIt does not cost any gas or initiate a transaction.\n\nWallet: ${
+        state.address
+      }\nDate: ${new Date().toISOString()}`;
 
-      // Request signature from user
-      const signature = await signer.signMessage(message);
+      try {
+        // Request signature
+        const signature = await signer.signMessage(message);
 
-      // Verify the signature (optional but good practice)
-      const recoveredAddress = ethers.verifyMessage(message, signature);
+        // Verify the signature
+        const recoveredAddress = ethers.verifyMessage(message, signature);
 
-      if (recoveredAddress.toLowerCase() === state.address.toLowerCase()) {
-        // Signature is valid
+        // Check if the recovered address matches the connected address
+        if (recoveredAddress.toLowerCase() === state.address.toLowerCase()) {
+          setState((prev) => ({
+            ...prev,
+            isAuthenticated: true,
+            isAuthenticating: false,
+            error: null,
+          }));
+
+          // Store authentication state in localStorage
+          localStorage.setItem(AUTHENTICATED_KEY, "true");
+          return true;
+        } else {
+          throw new Error("Signature verification failed");
+        }
+      } catch (signError: any) {
+        console.error("Error signing message:", signError);
+
+        // Check for user rejected signatures
+        const errorMessage = signError?.message || String(signError);
+        const isUserRejected =
+          errorMessage.includes("rejected") ||
+          errorMessage.includes("denied") ||
+          errorMessage.includes("canceled") ||
+          errorMessage.includes("cancelled") ||
+          errorMessage.includes("User rejected");
+
         setState((prev) => ({
           ...prev,
-          isAuthenticated: true,
           isAuthenticating: false,
-          error: null,
+          error: isUserRejected
+            ? "Signature was rejected by user"
+            : `Error signing: ${errorMessage}`,
         }));
-
-        // Store authentication state
-        localStorage.setItem(AUTHENTICATED_KEY, "true");
-        return true;
-      } else {
-        throw new Error("Signature verification failed");
+        return false;
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
-
-      // Check for user rejected error
-      const errorMessage = error?.message || String(error);
-      const isUserRejected =
-        errorMessage.includes("rejected") ||
-        errorMessage.includes("denied") ||
-        errorMessage.includes("canceled") ||
-        errorMessage.includes("cancelled") ||
-        errorMessage.includes("User rejected");
-
       setState((prev) => ({
         ...prev,
         isAuthenticating: false,
-        isAuthenticated: false, // Ensure the authenticated flag is explicitly false
-        error: isUserRejected
-          ? "User rejected signature request"
-          : "Failed to authenticate wallet",
+        error: `Authentication error: ${error.message || error}`,
       }));
-
-      // If the user rejected the signature, set the disconnect flag to prevent auto-reconnect
-      if (isUserRejected) {
-        localStorage.setItem(DISCONNECTED_KEY, "true");
-      }
-
       return false;
     }
   }, [provider, state.address]);
 
   return {
-    ...state,
+    address: state.address,
+    chainId: state.chainId,
+    isConnecting: state.isConnecting,
+    isConnected: state.isConnected,
+    isAuthenticated: state.isAuthenticated,
+    isAuthenticating: state.isAuthenticating,
+    error: state.error,
     connect,
     disconnect,
     authenticate,
-    provider,
   };
 }

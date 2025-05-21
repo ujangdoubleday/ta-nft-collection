@@ -3,60 +3,15 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { generateBreadcrumbs } from "@/lib/utils/breadcrumbs";
 
 export function Win98Taskbar() {
   const [currentTime, setCurrentTime] = React.useState<string>("");
   const pathname = usePathname();
-
-  // Function to generate breadcrumb items based on pathname
-  const generateBreadcrumbs = () => {
-    if (pathname === "/") return [];
-
-    const paths = pathname.split("/").filter(Boolean);
-    const breadcrumbs = [];
-
-    let currentPath = "";
-
-    for (let i = 0; i < paths.length; i++) {
-      currentPath += `/${paths[i]}`;
-
-      // Handle special cases for better labeling
-      let label = paths[i].replace(/-/g, " ");
-      label = label.charAt(0).toUpperCase() + label.slice(1);
-
-      // For collection IDs, add "Collection: " prefix
-      if (i === 1 && paths[0] === "my-collections" && paths[i] !== "create") {
-        breadcrumbs.push({ label: `Collection: ${label}`, path: currentPath });
-      }
-      // For NFT IDs
-      else if (i === 2 && paths[0] === "my-collections") {
-        breadcrumbs.push({ label: `NFT: ${paths[i]}`, path: currentPath });
-      }
-      // For "create" or other special pages
-      else if (paths[i] === "create") {
-        breadcrumbs.push({ label: "Create New", path: currentPath });
-      }
-      // For "mint" page
-      else if (paths[i] === "mint") {
-        breadcrumbs.push({ label: "Mint NFT", path: currentPath });
-      }
-      // Standard pages
-      else if (i === 0) {
-        if (paths[i] === "my-collections") {
-          breadcrumbs.push({ label: "My Collections", path: currentPath });
-        } else {
-          breadcrumbs.push({ label, path: currentPath });
-        }
-      }
-    }
-
-    return breadcrumbs;
-  };
-
-  const breadcrumbs = generateBreadcrumbs();
+  const breadcrumbs = generateBreadcrumbs(pathname);
 
   React.useEffect(() => {
     const updateTime = () => {
@@ -70,6 +25,26 @@ export function Win98Taskbar() {
     const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  // Function to get the appropriate icon for a path
+  const getIconForPath = (path: string): string => {
+    if (path === "/") {
+      return "/assets/icons/windows.png";
+    } else if (path === "/about") {
+      return "/assets/icons/taskbar/about.png";
+    } else if (path === "/contact") {
+      return "/assets/icons/taskbar/contact.png";
+    } else if (path === "/my-collections") {
+      return "/assets/icons/taskbar/collections.png";
+    } else if (path.includes("/my-collections/") && !path.includes("/nft/")) {
+      return "/assets/icons/taskbar/ape.png";
+    } else if (path.includes("/nft/")) {
+      return "/assets/icons/taskbar/detail-nft.png";
+    }
+
+    // Default icon if no match
+    return "/assets/icons/windows.png";
+  };
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-10 bg-[#c0c0c0] border-t-[2px] border-white z-50">
@@ -103,12 +78,19 @@ export function Win98Taskbar() {
               <Button
                 size="sm"
                 className={cn(
-                  "h-8 px-2 bg-[#c0c0c0] text-black text-xs whitespace-nowrap",
+                  "h-8 px-2 bg-[#c0c0c0] text-black text-xs whitespace-nowrap flex items-center gap-2",
                   pathname === crumb.path
                     ? "border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-[#d2d2d2]"
                     : "border-t-white border-l-white border-r-[#808080] border-b-[#808080]"
                 )}
               >
+                <div className="w-4 h-4 bg-transparent flex items-center justify-center">
+                  <img
+                    src={getIconForPath(crumb.path)}
+                    alt={crumb.label}
+                    className="w-4 h-4"
+                  />
+                </div>
                 {crumb.label}
               </Button>
             </Link>
