@@ -5,10 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { cn, formatAddress } from "@/lib/utils";
 import { useState, useEffect } from "react";
-import { AlertCircle } from "lucide-react";
 import { useWallet } from "@/lib/hooks/wallet";
 import { Win98Spinner, Win98NavLink } from "@/components/ui/win98";
 import { Copy, Check } from "lucide-react";
@@ -42,17 +40,14 @@ export function Navbar() {
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Effect untuk mengatur step dialog berdasarkan status wallet
   useEffect(() => {
     if (isConnected) {
       if (isAuthenticated) {
         setWalletModalStep("details");
-        // Jika baru saja terautentikasi, tutup dialog dan tampilkan notifikasi
         if (isWalletModalOpen && walletModalStep === "sign") {
           setIsWalletModalOpen(false);
           setShowSuccessNotification(true);
 
-          // Sembunyikan notifikasi setelah 5 detik
           const timer = setTimeout(() => {
             setShowSuccessNotification(false);
           }, 5000);
@@ -67,10 +62,8 @@ export function Navbar() {
     }
   }, [isConnected, isAuthenticated, isWalletModalOpen]);
 
-  // Effect untuk menangani error dari wallet
   useEffect(() => {
     if (error) {
-      // Jika ada error dari wallet hook, tampilkan sebagai notifikasi
       setErrorMessage(
         error.includes("rejected") ||
           error.includes("denied") ||
@@ -80,9 +73,8 @@ export function Navbar() {
           : error
       );
       setShowErrorNotification(true);
-      setIsWalletModalOpen(false); // Tutup dialog
+      setIsWalletModalOpen(false);
 
-      // Sembunyikan notifikasi error setelah 5 detik
       const timer = setTimeout(() => {
         setShowErrorNotification(false);
         setErrorMessage("");
@@ -92,7 +84,6 @@ export function Navbar() {
     }
   }, [error]);
 
-  // Detect current active section
   const isActive = (path: string) => {
     if (path === "/") {
       return pathname === path;
@@ -100,7 +91,6 @@ export function Navbar() {
     return pathname.startsWith(path);
   };
 
-  // Function to copy address to clipboard
   const copyAddress = async () => {
     if (address) {
       await navigator.clipboard.writeText(address);
@@ -109,7 +99,6 @@ export function Navbar() {
     }
   };
 
-  // Get network name from chainId
   const getNetworkName = (chainId: string | null) => {
     switch (chainId) {
       case "11155111":
@@ -123,7 +112,6 @@ export function Navbar() {
     }
   };
 
-  // Reset all wallet-related states
   const resetWalletStates = () => {
     setIsWalletModalOpen(false);
     setWalletModalStep("connect");
@@ -132,46 +120,38 @@ export function Navbar() {
     setErrorMessage("");
   };
 
-  // Handle connect and keep modal open
   const handleConnect = async () => {
     try {
       const success = await connect();
       if (!success) {
-        // If connection failed but no error in state
         resetWalletStates();
       }
     } catch (err) {
-      // This should not happen as errors are handled in the hook
       console.error("Unhandled error in connect:", err);
       resetWalletStates();
     }
   };
 
-  // Handle authentication
   const handleAuthenticate = async () => {
     try {
       const success = await authenticate();
       if (!success) {
-        // If authentication failed but no error in state
-        disconnect(); // Pastikan disconnect wallet saat authentikasi gagal
+        disconnect();
         resetWalletStates();
       }
     } catch (err) {
-      // This should not happen as errors are handled in the hook
       console.error("Unhandled error in authenticate:", err);
-      disconnect(); // Pastikan disconnect wallet saat error
+      disconnect();
       resetWalletStates();
     }
   };
 
-  // Handle cancel di dialog sign
   const handleCancelSign = () => {
-    disconnect(); // Pastikan disconnect wallet
+    disconnect();
     setErrorMessage("Authentication Cancelled by User");
     setShowErrorNotification(true);
     resetWalletStates();
 
-    // Sembunyikan notifikasi error setelah 5 detik
     setTimeout(() => {
       setShowErrorNotification(false);
       setErrorMessage("");
@@ -185,24 +165,19 @@ export function Navbar() {
 
   const handleWalletButtonClick = () => {
     if (isAuthenticated) {
-      // Jika sudah authenticated, tampilkan modal wallet details langsung
       setWalletModalStep("details");
       setIsWalletModalOpen(true);
     } else if (isConnected) {
-      // Jika connected tapi belum authenticated, tampilkan modal sign
       setWalletModalStep("sign");
       setIsWalletModalOpen(true);
     } else {
-      // Tampilkan modal connect
       setWalletModalStep("connect");
       setIsWalletModalOpen(true);
     }
   };
 
   const handleDialogOpenChange = (open: boolean) => {
-    // Jika dialog ditutup oleh user
     if (!open) {
-      // Jika wallet terhubung tapi belum terautentikasi, disconnect
       if (isConnected && !isAuthenticated) {
         disconnect();
       }
@@ -221,7 +196,6 @@ export function Navbar() {
     setErrorMessage("");
   };
 
-  // JSX untuk navbar
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-14 bg-[#c0c0c0] border-b border-[#808080] shadow-md">
       <div className="h-full mx-auto px-2 sm:px-4 md:px-6 flex items-center justify-between">
@@ -262,7 +236,6 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Connect Wallet Button */}
           <Dialog
             open={isWalletModalOpen}
             onOpenChange={handleDialogOpenChange}
@@ -302,7 +275,6 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Notifications */}
       {showSuccessNotification && (
         <Win98SuccessNotification
           message="Wallet Connected Successfully"
@@ -320,7 +292,6 @@ export function Navbar() {
   );
 }
 
-// Component for adding space after navbar
 export function NavbarSpacer() {
   return <div className="h-14"></div>;
 }

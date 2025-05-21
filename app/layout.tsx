@@ -20,10 +20,9 @@ export default function RootLayout({
   const [initialRenderComplete, setInitialRenderComplete] = useState(false);
 
   useEffect(() => {
-    // First show boot screen for a moment
     const bootTimer = setTimeout(() => {
       setBootScreen(false);
-      // Start loading sequence
+
       const messages = [
         "Detecting hardware...",
         "Initializing system...",
@@ -31,9 +30,8 @@ export default function RootLayout({
         "Starting Pixel Vault...",
       ];
 
-      // Windows 98 loading simulation
-      const segments = 20; // Number of segments in progress bar
-      const totalDuration = 4000; // Total loading time in ms
+      const segments = 20;
+      const totalDuration = 4000;
       const intervalTime = totalDuration / segments;
 
       let currentSegment = 0;
@@ -42,7 +40,6 @@ export default function RootLayout({
           currentSegment++;
           setProgress((currentSegment / segments) * 100);
 
-          // Update loading message at certain points
           if (currentSegment === 5) {
             setLoadingText(messages[0]);
           } else if (currentSegment === 10) {
@@ -64,31 +61,23 @@ export default function RootLayout({
     return () => clearTimeout(bootTimer);
   }, []);
 
-  // Mark initial render complete - this helps avoid hydration issues
   useEffect(() => {
     setInitialRenderComplete(true);
   }, []);
 
-  // Show welcome notification after loading is complete
   useEffect(() => {
     if (!loading && initialRenderComplete) {
-      // We specifically use sessionStorage instead of localStorage
-      // This will show welcome message on each page refresh/session
-      // but not when navigating between pages
       const hasSeenWelcomeInSession =
         sessionStorage.getItem("hasSeenWelcomeInSession") === "true";
 
       if (!hasSeenWelcomeInSession) {
         setShowWelcome(true);
-        // Don't set the session flag until they close the notification
       }
     }
   }, [loading, initialRenderComplete]);
 
-  // Function to close welcome notification and save state to localStorage
   const handleCloseWelcome = () => {
     setShowWelcome(false);
-    // Mark as seen for this session
     sessionStorage.setItem("hasSeenWelcomeInSession", "true");
   };
 
@@ -110,7 +99,6 @@ export default function RootLayout({
           {loading ? (
             <div className="min-h-screen flex flex-col items-center justify-center">
               {bootScreen ? (
-                // Windows 98 BIOS-style boot screen
                 <div className="bg-[#000] w-full h-screen flex flex-col items-center justify-center text-white">
                   <div className="text-center">
                     <p className="text-sm mb-4">PIXEL BIOS v4.98</p>
@@ -123,7 +111,6 @@ export default function RootLayout({
                   </div>
                 </div>
               ) : (
-                // Windows 98 loading screen
                 <div className="bg-[#000] w-full h-screen flex flex-col items-center justify-center">
                   <div className="bg-[#008080] p-2 rounded mb-8">
                     <h1 className="text-white font-bold text-2xl">
@@ -157,7 +144,6 @@ export default function RootLayout({
               </div>
               <Win98Taskbar />
 
-              {/* Modal dialog effect that appears after loading */}
               {showWelcome && (
                 <Win98WelcomeNotification onClose={handleCloseWelcome} />
               )}

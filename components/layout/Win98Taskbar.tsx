@@ -26,7 +26,6 @@ export function Win98Taskbar() {
     return () => clearInterval(interval);
   }, []);
 
-  // Function to get the appropriate icon for a path
   const getIconForPath = (path: string): string => {
     if (path === "/") {
       return "/assets/icons/windows.png";
@@ -42,7 +41,6 @@ export function Win98Taskbar() {
       return "/assets/icons/taskbar/detail-nft.png";
     }
 
-    // Default icon if no match
     return "/assets/icons/windows.png";
   };
 
