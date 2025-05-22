@@ -204,10 +204,10 @@ export function Navbar() {
             <div className="flex items-center">
               <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-1">
                 <Image
-                  src="/assets/images/black.png"
+                  src="/assets/logo/black.svg"
                   alt="MyNFTs Logo"
-                  width={32}
-                  height={32}
+                  width={38}
+                  height={38}
                   priority
                 />
               </div>
