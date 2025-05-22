@@ -13,7 +13,7 @@ interface Win98ErrorNotificationProps {
 export function Win98ErrorNotification({
   message,
   onClose,
-  position = "top",
+  position = "bottom",
   className,
 }: Win98ErrorNotificationProps) {
   return (

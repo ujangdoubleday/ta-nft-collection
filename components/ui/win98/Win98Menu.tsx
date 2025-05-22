@@ -71,7 +71,7 @@ export function Win98Menu({
         disabled={item.disabled}
       >
         {item.icon && (
-          <div className="w-4 h-4 mr-2 flex-shrink-0">
+          <div className="w-4 h-4 mr-1 flex-shrink-0">
             <img src={item.icon} alt="" className="w-4 h-4" />
           </div>
         )}
@@ -96,7 +96,7 @@ export function Win98Menu({
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-0.5 z-50 bg-[#c0c0c0] border-2 border-t-white border-l-white border-r-[#808080] border-b-[#808080] min-w-[180px] shadow-md">
+        <div className="absolute left-0 top-full mt-0.5 z-50 bg-[#c0c0c0] border-2 border-t-white border-l-white border-r-[#808080] border-b-[#808080] min-w-[160px] shadow-md">
           <div className="py-1">{items.map(renderMenuItem)}</div>
         </div>
       )}

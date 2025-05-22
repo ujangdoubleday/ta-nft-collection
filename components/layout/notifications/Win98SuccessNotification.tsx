@@ -13,7 +13,7 @@ interface Win98SuccessNotificationProps {
 export function Win98SuccessNotification({
   message,
   onClose,
-  position = "top",
+  position = "bottom",
   className,
 }: Win98SuccessNotificationProps) {
   return (

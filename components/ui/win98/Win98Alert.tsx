@@ -106,7 +106,9 @@ export function Win98Alert({
               className={cn(
                 "min-w-[80px] px-4 py-1 text-sm border-2",
                 "border-t-white border-l-white border-r-[#808080] border-b-[#808080]",
-                "active:border-t-[#808080] active:border-l-[#808080] active:border-r-white active:border-b-white",
+                "hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]",
+                "active:bg-[#b0b0b0] active:border-t-[#808080] active:border-l-[#808080] active:border-r-white active:border-b-white",
+                "transition-colors duration-100",
                 button.primary && "font-bold"
               )}
             >
