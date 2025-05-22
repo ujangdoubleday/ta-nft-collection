@@ -3,22 +3,27 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { generateBreadcrumbs } from "@/lib/utils/breadcrumbs";
 
 export function Win98Taskbar() {
   const [currentTime, setCurrentTime] = React.useState<string>("");
+  const [isDaytime, setIsDaytime] = React.useState<boolean>(true);
   const pathname = usePathname();
   const breadcrumbs = generateBreadcrumbs(pathname);
 
   React.useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      const hours = now.getHours().toString().padStart(2, "0");
+      const hours = now.getHours();
       const minutes = now.getMinutes().toString().padStart(2, "0");
-      setCurrentTime(`${hours}:${minutes}`);
+
+      // Check if it's daytime (between 6 AM and 6 PM)
+      setIsDaytime(hours >= 6 && hours < 18);
+
+      // Format time for display (24-hour format)
+      setCurrentTime(`${hours.toString().padStart(2, "0")}:${minutes}`);
     };
 
     updateTime();
@@ -43,6 +48,38 @@ export function Win98Taskbar() {
 
     return "/assets/icons/windows.png";
   };
+
+  const menuItems = [
+    {
+      label: "Home",
+      icon: "🏠",
+      href: "/",
+    },
+    {
+      label: "My Collections",
+      icon: "🖼️",
+      href: "/my-collections",
+    },
+    {
+      label: "About",
+      icon: "ℹ️",
+      href: "/about",
+    },
+    {
+      label: "Contact",
+      icon: "📧",
+      href: "/contact",
+      dividerAfter: true,
+    },
+    {
+      label: "Log Out",
+      icon: "🚪",
+      onClick: () => {
+        alert("Logging out...");
+        closeStartMenu();
+      },
+    },
+  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-10 bg-[#c0c0c0] border-t-[2px] border-white z-50">
@@ -97,8 +134,48 @@ export function Win98Taskbar() {
 
         <div className="h-full flex items-center px-1 py-1">
           <div className="h-full bg-[#c0c0c0] border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white px-2 py-1 flex items-center">
-            <ThemeToggle />
-            <span className="text-black ml-2">{currentTime}</span>
+            <span className="text-black flex items-center">
+              {isDaytime ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-black mr-2"
+                >
+                  <circle cx="12" cy="12" r="4"></circle>
+                  <path d="M12 2v2"></path>
+                  <path d="M12 20v2"></path>
+                  <path d="m4.93 4.93 1.41 1.41"></path>
+                  <path d="m17.66 17.66 1.41 1.41"></path>
+                  <path d="M2 12h2"></path>
+                  <path d="M20 12h2"></path>
+                  <path d="m6.34 17.66-1.41 1.41"></path>
+                  <path d="m19.07 4.93-1.41 1.41"></path>
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-black mr-2"
+                >
+                  <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+                </svg>
+              )}
+              {currentTime}
+            </span>
           </div>
         </div>
       </div>

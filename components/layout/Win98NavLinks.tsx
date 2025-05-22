@@ -79,7 +79,7 @@ export function Win98NavLinks() {
   return (
     <>
       {/* Desktop Navigation - Windows 98 Menu Style */}
-      <div className="hidden md:flex items-center bg-[#c0c0c0] h-6 border-b border-[#808080]">
+      <div className="hidden md:flex items-center bg-[#c0c0c0] h-6 border-b border-[#808080] text-sm">
         <Win98Menu label="File" items={fileMenuItems} />
         <Win98Menu
           label="Collections"
@@ -107,7 +107,7 @@ export function Win98NavLinks() {
 
       {/* Mobile Navigation - Traditional Links */}
       <nav className="md:hidden">
-        <ul className="flex items-center space-x-2">
+        <ul className="flex items-center space-x-1">
           {mainLinks.map((link) => (
             <li key={link.href}>
               <Win98NavLink

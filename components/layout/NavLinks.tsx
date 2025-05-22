@@ -24,10 +24,9 @@ const useNavLinks = () => {
 
   const links = [
     { href: "/", label: "Home" },
-    { href: "/my-collections", label: "My Collections" },
-    { href: "/todos", label: "Todos" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
+    { href: "/my-collections", label: "My Collections" },
   ];
 
   return { links, pathname, isActive, isOpen, setIsOpen };
@@ -71,12 +70,13 @@ export const NavLinks = () => {
   const { links, isActive } = useNavLinks();
 
   return (
-    <nav className="hidden md:flex items-center gap-4">
+    <nav className="hidden md:flex items-center gap-2">
       {links.map((link) => (
         <Win98NavLink
           key={link.href}
           href={link.href}
           isActive={isActive(link.href)}
+          className="text-sm px-2"
         >
           {link.label}
         </Win98NavLink>

@@ -1,21 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 
-export const Logo = () => (
-  <Link href="/">
-    <div className="flex items-center">
-      <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-1">
-        <Image
-          src="/assets/logo/black.svg"
-          alt="MyNFTs Logo"
-          width={38}
-          height={38}
-          priority
-        />
-      </div>
-      <span className="ml-2 text-black font-bold inline-block text-xs sm:text-sm md:text-base">
-        MyNFTs.exe
+export const Logo = () => {
+  return (
+    <Link href="/" className="flex items-center">
+      <span className="text-base font-bold text-black">
+        MyNFTs<span className="text-sm">.exe</span>
       </span>
-    </div>
-  </Link>
-);
+    </Link>
+  );
+};
