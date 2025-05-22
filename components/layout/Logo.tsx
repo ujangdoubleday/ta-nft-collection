@@ -13,7 +13,7 @@ export const Logo = () => (
           priority
         />
       </div>
-      <span className="ml-2 text-black font-bold hidden md:inline-block">
+      <span className="ml-2 text-black font-bold inline-block text-xs sm:text-sm md:text-base">
         MyNFTs.exe
       </span>
     </div>

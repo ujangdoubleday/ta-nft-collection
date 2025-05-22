@@ -45,10 +45,15 @@ export const WalletButton = () => {
             {isConnected && isAuthenticated ? (
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span>{formatAddress(address || "")}</span>
+                <span className="text-xs">
+                  {formatAddress(address || "").substring(0, 6)}
+                </span>
               </div>
             ) : (
-              <span>Connect Wallet</span>
+              <div>
+                <span className="hidden xs:inline">Connect Wallet</span>
+                <span className="xs:inline sm:hidden">Connect</span>
+              </div>
             )}
           </Button>
         </DialogTrigger>
