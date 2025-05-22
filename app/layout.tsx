@@ -6,6 +6,7 @@ import { Win98Taskbar } from "@/components/layout";
 import { ThemeProvider } from "@/components/common";
 import { Navbar, NavbarSpacer } from "@/components/layout";
 import { Win98WelcomeNotification } from "@/components/layout/notifications";
+import { TRPCProvider } from "@/components/providers/trpc-provider";
 
 export default function RootLayout({
   children,
@@ -96,59 +97,61 @@ export default function RootLayout({
           defaultTheme="light"
           enableSystem={false}
         >
-          {loading ? (
-            <div className="min-h-screen flex flex-col items-center justify-center">
-              {bootScreen ? (
-                <div className="bg-[#000] w-full h-screen flex flex-col items-center justify-center text-white">
-                  <div className="text-center">
-                    <p className="text-sm mb-4">PIXEL BIOS v4.98</p>
-                    <p className="text-xs mb-1">CPU: Web Assembly 3.7 GHz</p>
-                    <p className="text-xs mb-1">Memory Test: 640K OK</p>
-                    <p className="text-xs mb-4 animate-blink">
-                      Press DEL to enter SETUP
-                    </p>
-                    <p className="text-xs">Booting from Web Drive C:...</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-[#000] w-full h-screen flex flex-col items-center justify-center">
-                  <div className="bg-[#008080] p-2 rounded mb-8">
-                    <h1 className="text-white font-bold text-2xl">
-                      MyNFTs.exe
-                    </h1>
-                  </div>
-                  <div className="w-80 bg-[#c0c0c0] border-t-white border-l-white border-r-[#808080] border-b-[#808080] border-[2px] p-[2px] shadow-md">
-                    <div className="h-5 w-full bg-[#c0c0c0] border-t-[#808080] border-l-[#808080] border-r-white border-b-white border-[1px] flex items-center px-1">
-                      {Array.from({ length: 20 }).map((_, index) => (
-                        <div
-                          key={index}
-                          className={`h-3 w-[10px] mx-[1px] ${
-                            index < Math.ceil(progress / 5)
-                              ? "bg-[#000080] win98-progress-block"
-                              : "bg-[#c0c0c0]"
-                          }`}
-                        />
-                      ))}
+          <TRPCProvider>
+            {loading ? (
+              <div className="min-h-screen flex flex-col items-center justify-center">
+                {bootScreen ? (
+                  <div className="bg-[#000] w-full h-screen flex flex-col items-center justify-center text-white">
+                    <div className="text-center">
+                      <p className="text-sm mb-4">PIXEL BIOS v4.98</p>
+                      <p className="text-xs mb-1">CPU: Web Assembly 3.7 GHz</p>
+                      <p className="text-xs mb-1">Memory Test: 640K OK</p>
+                      <p className="text-xs mb-4 animate-blink">
+                        Press DEL to enter SETUP
+                      </p>
+                      <p className="text-xs">Booting from Web Drive C:...</p>
                     </div>
                   </div>
-                  <p className="text-white mt-4 text-xs">{loadingText}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="relative flex min-h-screen flex-col pb-10 animate-fade-in">
-              <Navbar />
-              <NavbarSpacer />
-              <div className="flex-1 pt-2 px-2 sm:px-4 md:px-6 win98-scrollbar overflow-auto">
-                {children}
+                ) : (
+                  <div className="bg-[#000] w-full h-screen flex flex-col items-center justify-center">
+                    <div className="bg-[#008080] p-2 rounded mb-8">
+                      <h1 className="text-white font-bold text-2xl">
+                        MyNFTs.exe
+                      </h1>
+                    </div>
+                    <div className="w-80 bg-[#c0c0c0] border-t-white border-l-white border-r-[#808080] border-b-[#808080] border-[2px] p-[2px] shadow-md">
+                      <div className="h-5 w-full bg-[#c0c0c0] border-t-[#808080] border-l-[#808080] border-r-white border-b-white border-[1px] flex items-center px-1">
+                        {Array.from({ length: 20 }).map((_, index) => (
+                          <div
+                            key={index}
+                            className={`h-3 w-[10px] mx-[1px] ${
+                              index < Math.ceil(progress / 5)
+                                ? "bg-[#000080] win98-progress-block"
+                                : "bg-[#c0c0c0]"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-white mt-4 text-xs">{loadingText}</p>
+                  </div>
+                )}
               </div>
-              <Win98Taskbar />
+            ) : (
+              <div className="relative flex min-h-screen flex-col pb-10 animate-fade-in">
+                <Navbar />
+                <NavbarSpacer />
+                <div className="flex-1 pt-2 px-2 sm:px-4 md:px-6 win98-scrollbar overflow-auto">
+                  {children}
+                </div>
+                <Win98Taskbar />
 
-              {showWelcome && (
-                <Win98WelcomeNotification onClose={handleCloseWelcome} />
-              )}
-            </div>
-          )}
+                {showWelcome && (
+                  <Win98WelcomeNotification onClose={handleCloseWelcome} />
+                )}
+              </div>
+            )}
+          </TRPCProvider>
         </ThemeProvider>
       </body>
     </html>
