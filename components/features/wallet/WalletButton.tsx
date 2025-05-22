@@ -66,12 +66,12 @@ export const WalletButton = () => {
         <Win98DialogTrigger asChild>
           <Button
             onClick={handleWalletButtonClick}
-            className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] text-black text-xs h-8 hover:bg-[#c0c0c0] hover-active press-effect"
+            className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] text-black text-sm h-8 hover:bg-[#c0c0c0] hover-active press-effect"
           >
             {isConnected && isAuthenticated ? (
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-xs">
+                <span className="text-sm">
                   {formatAddress(address || "").substring(0, 6)}
                 </span>
               </div>
