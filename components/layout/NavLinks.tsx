@@ -25,6 +25,7 @@ const useNavLinks = () => {
   const links = [
     { href: "/", label: "Home" },
     { href: "/my-collections", label: "My Collections" },
+    { href: "/todos", label: "Todos" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
