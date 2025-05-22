@@ -1,13 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { use } from "react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Win98Window } from "@/components/ui/win98";
+import { FileUp } from "lucide-react";
 
 // Sample collections data
 const collections = {
@@ -21,8 +20,8 @@ const collections = {
       type: "Digital Art",
       image:
         i % 2 === 0
-          ? "/assets/images/nfts/pixel-art/pixel-1.svg"
-          : "/assets/images/nfts/pixel-art/pixel-2.svg",
+          ? "/assets/images/nfts/pixel-art/pixel-1.jpg"
+          : "/assets/images/nfts/pixel-art/pixel-2.jpg",
       attributes: {
         rarity: i < 3 ? "Rare" : i < 8 ? "Uncommon" : "Common",
         pixels: `${(i + 1) * 8}x${(i + 1) * 8}`,
@@ -95,27 +94,58 @@ export default function CollectionPage({
 }: {
   params: { collectionId: string };
 }) {
-  const collectionId = params.collectionId;
+  const router = useRouter();
+  const unwrappedParams = use(params);
+  const collectionId = unwrappedParams.collectionId;
   const collection = collections[collectionId as keyof typeof collections];
+
+  const handleAddNewClick = () => {
+    router.push(`/my-collections/${collectionId}/mint`);
+  };
+
+  const handleViewDetails = (itemId: string) => {
+    router.push(`/my-collections/${collectionId}/${itemId}`);
+  };
 
   // Handle case where collection doesn't exist
   if (!collection) {
     return (
       <main className="py-4">
         <Container>
-          <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-4">
-            <div className="win98-bar h-6 flex items-center px-2 mb-4">
-              <span className="text-white text-xs font-semibold tracking-tight">
-                Collection Not Found
-              </span>
+          <Win98Window
+            title="Error - Collection Not Found"
+            className="max-w-4xl mx-auto"
+            onClose={() => router.push("/my-collections")}
+            icon="/assets/icons/windows.png"
+          >
+            <div className="p-4">
+              <div className="flex items-center mb-4 p-3 border border-[#808080] bg-[#fffbf0]">
+                <svg
+                  className="w-8 h-8 mr-3 text-red-600"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-black">
+                  The collection you're looking for doesn't exist.
+                </p>
+              </div>
+              <Button
+                className="hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
+                onClick={() => router.push("/my-collections")}
+              >
+                Back to Your Gallery
+              </Button>
             </div>
-            <div className="text-black p-3">
-              <p>The collection you're looking for doesn't exist.</p>
-              <Link href="/my-collections">
-                <Button className="mt-4">Back to Your Gallery</Button>
-              </Link>
-            </div>
-          </div>
+          </Win98Window>
         </Container>
       </main>
     );
@@ -124,70 +154,94 @@ export default function CollectionPage({
   return (
     <main className="py-4">
       <Container>
-        <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-4 mb-4">
-          <div className="win98-bar h-6 flex items-center justify-between px-2 mb-2">
-            <span className="text-white text-xs font-semibold tracking-tight">
-              Collection: {collection.name}
-            </span>
-            <Link href={`/my-collections/${collectionId}/mint`}>
-              <Button size="sm" className="text-xs h-5 py-0 px-2 bg-[#c0c0c0]">
-                Add New Artwork
-              </Button>
-            </Link>
-          </div>
+        <Win98Window
+          title={`Collection: ${collection.name}`}
+          className="max-w-6xl mx-auto"
+          icon="/assets/icons/windows.png"
+        >
+          <div className="p-4">
+            <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white p-3 bg-white mb-4">
+              <p className="text-black text-sm">{collection.description}</p>
+            </div>
 
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <Link href="/my-collections">
-                <Button size="sm" className="text-xs h-6 py-0 px-2 mr-2">
-                  ← Back to Gallery
+            {collection.items.length === 0 ? (
+              <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white p-6 bg-white text-center">
+                <p className="text-black text-sm mb-3">
+                  This collection is empty. Start creating your digital artwork!
+                </p>
+                <Button
+                  className="hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
+                  onClick={handleAddNewClick}
+                >
+                  Create Your First Artwork
                 </Button>
-              </Link>
-              <p className="text-black text-xs">{collection.description}</p>
-            </div>
-          </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {collection.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-2 hover:shadow-md"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="text-black text-sm font-bold truncate pr-2">
+                        {item.name}
+                      </div>
+                    </div>
 
-          {collection.items.length === 0 ? (
-            <div className="win98-shadow-inset p-6 bg-white text-center">
-              <p className="text-black text-sm mb-3">
-                This collection is empty. Start creating your digital artwork!
-              </p>
-              <Link href={`/my-collections/${collectionId}/mint`}>
-                <Button>Create Your First Artwork</Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {collection.items.map((item) => (
-                <Card key={item.id} className="h-full">
-                  <CardHeader className="p-2 pb-0">
-                    <CardTitle className="text-black text-sm">
-                      {item.name}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-2">
-                    <div className="win98-shadow-inset h-32 w-full bg-white mb-2 flex items-center justify-center">
+                    <div
+                      className="bg-white mb-2 cursor-pointer overflow-hidden relative transition-all duration-200 hover:opacity-90 hover:shadow-md"
+                      style={{
+                        aspectRatio: "1/1",
+                        width: "100%",
+                      }}
+                      onClick={() => handleViewDetails(item.id)}
+                    >
                       <img
                         src={item.image}
                         alt={item.name}
-                        className="max-h-28 max-w-28"
+                        className="w-full h-full object-cover"
                       />
-                    </div>
-                    <div className="text-black text-xs">{item.type}</div>
-                  </CardContent>
-                  <CardFooter className="p-2 flex justify-between">
-                    <div className="text-black text-xs">Creator: You</div>
-                    <Link href={`/my-collections/${collectionId}/${item.id}`}>
-                      <Button size="sm" className="text-xs h-6 py-0 px-2">
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1 text-xs opacity-0 hover:opacity-100 transition-opacity">
                         View Details
-                      </Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))}
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="text-black text-xs bg-[#efefef] px-1 border border-[#808080] rounded-sm">
+                        {item.attributes?.rarity ||
+                          item.attributes?.era ||
+                          item.attributes?.complexity ||
+                          ""}
+                      </div>
+                      <div className="text-black text-xs">Created by: You</div>
+                    </div>
+
+                    <div className="border border-[#808080] bg-[#f0f0f0] p-1 mb-2 text-[10px]">
+                      {item.attributes &&
+                        Object.entries(item.attributes).map(([key, value]) => (
+                          <div key={key} className="flex justify-between">
+                            <span className="font-bold">{key}:</span>
+                            <span>{value as string}</span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end mt-4">
+              <Button
+                className="flex items-center hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
+                onClick={handleAddNewClick}
+              >
+                <FileUp className="h-4 w-4 mr-1" />
+                Add New NFT
+              </Button>
             </div>
-          )}
-        </div>
+          </div>
+        </Win98Window>
       </Container>
     </main>
   );

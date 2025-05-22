@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import "@/styles/globals.css";
 import { Win98Taskbar } from "@/components/layout";
 import { ThemeProvider } from "@/components/common";
-import { Navbar, NavbarSpacer } from "@/components/layout";
+import { Navbar, NavbarSpacer, Win98SubMenuBar } from "@/components/layout";
 import { Win98WelcomeNotification } from "@/components/layout/notifications";
 import { TRPCProvider } from "@/components/providers/trpc-provider";
 
@@ -141,6 +141,7 @@ export default function RootLayout({
               <div className="relative flex min-h-screen flex-col pb-10 animate-fade-in">
                 <Navbar />
                 <NavbarSpacer />
+                <Win98SubMenuBar />
                 <div className="flex-1 pt-2 px-2 sm:px-4 md:px-6 win98-scrollbar overflow-auto">
                   {children}
                 </div>
