@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { formatAddress } from "@/lib/utils";
 import { WalletModalContent } from "@/components/features/wallet/WalletModalContent";
 import { useWalletModal } from "./useWalletModal";
@@ -7,8 +6,16 @@ import {
   Win98SuccessNotification,
   Win98ErrorNotification,
 } from "@/components/layout/notifications";
+import { useState } from "react";
+import {
+  Win98Dialog,
+  Win98DialogContent,
+  Win98DialogTrigger,
+} from "@/components/ui/win98/Win98Dialog";
 
 export const WalletButton = () => {
+  const [showHelp, setShowHelp] = useState(false);
+
   const {
     isWalletModalOpen,
     copied,
@@ -34,10 +41,29 @@ export const WalletButton = () => {
     handleCloseErrorNotification,
   } = useWalletModal();
 
+  const triggerMetaMask = async () => {
+    try {
+      // Attempt to force MetaMask to show
+      if (window.ethereum) {
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        setShowHelp(false);
+      } else {
+        alert(
+          "MetaMask tidak terinstall. Silakan install MetaMask dan refresh halaman."
+        );
+      }
+    } catch (err) {
+      console.error("Error triggering MetaMask:", err);
+    }
+  };
+
   return (
     <>
-      <Dialog open={isWalletModalOpen} onOpenChange={handleDialogOpenChange}>
-        <DialogTrigger asChild>
+      <Win98Dialog
+        open={isWalletModalOpen}
+        onOpenChange={handleDialogOpenChange}
+      >
+        <Win98DialogTrigger asChild>
           <Button
             onClick={handleWalletButtonClick}
             className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] text-black text-xs h-8 hover:bg-[#c0c0c0] hover-active press-effect"
@@ -56,8 +82,11 @@ export const WalletButton = () => {
               </div>
             )}
           </Button>
-        </DialogTrigger>
-        <DialogContent className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-4 max-w-md sm:max-w-md text-black shadow-md">
+        </Win98DialogTrigger>
+        <Win98DialogContent
+          title="Wallet Connection"
+          className="max-w-md sm:max-w-md"
+        >
           <WalletModalContent
             step={walletModalStep}
             address={address}
@@ -72,8 +101,8 @@ export const WalletButton = () => {
             onDisconnect={handleDisconnect}
             onCancelSign={handleCancelSign}
           />
-        </DialogContent>
-      </Dialog>
+        </Win98DialogContent>
+      </Win98Dialog>
 
       {showSuccessNotification && (
         <Win98SuccessNotification

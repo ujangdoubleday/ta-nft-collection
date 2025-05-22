@@ -5,7 +5,7 @@ import detectEthereumProvider from "@metamask/detect-provider";
 // Deklarasi tipe untuk window global
 declare global {
   interface Window {
-    ethereum: {
+    ethereum?: {
       request: (args: { method: string; params?: any[] }) => Promise<any>;
       on: (eventName: string, handler: (...args: any[]) => void) => void;
       removeListener: (
@@ -300,6 +300,24 @@ export function useWallet() {
    * Authenticate the connected wallet
    */
   const authenticate = useCallback(async () => {
+    // Check if window is defined (for SSR)
+    if (typeof window === "undefined") {
+      console.error("Window is not defined, cannot authenticate");
+      return false;
+    }
+
+    // Check if provider and ethereum are available
+    if (!window.ethereum) {
+      console.error("MetaMask is not installed");
+      setState((prev) => ({
+        ...prev,
+        error:
+          "MetaMask tidak terinstall. Harap install MetaMask dan refresh halaman.",
+        isAuthenticating: false,
+      }));
+      return false;
+    }
+
     if (!provider || !state.address) {
       setState((prev) => ({
         ...prev,
@@ -316,20 +334,67 @@ export function useWallet() {
         error: null,
       }));
 
-      // Get signer from provider
-      const signer = await provider.getSigner();
+      console.log("Starting authentication process");
+
+      // Ensure accounts are accessible - this often wakes up MetaMask
+      try {
+        console.log("Requesting accounts to ensure MetaMask is awake");
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        console.log("Active account:", accounts[0]);
+
+        // Small delay to ensure MetaMask UI is ready
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      } catch (err) {
+        console.error("Error requesting accounts:", err);
+        throw new Error(
+          "Failed to connect to MetaMask. Please check if MetaMask is unlocked."
+        );
+      }
 
       // Create signature message
       const message = `Welcome to MyNFTs.exe!\n\nThis signature verifies your wallet ownership.\nIt does not cost any gas or initiate a transaction.\n\nWallet: ${
         state.address
       }\nDate: ${new Date().toISOString()}`;
 
+      console.log("Requesting signature using personal_sign");
+
+      // Convert message to hex
+      const hexMessage = ethers.hexlify(ethers.toUtf8Bytes(message));
+      console.log("Requesting signature for address:", state.address);
+
       try {
-        // Request signature
-        const signature = await signer.signMessage(message);
+        // Metode 1: Mencoba langsung dengan window.ethereum
+        console.log("Method 1: Using window.ethereum.request directly");
+        let signature;
+
+        try {
+          signature = await window.ethereum.request({
+            method: "personal_sign",
+            params: [hexMessage, state.address],
+          });
+        } catch (directError) {
+          console.warn(
+            "Direct method failed, trying fallback method",
+            directError
+          );
+
+          // Metode 2: Mencoba dengan ethers.js BrowserProvider
+          console.log("Method 2: Using ethers.js BrowserProvider");
+          const signer = await provider.getSigner();
+          signature = await signer.signMessage(message);
+        }
+
+        console.log("Signature received:", !!signature);
 
         // Verify the signature
         const recoveredAddress = ethers.verifyMessage(message, signature);
+
+        console.log("Verification:", {
+          original: state.address.toLowerCase(),
+          recovered: recoveredAddress.toLowerCase(),
+        });
 
         // Check if the recovered address matches the connected address
         if (recoveredAddress.toLowerCase() === state.address.toLowerCase()) {
@@ -346,33 +411,28 @@ export function useWallet() {
         } else {
           throw new Error("Signature verification failed");
         }
-      } catch (signError: any) {
-        console.error("Error signing message:", signError);
-
-        // Check for user rejected signatures
-        const errorMessage = signError?.message || String(signError);
-        const isUserRejected =
-          errorMessage.includes("rejected") ||
-          errorMessage.includes("denied") ||
-          errorMessage.includes("canceled") ||
-          errorMessage.includes("cancelled") ||
-          errorMessage.includes("User rejected");
-
-        setState((prev) => ({
-          ...prev,
-          isAuthenticating: false,
-          error: isUserRejected
-            ? "Signature was rejected by user"
-            : `Error signing: ${errorMessage}`,
-        }));
-        return false;
+      } catch (innerError) {
+        console.error("Error in signature process:", innerError);
+        throw innerError; // Re-throw untuk ditangkap oleh catch di luar
       }
     } catch (error: any) {
       console.error("Authentication error:", error);
+
+      // Check for user rejected signatures
+      const errorMessage = error?.message || String(error);
+      const isUserRejected =
+        errorMessage.includes("rejected") ||
+        errorMessage.includes("denied") ||
+        errorMessage.includes("canceled") ||
+        errorMessage.includes("cancelled") ||
+        errorMessage.includes("User rejected");
+
       setState((prev) => ({
         ...prev,
         isAuthenticating: false,
-        error: `Authentication error: ${error.message || error}`,
+        error: isUserRejected
+          ? "Signature was rejected by user"
+          : `Error signing: ${errorMessage}`,
       }));
       return false;
     }
