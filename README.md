@@ -63,6 +63,13 @@ The project follows a modular approach for better organization and maintainabili
 - NFT collection management
 - Authentication using wallet signatures
 - Responsive design
+- Next.js App Router architecture
+- tRPC for type-safe API development
+- Prisma ORM with PostgreSQL database
+- PostgreSQL database support
+- TypeScript for type safety
+- Integration with Prisma Data Platform
+- Web3/Ethereum integration via MetaMask
 
 ## Technologies Used
 
@@ -74,45 +81,93 @@ The project follows a modular approach for better organization and maintainabili
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
-- MetaMask extension
+- Node.js 18+ or Bun runtime
+- PostgreSQL database
 
 ### Installation
 
-1. Clone the repository:
+```bash
+# Install dependencies
+bun install
+```
+
+### Database Configuration
+
+1. Create a `.env` file in the root directory
+2. Add your PostgreSQL database URL:
+   ```
+   DATABASE_URL="postgresql://username:password@hostname:port/database?schema=public"
+   ```
+3. If using Prisma Data Platform:
 
    ```
-   git clone https://github.com/yourusername/nft-next.git
-   cd nft-next
+   # Data Proxy URL (from Prisma Data Platform)
+   DATABASE_URL="prisma://your-data-proxy-url"
+
+   # Your direct PostgreSQL connection
+   DIRECT_URL="postgresql://username:password@hostname:port/database?schema=public"
    ```
 
-2. Install dependencies:
+### Initialize Database
 
-   ```
-   npm install
-   # or
-   yarn
-   ```
+```bash
+# Generate Prisma client
+bunx prisma generate
 
-3. Run the development server:
+# Create database tables
+bunx prisma db push
 
-   ```
-   npm run dev
-   # or
-   yarn dev
-   ```
+# Seed initial data
+bun run seed
+```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+### Development
 
-## Architecture
+```bash
+# Run development server
+bun run dev
+```
 
-The application uses a modular architecture with clear separation of concerns:
+## Project Structure
 
-- **Components**: UI components organized by functionality
-- **Hooks**: Custom React hooks for data fetching and state management
-- **Utils**: Utility functions for common operations
-- **Styles**: Global styles and theme-specific CSS
+- `app/` - Next.js App Router pages and layouts
+- `components/` - React components
+- `lib/` - Utility functions and shared code
+  - `db.ts` - Database client
+  - `trpc/` - tRPC implementation
+    - `server.ts` - tRPC server setup
+    - `client.ts` - tRPC client setup
+    - `routers/` - API route handlers
+- `prisma/` - Database schema and migrations
+- `public/` - Static assets
+- `styles/` - Global styles
+
+## API Structure with tRPC
+
+The API is built using tRPC for full type-safety between client and server:
+
+- `lib/trpc/server.ts` - Server-side tRPC configuration
+- `lib/trpc/client.ts` - Client-side tRPC setup
+- `lib/trpc/routers/` - API route implementations:
+  - `user.ts` - User-related operations
+  - `nft.ts` - NFT operations
+  - `collection.ts` - Collection operations
+  - `root.ts` - Root router that combines all routers
+
+## Database Schema
+
+The database uses Prisma ORM with the following models:
+
+- `User` - User profiles and wallets
+- `NFT` - NFT metadata and ownership
+- `Collection` - NFT collections
+
+## Learn More
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [tRPC Documentation](https://trpc.io/docs)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [Prisma Data Platform](https://www.prisma.io/data-platform)
 
 ## License
 
