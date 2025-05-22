@@ -1,16 +1,15 @@
 import { Container } from "@/components/ui/container";
+import { Win98Window } from "@/components/ui/win98";
 
 export default function AboutPage() {
   return (
     <main className="py-4">
       <Container>
-        <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-4">
-          <div className="win98-bar h-6 flex items-center px-2 mb-4">
-            <span className="text-white text-xs font-semibold tracking-tight">
-              About MyNFTs.exe
-            </span>
-          </div>
-
+        <Win98Window
+          title="About MyNFTs.exe"
+          icon="/assets/icons/info.png"
+          className="mb-4"
+        >
           <div className="space-y-4 text-black">
             <p>
               Welcome to MyNFTs.exe, a creative platform that celebrates the
@@ -48,7 +47,7 @@ export default function AboutPage() {
               <li>Community of creative digital artists</li>
             </ul>
           </div>
-        </div>
+        </Win98Window>
       </Container>
     </main>
   );

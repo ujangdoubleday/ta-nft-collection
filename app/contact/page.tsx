@@ -1,18 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Input } from "@/components/ui/input";
+import { Win98Window } from "@/components/ui/win98";
 
 export default function ContactPage() {
   return (
     <main className="py-4">
       <Container>
-        <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-4">
-          <div className="win98-bar h-6 flex items-center px-2 mb-4">
-            <span className="text-white text-xs font-semibold tracking-tight">
-              Contact Us
-            </span>
-          </div>
-
+        <Win98Window
+          title="Contact Us"
+          icon="/assets/icons/mail.png"
+          className="mb-4"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4 text-black">
               <p className="text-sm">
@@ -38,7 +37,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3 space-y-3">
+            <Win98Window title="Contact Form" className="p-3 space-y-3">
               <div>
                 <label className="text-black text-xs block mb-1">Name</label>
                 <Input placeholder="Enter your name" />
@@ -65,9 +64,9 @@ export default function ContactPage() {
               <div className="flex justify-end mt-2">
                 <Button>Send Message</Button>
               </div>
-            </div>
+            </Win98Window>
           </div>
-        </div>
+        </Win98Window>
       </Container>
     </main>
   );

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
+import { Win98Window } from "@/components/ui/win98";
 
 // Sample collection data
 const collections = [
@@ -40,13 +41,11 @@ export default function MyCollectionsPage() {
   return (
     <main className="py-4">
       <Container>
-        <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-4 mb-4">
-          <div className="win98-bar h-6 flex items-center justify-between px-2 mb-4">
-            <span className="text-white text-xs font-semibold tracking-tight">
-              Your Digital Gallery
-            </span>
-          </div>
-
+        <Win98Window
+          title="Your Digital Gallery"
+          icon="/assets/icons/gallery.png"
+          className="mb-4"
+        >
           {collections.length === 0 ? (
             <div className="p-4 text-center">
               <p className="text-black text-sm mb-4">
@@ -59,16 +58,11 @@ export default function MyCollectionsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
               {collections.map((collection) => (
-                <div
+                <Win98Window
                   key={collection.id}
-                  className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] overflow-hidden"
+                  title={collection.name}
+                  className="overflow-hidden"
                 >
-                  <div className="win98-bar h-6 flex items-center px-2">
-                    <span className="text-white text-xs font-semibold tracking-tight">
-                      {collection.name}
-                    </span>
-                  </div>
-
                   <div className="p-3 flex gap-3">
                     <div className="win98-shadow-inset h-20 w-20 bg-white flex-shrink-0 flex items-center justify-center">
                       <img
@@ -96,11 +90,11 @@ export default function MyCollectionsPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </Win98Window>
               ))}
             </div>
           )}
-        </div>
+        </Win98Window>
       </Container>
     </main>
   );
