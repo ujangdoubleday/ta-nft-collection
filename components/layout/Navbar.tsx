@@ -1,7 +1,7 @@
 "use client";
-
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -203,12 +203,16 @@ export function Navbar() {
           <Link href="/">
             <div className="flex items-center">
               <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-1">
-                <div className="bg-[#000080] px-1 py-0.5">
-                  <span className="text-white text-lg font-bold">PV</span>
-                </div>
+                <Image
+                  src="/assets/images/black.png"
+                  alt="MyNFTs Logo"
+                  width={32}
+                  height={32}
+                  priority
+                />
               </div>
               <span className="ml-2 text-black font-bold hidden md:inline-block">
-                Pixel Vault
+                MyNFTs.exe
               </span>
             </div>
           </Link>
