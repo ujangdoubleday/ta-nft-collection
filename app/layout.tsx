@@ -27,7 +27,7 @@ export default function RootLayout({
         "Detecting hardware...",
         "Initializing system...",
         "Loading components...",
-        "Starting Pixel Vault...",
+        "Starting MyNFTs.exe...",
       ];
 
       const segments = 20;
@@ -84,7 +84,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>Pixel Vault: Digital Art Creator</title>
+        <title>MyNFTs.exe: Digital Art Creator</title>
         <meta
           name="description"
           content="A retro-styled digital art creation platform"
@@ -114,7 +114,7 @@ export default function RootLayout({
                 <div className="bg-[#000] w-full h-screen flex flex-col items-center justify-center">
                   <div className="bg-[#008080] p-2 rounded mb-8">
                     <h1 className="text-white font-bold text-2xl">
-                      Pixel Vault
+                      MyNFTs.exe
                     </h1>
                   </div>
                   <div className="w-80 bg-[#c0c0c0] border-t-white border-l-white border-r-[#808080] border-b-[#808080] border-[2px] p-[2px] shadow-md">

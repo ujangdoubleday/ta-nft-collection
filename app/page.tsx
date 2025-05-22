@@ -11,7 +11,7 @@ export default function Home() {
         <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-4 mb-4">
           <div className="win98-bar h-6 flex items-center px-2 mb-4">
             <span className="text-white text-xs font-semibold tracking-tight">
-              Pixel Vault: Digital Art Creator
+              MyNFTs.exe: Digital Art Creator
             </span>
           </div>
 

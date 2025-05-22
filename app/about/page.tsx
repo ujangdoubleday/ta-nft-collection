@@ -7,13 +7,13 @@ export default function AboutPage() {
         <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-4">
           <div className="win98-bar h-6 flex items-center px-2 mb-4">
             <span className="text-white text-xs font-semibold tracking-tight">
-              About Pixel Vault
+              About MyNFTs.exe
             </span>
           </div>
 
           <div className="space-y-4 text-black">
             <p>
-              Welcome to Pixel Vault, a creative platform that celebrates the
+              Welcome to MyNFTs.exe, a creative platform that celebrates the
               nostalgia of retro computing aesthetics.
             </p>
 

@@ -320,7 +320,7 @@ export function useWallet() {
       const signer = await provider.getSigner();
 
       // Create signature message
-      const message = `Welcome to Pixel Vault!\n\nThis signature verifies your wallet ownership.\nIt does not cost any gas or initiate a transaction.\n\nWallet: ${
+      const message = `Welcome to MyNFTs.exe!\n\nThis signature verifies your wallet ownership.\nIt does not cost any gas or initiate a transaction.\n\nWallet: ${
         state.address
       }\nDate: ${new Date().toISOString()}`;
 

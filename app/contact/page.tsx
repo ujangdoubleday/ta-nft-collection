@@ -19,7 +19,7 @@ export default function ContactPage() {
                 <strong>Get in Touch</strong>
               </p>
               <p className="text-xs">
-                Have questions about Pixel Vault or digital art creation? We'd
+                Have questions about MyNFTs.exe or digital art creation? We'd
                 love to hear from you! Fill out the form and our team will get
                 back to you as soon as possible.
               </p>

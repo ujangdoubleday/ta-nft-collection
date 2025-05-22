@@ -1,4 +1,4 @@
-# Pixel Vault - NFT Creator Platform
+# MyNFTs.exe - NFT Creator Platform
 
 A retro-styled web application for creating and managing NFT collections using Next.js, ethers.js, and MetaMask integration.
 

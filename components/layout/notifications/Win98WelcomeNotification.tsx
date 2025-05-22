@@ -17,7 +17,7 @@ export function Win98WelcomeNotification({
   return (
     <Win98Notification
       title="Welcome"
-      message="Welcome to Pixel Vault! Create, collect, and share digital art in a retro-styled environment."
+      message="Welcome to MyNFTs.exe! Create, collect, and share digital art in a retro-styled environment."
       onClose={onClose}
       position={position}
       className={className}
