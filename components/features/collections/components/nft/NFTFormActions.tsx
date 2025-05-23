@@ -1,0 +1,30 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
+
+interface NFTFormActionsProps {
+  onCancel: () => void;
+}
+
+export function NFTFormActions({ onCancel }: NFTFormActionsProps) {
+  return (
+    <div className="flex justify-between mt-6">
+      <Button
+        type="button"
+        variant="outline"
+        className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
+        onClick={onCancel}
+      >
+        Cancel
+      </Button>
+      <Button
+        type="submit"
+        className="flex items-center hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
+      >
+        <Save className="h-4 w-4 mr-1" />
+        Create NFT
+      </Button>
+    </div>
+  );
+}
