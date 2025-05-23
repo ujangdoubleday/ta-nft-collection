@@ -1,11 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { use } from "react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Win98Window } from "@/components/ui/win98";
 import { NFTMintForm } from "@/components/features/collections";
+import { useRouter } from "next/navigation";
+import { use } from "react";
 
 // Sample collections data for header display
 const collections = {
@@ -29,16 +29,21 @@ const collections = {
   },
 };
 
-// Type for unwrapped params
-type RouteParams = {
-  collectionId: string;
-};
+type Params = Promise<{ collectionId: string }>;
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-export default function CreateNFTPage({ params }: { params: RouteParams }) {
+export default function CreateNFTPage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const router = useRouter();
-  // Use any as a workaround for the type issues with React.use()
-  const unwrappedParams = use(params as any) as RouteParams;
-  const collectionId = unwrappedParams.collectionId;
+  const resolvedParams = use(params);
+  const { collectionId } = resolvedParams;
+
+  // In a real app, this would be a database or API call
   const collection = collections[collectionId as keyof typeof collections];
 
   // Handle case where collection doesn't exist

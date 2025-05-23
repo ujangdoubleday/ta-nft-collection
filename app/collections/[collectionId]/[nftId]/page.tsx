@@ -1,11 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { use } from "react";
 import { Container } from "@/components/ui/container";
 import { Button } from "@/components/ui/button";
 import { Win98Window } from "@/components/ui/win98";
 import { NFTDetail } from "@/components/features/collections";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { use } from "react";
 
 // Define type for NFT history item
 type HistoryItem = {
@@ -198,17 +199,25 @@ const collections: Record<string, Collection> = {
   },
 };
 
-// Type for unwrapped params
-type RouteParams = {
+type Params = Promise<{
   collectionId: string;
   nftId: string;
-};
+}>;
 
-export default function NFTDetailPage({ params }: { params: RouteParams }) {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
+
+export default function NFTDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const router = useRouter();
-  // Use any as a workaround for the type issues with React.use()
-  const unwrappedParams = use(params as any) as RouteParams;
-  const { collectionId, nftId } = unwrappedParams;
+  const resolvedParams = use(params);
+  const { collectionId, nftId } = resolvedParams;
+
+  // In a real app, this would be a database or API call
   const collection = collections[collectionId as keyof typeof collections];
 
   if (!collection) {
@@ -254,7 +263,7 @@ export default function NFTDetailPage({ params }: { params: RouteParams }) {
     );
   }
 
-  // Use the defined type for nft
+  // Get the NFT
   const nft = collection.items?.[nftId] as NFTItem | undefined;
 
   if (!nft) {
