@@ -38,9 +38,9 @@ export function Win98Taskbar() {
       return "/assets/icons/taskbar/about.png";
     } else if (path === "/contact") {
       return "/assets/icons/taskbar/contact.png";
-    } else if (path === "/my-collections") {
+    } else if (path === "/collections") {
       return "/assets/icons/taskbar/collections.png";
-    } else if (path.includes("/my-collections/") && !path.includes("/nft/")) {
+    } else if (path.includes("/collections/") && !path.includes("/nft/")) {
       return "/assets/icons/taskbar/ape.png";
     } else if (path.includes("/nft/")) {
       return "/assets/icons/taskbar/detail-nft.png";
@@ -48,38 +48,6 @@ export function Win98Taskbar() {
 
     return "/assets/icons/windows.png";
   };
-
-  const menuItems = [
-    {
-      label: "Home",
-      icon: "🏠",
-      href: "/",
-    },
-    {
-      label: "My Collections",
-      icon: "🖼️",
-      href: "/my-collections",
-    },
-    {
-      label: "About",
-      icon: "ℹ️",
-      href: "/about",
-    },
-    {
-      label: "Contact",
-      icon: "📧",
-      href: "/contact",
-      dividerAfter: true,
-    },
-    {
-      label: "Log Out",
-      icon: "🚪",
-      onClick: () => {
-        alert("Logging out...");
-        closeStartMenu();
-      },
-    },
-  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 h-10 bg-[#c0c0c0] border-t-[2px] border-white z-50">

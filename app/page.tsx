@@ -65,7 +65,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="mt-4 flex justify-center">
-                  <Link href="/my-collections">
+                  <Link href="/collections">
                     <Button>Explore Your Gallery</Button>
                   </Link>
                 </div>
@@ -88,7 +88,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex justify-center">
-                    <Link href="/my-collections/create">
+                    <Link href="/collections/new">
                       <Button>Create Collection</Button>
                     </Link>
                   </div>

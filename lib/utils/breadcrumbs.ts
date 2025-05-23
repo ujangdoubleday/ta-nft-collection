@@ -22,15 +22,15 @@ export function generateBreadcrumbs(pathname: string): Breadcrumb[] {
     label = label.charAt(0).toUpperCase() + label.slice(1);
 
     // For collection IDs, add "Collection: " prefix
-    if (i === 1 && paths[0] === "my-collections" && paths[i] !== "create") {
+    if (i === 1 && paths[0] === "collections" && paths[i] !== "new") {
       breadcrumbs.push({ label: `Collection: ${label}`, path: currentPath });
     }
     // For NFT IDs
-    else if (i === 2 && paths[0] === "my-collections") {
+    else if (i === 2 && paths[0] === "collections") {
       breadcrumbs.push({ label: `NFT: ${paths[i]}`, path: currentPath });
     }
-    // For "create" or other special pages
-    else if (paths[i] === "create") {
+    // For "new" or other special pages
+    else if (paths[i] === "new") {
       breadcrumbs.push({ label: "Create New", path: currentPath });
     }
     // For "mint" page
@@ -39,7 +39,7 @@ export function generateBreadcrumbs(pathname: string): Breadcrumb[] {
     }
     // Standard pages
     else if (i === 0) {
-      if (paths[i] === "my-collections") {
+      if (paths[i] === "collections") {
         breadcrumbs.push({ label: "My Collections", path: currentPath });
       } else {
         breadcrumbs.push({ label, path: currentPath });

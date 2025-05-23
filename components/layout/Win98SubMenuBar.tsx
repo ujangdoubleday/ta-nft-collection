@@ -69,13 +69,13 @@ export function Win98SubMenuBar() {
     } else if (pathname === "/contact") {
       title = "Contact - Help";
       content = PAGE_HELP.contact;
-    } else if (pathname === "/my-collections") {
+    } else if (pathname === "/collections") {
       title = "My Collections - Help";
       content = PAGE_HELP.myCollections;
-    } else if (pathname.includes("/my-collections/create")) {
+    } else if (pathname.includes("/collections/new")) {
       title = "Create Collection - Help";
       content = PAGE_HELP.collectionCreate;
-    } else if (pathname.includes("/my-collections/edit")) {
+    } else if (pathname.includes("/collections/edit")) {
       title = "Edit Collection - Help";
       content = PAGE_HELP.collectionEdit;
     } else if (pathname.includes("/todos")) {
@@ -96,13 +96,13 @@ export function Win98SubMenuBar() {
     }
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       // Here you would implement actual search functionality
       alert(`Searching for: ${searchQuery}`);
       // Example: Navigate to search results page with query parameter
-      // router.push(`/my-collections/search?q=${encodeURIComponent(searchQuery)}`);
+      // router.push(`/collections/search?q=${encodeURIComponent(searchQuery)}`);
     }
   };
 
@@ -128,12 +128,12 @@ export function Win98SubMenuBar() {
     }
 
     // My Collections page actions
-    if (pathname === "/my-collections") {
+    if (pathname === "/collections") {
       return [
         {
           label: "New Collection",
           icon: <FilePlus className="h-3 w-3" />,
-          onClick: () => router.push("/my-collections/create"),
+          onClick: () => router.push("/collections/new"),
         },
         {
           label: "Search",
@@ -144,8 +144,8 @@ export function Win98SubMenuBar() {
       ];
     }
 
-    // NFT Mint page - check for /my-collections/[collectionId]/mint pattern
-    const mintPathMatch = pathname.match(/^\/my-collections\/([^/]+)\/mint$/);
+    // NFT Mint page - check for /collections/[collectionId]/mint pattern
+    const mintPathMatch = pathname.match(/^\/collections\/([^/]+)\/mint$/);
     if (mintPathMatch) {
       return [
         {
@@ -161,11 +161,11 @@ export function Win98SubMenuBar() {
       ];
     }
 
-    // Dynamic collection page - check if it matches /my-collections/[something] but NOT /my-collections/create or /my-collections/edit
-    const collectionPathMatch = pathname.match(/^\/my-collections\/([^/]+)$/);
+    // Dynamic collection page - check if it matches /collections/[something] but NOT /collections/new or /collections/edit
+    const collectionPathMatch = pathname.match(/^\/collections\/([^/]+)$/);
     if (
       collectionPathMatch &&
-      collectionPathMatch[1] !== "create" &&
+      collectionPathMatch[1] !== "new" &&
       collectionPathMatch[1] !== "edit"
     ) {
       const collectionId = collectionPathMatch[1];
@@ -173,7 +173,7 @@ export function Win98SubMenuBar() {
         {
           label: "Add NFT",
           icon: <FilePlus className="h-3 w-3" />,
-          onClick: () => router.push(`/my-collections/${collectionId}/mint`),
+          onClick: () => router.push(`/collections/${collectionId}/mint`),
         },
         {
           label: "Search NFT",
@@ -191,8 +191,8 @@ export function Win98SubMenuBar() {
 
     // Collection creation/edit page
     if (
-      pathname.includes("/my-collections/create") ||
-      pathname.includes("/my-collections/edit")
+      pathname.includes("/collections/new") ||
+      pathname.includes("/collections/edit")
     ) {
       return [
         {
@@ -228,7 +228,7 @@ export function Win98SubMenuBar() {
   // Generate title based on path
   const pageTitle = useMemo(() => {
     if (pathname === "/") return "My Computer";
-    if (pathname === "/my-collections") return "My Collections";
+    if (pathname === "/collections") return "My Collections";
     if (pathname === "/todos") return "Task Manager";
 
     // Handle specific paths or use the last segment
@@ -286,7 +286,7 @@ export function Win98SubMenuBar() {
         showBackButton={pathname !== "/"}
         className="mb-1 shadow-sm"
         extraContent={
-          showSearch && pathname === "/my-collections" ? <SearchInput /> : null
+          showSearch && pathname === "/collections" ? <SearchInput /> : null
         }
       />
 

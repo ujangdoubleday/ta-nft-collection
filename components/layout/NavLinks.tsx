@@ -26,7 +26,7 @@ const useNavLinks = () => {
     { href: "/", label: "Home" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
-    { href: "/my-collections", label: "My Collections" },
+    { href: "/collections", label: "My Collections" },
   ];
 
   return { links, pathname, isActive, isOpen, setIsOpen };

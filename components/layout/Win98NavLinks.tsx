@@ -9,16 +9,12 @@ const mainLinks = [
     label: "Home",
   },
   {
-    href: "/my-collections",
+    href: "/collections",
     label: "My Collections",
   },
   {
     href: "/collections",
     label: "Explore",
-  },
-  {
-    href: "/todos",
-    label: "Todos",
   },
   {
     href: "/about",
@@ -27,10 +23,6 @@ const mainLinks = [
   {
     href: "/contact",
     label: "Contact",
-  },
-  {
-    href: "/demo-dialog",
-    label: "Dialog Demo",
   },
 ];
 
@@ -42,14 +34,14 @@ export function Win98NavLinks() {
     {
       id: "new",
       label: "New Collection",
-      icon: "/assets/icons/new.png",
-      onClick: () => (window.location.href = "/my-collections/create"),
+      icon: "/assets/icons/new-collection.png",
+      onClick: () => (window.location.href = "/collections/new"),
     },
     {
       id: "open",
       label: "Open Collections",
       icon: "/assets/icons/folder.png",
-      onClick: () => (window.location.href = "/my-collections"),
+      onClick: () => (window.location.href = "/collections"),
     },
     { id: "sep1", separator: true },
     { id: "exit", label: "Exit", onClick: () => (window.location.href = "/") },
@@ -85,19 +77,14 @@ export function Win98NavLinks() {
           label="Collections"
           items={[
             {
-              id: "explore",
-              label: "Explore All",
-              onClick: () => (window.location.href = "/collections"),
-            },
-            {
               id: "my",
               label: "My Collections",
-              onClick: () => (window.location.href = "/my-collections"),
+              onClick: () => (window.location.href = "/collections"),
             },
             {
               id: "create",
               label: "Create New",
-              onClick: () => (window.location.href = "/my-collections/create"),
+              onClick: () => (window.location.href = "/collections/new"),
             },
           ]}
         />
