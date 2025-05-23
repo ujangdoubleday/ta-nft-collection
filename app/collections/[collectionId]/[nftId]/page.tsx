@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
+export const runtime = "edge";
+
 // Define type for NFT history item
 type HistoryItem = {
   type: string;

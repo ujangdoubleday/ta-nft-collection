@@ -7,6 +7,8 @@ import { CollectionDetail } from "@/components/features/collections";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
+export const runtime = "edge";
+
 // Define types for the collection items
 type CollectionItem = {
   id: string;

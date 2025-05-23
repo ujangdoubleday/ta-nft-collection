@@ -7,6 +7,8 @@ import { NFTMintForm } from "@/components/features/collections";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 
+export const runtime = "edge";
+
 // Sample collections data for header display
 const collections = {
   "pixel-art": {
