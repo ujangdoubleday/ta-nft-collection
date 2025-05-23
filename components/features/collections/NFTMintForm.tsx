@@ -85,7 +85,7 @@ export function NFTMintForm({
     <Win98Window
       title={`Create NFT - ${collectionName}`}
       className="max-w-6xl mx-auto"
-      icon="/assets/icons/windows.png"
+      icon="/assets/icons/window/gallery-create.png"
     >
       <form onSubmit={handleSubmit} className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

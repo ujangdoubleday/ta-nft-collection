@@ -219,7 +219,7 @@ export default function NFTDetailPage({ params }: { params: RouteParams }) {
             title="Error - Collection Not Found"
             className="max-w-4xl mx-auto"
             onClose={() => router.push("/collections")}
-            icon="/assets/icons/windows.png"
+            icon="/assets/icons/window/gallery.png"
           >
             <div className="p-4">
               <div className="flex items-center mb-4 p-3 border border-[#808080] bg-[#fffbf0]">
@@ -265,7 +265,7 @@ export default function NFTDetailPage({ params }: { params: RouteParams }) {
             title="Error - NFT Not Found"
             className="max-w-4xl mx-auto"
             onClose={() => router.push(`/collections/${collectionId}`)}
-            icon="/assets/icons/windows.png"
+            icon="/assets/icons/window/gallery.png"
           >
             <div className="p-4">
               <div className="flex items-center mb-4 p-3 border border-[#808080] bg-[#fffbf0]">
@@ -304,7 +304,7 @@ export default function NFTDetailPage({ params }: { params: RouteParams }) {
   return (
     <main className="py-4">
       <Container>
-        <NFTDetail collectionId={collectionId} nft={nft} />
+        <NFTDetail collectionId={collectionId} nftId={nftId} nft={nft} />
       </Container>
     </main>
   );

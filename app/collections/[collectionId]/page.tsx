@@ -138,7 +138,7 @@ export default function CollectionPage({ params }: { params: RouteParams }) {
             title="Error - Collection Not Found"
             className="max-w-4xl mx-auto"
             onClose={() => router.push("/collections")}
-            icon="/assets/icons/windows.png"
+            icon="/assets/icons/window/gallery.png"
           >
             <div className="p-4">
               <div className="flex items-center mb-4 p-3 border border-[#808080] bg-[#fffbf0]">

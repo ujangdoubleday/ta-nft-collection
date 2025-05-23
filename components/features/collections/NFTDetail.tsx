@@ -21,7 +21,7 @@ export function NFTDetail({ collectionId, nftId, nft }: NFTDetailProps) {
     <Win98Window
       title={`NFT: ${nft.name}`}
       className="max-w-6xl mx-auto"
-      icon="/assets/icons/windows.png"
+      icon="/assets/icons/window/gallery.png"
     >
       <div className="p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
