@@ -21,28 +21,37 @@ import {
 
 // Page help descriptions
 const PAGE_HELP = {
-  home: "Welcome to MyNFTs.exe - a Windows 98 styled NFT platform. Navigate through the application using the navigation bar and menus. Click on icons to access different features.",
+  home: "Welcome to MyNFTs.exe - a Windows 98 styled NFT platform. Navigate through the application using the navigation bar and menus. Click on icons to access different features. You can create and manage your NFT collections from here.",
 
   about:
-    "This page contains information about MyNFTs.exe platform, its creators, and the technology used to build it. Learn more about our mission and goals.",
+    "This page contains information about MyNFTs.exe platform, its creators, and the technology used to build it. Learn more about our mission, vision, and the team behind this retro-inspired NFT marketplace.",
 
   contact:
-    "Use this page to get in touch with the developers of MyNFTs.exe. You can send feedback, report issues, or ask questions about the platform.",
+    "Use this page to get in touch with the developers of MyNFTs.exe. You can send feedback, report issues, ask questions about the platform, or request new features for future updates.",
 
   myCollections:
-    "Browse and manage your NFT collections. Create new collections, view your existing ones, and manage your digital assets all in one place.",
+    "Browse and manage your NFT collections. Create new collections, view your existing ones, and manage your digital assets all in one place. From here, you can also create new NFTs for any of your collections.",
 
   collectionCreate:
-    "Create a new NFT collection by filling out the form. You can set a name, description, and upload preview images for your collection.",
+    "Create a new NFT collection by filling out the form. You can set a name, description, symbol, and upload preview images for your collection. Make sure to give your collection a memorable name and description to stand out.",
 
   collectionEdit:
-    "Edit your existing NFT collection details including name, description, and preview images.",
+    "Edit your existing NFT collection details including name, description, and preview images. You can update any information about your collection to keep it current and engaging.",
+
+  collectionDetail:
+    "View all NFTs in this collection. From here, you can see the details of each NFT, create new ones, or click on any NFT to view more information about it. Browse your digital assets and manage them easily.",
+
+  nftMint:
+    "Create a new NFT for your collection. Fill out the details such as title, description, and properties. You can also upload the digital artwork file that will be associated with this NFT. Be as descriptive as possible to increase the value of your NFT.",
+
+  nftDetail:
+    "View detailed information about this specific NFT. You can see its properties, history, and ownership details. This page also allows you to transfer the NFT to another wallet or perform other actions.",
 
   todos:
-    "Manage your tasks with this simple todo application. Add, edit, and mark tasks as complete to stay organized.",
+    "Manage your tasks with this simple todo application. Add, edit, and mark tasks as complete to stay organized. Keep track of your NFT creation plans and other related tasks.",
 
   default:
-    "Welcome to MyNFTs.exe! This Windows 98-style interface allows you to navigate through the application. Use the menu at the top to access different features.",
+    "Welcome to MyNFTs.exe! This Windows 98-style interface allows you to navigate through the application. Use the menu at the top to access different features. If you need specific help for a page, look for the Help button in the toolbar.",
 };
 
 export function Win98SubMenuBar() {
@@ -81,6 +90,21 @@ export function Win98SubMenuBar() {
     } else if (pathname.includes("/todos")) {
       title = "Todos - Help";
       content = PAGE_HELP.todos;
+    }
+    // Check for NFT mint page
+    else if (pathname.match(/^\/collections\/([^/]+)\/mint$/)) {
+      title = "Create NFT - Help";
+      content = PAGE_HELP.nftMint;
+    }
+    // Check for NFT detail page
+    else if (pathname.match(/^\/collections\/([^/]+)\/[^/]+$/)) {
+      title = "NFT Details - Help";
+      content = PAGE_HELP.nftDetail;
+    }
+    // Check for Collection detail page
+    else if (pathname.match(/^\/collections\/([^/]+)$/)) {
+      title = "Collection Details - Help";
+      content = PAGE_HELP.collectionDetail;
     }
 
     setHelpTitle(title);

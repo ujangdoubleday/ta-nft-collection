@@ -11,7 +11,7 @@
 
 @layer base {
   :root {
-    --background: 180 100% 25%; /* Windows 98 teal #008080 */
+    --background: 180 100% 25%; /* Retro teal #008080 */
     --foreground: 0 0% 0%;
     --card: 0 0% 83.9%;
     --card-foreground: 0 0% 0%;
@@ -34,7 +34,7 @@
   }
 
   .dark {
-    --background: 180 100% 25%; /* Windows 98 teal #008080 for dark mode too */
+    --background: 180 100% 25%; /* Retro teal #008080 for dark mode too */
     --foreground: 0 0% 0%;
     --card: 0 0% 83.9%;
     --card-foreground: 0 0% 0%;
@@ -298,9 +298,46 @@ main > div {
 
 /* Windows 98 Progress Block Animation */
 @keyframes win98Block {
-  0% { transform: scaleY(0.6); }
-  50% { transform: scaleY(1); }
-  100% { transform: scaleY(0.6); }
+  0%, 100% { background: #000080; }
+  50% { background: #1084d0; }
+}
+
+@keyframes retro-loading {
+  0%, 100% { background-color: #000080; }
+  50% { background-color: #1084d0; }
+}
+
+@keyframes retro-scan {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes retro-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes retro-boot {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.animate-windows98-loading {
+  animation: retro-loading 1s infinite;
+}
+
+.animate-windows98-scan {
+  animation: retro-scan 2s infinite linear;
+}
+
+.animate-windows98-blink {
+  animation: retro-blink 1s infinite;
+}
+
+.animate-windows98-boot {
+  animation: retro-boot 3s ease-in-out;
 }
 
 .win98-progress-block {
