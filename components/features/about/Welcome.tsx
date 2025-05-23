@@ -4,7 +4,7 @@ export function Welcome() {
   return (
     <Win98Window
       title="Welcome to MyNFTs.exe"
-      icon="/assets/icons/welcome.png"
+      icon="/assets/icons/window/welcome.png"
       className="mb-4"
     >
       <div className="p-4 text-black">

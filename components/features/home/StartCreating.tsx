@@ -11,7 +11,7 @@ export function StartCreating() {
   return (
     <Win98Window
       title="Start Creating"
-      icon="/assets/icons/create-art.png"
+      icon="/assets/icons/window/create-art.png"
       className="h-full"
     >
       <div className="p-3">

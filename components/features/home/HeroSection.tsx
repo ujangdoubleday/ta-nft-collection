@@ -6,7 +6,7 @@ export function HeroSection() {
   return (
     <Win98Window
       title="MyNFTs.exe: Digital Art Creator"
-      icon="/assets/icons/nft-art.png"
+      icon="/assets/icons/window/nft-art.png"
       className="mb-4"
     >
       <div className="space-y-4 text-black p-4">
@@ -32,7 +32,7 @@ export function HeroSection() {
           </div>
           <div className="flex-shrink-0 w-40 h-40 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] flex items-center justify-center">
             <img
-              src="/assets/icons/nft.png"
+              src="/assets/icons/window/nft-art.png"
               alt="NFT Illustration"
               className="w-32 h-32 object-contain"
               onError={(e) => {

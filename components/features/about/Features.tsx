@@ -49,7 +49,7 @@ export function Features() {
   return (
     <Win98Window
       title="Platform Features"
-      icon="/assets/icons/features.png"
+      icon="/assets/icons/window/features.png"
       className="mb-4"
     >
       <div className="p-4 text-black">

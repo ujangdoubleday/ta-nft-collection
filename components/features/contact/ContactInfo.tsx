@@ -4,7 +4,7 @@ export function ContactInfo() {
   return (
     <Win98Window
       title="Get in Touch"
-      icon="/assets/icons/email.png"
+      icon="/assets/icons/window/email.png"
       className="mb-4"
     >
       <div className="p-4 space-y-4 text-black">

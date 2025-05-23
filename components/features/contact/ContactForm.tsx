@@ -58,7 +58,7 @@ export function ContactForm() {
   return (
     <Win98Window
       title="Message Form"
-      icon="/assets/icons/form.png"
+      icon="/assets/icons/window/form.png"
       className="mb-4"
     >
       <div className="p-4 text-black">

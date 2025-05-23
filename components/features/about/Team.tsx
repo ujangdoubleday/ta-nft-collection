@@ -4,7 +4,7 @@ export function Team() {
   return (
     <Win98Window
       title="Creator"
-      icon="/assets/icons/developer.png"
+      icon="/assets/icons/window/developer.png"
       className="mb-4"
     >
       <div className="p-4 text-black">

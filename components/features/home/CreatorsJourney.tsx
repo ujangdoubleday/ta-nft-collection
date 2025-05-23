@@ -31,7 +31,7 @@ export function CreatorsJourney() {
   return (
     <Win98Window
       title="Creator's Journey"
-      icon="/assets/icons/journey-art.png"
+      icon="/assets/icons/window/journey-art.png"
       className="h-full"
     >
       <div className="p-3">

@@ -4,7 +4,7 @@ export function Mission() {
   return (
     <Win98Window
       title="Our Mission"
-      icon="/assets/icons/mission.png"
+      icon="/assets/icons/window/mission.png"
       className="mb-4"
     >
       <div className="space-y-4 p-4 text-black">

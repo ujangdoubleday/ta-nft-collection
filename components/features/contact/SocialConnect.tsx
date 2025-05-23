@@ -40,7 +40,7 @@ export function SocialConnect() {
   return (
     <Win98Window
       title="Connect Online"
-      icon="/assets/icons/globe.png"
+      icon="/assets/icons/window/globe.png"
       className="mb-4"
     >
       <div className="p-4 text-black">

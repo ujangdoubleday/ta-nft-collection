@@ -4,17 +4,10 @@ import React, { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Win98SubMenu, Win98Alert } from "@/components/ui/win98";
 import {
-  Undo,
   Eraser,
-  Save,
-  FileOutput,
-  Copy,
   RefreshCw,
   Search,
-  FolderOpen,
   FilePlus,
-  FileText,
-  Home,
   HelpCircle,
   X,
 } from "lucide-react";
