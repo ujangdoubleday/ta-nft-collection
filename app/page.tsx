@@ -1,5 +1,3 @@
-"use client";
-
 import { Container } from "@/components/ui/container";
 import {
   HeroSection,
@@ -12,7 +10,6 @@ export default function Home() {
     <main className="py-4">
       <Container>
         <HeroSection />
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <CreatorsJourney />
           <StartCreating />

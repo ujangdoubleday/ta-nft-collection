@@ -216,7 +216,7 @@ export function useWallet() {
             method: "wallet_requestPermissions",
             params: [{ eth_accounts: {} }],
           });
-        } catch (e) {
+        } catch (_e) {
           console.log(
             "wallet_requestPermissions failed, falling back to eth_requestAccounts"
           );

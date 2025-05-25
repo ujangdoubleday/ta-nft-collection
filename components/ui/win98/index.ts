@@ -18,7 +18,3 @@ export {
   Win98DialogDescription,
   Win98DialogClose,
 } from "./Win98Dialog";
-
-// Todo components are now Win98 styled
-export { TodoItem } from "../todo-item";
-export { TodoList } from "../todo-list";

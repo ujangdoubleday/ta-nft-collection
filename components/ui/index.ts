@@ -2,7 +2,6 @@
  * Re-export UI components for easier imports
  */
 
-export * from "./avatar";
 export * from "./button";
 export * from "./card";
 export * from "./container";
