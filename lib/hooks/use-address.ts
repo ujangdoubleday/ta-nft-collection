@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 export function useAddress() {
   const { address } = useWallet();
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, _setError] = useState<Error | null>(null);
 
   useEffect(() => {
     // When address changes, reset loading state

@@ -30,7 +30,7 @@ export function Win98SubMenu({
   const router = useRouter();
   const pathname = usePathname();
 
-  const getPageTitle = () => {
+  const _getPageTitle = () => {
     if (title) return title;
 
     // Generate title based on current path if not provided

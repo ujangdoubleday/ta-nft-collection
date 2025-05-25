@@ -4,7 +4,7 @@ import * as React from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 
-interface Win98DialogProps extends DialogPrimitive.DialogProps {
+interface _Win98DialogProps extends DialogPrimitive.DialogProps {
   children: React.ReactNode;
 }
 

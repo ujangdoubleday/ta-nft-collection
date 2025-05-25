@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface LoadingScreenProps {
   progress: number;
@@ -23,9 +24,12 @@ export function LoadingScreen({ progress, loadingText }: LoadingScreenProps) {
       <div className="w-full max-w-md mb-10 px-4">
         <div className="flex items-center justify-center mb-10">
           <div className="h-28 w-28 relative">
-            <img
+            <Image
               src="/assets/logo/black.svg"
               alt="MyNFTs Logo"
+              decoding="async"
+              fill={true}
+              unoptimized
               className="invert h-full w-full"
               onError={(e) => {
                 e.currentTarget.src =

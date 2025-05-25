@@ -16,7 +16,11 @@ interface NFTDetailProps {
   nft: NFTItem;
 }
 
-export function NFTDetail({ collectionId, nftId, nft }: NFTDetailProps) {
+export function NFTDetail({
+  collectionId,
+  nftId: _nftId,
+  nft,
+}: NFTDetailProps) {
   return (
     <Win98Window
       title={`NFT: ${nft.name}`}

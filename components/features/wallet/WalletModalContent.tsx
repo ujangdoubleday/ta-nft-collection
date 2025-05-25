@@ -96,7 +96,7 @@ export function WalletModalContent({
               </p>
               <p>
                 <strong>Message:</strong> Sign this message to access Pixel
-                Vault. This is free and doesn't require gas.
+                Vault. This is free and doesn&apos;t require gas.
               </p>
             </div>
 

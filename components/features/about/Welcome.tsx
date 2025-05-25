@@ -1,4 +1,5 @@
 import { Win98Window } from "@/components/ui/win98";
+import Image from "next/image";
 
 export function Welcome() {
   return (
@@ -19,15 +20,17 @@ export function Welcome() {
               Our platform combines the distinctive charm of classic computing
               interfaces with cutting-edge NFT technology, creating a unique
               space for digital artists to create, showcase, and trade their
-              work in an environment that's both nostalgic and functional.
+              work in an environment that&apos;s both nostalgic and functional.
             </p>
           </div>
 
           <div className="w-full md:w-1/3 flex justify-center">
             <div className="win98-shadow-inset h-32 w-32 bg-white flex items-center justify-center">
-              <img
+              <Image
                 src="/assets/logo/black.svg"
                 alt="MyNFTs.exe Logo"
+                width={500}
+                height={500}
                 className="max-h-24 max-w-24"
               />
             </div>
@@ -38,8 +41,8 @@ export function Welcome() {
           <p className="text-xs">
             <strong>Why Retro Aesthetics?</strong> The distinctive interface of
             classic computing, with its iconic buttons, taskbars, and window
-            designs, defined an era of digital creativity. We're bringing that
-            charm back to inspire a new generation of digital artists while
+            designs, defined an era of digital creativity. We&apos;re bringing
+            that charm back to inspire a new generation of digital artists while
             providing modern tools for creating and managing digital assets.
           </p>
         </div>

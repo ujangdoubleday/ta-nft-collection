@@ -1,5 +1,3 @@
-"use client";
-
 import { Container } from "@/components/ui/container";
 import { CollectionForm } from "@/components/features/collections";
 

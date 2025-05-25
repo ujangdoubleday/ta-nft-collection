@@ -1,6 +1,7 @@
 "use client";
 
 import { Win98Window } from "@/components/ui/win98";
+import Image from "next/image";
 
 export function HeroSection() {
   return (
@@ -31,14 +32,12 @@ export function HeroSection() {
             </div>
           </div>
           <div className="flex-shrink-0 w-40 h-40 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] flex items-center justify-center">
-            <img
+            <Image
               src="/assets/icons/window/nft-art.png"
               alt="NFT Illustration"
+              width={500}
+              height={500}
               className="w-32 h-32 object-contain"
-              onError={(e) => {
-                e.currentTarget.src =
-                  "https://via.placeholder.com/128?text=NFT";
-              }}
             />
           </div>
         </div>

@@ -121,7 +121,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default async function CollectionPage({
   params,
-  searchParams,
+  searchParams: _searchParams,
 }: {
   params: Params;
   searchParams: SearchParams;

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/win98/Win98Dialog";
 
 export const WalletButton = () => {
-  const [showHelp, setShowHelp] = useState(false);
+  const [_showHelp, setShowHelp] = useState(false);
 
   const {
     isWalletModalOpen,
@@ -41,7 +41,7 @@ export const WalletButton = () => {
     handleCloseErrorNotification,
   } = useWalletModal();
 
-  const triggerMetaMask = async () => {
+  const _triggerMetaMask = async () => {
     try {
       // Attempt to force MetaMask to show
       if (window.ethereum) {

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface NFTPreviewProps {
   name: string;
   description: string;
@@ -17,9 +19,12 @@ export function NFTPreview({ name, description, image }: NFTPreviewProps) {
 
       <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-white mb-3 p-2">
         <div className="relative" style={{ aspectRatio: "1/1" }}>
-          <img
+          <Image
             src={image}
             alt={name}
+            unoptimized={true}
+            width={500}
+            height={500}
             className="w-full h-full object-contain"
           />
         </div>

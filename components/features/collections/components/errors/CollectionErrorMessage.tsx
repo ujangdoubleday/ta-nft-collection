@@ -39,7 +39,7 @@ export const CollectionErrorMessage = ({
             />
           </svg>
           <p className="text-black">
-            The collection you're looking for doesn't exist.
+            The collection you&apos;re looking for doesn&apos;t exist.
           </p>
         </div>
         <Button

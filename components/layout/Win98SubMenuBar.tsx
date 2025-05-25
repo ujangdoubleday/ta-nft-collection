@@ -240,7 +240,7 @@ export function Win98SubMenuBar() {
 
     // Default actions for other pages
     return [...defaultActions];
-  }, [pathname, router, toggleSearch]);
+  }, [pathname, router, toggleSearch, handleHelpClick]);
 
   // Generate title based on path
   const pageTitle = useMemo(() => {

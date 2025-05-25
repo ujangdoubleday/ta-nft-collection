@@ -9,7 +9,7 @@ export function ContactInfo() {
     >
       <div className="p-4 space-y-4 text-black">
         <p className="text-sm">
-          I'd love to hear from you! Whether you have questions about
+          I&apos;d love to hear from you! Whether you have questions about
           MyNFTs.exe, feature requests, or just want to chat about retro
           computing and NFTs, feel free to reach out.
         </p>

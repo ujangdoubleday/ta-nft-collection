@@ -207,7 +207,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export default async function NFTDetailPage({
   params,
-  searchParams,
+  searchParams: _searchParams,
 }: {
   params: Params;
   searchParams: SearchParams;

@@ -65,8 +65,8 @@ export function ContactForm() {
         <div className="mb-4 win98-shadow-inset p-3 bg-white">
           <p className="text-xs">
             Have a question, suggestion, or just want to say hello? Fill out the
-            form below and I'll get back to you as soon as possible. All fields
-            marked with * are required.
+            form below and I&apos;ll get back to you as soon as possible. All
+            fields marked with * are required.
           </p>
         </div>
 
@@ -76,7 +76,7 @@ export function ContactForm() {
               Message sent successfully!
             </p>
             <p className="text-xs text-[#005000]">
-              Thank you for reaching out. I'll respond as soon as possible.
+              Thank you for reaching out. I&apos;ll respond as soon as possible.
             </p>
           </div>
         )}

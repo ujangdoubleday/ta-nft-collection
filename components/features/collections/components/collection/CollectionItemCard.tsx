@@ -1,6 +1,7 @@
 "use client";
 
 import { CollectionItem } from "@/components/features/collections/types";
+import Image from "next/image";
 
 interface CollectionItemCardProps {
   item: CollectionItem;
@@ -30,9 +31,12 @@ export function CollectionItemCard({
         }}
         onClick={() => onViewDetails(item.id)}
       >
-        <img
+        <Image
           src={item.image}
           alt={item.name}
+          unoptimized={true}
+          width={500}
+          height={500}
           className="w-full h-full object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1 text-xs opacity-0 hover:opacity-100 transition-opacity">

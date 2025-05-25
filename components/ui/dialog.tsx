@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-interface DialogProps extends DialogPrimitive.DialogProps {
+interface _DialogProps extends DialogPrimitive.DialogProps {
   title?: string;
 }
 

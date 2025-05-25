@@ -41,7 +41,8 @@ export const NFTErrorMessage = ({
             />
           </svg>
           <p className="text-black">
-            The NFT you're looking for couldn't be found in this collection.
+            The NFT you&apos;re looking for couldn&apos;t be found in this
+            collection.
           </p>
         </div>
         <Button

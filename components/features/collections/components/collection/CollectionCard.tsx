@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Win98Window } from "@/components/ui/win98";
+import Image from "next/image";
 
 export type CollectionCardProps = {
   id: string;
@@ -23,7 +24,13 @@ export function CollectionCard({
     <Win98Window key={id} title={name} className="overflow-hidden">
       <div className="p-3 flex gap-3">
         <div className="win98-shadow-inset h-20 w-20 bg-white flex-shrink-0 flex items-center justify-center">
-          <img src={thumbnail} alt={name} className="max-h-16 max-w-16" />
+          <Image
+            src={thumbnail}
+            alt={name}
+            width={96}
+            height={96}
+            className="max-h-16 max-w-16"
+          />
         </div>
         <div className="text-black">
           <p className="text-xs mb-1">{description}</p>
