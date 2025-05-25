@@ -25,6 +25,9 @@ module.exports = {
       },
     },
     extend: {
+      fontFamily: {
+        'ms-sans-serif': ['"MS Sans Serif"', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
