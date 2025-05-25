@@ -4,11 +4,7 @@ import { useEffect, useState } from "react";
 import "@/styles/globals.css";
 import { ThemeProvider } from "@/components/common";
 import { TRPCProvider } from "@/components/providers/trpc-provider";
-import {
-  BootScreen,
-  LoadingScreen,
-  MainLayout,
-} from "@/components/features/layout";
+import { LoadingScreen, MainLayout } from "@/components/features/layout";
 
 export default function RootLayout({
   children,
@@ -16,52 +12,45 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [loading, setLoading] = useState(true);
-  const [bootScreen, setBootScreen] = useState(true);
   const [progress, setProgress] = useState(0);
   const [loadingText, setLoadingText] = useState("Starting MyNFTs.exe...");
   const [showWelcome, setShowWelcome] = useState(false);
   const [initialRenderComplete, setInitialRenderComplete] = useState(false);
 
   useEffect(() => {
-    const bootTimer = setTimeout(() => {
-      setBootScreen(false);
+    const messages = [
+      "Detecting hardware components...",
+      "Initializing system interfaces...",
+      "Preparing virtual environment...",
+      "Loading MyNFTs.exe components...",
+    ];
 
-      const messages = [
-        "Detecting hardware components...",
-        "Initializing system interfaces...",
-        "Preparing virtual environment...",
-        "Loading MyNFTs.exe components...",
-      ];
+    const segments = 20;
+    const totalDuration = 5000;
+    const intervalTime = totalDuration / segments;
 
-      const segments = 20;
-      const totalDuration = 5000;
-      const intervalTime = totalDuration / segments;
+    let currentSegment = 0;
+    const progressInterval = setInterval(() => {
+      if (currentSegment < segments) {
+        currentSegment++;
+        setProgress((currentSegment / segments) * 100);
 
-      let currentSegment = 0;
-      const progressInterval = setInterval(() => {
-        if (currentSegment < segments) {
-          currentSegment++;
-          setProgress((currentSegment / segments) * 100);
-
-          if (currentSegment === 5) {
-            setLoadingText(messages[0]);
-          } else if (currentSegment === 10) {
-            setLoadingText(messages[1]);
-          } else if (currentSegment === 15) {
-            setLoadingText(messages[2]);
-          } else if (currentSegment === 18) {
-            setLoadingText(messages[3]);
-          }
-        } else {
-          clearInterval(progressInterval);
-          setLoading(false);
+        if (currentSegment === 5) {
+          setLoadingText(messages[0]);
+        } else if (currentSegment === 10) {
+          setLoadingText(messages[1]);
+        } else if (currentSegment === 15) {
+          setLoadingText(messages[2]);
+        } else if (currentSegment === 18) {
+          setLoadingText(messages[3]);
         }
-      }, intervalTime);
+      } else {
+        clearInterval(progressInterval);
+        setLoading(false);
+      }
+    }, intervalTime);
 
-      return () => clearInterval(progressInterval);
-    }, 2500);
-
-    return () => clearTimeout(bootTimer);
+    return () => clearInterval(progressInterval);
   }, []);
 
   useEffect(() => {
@@ -101,11 +90,7 @@ export default function RootLayout({
         >
           <TRPCProvider>
             {loading ? (
-              bootScreen ? (
-                <BootScreen />
-              ) : (
-                <LoadingScreen progress={progress} loadingText={loadingText} />
-              )
+              <LoadingScreen progress={progress} loadingText={loadingText} />
             ) : (
               <MainLayout
                 showWelcome={showWelcome}
