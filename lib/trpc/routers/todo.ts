@@ -1,5 +1,3 @@
-"use server";
-
 import { z } from "zod";
 import { router, publicProcedure } from "../server";
 import prisma from "@/lib/db";

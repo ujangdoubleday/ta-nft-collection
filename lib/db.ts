@@ -1,14 +1,18 @@
-// This file is a server-side module and should not be bundled for the browser
-"use server";
+import { PrismaClient } from "./generated/prisma";
 
-import { PrismaClient } from "./generated/prisma/edge";
+declare global {
+  var cachedPrisma: PrismaClient;
+}
 
-// PrismaClient is attached to the `global` object in development to prevent
-// exhausting your database connection limit.
-const globalForPrisma = globalThis as { prisma?: PrismaClient };
+let prisma: PrismaClient;
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV === "production") {
+  prisma = new PrismaClient();
+} else {
+  if (!global.cachedPrisma) {
+    global.cachedPrisma = new PrismaClient();
+  }
+  prisma = global.cachedPrisma;
+}
 
 export default prisma;
