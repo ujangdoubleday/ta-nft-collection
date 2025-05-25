@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAddress } from "@/lib/hooks/use-address";
-import { TodoItem } from "./todo-item";
-import { Button } from "./button";
-import { Input } from "./input";
-import { Card } from "./card";
+import { TodoItem } from "@/components/features/todo/todo-item";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Win98Window } from "@/components/ui/win98";
+import { Card } from "@/components/ui/card";
 import { useTrpc } from "@/lib/hooks/use-trpc";
 import { Plus, X, AlertTriangle, Info, CheckCircle2 } from "lucide-react";
 
 export function TodoList() {
-  const { data: address } = useAddress();
+  const { data: _address } = useAddress();
   const trpc = useTrpc();
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
@@ -23,8 +24,8 @@ export function TodoList() {
   // Use a simple test query that doesn't depend on the Todo model
   const {
     data: testData,
-    isLoading: testLoading,
-    error: testError,
+    isLoading: _testLoading,
+    error: _testError,
   } = trpc.todo.test.useQuery();
 
   // Fetch all todos, no longer filtering by wallet address
@@ -137,22 +138,7 @@ export function TodoList() {
         </div>
       )}
 
-      <Card className="overflow-hidden">
-        <div className="bg-[#000080] text-white px-2 py-0.5 flex items-center">
-          <div className="flex-1 font-bold text-sm">Add New Task</div>
-          <div className="flex items-center space-x-1">
-            <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-              _
-            </button>
-            <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-              □
-            </button>
-            <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-              ×
-            </button>
-          </div>
-        </div>
-
+      <Win98Window title="Add New Task" className="mb-4">
         <div className="p-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -214,24 +200,10 @@ export function TodoList() {
             </Button>
           </form>
         </div>
-      </Card>
+      </Win98Window>
 
       {testData && (
-        <Card className="overflow-hidden">
-          <div className="bg-[#000080] text-white px-2 py-0.5 flex items-center">
-            <div className="flex-1 font-bold text-sm">System Status</div>
-            <div className="flex items-center space-x-1">
-              <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-                _
-              </button>
-              <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-                □
-              </button>
-              <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-                ×
-              </button>
-            </div>
-          </div>
+        <Win98Window title="System Status" className="mb-4">
           <div className="p-4 bg-[#c0c0c0] text-sm">
             <p className="mb-1">tRPC Status: {testData.message}</p>
             <p className="mb-1">
@@ -239,25 +211,11 @@ export function TodoList() {
             </p>
             <p>Available models: {testData.prismaModels.join(", ")}</p>
           </div>
-        </Card>
+        </Win98Window>
       )}
 
       {todosError && (
-        <Card className="overflow-hidden">
-          <div className="bg-[#ff0000] text-white px-2 py-0.5 flex items-center">
-            <div className="flex-1 font-bold text-sm">ERROR</div>
-            <div className="flex items-center space-x-1">
-              <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-red-950">
-                _
-              </button>
-              <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-red-950">
-                □
-              </button>
-              <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-red-950">
-                ×
-              </button>
-            </div>
-          </div>
+        <Win98Window title="ERROR" className="mb-4">
           <div className="p-4 bg-red-50">
             <div className="flex items-start">
               <AlertTriangle className="text-red-600 w-5 h-5 mr-2 flex-shrink-0" />
@@ -269,25 +227,10 @@ export function TodoList() {
               Retry
             </Button>
           </div>
-        </Card>
+        </Win98Window>
       )}
 
-      <Card className="overflow-hidden">
-        <div className="bg-[#000080] text-white px-2 py-0.5 flex items-center">
-          <div className="flex-1 font-bold text-sm">My Tasks</div>
-          <div className="flex items-center space-x-1">
-            <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-              _
-            </button>
-            <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-              □
-            </button>
-            <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-              ×
-            </button>
-          </div>
-        </div>
-
+      <Win98Window title="My Tasks" className="mb-4">
         <div className="p-4">
           {todosLoading ? (
             <div className="flex justify-center items-center p-8">
@@ -322,7 +265,7 @@ export function TodoList() {
             </div>
           )}
         </div>
-      </Card>
+      </Win98Window>
     </div>
   );
 }

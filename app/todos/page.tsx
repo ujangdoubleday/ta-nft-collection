@@ -1,4 +1,4 @@
-import { TodoList } from "@/components/ui/todo-list";
+import { TodoList } from "@/components/features/todo/todo-list";
 import { Container } from "@/components/ui/container";
 import { Win98Window } from "@/components/ui/win98";
 

@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "./button";
-import { Card } from "./card";
-import { Toggle } from "./toggle";
-import { Input } from "./input";
+import { Button } from "@/components/ui/button";
+import { Win98Window } from "@/components/ui/win98";
+import { Toggle } from "@/components/ui/toggle";
+import { Input } from "@/components/ui/input";
 import { Trash2, CheckSquare, Edit, X } from "lucide-react";
 
 interface TodoItemProps {
@@ -42,28 +42,7 @@ export function TodoItem({
   };
 
   return (
-    <Card className="mb-4 overflow-hidden">
-      <div
-        className={`bg-[#000080] text-white text-xs px-2 py-0.5 flex items-center ${
-          completed ? "bg-[#008000]" : ""
-        }`}
-      >
-        <div className="flex-1 font-bold">
-          {completed ? "✓ COMPLETED" : "TODO"}
-        </div>
-        <div className="flex items-center space-x-1">
-          <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-            _
-          </button>
-          <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-            □
-          </button>
-          <button className="w-3 h-3 flex items-center justify-center border border-white text-[10px] leading-none hover:bg-blue-950">
-            ×
-          </button>
-        </div>
-      </div>
-
+    <Win98Window title="TODO" className="mb-4">
       {isEditing ? (
         <div className="p-4 space-y-4">
           <Input
@@ -180,6 +159,6 @@ export function TodoItem({
           )}
         </>
       )}
-    </Card>
+    </Win98Window>
   );
 }
