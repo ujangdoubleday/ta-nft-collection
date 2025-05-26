@@ -1,11 +1,12 @@
-import { z } from "zod";
-import { publicProcedure, router } from "../server";
-import { prisma } from "../../db";
+import { z } from 'zod';
+import { prisma } from '../../db';
+import { publicProcedure, router } from '../server';
 
 export const collectionRouter = router({
   getAll: publicProcedure.query(async () => {
     return prisma.collection.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
+      include: { owner: true },
     });
   }),
 
@@ -15,26 +16,27 @@ export const collectionRouter = router({
       const { contractAddress } = input;
       return prisma.collection.findUnique({
         where: { contractAddress },
+        include: { owner: true },
       });
     }),
 
-  getById: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      const { id } = input;
-      return prisma.collection.findUnique({
-        where: { id },
-      });
-    }),
+  getById: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+    const { id } = input;
+    return prisma.collection.findUnique({
+      where: { id },
+      include: { owner: true },
+    });
+  }),
 
   create: publicProcedure
     .input(
       z.object({
         name: z.string(),
         description: z.string().optional(),
-        imageUrl: z.string().optional(),
+        contractURI: z.string().optional(),
         contractAddress: z.string(),
-      })
+        ownerAddress: z.string(),
+      }),
     )
     .mutation(async ({ input }) => {
       // Check if collection already exists
@@ -49,6 +51,7 @@ export const collectionRouter = router({
       // Create new collection
       return prisma.collection.create({
         data: input,
+        include: { owner: true },
       });
     }),
 
@@ -58,8 +61,9 @@ export const collectionRouter = router({
         id: z.string(),
         name: z.string().optional(),
         description: z.string().optional(),
-        imageUrl: z.string().optional(),
-      })
+        contractURI: z.string().optional(),
+        ownerAddress: z.string().optional(),
+      }),
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
@@ -67,6 +71,7 @@ export const collectionRouter = router({
       return prisma.collection.update({
         where: { id },
         data,
+        include: { owner: true },
       });
     }),
 });
