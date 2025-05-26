@@ -1,5 +1,6 @@
 import { AppShell } from '@/components/features/layout';
 import '@/styles/globals.css';
+import { WagmiProvider } from '@/lib/wagmi/WagmiProvider';
 
 export default function RootLayout({
   children,
@@ -23,7 +24,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-[#008080] font-['MS_Sans_Serif'] antialiased">
-        <AppShell>{children}</AppShell>
+        <WagmiProvider>
+          <AppShell>{children}</AppShell>
+        </WagmiProvider>
       </body>
     </html>
   );

@@ -1,11 +1,7 @@
-"use client";
-import * as React from "react";
-import { Logo } from "./Logo";
-import { NavLinks } from "./NavLinks";
-import { MobileNav } from "./NavLinks";
-import { WalletButton } from "@/components/features/wallet/WalletButton";
+import { WalletButton } from '@/components/features/wallet/components/WalletButton';
+import { Logo } from './Logo';
+import { MobileNav, NavLinks } from './NavLinks';
 
-// Main Navbar Component
 export function Navbar() {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 h-12 bg-[#c0c0c0] border-b border-[#808080] shadow-md">
