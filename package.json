@@ -16,14 +16,13 @@
     "deploy": "npm run pages:build && wrangler pages deploy"
   },
   "dependencies": {
-    "@metamask/detect-provider": "^2.0.0",
     "@next/bundle-analyzer": "^15.4.0-canary.51",
     "@prisma/client": "^6.8.2",
     "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-dropdown-menu": "^2.1.14",
     "@radix-ui/react-slot": "^1.2.2",
     "@radix-ui/react-toggle": "^1.1.8",
-    "@tanstack/react-query": "^5.76.1",
+    "@tanstack/react-query": "^5.77.2",
     "@trpc/client": "^11.1.2",
     "@trpc/next": "^11.1.2",
     "@trpc/react-query": "^11.1.2",
@@ -40,6 +39,8 @@
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.0",
     "uuid": "^11.1.0",
+    "viem": "^2.30.1",
+    "wagmi": "^2.15.4",
     "zod": "^3.22.4"
   },
   "devDependencies": {
