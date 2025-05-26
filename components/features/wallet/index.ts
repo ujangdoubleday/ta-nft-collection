@@ -1,4 +1,4 @@
-export { WalletButton } from "./WalletButton";
-export { WalletModalContent } from "./WalletModalContent";
-export { useWalletModal } from "./useWalletModal";
-export type { WalletModalStep } from "./useWalletModal";
+export { useWalletModal } from './components/useWalletModal';
+export type { WalletModalStep } from './components/useWalletModal';
+export { WalletButton } from './components/WalletButton';
+export { WalletModalContent } from './components/WalletModalContent';
