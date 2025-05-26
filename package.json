@@ -28,15 +28,18 @@
     "@trpc/next": "^11.1.2",
     "@trpc/react-query": "^11.1.2",
     "@trpc/server": "^11.1.2",
+    "@types/uuid": "^10.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "ethers": "^6.11.1",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
+    "pinata": "^2.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.0",
+    "uuid": "^11.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
