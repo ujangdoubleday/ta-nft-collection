@@ -1143,10 +1143,12 @@ export namespace Prisma {
 
   export type UserCountOutputType = {
     nfts: number
+    collections: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     nfts?: boolean | UserCountOutputTypeCountNftsArgs
+    collections?: boolean | UserCountOutputTypeCountCollectionsArgs
   }
 
   // Custom InputTypes
@@ -1165,6 +1167,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountNftsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: NFTWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountCollectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CollectionWhereInput
   }
 
 
@@ -1353,6 +1362,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     nfts?: boolean | User$nftsArgs<ExtArgs>
+    collections?: boolean | User$collectionsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1389,6 +1399,7 @@ export namespace Prisma {
   export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "address" | "username" | "bio" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     nfts?: boolean | User$nftsArgs<ExtArgs>
+    collections?: boolean | User$collectionsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1398,6 +1409,7 @@ export namespace Prisma {
     name: "User"
     objects: {
       nfts: Prisma.$NFTPayload<ExtArgs>[]
+      collections: Prisma.$CollectionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1802,6 +1814,7 @@ export namespace Prisma {
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     nfts<T extends User$nftsArgs<ExtArgs> = {}>(args?: Subset<T, User$nftsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NFTPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    collections<T extends User$collectionsArgs<ExtArgs> = {}>(args?: Subset<T, User$collectionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CollectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2247,6 +2260,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: NFTScalarFieldEnum | NFTScalarFieldEnum[]
+  }
+
+  /**
+   * User.collections
+   */
+  export type User$collectionsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Collection
+     */
+    select?: CollectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Collection
+     */
+    omit?: CollectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
+    where?: CollectionWhereInput
+    orderBy?: CollectionOrderByWithRelationInput | CollectionOrderByWithRelationInput[]
+    cursor?: CollectionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CollectionScalarFieldEnum | CollectionScalarFieldEnum[]
   }
 
   /**
@@ -3452,8 +3489,9 @@ export namespace Prisma {
     id: string | null
     name: string | null
     description: string | null
-    imageUrl: string | null
+    contractURI: string | null
     contractAddress: string | null
+    ownerAddress: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3462,8 +3500,9 @@ export namespace Prisma {
     id: string | null
     name: string | null
     description: string | null
-    imageUrl: string | null
+    contractURI: string | null
     contractAddress: string | null
+    ownerAddress: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -3472,8 +3511,9 @@ export namespace Prisma {
     id: number
     name: number
     description: number
-    imageUrl: number
+    contractURI: number
     contractAddress: number
+    ownerAddress: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -3484,8 +3524,9 @@ export namespace Prisma {
     id?: true
     name?: true
     description?: true
-    imageUrl?: true
+    contractURI?: true
     contractAddress?: true
+    ownerAddress?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3494,8 +3535,9 @@ export namespace Prisma {
     id?: true
     name?: true
     description?: true
-    imageUrl?: true
+    contractURI?: true
     contractAddress?: true
+    ownerAddress?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -3504,8 +3546,9 @@ export namespace Prisma {
     id?: true
     name?: true
     description?: true
-    imageUrl?: true
+    contractURI?: true
     contractAddress?: true
+    ownerAddress?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -3587,8 +3630,9 @@ export namespace Prisma {
     id: string
     name: string
     description: string | null
-    imageUrl: string | null
+    contractURI: string | null
     contractAddress: string
+    ownerAddress: string
     createdAt: Date
     updatedAt: Date
     _count: CollectionCountAggregateOutputType | null
@@ -3614,53 +3658,72 @@ export namespace Prisma {
     id?: boolean
     name?: boolean
     description?: boolean
-    imageUrl?: boolean
+    contractURI?: boolean
     contractAddress?: boolean
+    ownerAddress?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    owner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collection"]>
 
   export type CollectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
     description?: boolean
-    imageUrl?: boolean
+    contractURI?: boolean
     contractAddress?: boolean
+    ownerAddress?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    owner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collection"]>
 
   export type CollectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
     description?: boolean
-    imageUrl?: boolean
+    contractURI?: boolean
     contractAddress?: boolean
+    ownerAddress?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    owner?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["collection"]>
 
   export type CollectionSelectScalar = {
     id?: boolean
     name?: boolean
     description?: boolean
-    imageUrl?: boolean
+    contractURI?: boolean
     contractAddress?: boolean
+    ownerAddress?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "imageUrl" | "contractAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["collection"]>
+  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "contractURI" | "contractAddress" | "ownerAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["collection"]>
+  export type CollectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type CollectionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type CollectionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    owner?: boolean | UserDefaultArgs<ExtArgs>
+  }
 
   export type $CollectionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Collection"
-    objects: {}
+    objects: {
+      owner: Prisma.$UserPayload<ExtArgs>
+    }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
       description: string | null
-      imageUrl: string | null
+      contractURI: string | null
       contractAddress: string
+      ownerAddress: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["collection"]>
@@ -4057,6 +4120,7 @@ export namespace Prisma {
    */
   export interface Prisma__CollectionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    owner<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4089,8 +4153,9 @@ export namespace Prisma {
     readonly id: FieldRef<"Collection", 'String'>
     readonly name: FieldRef<"Collection", 'String'>
     readonly description: FieldRef<"Collection", 'String'>
-    readonly imageUrl: FieldRef<"Collection", 'String'>
+    readonly contractURI: FieldRef<"Collection", 'String'>
     readonly contractAddress: FieldRef<"Collection", 'String'>
+    readonly ownerAddress: FieldRef<"Collection", 'String'>
     readonly createdAt: FieldRef<"Collection", 'DateTime'>
     readonly updatedAt: FieldRef<"Collection", 'DateTime'>
   }
@@ -4110,6 +4175,10 @@ export namespace Prisma {
      */
     omit?: CollectionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
+    /**
      * Filter, which Collection to fetch.
      */
     where: CollectionWhereUniqueInput
@@ -4128,6 +4197,10 @@ export namespace Prisma {
      */
     omit?: CollectionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
+    /**
      * Filter, which Collection to fetch.
      */
     where: CollectionWhereUniqueInput
@@ -4145,6 +4218,10 @@ export namespace Prisma {
      * Omit specific fields from the Collection
      */
     omit?: CollectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
     /**
      * Filter, which Collection to fetch.
      */
@@ -4194,6 +4271,10 @@ export namespace Prisma {
      */
     omit?: CollectionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
+    /**
      * Filter, which Collection to fetch.
      */
     where?: CollectionWhereInput
@@ -4242,6 +4323,10 @@ export namespace Prisma {
      */
     omit?: CollectionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
+    /**
      * Filter, which Collections to fetch.
      */
     where?: CollectionWhereInput
@@ -4285,6 +4370,10 @@ export namespace Prisma {
      */
     omit?: CollectionOmit<ExtArgs> | null
     /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
+    /**
      * The data needed to create a Collection.
      */
     data: XOR<CollectionCreateInput, CollectionUncheckedCreateInput>
@@ -4318,6 +4407,10 @@ export namespace Prisma {
      */
     data: CollectionCreateManyInput | CollectionCreateManyInput[]
     skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4332,6 +4425,10 @@ export namespace Prisma {
      * Omit specific fields from the Collection
      */
     omit?: CollectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
     /**
      * The data needed to update a Collection.
      */
@@ -4384,6 +4481,10 @@ export namespace Prisma {
      * Limit how many Collections to update.
      */
     limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4398,6 +4499,10 @@ export namespace Prisma {
      * Omit specific fields from the Collection
      */
     omit?: CollectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
     /**
      * The filter to search for the Collection to update in case it exists.
      */
@@ -4424,6 +4529,10 @@ export namespace Prisma {
      * Omit specific fields from the Collection
      */
     omit?: CollectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
     /**
      * Filter which Collection to delete.
      */
@@ -4456,6 +4565,10 @@ export namespace Prisma {
      * Omit specific fields from the Collection
      */
     omit?: CollectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CollectionInclude<ExtArgs> | null
   }
 
 
@@ -5528,8 +5641,9 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     description: 'description',
-    imageUrl: 'imageUrl',
+    contractURI: 'contractURI',
     contractAddress: 'contractAddress',
+    ownerAddress: 'ownerAddress',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -5657,6 +5771,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     nfts?: NFTListRelationFilter
+    collections?: CollectionListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -5668,6 +5783,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     nfts?: NFTOrderByRelationAggregateInput
+    collections?: CollectionOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -5682,6 +5798,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     nfts?: NFTListRelationFilter
+    collections?: CollectionListRelationFilter
   }, "id" | "address">
 
   export type UserOrderByWithAggregationInput = {
@@ -5805,20 +5922,24 @@ export namespace Prisma {
     id?: StringFilter<"Collection"> | string
     name?: StringFilter<"Collection"> | string
     description?: StringNullableFilter<"Collection"> | string | null
-    imageUrl?: StringNullableFilter<"Collection"> | string | null
+    contractURI?: StringNullableFilter<"Collection"> | string | null
     contractAddress?: StringFilter<"Collection"> | string
+    ownerAddress?: StringFilter<"Collection"> | string
     createdAt?: DateTimeFilter<"Collection"> | Date | string
     updatedAt?: DateTimeFilter<"Collection"> | Date | string
+    owner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type CollectionOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
     description?: SortOrderInput | SortOrder
-    imageUrl?: SortOrderInput | SortOrder
+    contractURI?: SortOrderInput | SortOrder
     contractAddress?: SortOrder
+    ownerAddress?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    owner?: UserOrderByWithRelationInput
   }
 
   export type CollectionWhereUniqueInput = Prisma.AtLeast<{
@@ -5829,17 +5950,20 @@ export namespace Prisma {
     NOT?: CollectionWhereInput | CollectionWhereInput[]
     name?: StringFilter<"Collection"> | string
     description?: StringNullableFilter<"Collection"> | string | null
-    imageUrl?: StringNullableFilter<"Collection"> | string | null
+    contractURI?: StringNullableFilter<"Collection"> | string | null
+    ownerAddress?: StringFilter<"Collection"> | string
     createdAt?: DateTimeFilter<"Collection"> | Date | string
     updatedAt?: DateTimeFilter<"Collection"> | Date | string
+    owner?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id" | "contractAddress">
 
   export type CollectionOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     description?: SortOrderInput | SortOrder
-    imageUrl?: SortOrderInput | SortOrder
+    contractURI?: SortOrderInput | SortOrder
     contractAddress?: SortOrder
+    ownerAddress?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CollectionCountOrderByAggregateInput
@@ -5854,8 +5978,9 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Collection"> | string
     name?: StringWithAggregatesFilter<"Collection"> | string
     description?: StringNullableWithAggregatesFilter<"Collection"> | string | null
-    imageUrl?: StringNullableWithAggregatesFilter<"Collection"> | string | null
+    contractURI?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     contractAddress?: StringWithAggregatesFilter<"Collection"> | string
+    ownerAddress?: StringWithAggregatesFilter<"Collection"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Collection"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Collection"> | Date | string
   }
@@ -5931,6 +6056,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     nfts?: NFTCreateNestedManyWithoutOwnerInput
+    collections?: CollectionCreateNestedManyWithoutOwnerInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -5942,6 +6068,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     nfts?: NFTUncheckedCreateNestedManyWithoutOwnerInput
+    collections?: CollectionUncheckedCreateNestedManyWithoutOwnerInput
   }
 
   export type UserUpdateInput = {
@@ -5953,6 +6080,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     nfts?: NFTUpdateManyWithoutOwnerNestedInput
+    collections?: CollectionUpdateManyWithoutOwnerNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -5964,6 +6092,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     nfts?: NFTUncheckedUpdateManyWithoutOwnerNestedInput
+    collections?: CollectionUncheckedUpdateManyWithoutOwnerNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -6097,18 +6226,20 @@ export namespace Prisma {
     id?: string
     name: string
     description?: string | null
-    imageUrl?: string | null
+    contractURI?: string | null
     contractAddress: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    owner: UserCreateNestedOneWithoutCollectionsInput
   }
 
   export type CollectionUncheckedCreateInput = {
     id?: string
     name: string
     description?: string | null
-    imageUrl?: string | null
+    contractURI?: string | null
     contractAddress: string
+    ownerAddress: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6117,18 +6248,20 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    owner?: UserUpdateOneRequiredWithoutCollectionsNestedInput
   }
 
   export type CollectionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    ownerAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6137,8 +6270,9 @@ export namespace Prisma {
     id?: string
     name: string
     description?: string | null
-    imageUrl?: string | null
+    contractURI?: string | null
     contractAddress: string
+    ownerAddress: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6147,7 +6281,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6157,8 +6291,9 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    ownerAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6280,12 +6415,22 @@ export namespace Prisma {
     none?: NFTWhereInput
   }
 
+  export type CollectionListRelationFilter = {
+    every?: CollectionWhereInput
+    some?: CollectionWhereInput
+    none?: CollectionWhereInput
+  }
+
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
   }
 
   export type NFTOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CollectionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -6473,8 +6618,9 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    imageUrl?: SortOrder
+    contractURI?: SortOrder
     contractAddress?: SortOrder
+    ownerAddress?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6483,8 +6629,9 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    imageUrl?: SortOrder
+    contractURI?: SortOrder
     contractAddress?: SortOrder
+    ownerAddress?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6493,8 +6640,9 @@ export namespace Prisma {
     id?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    imageUrl?: SortOrder
+    contractURI?: SortOrder
     contractAddress?: SortOrder
+    ownerAddress?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6536,11 +6684,25 @@ export namespace Prisma {
     connect?: NFTWhereUniqueInput | NFTWhereUniqueInput[]
   }
 
+  export type CollectionCreateNestedManyWithoutOwnerInput = {
+    create?: XOR<CollectionCreateWithoutOwnerInput, CollectionUncheckedCreateWithoutOwnerInput> | CollectionCreateWithoutOwnerInput[] | CollectionUncheckedCreateWithoutOwnerInput[]
+    connectOrCreate?: CollectionCreateOrConnectWithoutOwnerInput | CollectionCreateOrConnectWithoutOwnerInput[]
+    createMany?: CollectionCreateManyOwnerInputEnvelope
+    connect?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+  }
+
   export type NFTUncheckedCreateNestedManyWithoutOwnerInput = {
     create?: XOR<NFTCreateWithoutOwnerInput, NFTUncheckedCreateWithoutOwnerInput> | NFTCreateWithoutOwnerInput[] | NFTUncheckedCreateWithoutOwnerInput[]
     connectOrCreate?: NFTCreateOrConnectWithoutOwnerInput | NFTCreateOrConnectWithoutOwnerInput[]
     createMany?: NFTCreateManyOwnerInputEnvelope
     connect?: NFTWhereUniqueInput | NFTWhereUniqueInput[]
+  }
+
+  export type CollectionUncheckedCreateNestedManyWithoutOwnerInput = {
+    create?: XOR<CollectionCreateWithoutOwnerInput, CollectionUncheckedCreateWithoutOwnerInput> | CollectionCreateWithoutOwnerInput[] | CollectionUncheckedCreateWithoutOwnerInput[]
+    connectOrCreate?: CollectionCreateOrConnectWithoutOwnerInput | CollectionCreateOrConnectWithoutOwnerInput[]
+    createMany?: CollectionCreateManyOwnerInputEnvelope
+    connect?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -6569,6 +6731,20 @@ export namespace Prisma {
     deleteMany?: NFTScalarWhereInput | NFTScalarWhereInput[]
   }
 
+  export type CollectionUpdateManyWithoutOwnerNestedInput = {
+    create?: XOR<CollectionCreateWithoutOwnerInput, CollectionUncheckedCreateWithoutOwnerInput> | CollectionCreateWithoutOwnerInput[] | CollectionUncheckedCreateWithoutOwnerInput[]
+    connectOrCreate?: CollectionCreateOrConnectWithoutOwnerInput | CollectionCreateOrConnectWithoutOwnerInput[]
+    upsert?: CollectionUpsertWithWhereUniqueWithoutOwnerInput | CollectionUpsertWithWhereUniqueWithoutOwnerInput[]
+    createMany?: CollectionCreateManyOwnerInputEnvelope
+    set?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+    disconnect?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+    delete?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+    connect?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+    update?: CollectionUpdateWithWhereUniqueWithoutOwnerInput | CollectionUpdateWithWhereUniqueWithoutOwnerInput[]
+    updateMany?: CollectionUpdateManyWithWhereWithoutOwnerInput | CollectionUpdateManyWithWhereWithoutOwnerInput[]
+    deleteMany?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
+  }
+
   export type NFTUncheckedUpdateManyWithoutOwnerNestedInput = {
     create?: XOR<NFTCreateWithoutOwnerInput, NFTUncheckedCreateWithoutOwnerInput> | NFTCreateWithoutOwnerInput[] | NFTUncheckedCreateWithoutOwnerInput[]
     connectOrCreate?: NFTCreateOrConnectWithoutOwnerInput | NFTCreateOrConnectWithoutOwnerInput[]
@@ -6581,6 +6757,20 @@ export namespace Prisma {
     update?: NFTUpdateWithWhereUniqueWithoutOwnerInput | NFTUpdateWithWhereUniqueWithoutOwnerInput[]
     updateMany?: NFTUpdateManyWithWhereWithoutOwnerInput | NFTUpdateManyWithWhereWithoutOwnerInput[]
     deleteMany?: NFTScalarWhereInput | NFTScalarWhereInput[]
+  }
+
+  export type CollectionUncheckedUpdateManyWithoutOwnerNestedInput = {
+    create?: XOR<CollectionCreateWithoutOwnerInput, CollectionUncheckedCreateWithoutOwnerInput> | CollectionCreateWithoutOwnerInput[] | CollectionUncheckedCreateWithoutOwnerInput[]
+    connectOrCreate?: CollectionCreateOrConnectWithoutOwnerInput | CollectionCreateOrConnectWithoutOwnerInput[]
+    upsert?: CollectionUpsertWithWhereUniqueWithoutOwnerInput | CollectionUpsertWithWhereUniqueWithoutOwnerInput[]
+    createMany?: CollectionCreateManyOwnerInputEnvelope
+    set?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+    disconnect?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+    delete?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+    connect?: CollectionWhereUniqueInput | CollectionWhereUniqueInput[]
+    update?: CollectionUpdateWithWhereUniqueWithoutOwnerInput | CollectionUpdateWithWhereUniqueWithoutOwnerInput[]
+    updateMany?: CollectionUpdateManyWithWhereWithoutOwnerInput | CollectionUpdateManyWithWhereWithoutOwnerInput[]
+    deleteMany?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutNftsInput = {
@@ -6607,6 +6797,20 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutNftsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNftsInput, UserUpdateWithoutNftsInput>, UserUncheckedUpdateWithoutNftsInput>
+  }
+
+  export type UserCreateNestedOneWithoutCollectionsInput = {
+    create?: XOR<UserCreateWithoutCollectionsInput, UserUncheckedCreateWithoutCollectionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCollectionsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutCollectionsNestedInput = {
+    create?: XOR<UserCreateWithoutCollectionsInput, UserUncheckedCreateWithoutCollectionsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutCollectionsInput
+    upsert?: UserUpsertWithoutCollectionsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCollectionsInput, UserUpdateWithoutCollectionsInput>, UserUncheckedUpdateWithoutCollectionsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -6794,6 +6998,36 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type CollectionCreateWithoutOwnerInput = {
+    id?: string
+    name: string
+    description?: string | null
+    contractURI?: string | null
+    contractAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CollectionUncheckedCreateWithoutOwnerInput = {
+    id?: string
+    name: string
+    description?: string | null
+    contractURI?: string | null
+    contractAddress: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CollectionCreateOrConnectWithoutOwnerInput = {
+    where: CollectionWhereUniqueInput
+    create: XOR<CollectionCreateWithoutOwnerInput, CollectionUncheckedCreateWithoutOwnerInput>
+  }
+
+  export type CollectionCreateManyOwnerInputEnvelope = {
+    data: CollectionCreateManyOwnerInput | CollectionCreateManyOwnerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type NFTUpsertWithWhereUniqueWithoutOwnerInput = {
     where: NFTWhereUniqueInput
     update: XOR<NFTUpdateWithoutOwnerInput, NFTUncheckedUpdateWithoutOwnerInput>
@@ -6827,6 +7061,36 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"NFT"> | Date | string
   }
 
+  export type CollectionUpsertWithWhereUniqueWithoutOwnerInput = {
+    where: CollectionWhereUniqueInput
+    update: XOR<CollectionUpdateWithoutOwnerInput, CollectionUncheckedUpdateWithoutOwnerInput>
+    create: XOR<CollectionCreateWithoutOwnerInput, CollectionUncheckedCreateWithoutOwnerInput>
+  }
+
+  export type CollectionUpdateWithWhereUniqueWithoutOwnerInput = {
+    where: CollectionWhereUniqueInput
+    data: XOR<CollectionUpdateWithoutOwnerInput, CollectionUncheckedUpdateWithoutOwnerInput>
+  }
+
+  export type CollectionUpdateManyWithWhereWithoutOwnerInput = {
+    where: CollectionScalarWhereInput
+    data: XOR<CollectionUpdateManyMutationInput, CollectionUncheckedUpdateManyWithoutOwnerInput>
+  }
+
+  export type CollectionScalarWhereInput = {
+    AND?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
+    OR?: CollectionScalarWhereInput[]
+    NOT?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
+    id?: StringFilter<"Collection"> | string
+    name?: StringFilter<"Collection"> | string
+    description?: StringNullableFilter<"Collection"> | string | null
+    contractURI?: StringNullableFilter<"Collection"> | string | null
+    contractAddress?: StringFilter<"Collection"> | string
+    ownerAddress?: StringFilter<"Collection"> | string
+    createdAt?: DateTimeFilter<"Collection"> | Date | string
+    updatedAt?: DateTimeFilter<"Collection"> | Date | string
+  }
+
   export type UserCreateWithoutNftsInput = {
     id?: string
     address: string
@@ -6835,6 +7099,7 @@ export namespace Prisma {
     avatarUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    collections?: CollectionCreateNestedManyWithoutOwnerInput
   }
 
   export type UserUncheckedCreateWithoutNftsInput = {
@@ -6845,6 +7110,7 @@ export namespace Prisma {
     avatarUrl?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    collections?: CollectionUncheckedCreateNestedManyWithoutOwnerInput
   }
 
   export type UserCreateOrConnectWithoutNftsInput = {
@@ -6871,6 +7137,7 @@ export namespace Prisma {
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collections?: CollectionUpdateManyWithoutOwnerNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNftsInput = {
@@ -6881,6 +7148,67 @@ export namespace Prisma {
     avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    collections?: CollectionUncheckedUpdateManyWithoutOwnerNestedInput
+  }
+
+  export type UserCreateWithoutCollectionsInput = {
+    id?: string
+    address: string
+    username?: string | null
+    bio?: string | null
+    avatarUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    nfts?: NFTCreateNestedManyWithoutOwnerInput
+  }
+
+  export type UserUncheckedCreateWithoutCollectionsInput = {
+    id?: string
+    address: string
+    username?: string | null
+    bio?: string | null
+    avatarUrl?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    nfts?: NFTUncheckedCreateNestedManyWithoutOwnerInput
+  }
+
+  export type UserCreateOrConnectWithoutCollectionsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutCollectionsInput, UserUncheckedCreateWithoutCollectionsInput>
+  }
+
+  export type UserUpsertWithoutCollectionsInput = {
+    update: XOR<UserUpdateWithoutCollectionsInput, UserUncheckedUpdateWithoutCollectionsInput>
+    create: XOR<UserCreateWithoutCollectionsInput, UserUncheckedCreateWithoutCollectionsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutCollectionsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutCollectionsInput, UserUncheckedUpdateWithoutCollectionsInput>
+  }
+
+  export type UserUpdateWithoutCollectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    nfts?: NFTUpdateManyWithoutOwnerNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutCollectionsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    address?: StringFieldUpdateOperationsInput | string
+    username?: NullableStringFieldUpdateOperationsInput | string | null
+    bio?: NullableStringFieldUpdateOperationsInput | string | null
+    avatarUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    nfts?: NFTUncheckedUpdateManyWithoutOwnerNestedInput
   }
 
   export type NFTCreateManyOwnerInput = {
@@ -6892,6 +7220,16 @@ export namespace Prisma {
     contractAddress: string
     price?: number | null
     listed?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type CollectionCreateManyOwnerInput = {
+    id?: string
+    name: string
+    description?: string | null
+    contractURI?: string | null
+    contractAddress: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -6931,6 +7269,36 @@ export namespace Prisma {
     contractAddress?: StringFieldUpdateOperationsInput | string
     price?: NullableFloatFieldUpdateOperationsInput | number | null
     listed?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectionUpdateWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    contractURI?: NullableStringFieldUpdateOperationsInput | string | null
+    contractAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectionUncheckedUpdateWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    contractURI?: NullableStringFieldUpdateOperationsInput | string | null
+    contractAddress?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CollectionUncheckedUpdateManyWithoutOwnerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    contractURI?: NullableStringFieldUpdateOperationsInput | string | null
+    contractAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

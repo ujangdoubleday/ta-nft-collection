@@ -12,14 +12,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  address   String   @unique
-  username  String?
-  bio       String?
-  avatarUrl String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  nfts      NFT[]
+  id          String       @id @default(cuid())
+  address     String       @unique
+  username    String?
+  bio         String?
+  avatarUrl   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  nfts        NFT[]
+  collections Collection[]
 }
 
 model NFT {
@@ -43,8 +44,10 @@ model Collection {
   id              String   @id @default(cuid())
   name            String
   description     String?
-  imageUrl        String?
+  contractURI     String?
   contractAddress String   @unique
+  ownerAddress    String
+  owner           User     @relation(fields: [ownerAddress], references: [address])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
