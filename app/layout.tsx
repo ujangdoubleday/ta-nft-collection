@@ -1,6 +1,7 @@
 import { AppShell } from '@/components/features/layout';
 import '@/styles/globals.css';
 import { WagmiProvider } from '@/lib/wagmi/WagmiProvider';
+import { AuthProvider } from '@/lib/auth/AuthProvider';
 
 export default function RootLayout({
   children,
@@ -11,10 +12,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <title>MyNFTs.exe: Digital Art Creator</title>
-        <meta
-          name="description"
-          content="A retro-styled digital art creation platform"
-        />
+        <meta name="description" content="A retro-styled digital art creation platform" />
         <link
           rel="preload"
           href="/assets/fonts/ms-sans-serif.woff2"
@@ -25,7 +23,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-[#008080] font-['MS_Sans_Serif'] antialiased">
         <WagmiProvider>
-          <AppShell>{children}</AppShell>
+          <AuthProvider>
+            <AppShell>{children}</AppShell>
+          </AuthProvider>
         </WagmiProvider>
       </body>
     </html>
