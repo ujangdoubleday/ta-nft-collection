@@ -16,6 +16,8 @@
     "deploy": "npm run pages:build && wrangler pages deploy"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.9.1",
+    "@next-auth/prisma-adapter": "^1.0.7",
     "@next/bundle-analyzer": "^15.4.0-canary.51",
     "@prisma/client": "^6.8.2",
     "@radix-ui/react-dialog": "^1.1.13",
@@ -33,9 +35,11 @@
     "ethers": "^6.11.1",
     "lucide-react": "^0.511.0",
     "next": "15.3.2",
+    "next-auth": "^4.24.11",
     "pinata": "^2.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "siwe": "^3.0.0",
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.0",
     "uuid": "^11.1.0",
