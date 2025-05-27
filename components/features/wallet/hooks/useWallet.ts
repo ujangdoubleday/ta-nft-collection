@@ -3,18 +3,19 @@
 import { useCallback, useEffect, useState } from 'react';
 import { verifyMessage } from 'viem';
 import {
-    useAccount,
-    useChainId,
-    useConnect,
-    useDisconnect,
-    useSignMessage,
-    useWalletClient,
+  useAccount,
+  useChainId,
+  useConnect,
+  useDisconnect,
+  useSignMessage,
+  useWalletClient,
 } from 'wagmi';
 import { injected } from 'wagmi/connectors';
+import { createSiweMessage, signInWithEthereum } from '@/lib/auth/siwe';
+import { useSession, signOut } from 'next-auth/react';
 
 // Local storage keys
 const DISCONNECTED_KEY = 'wallet_disconnected';
-const AUTHENTICATED_KEY = 'wallet_authenticated';
 
 // Helper to check if code is running in browser
 const isBrowser = typeof window !== 'undefined';
@@ -35,7 +36,8 @@ const removeFromStorage = (key: string): void => {
   localStorage.removeItem(key);
 };
 
-export type WalletState = {
+// Wallet state interface
+interface WalletState {
   address: string | null;
   chainId: string | null;
   isConnecting: boolean;
@@ -44,7 +46,7 @@ export type WalletState = {
   manuallyDisconnected: boolean;
   isAuthenticated: boolean;
   isAuthenticating: boolean;
-};
+}
 
 export function useWalletWagmi() {
   // Initialize state with dummy values for SSR
@@ -64,7 +66,6 @@ export function useWalletWagmi() {
     setState((prev) => ({
       ...prev,
       manuallyDisconnected: getFromStorage(DISCONNECTED_KEY) === 'true',
-      isAuthenticated: getFromStorage(AUTHENTICATED_KEY) === 'true',
     }));
   }, []);
 
@@ -76,7 +77,10 @@ export function useWalletWagmi() {
   const { data: walletClient } = useWalletClient();
   const { signMessageAsync, isPending: isSignPending } = useSignMessage();
 
-  // Update state when account changes
+  // Next Auth session
+  const { data: session, status } = useSession();
+
+  // Update state when account or session changes
   useEffect(() => {
     setState((prev) => ({
       ...prev,
@@ -85,10 +89,10 @@ export function useWalletWagmi() {
       isConnected,
       isConnecting: isConnectPending,
       isAuthenticating: isSignPending,
-      // Reset authenticated state if disconnected
-      isAuthenticated: isConnected ? prev.isAuthenticated : false,
+      // Set authenticated based on NextAuth session
+      isAuthenticated: status === 'authenticated',
     }));
-  }, [address, isConnected, chainId, isConnectPending, isSignPending]);
+  }, [address, isConnected, chainId, isConnectPending, isSignPending, status]);
 
   // Update localStorage when manual disconnect changes
   useEffect(() => {
@@ -100,17 +104,6 @@ export function useWalletWagmi() {
       removeFromStorage(DISCONNECTED_KEY);
     }
   }, [state.manuallyDisconnected]);
-
-  // Update localStorage when authenticated changes
-  useEffect(() => {
-    if (!isBrowser) return;
-
-    if (state.isAuthenticated) {
-      setToStorage(AUTHENTICATED_KEY, 'true');
-    } else {
-      removeFromStorage(AUTHENTICATED_KEY);
-    }
-  }, [state.isAuthenticated]);
 
   /**
    * Connect to the wallet
@@ -149,9 +142,6 @@ export function useWalletWagmi() {
         error: null,
       }));
 
-      // Remove authenticated status from localstorage
-      removeFromStorage(AUTHENTICATED_KEY);
-
       return true;
     } catch (error: any) {
       console.error('Error connecting wallet:', error);
@@ -184,6 +174,9 @@ export function useWalletWagmi() {
   const disconnect = useCallback(async () => {
     try {
       await disconnectAsync();
+
+      // Sign out from NextAuth
+      await signOut({ redirect: false });
     } catch (err) {
       console.error('Error disconnecting:', err);
     }
@@ -200,58 +193,66 @@ export function useWalletWagmi() {
 
     // Store disconnected state to prevent auto-reconnect
     setToStorage(DISCONNECTED_KEY, 'true');
-    // Remove authenticated status
-    removeFromStorage(AUTHENTICATED_KEY);
   }, [disconnectAsync]);
 
   /**
-   * Authenticate the connected wallet
+   * Authenticate the connected wallet using SIWE and NextAuth
    */
-  const authenticate = useCallback(async () => {
-    if (!isBrowser) {
-      console.error('Window is not defined, cannot authenticate');
-      return false;
-    }
+  const authenticate = useCallback(
+    async (onSignComplete?: () => void) => {
+      if (!isBrowser) {
+        return false;
+      }
 
-    if (!walletClient || !address) {
-      setState((prev) => ({
-        ...prev,
-        error: 'Connect wallet before authenticating',
-        isAuthenticating: false,
-      }));
-      return false;
-    }
-
-    try {
-      setState((prev) => ({
-        ...prev,
-        isAuthenticating: true,
-        error: null,
-      }));
-
-      console.log('Starting authentication process');
-
-      // Create signature message
-      const message = `Welcome to MyNFTs.exe!\n\nThis signature verifies your wallet ownership.\nIt does not cost any gas or initiate a transaction.\n\nWallet: ${address}\nDate: ${new Date().toISOString()}`;
-
-      console.log('Requesting signature using wagmi signMessage');
+      if (!walletClient || !address) {
+        setState((prev) => ({
+          ...prev,
+          error: 'Connect wallet before authenticating',
+          isAuthenticating: false,
+        }));
+        return false;
+      }
 
       try {
-        // Sign the message
-        const signature = await signMessageAsync({ message });
-        console.log('Signature received:', !!signature);
+        setState((prev) => ({
+          ...prev,
+          isAuthenticating: true,
+          error: null,
+        }));
 
-        // Verify the signature
-        const verified = await verifyMessage({
-          address,
-          message,
-          signature,
-        });
+        // Create SIWE message with address in the statement
+        const statement = `Sign in to MyNFTs.exe with your Ethereum account ${address}.\nThis signature doesn't cost gas and securely identifies you.`;
 
-        console.log('Verification result:', verified);
+        try {
+          const message = await createSiweMessage(address, statement);
 
-        // Check if the verification succeeded
-        if (verified) {
+          // Sign the message
+          const signature = await signMessageAsync({ message });
+
+          // Verify the signature on the client side
+          const verified = await verifyMessage({
+            address,
+            message,
+            signature,
+          });
+
+          if (!verified) {
+            throw new Error('Client-side signature verification failed');
+          }
+
+          // Call the callback to indicate signing is complete
+          // This is where we'll show the account creation modal
+          if (onSignComplete) {
+            onSignComplete();
+          }
+
+          // Call Next Auth to verify and create session
+          const { success, error } = await signInWithEthereum(message, signature);
+
+          if (!success) {
+            throw new Error(error || 'Sign-in failed');
+          }
+
           setState((prev) => ({
             ...prev,
             isAuthenticated: true,
@@ -259,36 +260,32 @@ export function useWalletWagmi() {
             error: null,
           }));
 
-          // Store authentication state in localStorage
-          setToStorage(AUTHENTICATED_KEY, 'true');
           return true;
-        } else {
-          throw new Error('Signature verification failed');
+        } catch (innerError) {
+          throw innerError;
         }
-      } catch (innerError: any) {
-        console.error('Error in signature process:', innerError);
-        throw innerError;
+      } catch (error: any) {
+        // Check for user rejected signatures
+        const errorMessage = error?.message || String(error);
+        const isUserRejected =
+          errorMessage.includes('rejected') ||
+          errorMessage.includes('denied') ||
+          errorMessage.includes('canceled') ||
+          errorMessage.includes('cancelled') ||
+          errorMessage.includes('User rejected');
+
+        setState((prev) => ({
+          ...prev,
+          isAuthenticating: false,
+          error: isUserRejected
+            ? 'Signature was rejected by user'
+            : `Error signing: ${errorMessage}`,
+        }));
+        return false;
       }
-    } catch (error: any) {
-      console.error('Authentication error:', error);
-
-      // Check for user rejected signatures
-      const errorMessage = error?.message || String(error);
-      const isUserRejected =
-        errorMessage.includes('rejected') ||
-        errorMessage.includes('denied') ||
-        errorMessage.includes('canceled') ||
-        errorMessage.includes('cancelled') ||
-        errorMessage.includes('User rejected');
-
-      setState((prev) => ({
-        ...prev,
-        isAuthenticating: false,
-        error: isUserRejected ? 'Signature was rejected by user' : `Error signing: ${errorMessage}`,
-      }));
-      return false;
-    }
-  }, [walletClient, address, signMessageAsync]);
+    },
+    [walletClient, address, signMessageAsync],
+  );
 
   return {
     address: state.address,
@@ -301,5 +298,6 @@ export function useWalletWagmi() {
     connect,
     disconnect,
     authenticate,
+    session,
   };
 }

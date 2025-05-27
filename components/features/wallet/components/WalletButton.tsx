@@ -10,11 +10,12 @@ import {
   Win98DialogTrigger,
 } from '@/components/ui/win98/Win98Dialog';
 import { formatAddress } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWalletModal } from './useWalletModal';
 
 export const WalletButton = () => {
   const [_showHelp, setShowHelp] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const {
     isWalletModalOpen,
@@ -39,21 +40,14 @@ export const WalletButton = () => {
     handleDialogOpenChange,
     handleCloseSuccessNotification,
     handleCloseErrorNotification,
+    logMessages,
   } = useWalletModal();
 
-  const _triggerMetaMask = async () => {
-    try {
-      // Attempt to force MetaMask to show
-      if (window.ethereum) {
-        await window.ethereum.request({ method: 'eth_requestAccounts' });
-        setShowHelp(false);
-      } else {
-        alert('MetaMask tidak terinstall. Silakan install MetaMask dan refresh halaman.');
-      }
-    } catch (err) {
-      console.error('Error triggering MetaMask:', err);
-    }
-  };
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   return (
     <>
@@ -90,13 +84,14 @@ export const WalletButton = () => {
             onCopyAddress={copyAddress}
             onDisconnect={handleDisconnect}
             onCancelSign={handleCancelSign}
+            logMessages={logMessages}
           />
         </Win98DialogContent>
       </Win98Dialog>
 
       {showSuccessNotification && (
         <Win98SuccessNotification
-          message="Wallet Connected Successfully"
+          message="Your wallet has been connected and authenticated successfully!"
           onClose={handleCloseSuccessNotification}
         />
       )}
