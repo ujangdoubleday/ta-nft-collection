@@ -1,27 +1,57 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { LoadingScreen } from "./LoadingScreen";
-import { MainLayout } from "./MainLayout";
-import { TRPCProvider } from "@/components/providers/trpc-provider";
+import { useEffect, useState } from 'react';
+import { LoadingScreen } from './LoadingScreen';
+import { MainLayout } from './MainLayout';
+import { TRPCProvider } from '@/components/providers/trpc-provider';
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
-  const [loading, setLoading] = useState(true);
+  // Initialize with loading=false as default, and only set to true after checking
+  const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [loadingText, setLoadingText] = useState("Starting MyNFTs.exe...");
+  const [loadingText, setLoadingText] = useState('Starting MyNFTs.exe...');
   const [showWelcome, setShowWelcome] = useState(false);
   const [initialRenderComplete, setInitialRenderComplete] = useState(false);
 
+  // Initialize loading state based on first-load detection
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Check if this is the first load of the application in this browser session
+      const hasLoadedBefore = localStorage.getItem('appHasLoadedBefore');
+
+      // Only enable the loading screen for first time visitors
+      if (!hasLoadedBefore) {
+        setLoading(true);
+        // Set the flag to indicate the app has been loaded
+        localStorage.setItem('appHasLoadedBefore', 'true');
+
+        // Reset this flag when the tab is closed or after a certain period (optional)
+        const handleTabClose = () => {
+          // We can optionally reset the flag here, depending on requirements
+          // localStorage.removeItem("appHasLoadedBefore");
+        };
+
+        window.addEventListener('beforeunload', handleTabClose);
+        return () => {
+          window.removeEventListener('beforeunload', handleTabClose);
+        };
+      }
+    }
+  }, []);
+
+  // Loading animation logic - only runs if loading is true
+  useEffect(() => {
+    if (!loading) return;
+
     const messages = [
-      "Detecting hardware components...",
-      "Initializing system interfaces...",
-      "Preparing virtual environment...",
-      "Loading MyNFTs.exe components...",
+      'Detecting hardware components...',
+      'Initializing system interfaces...',
+      'Preparing virtual environment...',
+      'Loading MyNFTs.exe components...',
     ];
 
     const segments = 20;
@@ -50,19 +80,18 @@ export function AppShell({ children }: AppShellProps) {
     }, intervalTime);
 
     return () => clearInterval(progressInterval);
-  }, []);
+  }, [loading]);
 
   useEffect(() => {
     setInitialRenderComplete(true);
 
     // Force font loading
-    document.documentElement.classList.add("font-ms-sans-serif");
+    document.documentElement.classList.add('font-ms-sans-serif');
   }, []);
 
   useEffect(() => {
     if (!loading && initialRenderComplete) {
-      const hasSeenWelcomeInSession =
-        sessionStorage.getItem("hasSeenWelcomeInSession") === "true";
+      const hasSeenWelcomeInSession = sessionStorage.getItem('hasSeenWelcomeInSession') === 'true';
 
       if (!hasSeenWelcomeInSession) {
         setTimeout(() => setShowWelcome(true), 1000);
@@ -72,7 +101,7 @@ export function AppShell({ children }: AppShellProps) {
 
   const handleCloseWelcome = () => {
     setShowWelcome(false);
-    sessionStorage.setItem("hasSeenWelcomeInSession", "true");
+    sessionStorage.setItem('hasSeenWelcomeInSession', 'true');
   };
 
   return (
@@ -80,10 +109,7 @@ export function AppShell({ children }: AppShellProps) {
       {loading ? (
         <LoadingScreen progress={progress} loadingText={loadingText} />
       ) : (
-        <MainLayout
-          showWelcome={showWelcome}
-          onCloseWelcome={handleCloseWelcome}
-        >
+        <MainLayout showWelcome={showWelcome} onCloseWelcome={handleCloseWelcome}>
           {children}
         </MainLayout>
       )}
