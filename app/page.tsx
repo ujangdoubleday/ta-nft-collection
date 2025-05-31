@@ -1,9 +1,5 @@
-import { Container } from "@/components/ui/container";
-import {
-  HeroSection,
-  CreatorsJourney,
-  StartCreating,
-} from "@/components/features/home";
+import { Container } from '@/components/core/layout/container';
+import { HeroSection, CreatorsJourney, StartCreating } from '@/components/features/home';
 
 export default function Home() {
   return (
