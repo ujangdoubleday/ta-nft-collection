@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import { TodoItem } from '@/components/features/todo/todo-item';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Win98Window } from '@/components/ui/win98';
+import { Button, Input } from '@/components/ui/atoms';
+import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { useTrpc } from '@/lib/hooks/use-trpc';
 import { Plus, X, AlertTriangle, Info, CheckCircle2 } from 'lucide-react';
 

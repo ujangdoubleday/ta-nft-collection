@@ -1,6 +1,6 @@
 "use client";
 
-import { Win98Window } from "@/components/ui/win98";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import { useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -115,3 +115,4 @@ export function NFTMintForm({
     </Win98Window>
   );
 }
+

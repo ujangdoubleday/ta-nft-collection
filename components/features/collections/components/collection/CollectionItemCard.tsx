@@ -1,7 +1,7 @@
 'use client';
 
 import { CollectionItem } from '@/components/features/collections/types';
-import { NextImage } from '@/components/ui/NextImage';
+import { NextImage } from '@/components/shared/icons';
 
 interface CollectionItemCardProps {
   item: CollectionItem;

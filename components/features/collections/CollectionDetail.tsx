@@ -1,6 +1,6 @@
 'use client';
 
-import { Win98Window } from '@/components/ui/win98';
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import { useRouter } from 'next/navigation';
 import { Collection } from '@/components/features/collections/types';
 import {
@@ -50,3 +50,4 @@ export function CollectionDetail({ collectionId, collection }: CollectionDetailP
     </Win98Window>
   );
 }
+

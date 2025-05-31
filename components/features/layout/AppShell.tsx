@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { LoadingScreen } from '@/components/features/layout/LoadingScreen';
 import { MainLayout } from '@/components/features/layout/MainLayout';
-import { TRPCProvider } from '@/components/providers/trpc-provider';
+import { TRPCProvider } from '@/components/core/providers/trpc-provider';
 
 interface AppShellProps {
   children: React.ReactNode;

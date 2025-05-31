@@ -1,6 +1,6 @@
 'use client';
 
-import { Win98Window } from '@/components/ui/win98';
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import { NFTItem } from '@/components/features/collections/types';
 import {
   NFTPreview,
@@ -50,3 +50,4 @@ export function NFTDetail({ collectionId, nftId: _nftId, nft }: NFTDetailProps) 
     </Win98Window>
   );
 }
+

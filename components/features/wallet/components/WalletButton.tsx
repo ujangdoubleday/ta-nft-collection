@@ -3,13 +3,9 @@ import {
   Win98ErrorNotification,
   Win98SuccessNotification,
   Win98Notification,
-} from '@/components/layout/notifications';
-import { Button } from '@/components/ui/button';
-import {
-  Win98Dialog,
-  Win98DialogContent,
-  Win98DialogTrigger,
-} from '@/components/ui/win98/Win98Dialog';
+} from '@/components/features/layout/notifications';
+import { Button } from '@/components/ui/atoms/button';
+import { Win98Dialog, Win98DialogContent, Win98DialogTrigger } from '@/components/ui/organisms';
 import { formatAddress } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useWalletModal } from './useWalletModal';

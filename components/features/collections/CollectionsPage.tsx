@@ -1,9 +1,9 @@
 'use client';
 
-import { Container } from '@/components/ui/container';
+import { Container } from '@/components/core/layout';
 import { CollectionGallery } from '@/components/features/collections';
 import { useWallet } from '@/lib/hooks/wallet';
-import { Win98Window } from '@/components/ui/win98';
+import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { WalletButton } from '@/components/features/wallet/components/WalletButton';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';

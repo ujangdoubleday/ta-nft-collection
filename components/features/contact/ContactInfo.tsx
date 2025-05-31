@@ -1,4 +1,4 @@
-import { Win98Window } from "@/components/ui/win98";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 
 export function ContactInfo() {
   return (
@@ -110,3 +110,4 @@ export function ContactInfo() {
     </Win98Window>
   );
 }
+

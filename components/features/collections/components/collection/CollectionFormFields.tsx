@@ -1,7 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button, Input } from '@/components/ui/atoms';
 import Image from 'next/image';
 import { useRef, useState } from 'react';
 

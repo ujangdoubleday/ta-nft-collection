@@ -1,6 +1,6 @@
 "use client";
 
-import { Win98Window } from "@/components/ui/win98";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 
 type SocialLink = {
   name: string;
@@ -81,3 +81,4 @@ export function SocialConnect() {
     </Win98Window>
   );
 }
+

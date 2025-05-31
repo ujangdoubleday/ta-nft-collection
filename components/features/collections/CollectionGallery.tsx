@@ -1,6 +1,6 @@
 'use client';
 
-import { Win98Window } from '@/components/ui/win98';
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import {
   CollectionCard,
   EmptyCollectionMessage,
@@ -68,3 +68,4 @@ export function CollectionGallery({}: CollectionGalleryProps) {
     </Win98Window>
   );
 }
+
