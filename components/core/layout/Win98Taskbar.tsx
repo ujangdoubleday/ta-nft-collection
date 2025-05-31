@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/atoms';
 import { cn } from '@/lib/utils';
 import { generateBreadcrumbs } from '@/lib/utils/helpers';
 
