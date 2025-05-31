@@ -1,24 +1,21 @@
-"use client";
+'use client';
 
-import { Win98Window } from "@/components/ui/win98";
-import { useRouter } from "next/navigation";
-import { Collection } from "./types";
+import { Win98Window } from '@/components/ui/win98';
+import { useRouter } from 'next/navigation';
+import { Collection } from '@/components/features/collections/types';
 import {
   CollectionHeader,
   EmptyCollectionContent,
   CollectionItemCard,
   AddNewButton,
-} from "./components/collection";
+} from './components/collection';
 
 interface CollectionDetailProps {
   collectionId: string;
   collection: Collection;
 }
 
-export function CollectionDetail({
-  collectionId,
-  collection,
-}: CollectionDetailProps) {
+export function CollectionDetail({ collectionId, collection }: CollectionDetailProps) {
   const router = useRouter();
 
   const handleAddNewClick = () => {
@@ -43,11 +40,7 @@ export function CollectionDetail({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {collection.items.map((item) => (
-              <CollectionItemCard
-                key={item.id}
-                item={item}
-                onViewDetails={handleViewDetails}
-              />
+              <CollectionItemCard key={item.id} item={item} onViewDetails={handleViewDetails} />
             ))}
           </div>
         )}

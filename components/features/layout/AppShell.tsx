@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LoadingScreen } from './LoadingScreen';
-import { MainLayout } from './MainLayout';
+import { LoadingScreen } from '@/components/features/layout/LoadingScreen';
+import { MainLayout } from '@/components/features/layout/MainLayout';
 import { TRPCProvider } from '@/components/providers/trpc-provider';
 
 interface AppShellProps {

@@ -4,8 +4,11 @@ import { Win98Window } from '@/components/ui/win98';
 import { trpc } from '@/lib/trpc/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { CollectionFormActions, CollectionFormFields } from './components/collection';
-import { CollectionFormData } from './components/collection/CollectionFormFields';
+import {
+  CollectionFormActions,
+  CollectionFormFields,
+} from '@/components/features/collections/components/collection';
+import { CollectionFormData } from '@/components/features/collections/components/collection/CollectionFormFields';
 
 interface CollectionFormProps {
   // Props dapat ditambahkan jika perlu
