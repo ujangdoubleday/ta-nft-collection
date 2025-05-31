@@ -172,3 +172,22 @@ The database uses Prisma ORM with the following models:
 ## License
 
 [MIT](LICENSE)
+
+## CI/CD with GitHub Actions
+
+This project uses GitHub Actions for continuous integration. The workflow automatically lints and builds your application when you push to the main branch or create a pull request.
+
+### Required GitHub Secrets
+
+To use the CI/CD pipeline, add these secrets in your GitHub repository settings:
+
+1. `DATABASE_URL` - Your PostgreSQL database URL or Prisma Data Platform URL
+2. `NEXTAUTH_SECRET` - A random string used to encrypt NextAuth.js tokens
+3. `NEXTAUTH_URL` - The base URL of your website
+
+### CI/CD Pipeline Steps
+
+1. **Lint**: Runs ESLint to check code quality
+2. **Build**: Builds the Next.js application and saves the artifacts
+
+You can view the workflow details in `.github/workflows/ci-cd.yml`.
