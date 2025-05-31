@@ -1,6 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { SiweMessage } from 'siwe';
 import { prisma } from '@/lib/db';
 
 export const authOptions: NextAuthOptions = {
@@ -19,11 +18,9 @@ export const authOptions: NextAuthOptions = {
           }
 
           try {
-            // Extract the address from the signature
             const message = credentials.message;
             const signature = credentials.signature;
 
-            // Extract the Ethereum address from the message
             const addressMatch = message.match(/([0][xX][0-9a-fA-F]{40})/);
             if (!addressMatch) {
               return null;
@@ -31,7 +28,6 @@ export const authOptions: NextAuthOptions = {
 
             const address = addressMatch[1];
 
-            // Find or create the user
             let user = await prisma.user.findUnique({
               where: {
                 address: address.toLowerCase(),
@@ -63,7 +59,19 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 12 * 60 * 60,
+    updateAge: 0,
+  },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
   callbacks: {
     async session({ session, token }) {
