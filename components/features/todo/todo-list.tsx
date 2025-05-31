@@ -208,18 +208,25 @@ export function TodoList() {
             </div>
           ) : todos && todos.length > 0 ? (
             <div className="space-y-4">
-              {todos.map((todo) => (
-                <TodoItem
-                  key={todo.id}
-                  id={todo.id}
-                  title={todo.title}
-                  description={todo.description}
-                  completed={todo.completed}
-                  onToggleComplete={(id) => toggleCompletedMutation.mutate({ id })}
-                  onDelete={(id) => deleteTodoMutation.mutate({ id })}
-                  onUpdate={(id, data) => updateTodoMutation.mutate({ id, ...data })}
-                />
-              ))}
+              {todos.map(
+                (todo: {
+                  id: string;
+                  title: string;
+                  description?: string | null;
+                  completed: boolean;
+                }) => (
+                  <TodoItem
+                    key={todo.id}
+                    id={todo.id}
+                    title={todo.title}
+                    description={todo.description}
+                    completed={todo.completed}
+                    onToggleComplete={(id) => toggleCompletedMutation.mutate({ id })}
+                    onDelete={(id) => deleteTodoMutation.mutate({ id })}
+                    onUpdate={(id, data) => updateTodoMutation.mutate({ id, ...data })}
+                  />
+                ),
+              )}
             </div>
           ) : (
             <div className="text-center p-8 border-2 border-dashed border-gray-300">
