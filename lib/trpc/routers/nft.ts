@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { publicProcedure, router } from '../server';
+import { publicProcedure, router } from '@/lib/trpc/server';
 import { prisma } from '@/lib/db';
 
 export const nftRouter = router({
