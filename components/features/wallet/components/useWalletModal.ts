@@ -18,8 +18,12 @@ export const useWalletModal = () => {
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState(
+    'Your wallet has been connected and authenticated successfully!',
+  );
   const [previousAuthState, setPreviousAuthState] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [logMessages, setLogMessages] = useState<LogMessage[]>([]);
   const [_logCounter, setLogCounter] = useState(1);
 
@@ -58,12 +62,13 @@ export const useWalletModal = () => {
   };
 
   useEffect(() => {
-    if (isAuthenticated && !previousAuthState) {
+    if (isAuthenticated && !previousAuthState && !isDisconnecting) {
       setIsCreatingAccount(false);
       setWalletModalStep('details');
       addLogMessage('Authentication completed successfully!', 'success');
       clearLogMessages();
 
+      setSuccessMessage('Your wallet has been connected and authenticated successfully!');
       setShowSuccessNotification(true);
 
       const timer = setTimeout(() => {
@@ -74,7 +79,7 @@ export const useWalletModal = () => {
     }
 
     setPreviousAuthState(isAuthenticated);
-  }, [isAuthenticated, previousAuthState]);
+  }, [isAuthenticated, previousAuthState, isDisconnecting]);
 
   useEffect(() => {
     if (isConnected) {
@@ -144,6 +149,12 @@ export const useWalletModal = () => {
     setErrorMessage('');
     setIsCreatingAccount(false);
     clearLogMessages();
+
+    // Clear any pending notification timeouts
+    const maxTimeoutId = Number(setTimeout(() => {}, 0));
+    for (let i = 1; i < maxTimeoutId; i++) {
+      clearTimeout(i);
+    }
   };
 
   const handleConnect = async () => {
@@ -237,8 +248,27 @@ export const useWalletModal = () => {
   };
 
   const handleDisconnect = () => {
+    // Set disconnecting flag to prevent authentication notification
+    setIsDisconnecting(true);
+
+    // Cancel all timeouts
+    const maxTimeoutId = Number(setTimeout(() => {}, 0));
+    for (let i = 1; i < maxTimeoutId; i++) {
+      clearTimeout(i);
+    }
+
+    // Immediately hide all notifications
+    setShowSuccessNotification(false);
+    setShowErrorNotification(false);
+
+    // Disconnect wallet and close modal
     disconnect();
     setIsWalletModalOpen(false);
+
+    // Reset disconnecting flag after a short delay
+    setTimeout(() => {
+      setIsDisconnecting(false);
+    }, 1000);
   };
 
   const handleWalletButtonClick = () => {
@@ -285,7 +315,9 @@ export const useWalletModal = () => {
     showSuccessNotification,
     showErrorNotification,
     errorMessage,
+    successMessage,
     isCreatingAccount,
+    isDisconnecting,
     logMessages,
 
     // Wallet data

@@ -1,32 +1,33 @@
 # Components
 
-This directory contains all React components used in the application, organized by their specific purpose.
+This directory contains all React components used throughout the application.
 
 ## Directory Structure
 
-- **common/** - Shared UI components that are used across multiple parts of the application but aren't purely UI elements
-  - ThemeProvider.tsx - Context provider for theme management
-  - ThemeToggle.tsx - Button for switching between light and dark mode
-- **features/** - Feature-specific components organized by domain
+- `ui/` - Reusable UI components (buttons, inputs, cards, etc.)
 
-  - **auth/** - Authentication-related components
-  - **collections/** - NFT collection management components
-  - **wallet/** - Wallet integration components
+  - `primitives/` - Basic UI building blocks
+  - `compound/` - Components composed of multiple primitives
+  - `feedback/` - Loading states, toasts, alerts, etc.
+  - `data-display/` - Tables, lists, charts, etc.
+  - `layout/` - Layout-related components
 
-- **layout/** - Components for application layout
+- `common/` - Shared components used across multiple features
 
-  - Navbar.tsx - Top navigation bar
-  - Win98Taskbar.tsx - Windows 98 style taskbar for the bottom of the screen
+  - `navigation/` - Navigation components like navbar, sidebar, etc.
+  - `forms/` - Form-related components and wrappers
+  - `modals/` - Common modal components
+  - `cards/` - Card variations and card-based components
 
-- **ui/** - Reusable UI components that form the design system
-  - button.tsx - Button component
-  - dialog.tsx - Modal dialog component
-  - **win98/** - Windows 98 specific UI components
-    - Win98Spinner.tsx - Loading spinner in Windows 98 style
+- `features/` - Feature-specific components organized by domain
 
-## Guidelines
+  - Each subdirectory represents a specific feature area (collections, wallet, etc.)
 
-1. **Component Organization**: Place components in the appropriate directory based on their purpose
-2. **Naming Conventions**: Use PascalCase for component files and component names
-3. **Component Structure**: Each component should have a clear, single responsibility
-4. **CSS**: Use Tailwind CSS utility classes for styling when possible
+- `providers/` - Context providers and wrappers for the application
+
+## Best Practices
+
+- Keep components focused on a single responsibility
+- For components with complex logic, separate logic into custom hooks in `lib/hooks`
+- Export components through index files for cleaner imports
+- Use TypeScript interfaces to define component props

@@ -7,40 +7,40 @@ type Breadcrumb = {
  * Generate breadcrumb items from a pathname
  */
 export function generateBreadcrumbs(pathname: string): Breadcrumb[] {
-  if (pathname === "/") return [];
+  if (pathname === '/') return [];
 
-  const paths = pathname.split("/").filter(Boolean);
+  const paths = pathname.split('/').filter(Boolean);
   const breadcrumbs: Breadcrumb[] = [];
 
-  let currentPath = "";
+  let currentPath = '';
 
   for (let i = 0; i < paths.length; i++) {
     currentPath += `/${paths[i]}`;
 
     // Handle special cases for better labeling
-    let label = paths[i].replace(/-/g, " ");
+    let label = paths[i].replace(/-/g, ' ');
     label = label.charAt(0).toUpperCase() + label.slice(1);
 
     // For collection IDs, add "Collection: " prefix
-    if (i === 1 && paths[0] === "collections" && paths[i] !== "new") {
+    if (i === 1 && paths[0] === 'collections' && paths[i] !== 'new') {
       breadcrumbs.push({ label: `Collection: ${label}`, path: currentPath });
     }
     // For NFT IDs
-    else if (i === 2 && paths[0] === "collections") {
+    else if (i === 2 && paths[0] === 'collections') {
       breadcrumbs.push({ label: `NFT: ${paths[i]}`, path: currentPath });
     }
     // For "new" or other special pages
-    else if (paths[i] === "new") {
-      breadcrumbs.push({ label: "Create New", path: currentPath });
+    else if (paths[i] === 'new') {
+      breadcrumbs.push({ label: 'Create New', path: currentPath });
     }
     // For "mint" page
-    else if (paths[i] === "mint") {
-      breadcrumbs.push({ label: "Mint NFT", path: currentPath });
+    else if (paths[i] === 'mint') {
+      breadcrumbs.push({ label: 'Mint NFT', path: currentPath });
     }
     // Standard pages
     else if (i === 0) {
-      if (paths[i] === "collections") {
-        breadcrumbs.push({ label: "My Collections", path: currentPath });
+      if (paths[i] === 'collections') {
+        breadcrumbs.push({ label: 'My Collections', path: currentPath });
       } else {
         breadcrumbs.push({ label, path: currentPath });
       }

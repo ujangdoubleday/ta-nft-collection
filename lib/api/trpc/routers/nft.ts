@@ -1,10 +1,10 @@
 import { z } from 'zod';
+import { publicProcedure, router } from '@/lib/api/trpc/server';
 import { prisma } from '@/lib/db';
-import { publicProcedure, router } from '@/lib/trpc/server';
 
-export const collectionRouter = router({
+export const nftRouter = router({
   getAll: publicProcedure.query(async () => {
-    return prisma.collection.findMany({
+    return prisma.nFT.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
         owner: {
@@ -23,32 +23,19 @@ export const collectionRouter = router({
     });
   }),
 
-  getByContractAddress: publicProcedure
-    .input(z.object({ contractAddress: z.string() }))
+  getByOwner: publicProcedure
+    .input(z.object({ ownerAddress: z.string() }))
     .query(async ({ input }) => {
-      const { contractAddress } = input;
-      return prisma.collection.findUnique({
-        where: { contractAddress },
-        include: {
-          owner: {
-            select: {
-              id: true,
-              address: true,
-              createdAt: true,
-              updatedAt: true,
-              name: true,
-              email: true,
-              emailVerified: true,
-              image: true,
-            },
-          },
-        },
+      const { ownerAddress } = input;
+      return prisma.nFT.findMany({
+        where: { ownerAddress },
+        orderBy: { createdAt: 'desc' },
       });
     }),
 
   getById: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
     const { id } = input;
-    return prisma.collection.findUnique({
+    return prisma.nFT.findUnique({
       where: { id },
       include: {
         owner: {
@@ -67,29 +54,20 @@ export const collectionRouter = router({
     });
   }),
 
-  create: publicProcedure
+  getByTokenId: publicProcedure
     .input(
       z.object({
-        name: z.string(),
-        description: z.string().optional(),
-        contractURI: z.string().optional(),
+        tokenId: z.string(),
         contractAddress: z.string(),
-        ownerAddress: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
-      // Check if collection already exists
-      const existingCollection = await prisma.collection.findUnique({
-        where: { contractAddress: input.contractAddress },
-      });
-
-      if (existingCollection) {
-        return existingCollection;
-      }
-
-      // Create new collection
-      return prisma.collection.create({
-        data: input,
+    .query(async ({ input }) => {
+      const { tokenId, contractAddress } = input;
+      return prisma.nFT.findFirst({
+        where: {
+          tokenId,
+          contractAddress,
+        },
         include: {
           owner: {
             select: {
@@ -104,6 +82,26 @@ export const collectionRouter = router({
             },
           },
         },
+      });
+    }),
+
+  create: publicProcedure
+    .input(
+      z.object({
+        tokenId: z.string(),
+        name: z.string(),
+        description: z.string().optional(),
+        imageUrl: z.string(),
+        contractAddress: z.string(),
+        ownerAddress: z.string(),
+        price: z.number().optional(),
+        listed: z.boolean().default(false),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      // Create new NFT
+      return prisma.nFT.create({
+        data: input,
       });
     }),
 
@@ -113,30 +111,26 @@ export const collectionRouter = router({
         id: z.string(),
         name: z.string().optional(),
         description: z.string().optional(),
-        contractURI: z.string().optional(),
+        imageUrl: z.string().optional(),
+        price: z.number().optional(),
+        listed: z.boolean().optional(),
         ownerAddress: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
 
-      return prisma.collection.update({
+      return prisma.nFT.update({
         where: { id },
         data,
-        include: {
-          owner: {
-            select: {
-              id: true,
-              address: true,
-              createdAt: true,
-              updatedAt: true,
-              name: true,
-              email: true,
-              emailVerified: true,
-              image: true,
-            },
-          },
-        },
       });
     }),
+
+  delete: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+    const { id } = input;
+
+    return prisma.nFT.delete({
+      where: { id },
+    });
+  }),
 });

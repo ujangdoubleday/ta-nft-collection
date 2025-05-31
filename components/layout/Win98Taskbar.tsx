@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { generateBreadcrumbs } from "@/lib/utils/breadcrumbs";
+import * as React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { generateBreadcrumbs } from '@/lib/utils/helpers';
 
 export function Win98Taskbar() {
-  const [currentTime, setCurrentTime] = React.useState<string>("");
+  const [currentTime, setCurrentTime] = React.useState<string>('');
   const [isDaytime, setIsDaytime] = React.useState<boolean>(true);
   const pathname = usePathname();
   const breadcrumbs = generateBreadcrumbs(pathname);
@@ -17,13 +17,13 @@ export function Win98Taskbar() {
     const updateTime = () => {
       const now = new Date();
       const hours = now.getHours();
-      const minutes = now.getMinutes().toString().padStart(2, "0");
+      const minutes = now.getMinutes().toString().padStart(2, '0');
 
       // Check if it's daytime (between 6 AM and 6 PM)
       setIsDaytime(hours >= 6 && hours < 18);
 
       // Format time for display (24-hour format)
-      setCurrentTime(`${hours.toString().padStart(2, "0")}:${minutes}`);
+      setCurrentTime(`${hours.toString().padStart(2, '0')}:${minutes}`);
     };
 
     updateTime();
@@ -32,21 +32,21 @@ export function Win98Taskbar() {
   }, []);
 
   const getIconForPath = (path: string): string => {
-    if (path === "/") {
-      return "/assets/icons/windows.png";
-    } else if (path === "/about") {
-      return "/assets/icons/taskbar/about.png";
-    } else if (path === "/contact") {
-      return "/assets/icons/taskbar/contact.png";
-    } else if (path === "/collections") {
-      return "/assets/icons/taskbar/collections.png";
-    } else if (path.includes("/collections/") && !path.includes("/nft/")) {
-      return "/assets/icons/taskbar/ape.png";
-    } else if (path.includes("/nft/")) {
-      return "/assets/icons/taskbar/detail-nft.png";
+    if (path === '/') {
+      return '/assets/icons/windows.png';
+    } else if (path === '/about') {
+      return '/assets/icons/taskbar/about.png';
+    } else if (path === '/contact') {
+      return '/assets/icons/taskbar/contact.png';
+    } else if (path === '/collections') {
+      return '/assets/icons/taskbar/collections.png';
+    } else if (path.includes('/collections/') && !path.includes('/nft/')) {
+      return '/assets/icons/taskbar/ape.png';
+    } else if (path.includes('/nft/')) {
+      return '/assets/icons/taskbar/detail-nft.png';
     }
 
-    return "/assets/icons/windows.png";
+    return '/assets/icons/windows.png';
   };
 
   return (
@@ -56,19 +56,15 @@ export function Win98Taskbar() {
           <Link href="/">
             <Button
               className={cn(
-                "h-8 px-2 flex items-center gap-2 bg-[#c0c0c0]",
-                pathname === "/"
-                  ? "border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-[#d2d2d2]"
-                  : "border-t-white border-l-white border-r-[#808080] border-b-[#808080]"
+                'h-8 px-2 flex items-center gap-2 bg-[#c0c0c0]',
+                pathname === '/'
+                  ? 'border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-[#d2d2d2]'
+                  : 'border-t-white border-l-white border-r-[#808080] border-b-[#808080]',
               )}
               variant="default"
             >
               <div className="w-5 h-5 bg-transparent flex items-center justify-center">
-                <img
-                  src="/assets/icons/windows.png"
-                  alt="Windows"
-                  className="w-4 h-4"
-                />
+                <img src="/assets/icons/windows.png" alt="Windows" className="w-4 h-4" />
               </div>
               <span className="text-black">
                 <b>Home</b>
@@ -81,18 +77,14 @@ export function Win98Taskbar() {
               <Button
                 size="sm"
                 className={cn(
-                  "h-8 px-2 bg-[#c0c0c0] text-black text-xs whitespace-nowrap flex items-center gap-2",
+                  'h-8 px-2 bg-[#c0c0c0] text-black text-xs whitespace-nowrap flex items-center gap-2',
                   pathname === crumb.path
-                    ? "border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-[#d2d2d2]"
-                    : "border-t-white border-l-white border-r-[#808080] border-b-[#808080]"
+                    ? 'border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-[#d2d2d2]'
+                    : 'border-t-white border-l-white border-r-[#808080] border-b-[#808080]',
                 )}
               >
                 <div className="w-4 h-4 bg-transparent flex items-center justify-center">
-                  <img
-                    src={getIconForPath(crumb.path)}
-                    alt={crumb.label}
-                    className="w-4 h-4"
-                  />
+                  <img src={getIconForPath(crumb.path)} alt={crumb.label} className="w-4 h-4" />
                 </div>
                 {crumb.label}
               </Button>

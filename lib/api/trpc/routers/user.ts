@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { publicProcedure, router } from '@/lib/trpc/server';
+import { publicProcedure, router } from '@/lib/api/trpc/server';
 import { prisma } from '@/lib/db';
 
 export const userRouter = router({

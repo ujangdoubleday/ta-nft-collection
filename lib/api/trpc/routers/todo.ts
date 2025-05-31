@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { router, publicProcedure } from '@/lib/trpc/server';
-import prisma from '@/lib/db';
+import { router, publicProcedure } from '@/lib/api/trpc/server';
+import { prisma } from '@/lib/db/prisma';
 
 export const todoRouter = router({
   getAll: publicProcedure

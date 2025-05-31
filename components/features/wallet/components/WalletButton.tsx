@@ -2,6 +2,7 @@ import { WalletModalContent } from '@/components/features/wallet/components/Wall
 import {
   Win98ErrorNotification,
   Win98SuccessNotification,
+  Win98Notification,
 } from '@/components/layout/notifications';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,11 +25,13 @@ export const WalletButton = () => {
     showSuccessNotification,
     showErrorNotification,
     errorMessage,
+    successMessage,
     address,
     isConnected,
     isConnecting,
     isAuthenticated,
     isAuthenticating,
+    isDisconnecting,
     chainId,
     getNetworkName,
     copyAddress,
@@ -42,6 +45,9 @@ export const WalletButton = () => {
     handleCloseErrorNotification,
     logMessages,
   } = useWalletModal();
+
+  // Check if error message is specifically for wallet disconnection
+  const isDisconnectionMessage = errorMessage === 'Your wallet has been disconnected.';
 
   useEffect(() => {
     setIsMounted(true);
@@ -89,14 +95,14 @@ export const WalletButton = () => {
         </Win98DialogContent>
       </Win98Dialog>
 
-      {showSuccessNotification && (
+      {showSuccessNotification && !isDisconnecting && (
         <Win98SuccessNotification
-          message="Your wallet has been connected and authenticated successfully!"
+          message={successMessage}
           onClose={handleCloseSuccessNotification}
         />
       )}
 
-      {showErrorNotification && (
+      {showErrorNotification && !isDisconnecting && (
         <Win98ErrorNotification message={errorMessage} onClose={handleCloseErrorNotification} />
       )}
     </>
