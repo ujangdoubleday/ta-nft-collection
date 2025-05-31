@@ -1,6 +1,6 @@
 import { AppShell } from '@/components/features/layout';
 import '@/styles/globals.css';
-import { WagmiProvider } from '@/lib/wagmi/WagmiProvider';
+import { WagmiProvider } from '@/lib/blockchain/wagmi';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 
 export default function RootLayout({

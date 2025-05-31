@@ -1,7 +1,7 @@
 'use client';
 
 import { Win98Window } from '@/components/ui/win98';
-import { trpc } from '@/lib/trpc/client';
+import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import {
