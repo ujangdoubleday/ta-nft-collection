@@ -1,5 +1,5 @@
-import { Container } from "@/components/ui/container";
-import { CollectionForm } from "@/components/features/collections";
+import { Container } from '@/components/core/layout/container';
+import { CollectionForm } from '@/components/features/collections';
 
 export default function CreateCollectionPage() {
   return (
