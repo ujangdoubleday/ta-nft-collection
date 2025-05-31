@@ -1,0 +1,19 @@
+# These owners will be the default owners for everything in the repo.
+# They will be requested for review when someone opens a pull request.
+* @ujangbedog
+
+# Specific file type owners
+*.ts @ujangbedog
+*.tsx @ujangbedog
+*.js @ujangbedog
+*.jsx @ujangbedog
+
+# Directory owners
+/app/ @ujangbedog
+/components/ @ujangbedog
+/lib/ @ujangbedog
+/prisma/ @ujangbedog
+/styles/ @ujangbedog
+
+# CI/CD workflow files
+/.github/workflows/ @ujangbedog 
