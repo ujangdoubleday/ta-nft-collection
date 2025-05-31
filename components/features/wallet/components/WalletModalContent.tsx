@@ -4,7 +4,7 @@ import React from 'react';
 import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Win98Spinner } from '@/components/ui/win98';
 import { MetaMaskIcon } from '@/components/ui/MetaMaskIcon';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, LogOut } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
 import { LogMessage } from './useWalletModal';
 
@@ -244,7 +244,9 @@ export function WalletModalContent({
               onClick={onDisconnect}
               className="w-full bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] px-4 py-2 text-black text-sm press-effect"
             >
-              Disconnect Wallet
+              <span className="flex items-center justify-center gap-2">
+                <LogOut className="w-4 h-4" /> Disconnect Wallet
+              </span>
             </button>
           </div>
         </>
