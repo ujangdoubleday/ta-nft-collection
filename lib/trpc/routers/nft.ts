@@ -1,12 +1,25 @@
-import { z } from "zod";
-import { publicProcedure, router } from "../server";
-import { prisma } from "../../db";
+import { z } from 'zod';
+import { publicProcedure, router } from '../server';
+import { prisma } from '@/lib/db';
 
 export const nftRouter = router({
   getAll: publicProcedure.query(async () => {
     return prisma.nFT.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { owner: true },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            address: true,
+            createdAt: true,
+            updatedAt: true,
+            name: true,
+            email: true,
+            emailVerified: true,
+            image: true,
+          },
+        },
+      },
     });
   }),
 
@@ -16,26 +29,37 @@ export const nftRouter = router({
       const { ownerAddress } = input;
       return prisma.nFT.findMany({
         where: { ownerAddress },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
       });
     }),
 
-  getById: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      const { id } = input;
-      return prisma.nFT.findUnique({
-        where: { id },
-        include: { owner: true },
-      });
-    }),
+  getById: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
+    const { id } = input;
+    return prisma.nFT.findUnique({
+      where: { id },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            address: true,
+            createdAt: true,
+            updatedAt: true,
+            name: true,
+            email: true,
+            emailVerified: true,
+            image: true,
+          },
+        },
+      },
+    });
+  }),
 
   getByTokenId: publicProcedure
     .input(
       z.object({
         tokenId: z.string(),
         contractAddress: z.string(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       const { tokenId, contractAddress } = input;
@@ -44,7 +68,20 @@ export const nftRouter = router({
           tokenId,
           contractAddress,
         },
-        include: { owner: true },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              address: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              email: true,
+              emailVerified: true,
+              image: true,
+            },
+          },
+        },
       });
     }),
 
@@ -59,7 +96,7 @@ export const nftRouter = router({
         ownerAddress: z.string(),
         price: z.number().optional(),
         listed: z.boolean().default(false),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       // Create new NFT
@@ -78,7 +115,7 @@ export const nftRouter = router({
         price: z.number().optional(),
         listed: z.boolean().optional(),
         ownerAddress: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
@@ -89,13 +126,11 @@ export const nftRouter = router({
       });
     }),
 
-  delete: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ input }) => {
-      const { id } = input;
+  delete: publicProcedure.input(z.object({ id: z.string() })).mutation(async ({ input }) => {
+    const { id } = input;
 
-      return prisma.nFT.delete({
-        where: { id },
-      });
-    }),
+    return prisma.nFT.delete({
+      where: { id },
+    });
+  }),
 });

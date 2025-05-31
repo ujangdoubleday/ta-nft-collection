@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { publicProcedure, router } from "../server";
-import { prisma } from "../../db";
+import { z } from 'zod';
+import { publicProcedure, router } from '@/lib/trpc/server';
+import { prisma } from '@/lib/db';
 
 export const userRouter = router({
   getByAddress: publicProcedure
@@ -18,13 +18,10 @@ export const userRouter = router({
     .input(
       z.object({
         address: z.string(),
-        username: z.string().optional(),
-        bio: z.string().optional(),
-        avatarUrl: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
-      const { address, username, bio, avatarUrl } = input;
+      const { address } = input;
 
       // Check if user already exists
       const existingUser = await prisma.user.findUnique({
@@ -39,9 +36,6 @@ export const userRouter = router({
       const newUser = await prisma.user.create({
         data: {
           address,
-          username,
-          bio,
-          avatarUrl,
         },
       });
 
@@ -52,21 +46,14 @@ export const userRouter = router({
     .input(
       z.object({
         address: z.string(),
-        username: z.string().optional(),
-        bio: z.string().optional(),
-        avatarUrl: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
-      const { address, username, bio, avatarUrl } = input;
+      const { address } = input;
 
       const updatedUser = await prisma.user.update({
         where: { address },
-        data: {
-          username,
-          bio,
-          avatarUrl,
-        },
+        data: {},
       });
 
       return updatedUser;

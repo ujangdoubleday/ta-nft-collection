@@ -1,12 +1,25 @@
 import { z } from 'zod';
-import { prisma } from '../../db';
-import { publicProcedure, router } from '../server';
+import { prisma } from '@/lib/db';
+import { publicProcedure, router } from '@/lib/trpc/server';
 
 export const collectionRouter = router({
   getAll: publicProcedure.query(async () => {
     return prisma.collection.findMany({
       orderBy: { createdAt: 'desc' },
-      include: { owner: true },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            address: true,
+            createdAt: true,
+            updatedAt: true,
+            name: true,
+            email: true,
+            emailVerified: true,
+            image: true,
+          },
+        },
+      },
     });
   }),
 
@@ -16,7 +29,20 @@ export const collectionRouter = router({
       const { contractAddress } = input;
       return prisma.collection.findUnique({
         where: { contractAddress },
-        include: { owner: true },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              address: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              email: true,
+              emailVerified: true,
+              image: true,
+            },
+          },
+        },
       });
     }),
 
@@ -24,7 +50,20 @@ export const collectionRouter = router({
     const { id } = input;
     return prisma.collection.findUnique({
       where: { id },
-      include: { owner: true },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            address: true,
+            createdAt: true,
+            updatedAt: true,
+            name: true,
+            email: true,
+            emailVerified: true,
+            image: true,
+          },
+        },
+      },
     });
   }),
 
@@ -51,7 +90,20 @@ export const collectionRouter = router({
       // Create new collection
       return prisma.collection.create({
         data: input,
-        include: { owner: true },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              address: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              email: true,
+              emailVerified: true,
+              image: true,
+            },
+          },
+        },
       });
     }),
 
@@ -71,7 +123,20 @@ export const collectionRouter = router({
       return prisma.collection.update({
         where: { id },
         data,
-        include: { owner: true },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              address: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              email: true,
+              emailVerified: true,
+              image: true,
+            },
+          },
+        },
       });
     }),
 });

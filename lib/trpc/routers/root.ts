@@ -1,8 +1,8 @@
-import { router } from "../server";
-import { userRouter } from "./user";
-import { nftRouter } from "./nft";
-import { collectionRouter } from "./collection";
-import { todoRouter } from "./todo";
+import { router } from '@/lib/trpc/server';
+import { userRouter } from '@/lib/trpc/routers/user';
+import { nftRouter } from '@/lib/trpc/routers/nft';
+import { collectionRouter } from '@/lib/trpc/routers/collection';
+import { todoRouter } from '@/lib/trpc/routers/todo';
 
 export const appRouter = router({
   user: userRouter,

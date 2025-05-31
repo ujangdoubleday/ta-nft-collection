@@ -1,20 +1,20 @@
-import { z } from "zod";
-import { router, publicProcedure } from "../server";
-import prisma from "@/lib/db";
+import { z } from 'zod';
+import { router, publicProcedure } from '@/lib/trpc/server';
+import prisma from '@/lib/db';
 
 export const todoRouter = router({
   getAll: publicProcedure
     .input(
       z.object({
         authorName: z.string().optional(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       try {
         // Check if the todo model exists on the prisma client
         if (!prisma.todo) {
           throw new Error(
-            "Todo model not available on Prisma client. Please check your Prisma setup."
+            'Todo model not available on Prisma client. Please check your Prisma setup.',
           );
         }
 
@@ -22,10 +22,10 @@ export const todoRouter = router({
 
         return await prisma.todo.findMany({
           where,
-          orderBy: { createdAt: "desc" },
+          orderBy: { createdAt: 'desc' },
         });
       } catch (error: any) {
-        console.error("Error in todo.getAll:", error);
+        console.error('Error in todo.getAll:', error);
         throw new Error(`Failed to get todos: ${error.message}`);
       }
     }),
@@ -34,7 +34,7 @@ export const todoRouter = router({
     .input(
       z.object({
         id: z.string(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       return await prisma.todo.findUnique({
@@ -48,14 +48,14 @@ export const todoRouter = router({
         title: z.string().min(1),
         description: z.string().optional(),
         authorName: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       try {
         // Check if the todo model exists on the prisma client
         if (!prisma.todo) {
           throw new Error(
-            "Todo model not available on Prisma client. Please check your Prisma setup."
+            'Todo model not available on Prisma client. Please check your Prisma setup.',
           );
         }
 
@@ -63,11 +63,11 @@ export const todoRouter = router({
           data: {
             title: input.title,
             description: input.description,
-            authorName: input.authorName || "Anonymous",
+            authorName: input.authorName || 'Anonymous',
           },
         });
       } catch (error: any) {
-        console.error("Error in todo.create:", error);
+        console.error('Error in todo.create:', error);
         throw new Error(`Failed to create todo: ${error.message}`);
       }
     }),
@@ -80,7 +80,7 @@ export const todoRouter = router({
         description: z.string().optional(),
         completed: z.boolean().optional(),
         authorName: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       const { id, ...data } = input;
@@ -94,7 +94,7 @@ export const todoRouter = router({
     .input(
       z.object({
         id: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       return await prisma.todo.delete({
@@ -106,14 +106,14 @@ export const todoRouter = router({
     .input(
       z.object({
         id: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       try {
         // Check if the todo model exists on the prisma client
         if (!prisma.todo) {
           throw new Error(
-            "Todo model not available on Prisma client. Please check your Prisma setup."
+            'Todo model not available on Prisma client. Please check your Prisma setup.',
           );
         }
 
@@ -122,7 +122,7 @@ export const todoRouter = router({
         });
 
         if (!todo) {
-          throw new Error("Todo not found");
+          throw new Error('Todo not found');
         }
 
         return await prisma.todo.update({
@@ -130,7 +130,7 @@ export const todoRouter = router({
           data: { completed: !todo.completed },
         });
       } catch (error: any) {
-        console.error("Error in todo.toggleCompleted:", error);
+        console.error('Error in todo.toggleCompleted:', error);
         throw new Error(`Failed to toggle todo: ${error.message}`);
       }
     }),
@@ -139,8 +139,8 @@ export const todoRouter = router({
   test: publicProcedure.query(() => {
     return {
       success: true,
-      message: "tRPC todo router is working",
-      prismaModels: Object.keys(prisma).filter((key) => !key.startsWith("_")),
+      message: 'tRPC todo router is working',
+      prismaModels: Object.keys(prisma).filter((key) => !key.startsWith('_')),
       hasTodoModel: !!prisma.todo,
     };
   }),
