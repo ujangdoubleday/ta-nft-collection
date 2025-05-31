@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String  @id @default(uuid())
   userId            String
   type              String
   provider          String
@@ -31,7 +31,7 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
@@ -47,11 +47,8 @@ model VerificationToken {
 }
 
 model User {
-  id          String       @id @default(cuid())
+  id          String       @id @default(uuid())
   address     String       @unique
-  username    String?
-  bio         String?
-  avatarUrl   String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   nfts        NFT[]
@@ -67,7 +64,7 @@ model User {
 }
 
 model NFT {
-  id              String   @id @default(cuid())
+  id              String   @id @default(uuid())
   tokenId         String
   name            String
   description     String?
@@ -84,7 +81,7 @@ model NFT {
 }
 
 model Collection {
-  id              String   @id @default(cuid())
+  id              String   @id @default(uuid())
   name            String
   description     String?
   contractURI     String?
@@ -96,7 +93,7 @@ model Collection {
 }
 
 model Todo {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   title       String
   description String?
   completed   Boolean  @default(false)

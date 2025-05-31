@@ -12,9 +12,6 @@ async function main() {
   const user = await prisma.user.create({
     data: {
       address: '0x1234567890123456789012345678901234567890',
-      username: 'TestUser',
-      bio: 'This is a test user for development',
-      avatarUrl: 'https://i.pravatar.cc/300',
     },
   });
 
