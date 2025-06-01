@@ -33,21 +33,36 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Get the authentication token from the request
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-  });
+  try {
+    // Get the authentication token from the request
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: process.env.NODE_ENV === 'production',
+    });
 
-  // If no token exists or there's no wallet address in the token,
-  // redirect to the main collections page
-  if (!token || !token.address) {
+    // For debugging in production
+    console.log('Middleware token check:', {
+      path,
+      hasToken: !!token,
+      tokenKeys: token ? Object.keys(token) : null,
+      address: token?.address || token?.sub || null,
+    });
+
+    // Check if token exists and has either address or sub property
+    if (!token || (!token.address && !token.sub)) {
+      console.log('Middleware: No valid token or address, redirecting');
+      const url = new URL('/collections', request.url);
+      return NextResponse.redirect(url);
+    }
+
+    // Allow the request to proceed if the user is authenticated
+    return NextResponse.next();
+  } catch (error) {
+    console.error('Middleware error:', error);
     const url = new URL('/collections', request.url);
     return NextResponse.redirect(url);
   }
-
-  // Allow the request to proceed if the user is authenticated
-  return NextResponse.next();
 }
 
 // Configure which paths this middleware will run on
