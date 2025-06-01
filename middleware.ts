@@ -3,26 +3,16 @@ import { getToken } from 'next-auth/jwt';
 
 // Define the paths that need wallet authentication
 const PROTECTED_PATHS = [
-  '/collections/new',
-  '/collections/[collectionId]',
-  '/collections/[collectionId]/mint',
-  '/collections/[collectionId]/[nftId]',
+  '/collections/(protected)/new',
+  '/collections/(protected)/[collectionId]',
+  '/collections/(protected)/[collectionId]/mint',
+  '/collections/(protected)/[collectionId]/[nftId]',
 ];
 
 // Helper function to check if a path matches any of the protected patterns
 function isProtectedPath(path: string): boolean {
-  // Explicitly check for /collections/new
-  if (path === '/collections/new') {
-    return true;
-  }
-
-  // Match exact paths
-  if (PROTECTED_PATHS.includes(path)) {
-    return true;
-  }
-
-  // Handle dynamic routes
-  if (path.startsWith('/collections/') && path !== '/collections' && path !== '/collections/') {
+  // Check if path contains the (protected) route group
+  if (path.includes('/(protected)/')) {
     return true;
   }
 
@@ -49,14 +39,9 @@ export async function middleware(request: NextRequest) {
 
     // Check if token exists and has either address or sub property
     if (!token || (!token.address && !token.sub)) {
-      // Special handling for /collections/new - redirect to connect wallet first
-      if (path === '/collections/new') {
-        // Store the intended destination to redirect back after authentication
-        const url = new URL('/collections?redirect=/collections/new', request.url);
-        return NextResponse.redirect(url);
-      }
-
-      const url = new URL('/collections', request.url);
+      // Store the intended destination to redirect back after authentication
+      const redirectPath = path.replace('/(protected)', '');
+      const url = new URL(`/collections?redirect=${redirectPath}`, request.url);
       return NextResponse.redirect(url);
     }
 
@@ -71,6 +56,6 @@ export async function middleware(request: NextRequest) {
 // Configure which paths this middleware will run on
 export const config = {
   matcher: [
-    '/collections/:path*', // Match any path that starts with /collections/
+    '/collections/(protected)/:path*', // Match any path that contains the protected route group
   ],
 };
