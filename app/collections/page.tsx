@@ -1,5 +1,5 @@
-import { CollectionsPage } from '@/components/features/collections';
+import { TrpcCollectionsPage } from '@/components/features/collections';
 
 export default function MyCollectionsPage() {
-  return <CollectionsPage />;
+  return <TrpcCollectionsPage />;
 }

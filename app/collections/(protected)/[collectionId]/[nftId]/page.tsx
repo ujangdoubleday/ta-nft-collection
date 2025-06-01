@@ -1,9 +1,6 @@
 import { Container } from '@/components/core/layout/container';
-import {
-  ClientNFTDetail,
-  NFTErrorMessage,
-  CollectionErrorMessage,
-} from '@/components/features/collections';
+import { TrpcNFTDetail, CollectionErrorMessage } from '@/components/features/collections';
+import { getCollectionByContractAddress, getNFTByTokenId } from '@/lib/api/services';
 
 // Define type for NFT history item
 type HistoryItem = {
@@ -193,6 +190,7 @@ const collections: Record<string, Collection> = {
   },
 };
 
+// The collectionId param from the URL is actually the contract address
 type Params = Promise<{
   collectionId: string;
   nftId: string;
@@ -209,10 +207,12 @@ export default async function NFTDetailPage({
 }) {
   // Await the params
   const resolvedParams = await params;
-  const { collectionId, nftId } = resolvedParams;
+  // The collectionId from the URL is actually the contract address
+  const contractAddress = resolvedParams.collectionId;
+  const { nftId } = resolvedParams;
 
-  // In a real app, this would be a database or API call
-  const collection = collections[collectionId as keyof typeof collections];
+  // Fetch collection from database using contract address via tRPC
+  const collection = await getCollectionByContractAddress(contractAddress);
 
   if (!collection) {
     return (
@@ -224,28 +224,16 @@ export default async function NFTDetailPage({
     );
   }
 
-  // Get the NFT
-  const nft = collection.items?.[nftId] as NFTItem | undefined;
+  // Fetch NFT data from database
+  const nft = await getNFTByTokenId(nftId, contractAddress);
 
-  if (!nft) {
-    return (
-      <main className="py-4">
-        <Container>
-          <NFTErrorMessage collectionId={collectionId} />
-        </Container>
-      </main>
-    );
-  }
+  // If NFT doesn't exist, we'll let the client component handle the error
+  // This allows us to show a nice error message while still using the client component
 
   return (
     <main className="py-4">
       <Container>
-        <ClientNFTDetail
-          collectionId={collectionId}
-          nftId={nftId}
-          nft={nft}
-          collectionName={collection.name}
-        />
+        <TrpcNFTDetail contractAddress={contractAddress} nftId={nftId} />
       </Container>
     </main>
   );

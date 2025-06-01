@@ -1,28 +1,10 @@
 import { Container } from '@/components/core/layout/container';
-import { ClientNFTMintForm, CollectionErrorMessage } from '@/components/features/collections';
+import { TrpcNFTMintForm, CollectionErrorMessage } from '@/components/features/collections';
+import { getCollectionByContractAddress } from '@/lib/api/services';
 
 // export const runtime = 'edge';
 
-// Sample collections data for header display
-const collections = {
-  'pixel-art': {
-    name: 'Pixel Art',
-    description: 'Classic pixel art celebrating the golden age of digital creativity',
-  },
-  '3d-voxel': {
-    name: '3D Voxel',
-    description: 'Three-dimensional voxel art with depth and personality',
-  },
-  'retro-computing': {
-    name: 'Retro Computing',
-    description: 'Digital artifacts celebrating the history of computing',
-  },
-  'windows-98-icons': {
-    name: 'Classic Icons',
-    description: 'Nostalgic digital iconography from the dawn of the internet age',
-  },
-};
-
+// The collectionId param from the URL is actually the contract address
 type Params = Promise<{ collectionId: string }>;
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -35,10 +17,12 @@ export default async function CreateNFTPage({
 }) {
   // Await the params
   const resolvedParams = await params;
-  const { collectionId } = resolvedParams;
+  // The collectionId from the URL is actually the contract address
+  const contractAddress = resolvedParams.collectionId;
 
-  // In a real app, this would be a database or API call
-  const collection = collections[collectionId as keyof typeof collections];
+  // Fetch collection from database using contract address via tRPC
+  // This is just to check if the collection exists before rendering the client component
+  const collection = await getCollectionByContractAddress(contractAddress);
 
   // Handle case where collection doesn't exist
   if (!collection) {
@@ -57,7 +41,7 @@ export default async function CreateNFTPage({
   return (
     <main className="py-4">
       <Container>
-        <ClientNFTMintForm collectionId={collectionId} collectionName={collection.name} />
+        <TrpcNFTMintForm contractAddress={contractAddress} />
       </Container>
     </main>
   );
