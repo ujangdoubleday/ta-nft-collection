@@ -34,11 +34,15 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Get the authentication token from the request
+    // Log all cookies for debugging
+    console.log('All cookies:', request.cookies.getAll());
+
+    // Get the authentication token from the request with more options
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
       secureCookie: process.env.NODE_ENV === 'production',
+      cookieName: 'next-auth.session-token',
     });
 
     // For debugging in production
@@ -46,12 +50,17 @@ export async function middleware(request: NextRequest) {
       path,
       hasToken: !!token,
       tokenKeys: token ? Object.keys(token) : null,
+      tokenContent: token ? JSON.stringify(token) : null,
       address: token?.address || token?.sub || null,
     });
 
     // Check if token exists and has either address or sub property
     if (!token || (!token.address && !token.sub)) {
       console.log('Middleware: No valid token or address, redirecting');
+
+      // Instead of redirecting, let's try to allow access temporarily for debugging
+      // return NextResponse.next();
+
       const url = new URL('/collections', request.url);
       return NextResponse.redirect(url);
     }
