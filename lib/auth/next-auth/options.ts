@@ -10,9 +10,6 @@ const cookieDomain =
       : undefined
     : undefined;
 
-// Log cookie domain for debugging
-console.log('NextAuth cookie domain:', cookieDomain);
-
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -111,28 +108,12 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub;
         session.user.address = token.address as string;
       }
-      // Log session for debugging
-      console.log('NextAuth session callback:', {
-        hasSession: !!session,
-        hasUser: !!session?.user,
-        address: session?.user?.address,
-        tokenSub: token.sub,
-        tokenAddress: token.address,
-      });
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.address = user.address;
       }
-      // Log token for debugging
-      console.log('NextAuth JWT callback:', {
-        hasToken: !!token,
-        hasUser: !!user,
-        tokenSub: token.sub,
-        tokenAddress: token.address,
-        userAddress: user?.address,
-      });
       return token;
     },
   },

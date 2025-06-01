@@ -11,6 +11,11 @@ const PROTECTED_PATHS = [
 
 // Helper function to check if a path matches any of the protected patterns
 function isProtectedPath(path: string): boolean {
+  // Explicitly check for /collections/new
+  if (path === '/collections/new') {
+    return true;
+  }
+
   // Match exact paths
   if (PROTECTED_PATHS.includes(path)) {
     return true;
@@ -34,9 +39,6 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Log all cookies for debugging
-    console.log('All cookies:', request.cookies.getAll());
-
     // Get the authentication token from the request with more options
     const token = await getToken({
       req: request,
@@ -45,21 +47,14 @@ export async function middleware(request: NextRequest) {
       cookieName: 'next-auth.session-token',
     });
 
-    // For debugging in production
-    console.log('Middleware token check:', {
-      path,
-      hasToken: !!token,
-      tokenKeys: token ? Object.keys(token) : null,
-      tokenContent: token ? JSON.stringify(token) : null,
-      address: token?.address || token?.sub || null,
-    });
-
     // Check if token exists and has either address or sub property
     if (!token || (!token.address && !token.sub)) {
-      console.log('Middleware: No valid token or address, redirecting');
-
-      // Instead of redirecting, let's try to allow access temporarily for debugging
-      // return NextResponse.next();
+      // Special handling for /collections/new - redirect to connect wallet first
+      if (path === '/collections/new') {
+        // Store the intended destination to redirect back after authentication
+        const url = new URL('/collections?redirect=/collections/new', request.url);
+        return NextResponse.redirect(url);
+      }
 
       const url = new URL('/collections', request.url);
       return NextResponse.redirect(url);
@@ -68,7 +63,6 @@ export async function middleware(request: NextRequest) {
     // Allow the request to proceed if the user is authenticated
     return NextResponse.next();
   } catch (error) {
-    console.error('Middleware error:', error);
     const url = new URL('/collections', request.url);
     return NextResponse.redirect(url);
   }
