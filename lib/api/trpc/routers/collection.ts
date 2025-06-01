@@ -87,6 +87,22 @@ export const collectionRouter = router({
         return existingCollection;
       }
 
+      // Check if user exists
+      let user = await prisma.user.findUnique({
+        where: { address: input.ownerAddress },
+      });
+
+      // Create user if it doesn't exist
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            address: input.ownerAddress,
+            name: `User-${input.ownerAddress.substring(0, 8)}`,
+          },
+        });
+        console.log(`Created new user with address: ${input.ownerAddress}`);
+      }
+
       // Create new collection
       return prisma.collection.create({
         data: input,
