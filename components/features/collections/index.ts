@@ -12,3 +12,7 @@ export { NFTErrorMessage } from './components/errors/NFTErrorMessage';
 export { ClientNFTDetail } from './components/nft/ClientNFTDetail';
 export { ClientCollectionDetail } from './components/collection/ClientCollectionDetail';
 export { ClientNFTMintForm } from './components/nft/ClientNFTMintForm';
+
+// Authentication and page wrappers
+export { AuthenticationRequired } from './components/auth/AuthenticationRequired';
+export { CreateCollectionPageWrapper } from './components/create/CreateCollectionPageWrapper';
