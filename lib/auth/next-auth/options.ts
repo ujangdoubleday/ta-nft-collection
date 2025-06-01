@@ -2,6 +2,17 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/db';
 
+// Get the domain for cookies
+const cookieDomain =
+  process.env.NODE_ENV === 'production'
+    ? process.env.NEXTAUTH_URL
+      ? new URL(process.env.NEXTAUTH_URL).hostname
+      : undefined
+    : undefined;
+
+// Log cookie domain for debugging
+console.log('NextAuth cookie domain:', cookieDomain);
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -70,6 +81,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
+        domain: cookieDomain,
       },
     },
     callbackUrl: {
@@ -79,6 +91,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
+        domain: cookieDomain,
       },
     },
     csrfToken: {
@@ -88,6 +101,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
+        domain: cookieDomain,
       },
     },
   },
@@ -97,12 +111,28 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub;
         session.user.address = token.address as string;
       }
+      // Log session for debugging
+      console.log('NextAuth session callback:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        address: session?.user?.address,
+        tokenSub: token.sub,
+        tokenAddress: token.address,
+      });
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.address = user.address;
       }
+      // Log token for debugging
+      console.log('NextAuth JWT callback:', {
+        hasToken: !!token,
+        hasUser: !!user,
+        tokenSub: token.sub,
+        tokenAddress: token.address,
+        userAddress: user?.address,
+      });
       return token;
     },
   },
