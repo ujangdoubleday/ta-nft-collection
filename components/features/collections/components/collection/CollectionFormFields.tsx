@@ -10,7 +10,7 @@ export type CollectionFormData = {
   description: string;
   coverImage: File | null;
   storage: string;
-  ownerAddress: string;
+  ownerAddress?: string; // Made optional
 };
 
 interface CollectionFormFieldsProps {
@@ -88,23 +88,6 @@ export function CollectionFormFields({
             />
             <p className="text-xs text-[#808080] mt-1">
               A short identifier for your collection (max 5 characters)
-            </p>
-          </div>
-
-          <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-            <label className="text-black text-xs font-bold block mb-1">
-              Owner Address <span className="text-red-600">*</span>
-            </label>
-            <Input
-              placeholder="Enter wallet address (0x...)"
-              required
-              name="ownerAddress"
-              value={formData.ownerAddress}
-              onChange={handleChange}
-              className="hover:border-[#0000ff] focus:border-[#0000ff]"
-            />
-            <p className="text-xs text-[#808080] mt-1">
-              Ethereum address that will own this collection
             </p>
           </div>
 
