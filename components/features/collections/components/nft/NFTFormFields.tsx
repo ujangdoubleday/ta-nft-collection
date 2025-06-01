@@ -1,8 +1,7 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ChangeEvent } from "react";
+import { Button, Input } from '@/components/ui/atoms';
+import { ChangeEvent } from 'react';
 
 export type NFTFormData = {
   title: string;
@@ -20,16 +19,12 @@ interface NFTFormFieldsProps {
   handleChange: (
     e: ChangeEvent<HTMLInputElement>,
     propertyIndex?: number | null,
-    field?: string | null
+    field?: string | null,
   ) => void;
   handleAddProperty: () => void;
 }
 
-export function NFTFormFields({
-  formData,
-  handleChange,
-  handleAddProperty,
-}: NFTFormFieldsProps) {
+export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFTFormFieldsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
@@ -49,9 +44,7 @@ export function NFTFormFields({
           </div>
 
           <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-            <label className="text-black text-xs font-bold block mb-1">
-              Description
-            </label>
+            <label className="text-black text-xs font-bold block mb-1">Description</label>
             <textarea
               className="w-full bg-white border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white p-2 text-sm h-24 hover:border-[#0000ff] focus:border-[#0000ff] focus:outline-none"
               placeholder="Tell the story behind your NFT"
@@ -62,9 +55,7 @@ export function NFTFormFields({
           </div>
 
           <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-            <label className="text-black text-xs font-bold block mb-1">
-              External URL
-            </label>
+            <label className="text-black text-xs font-bold block mb-1">External URL</label>
             <Input
               placeholder="https://"
               name="externalUrl"
@@ -72,9 +63,7 @@ export function NFTFormFields({
               onChange={handleChange}
               className="hover:border-[#0000ff] focus:border-[#0000ff]"
             />
-            <p className="text-xs text-[#808080] mt-1">
-              Link to additional content (optional)
-            </p>
+            <p className="text-xs text-[#808080] mt-1">Link to additional content (optional)</p>
           </div>
         </div>
       </div>
@@ -82,9 +71,7 @@ export function NFTFormFields({
       <div className="space-y-4">
         <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
           <div className="win98-bar h-6 flex items-center px-2 mb-3">
-            <span className="text-white text-xs font-semibold tracking-tight">
-              NFT File Upload
-            </span>
+            <span className="text-white text-xs font-semibold tracking-tight">NFT File Upload</span>
           </div>
 
           <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white h-40 w-full bg-white p-2 flex flex-col items-center justify-center">
@@ -108,9 +95,7 @@ export function NFTFormFields({
 
         <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
           <div className="win98-bar h-6 flex items-center px-2 mb-3">
-            <span className="text-white text-xs font-semibold tracking-tight">
-              Properties
-            </span>
+            <span className="text-white text-xs font-semibold tracking-tight">Properties</span>
           </div>
 
           <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white p-2 bg-white">
@@ -120,13 +105,13 @@ export function NFTFormFields({
                   placeholder="Property name"
                   className="mr-2 hover:border-[#0000ff] focus:border-[#0000ff]"
                   value={prop.name}
-                  onChange={(e) => handleChange(e, index, "name")}
+                  onChange={(e) => handleChange(e, index, 'name')}
                 />
                 <Input
                   placeholder="Value"
                   className="hover:border-[#0000ff] focus:border-[#0000ff]"
                   value={prop.value}
-                  onChange={(e) => handleChange(e, index, "value")}
+                  onChange={(e) => handleChange(e, index, 'value')}
                 />
               </div>
             ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/atoms/button";
 import { Save } from "lucide-react";
 
 interface NFTFormActionsProps {
@@ -28,3 +28,4 @@ export function NFTFormActions({ onCancel }: NFTFormActionsProps) {
     </div>
   );
 }
+

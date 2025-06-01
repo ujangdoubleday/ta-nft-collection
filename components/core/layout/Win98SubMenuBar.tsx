@@ -1,102 +1,95 @@
-"use client";
+'use client';
 
-import React, { useMemo, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { Win98SubMenu, Win98Alert } from "@/components/ui/win98";
-import {
-  Eraser,
-  RefreshCw,
-  Search,
-  FilePlus,
-  HelpCircle,
-  X,
-} from "lucide-react";
+import React, { useMemo, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
+import { Win98SubMenu, Win98Alert } from '@/components/ui/organisms';
+import { Eraser, RefreshCw, Search, FilePlus, HelpCircle, X } from 'lucide-react';
 
 // Page help descriptions
 const PAGE_HELP = {
-  home: "Welcome to MyNFTs.exe - a Windows 98 styled NFT platform. Navigate through the application using the navigation bar and menus. Click on icons to access different features. You can create and manage your NFT collections from here.",
+  home: 'Welcome to MyNFTs.exe - a Windows 98 styled NFT platform. Navigate through the application using the navigation bar and menus. Click on icons to access different features. You can create and manage your NFT collections from here.',
 
   about:
-    "This page contains information about MyNFTs.exe platform, its creators, and the technology used to build it. Learn more about our mission, vision, and the team behind this retro-inspired NFT marketplace.",
+    'This page contains information about MyNFTs.exe platform, its creators, and the technology used to build it. Learn more about our mission, vision, and the team behind this retro-inspired NFT marketplace.',
 
   contact:
-    "Use this page to get in touch with the developers of MyNFTs.exe. You can send feedback, report issues, ask questions about the platform, or request new features for future updates.",
+    'Use this page to get in touch with the developers of MyNFTs.exe. You can send feedback, report issues, ask questions about the platform, or request new features for future updates.',
 
   myCollections:
-    "Browse and manage your NFT collections. Create new collections, view your existing ones, and manage your digital assets all in one place. From here, you can also create new NFTs for any of your collections.",
+    'Browse and manage your NFT collections. Create new collections, view your existing ones, and manage your digital assets all in one place. From here, you can also create new NFTs for any of your collections.',
 
   collectionCreate:
-    "Create a new NFT collection by filling out the form. You can set a name, description, symbol, and upload preview images for your collection. Make sure to give your collection a memorable name and description to stand out.",
+    'Create a new NFT collection by filling out the form. You can set a name, description, symbol, and upload preview images for your collection. Make sure to give your collection a memorable name and description to stand out.',
 
   collectionEdit:
-    "Edit your existing NFT collection details including name, description, and preview images. You can update any information about your collection to keep it current and engaging.",
+    'Edit your existing NFT collection details including name, description, and preview images. You can update any information about your collection to keep it current and engaging.',
 
   collectionDetail:
-    "View all NFTs in this collection. From here, you can see the details of each NFT, create new ones, or click on any NFT to view more information about it. Browse your digital assets and manage them easily.",
+    'View all NFTs in this collection. From here, you can see the details of each NFT, create new ones, or click on any NFT to view more information about it. Browse your digital assets and manage them easily.',
 
   nftMint:
-    "Create a new NFT for your collection. Fill out the details such as title, description, and properties. You can also upload the digital artwork file that will be associated with this NFT. Be as descriptive as possible to increase the value of your NFT.",
+    'Create a new NFT for your collection. Fill out the details such as title, description, and properties. You can also upload the digital artwork file that will be associated with this NFT. Be as descriptive as possible to increase the value of your NFT.',
 
   nftDetail:
-    "View detailed information about this specific NFT. You can see its properties, history, and ownership details. This page also allows you to transfer the NFT to another wallet or perform other actions.",
+    'View detailed information about this specific NFT. You can see its properties, history, and ownership details. This page also allows you to transfer the NFT to another wallet or perform other actions.',
 
   todos:
-    "Manage your tasks with this simple todo application. Add, edit, and mark tasks as complete to stay organized. Keep track of your NFT creation plans and other related tasks.",
+    'Manage your tasks with this simple todo application. Add, edit, and mark tasks as complete to stay organized. Keep track of your NFT creation plans and other related tasks.',
 
   default:
-    "Welcome to MyNFTs.exe! This Windows 98-style interface allows you to navigate through the application. Use the menu at the top to access different features. If you need specific help for a page, look for the Help button in the toolbar.",
+    'Welcome to MyNFTs.exe! This Windows 98-style interface allows you to navigate through the application. Use the menu at the top to access different features. If you need specific help for a page, look for the Help button in the toolbar.',
 };
 
 export function Win98SubMenuBar() {
   const router = useRouter();
   const pathname = usePathname();
   const [showHelpAlert, setShowHelpAlert] = useState(false);
-  const [helpContent, setHelpContent] = useState("");
-  const [helpTitle, setHelpTitle] = useState("");
+  const [helpContent, setHelpContent] = useState('');
+  const [helpTitle, setHelpTitle] = useState('');
   const [showSearch, setShowSearch] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Function to handle help click
   const handleHelpClick = () => {
-    let title = "Help";
+    let title = 'Help';
     let content = PAGE_HELP.default;
 
     // Set help content based on current path
-    if (pathname === "/") {
-      title = "Home - Help";
+    if (pathname === '/') {
+      title = 'Home - Help';
       content = PAGE_HELP.home;
-    } else if (pathname === "/about") {
-      title = "About - Help";
+    } else if (pathname === '/about') {
+      title = 'About - Help';
       content = PAGE_HELP.about;
-    } else if (pathname === "/contact") {
-      title = "Contact - Help";
+    } else if (pathname === '/contact') {
+      title = 'Contact - Help';
       content = PAGE_HELP.contact;
-    } else if (pathname === "/collections") {
-      title = "My Collections - Help";
+    } else if (pathname === '/collections') {
+      title = 'My Collections - Help';
       content = PAGE_HELP.myCollections;
-    } else if (pathname.includes("/collections/new")) {
-      title = "Create Collection - Help";
+    } else if (pathname.includes('/collections/new')) {
+      title = 'Create Collection - Help';
       content = PAGE_HELP.collectionCreate;
-    } else if (pathname.includes("/collections/edit")) {
-      title = "Edit Collection - Help";
+    } else if (pathname.includes('/collections/edit')) {
+      title = 'Edit Collection - Help';
       content = PAGE_HELP.collectionEdit;
-    } else if (pathname.includes("/todos")) {
-      title = "Todos - Help";
+    } else if (pathname.includes('/todos')) {
+      title = 'Todos - Help';
       content = PAGE_HELP.todos;
     }
     // Check for NFT mint page
     else if (pathname.match(/^\/collections\/([^/]+)\/mint$/)) {
-      title = "Create NFT - Help";
+      title = 'Create NFT - Help';
       content = PAGE_HELP.nftMint;
     }
     // Check for NFT detail page
     else if (pathname.match(/^\/collections\/([^/]+)\/[^/]+$/)) {
-      title = "NFT Details - Help";
+      title = 'NFT Details - Help';
       content = PAGE_HELP.nftDetail;
     }
     // Check for Collection detail page
     else if (pathname.match(/^\/collections\/([^/]+)$/)) {
-      title = "Collection Details - Help";
+      title = 'Collection Details - Help';
       content = PAGE_HELP.collectionDetail;
     }
 
@@ -109,7 +102,7 @@ export function Win98SubMenuBar() {
     setShowSearch(!showSearch);
     if (!showSearch) {
       // Reset search query when showing the search input
-      setSearchQuery("");
+      setSearchQuery('');
     }
   };
 
@@ -126,17 +119,17 @@ export function Win98SubMenuBar() {
   const getPageActions = useMemo(() => {
     const defaultActions = [
       {
-        label: "Help",
+        label: 'Help',
         icon: <HelpCircle className="h-3 w-3" />,
         onClick: handleHelpClick,
       },
     ];
 
     // Home page actions
-    if (pathname === "/") {
+    if (pathname === '/') {
       return [
         {
-          label: "Refresh",
+          label: 'Refresh',
           icon: <RefreshCw className="h-3 w-3" />,
           onClick: () => window.location.reload(),
         },
@@ -145,15 +138,15 @@ export function Win98SubMenuBar() {
     }
 
     // My Collections page actions
-    if (pathname === "/collections") {
+    if (pathname === '/collections') {
       return [
         {
-          label: "New Collection",
+          label: 'New Collection',
           icon: <FilePlus className="h-3 w-3" />,
-          onClick: () => router.push("/collections/new"),
+          onClick: () => router.push('/collections/new'),
         },
         {
-          label: "Search",
+          label: 'Search',
           icon: <Search className="h-3 w-3" />,
           onClick: toggleSearch,
         },
@@ -166,11 +159,11 @@ export function Win98SubMenuBar() {
     if (mintPathMatch) {
       return [
         {
-          label: "Reset Form",
+          label: 'Reset Form',
           icon: <Eraser className="h-3 w-3" />,
           onClick: () => {
             // Dispatch a custom event that the mint page can listen for
-            const event = new CustomEvent("resetMintForm");
+            const event = new CustomEvent('resetMintForm');
             window.dispatchEvent(event);
           },
         },
@@ -182,23 +175,23 @@ export function Win98SubMenuBar() {
     const collectionPathMatch = pathname.match(/^\/collections\/([^/]+)$/);
     if (
       collectionPathMatch &&
-      collectionPathMatch[1] !== "new" &&
-      collectionPathMatch[1] !== "edit"
+      collectionPathMatch[1] !== 'new' &&
+      collectionPathMatch[1] !== 'edit'
     ) {
       const collectionId = collectionPathMatch[1];
       return [
         {
-          label: "Add NFT",
+          label: 'Add NFT',
           icon: <FilePlus className="h-3 w-3" />,
           onClick: () => router.push(`/collections/${collectionId}/mint`),
         },
         {
-          label: "Search NFT",
+          label: 'Search NFT',
           icon: <Search className="h-3 w-3" />,
           onClick: toggleSearch,
         },
         {
-          label: "Refresh Data",
+          label: 'Refresh Data',
           icon: <RefreshCw className="h-3 w-3" />,
           onClick: () => window.location.reload(),
         },
@@ -207,30 +200,27 @@ export function Win98SubMenuBar() {
     }
 
     // Collection creation/edit page
-    if (
-      pathname.includes("/collections/new") ||
-      pathname.includes("/collections/edit")
-    ) {
+    if (pathname.includes('/collections/new') || pathname.includes('/collections/edit')) {
       return [
         {
-          label: "Reset Form",
+          label: 'Reset Form',
           icon: <Eraser className="h-3 w-3" />,
-          onClick: () => alert("Redo last action"),
+          onClick: () => alert('Redo last action'),
         },
         ...defaultActions,
       ];
     }
 
     // Todos page
-    if (pathname.includes("/todos")) {
+    if (pathname.includes('/todos')) {
       return [
         {
-          label: "Add Todo",
+          label: 'Add Todo',
           icon: <FilePlus className="h-3 w-3" />,
-          onClick: () => alert("Add new todo"),
+          onClick: () => alert('Add new todo'),
         },
         {
-          label: "Refresh",
+          label: 'Refresh',
           icon: <RefreshCw className="h-3 w-3" />,
           onClick: () => window.location.reload(),
         },
@@ -244,26 +234,26 @@ export function Win98SubMenuBar() {
 
   // Generate title based on path
   const pageTitle = useMemo(() => {
-    if (pathname === "/") return "My Computer";
-    if (pathname === "/collections") return "My Collections";
-    if (pathname === "/todos") return "Task Manager";
+    if (pathname === '/') return 'My Computer';
+    if (pathname === '/collections') return 'My Collections';
+    if (pathname === '/todos') return 'Task Manager';
 
     // Handle specific paths or use the last segment
-    const segments = pathname.split("/").filter(Boolean);
+    const segments = pathname.split('/').filter(Boolean);
     if (segments.length > 0) {
       const lastSegment = segments[segments.length - 1];
 
       // Format some common segments nicely
-      if (lastSegment === "create") return "New Item";
-      if (lastSegment === "edit") return "Edit Item";
+      if (lastSegment === 'create') return 'New Item';
+      if (lastSegment === 'edit') return 'Edit Item';
 
       return lastSegment
-        .split("-")
+        .split('-')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
+        .join(' ');
     }
 
-    return "Explorer";
+    return 'Explorer';
   }, [pathname]);
 
   // Search input component
@@ -300,11 +290,9 @@ export function Win98SubMenuBar() {
       <Win98SubMenu
         title={pageTitle}
         actions={getPageActions}
-        showBackButton={pathname !== "/"}
+        showBackButton={pathname !== '/'}
         className="mb-1 shadow-sm"
-        extraContent={
-          showSearch && pathname === "/collections" ? <SearchInput /> : null
-        }
+        extraContent={showSearch && pathname === '/collections' ? <SearchInput /> : null}
       />
 
       {showHelpAlert && (
@@ -313,7 +301,7 @@ export function Win98SubMenuBar() {
           message={helpContent}
           type="info"
           onClose={() => setShowHelpAlert(false)}
-          buttons={[{ label: "OK", onClick: () => {}, primary: true }]}
+          buttons={[{ label: 'OK', onClick: () => {}, primary: true }]}
         />
       )}
     </>

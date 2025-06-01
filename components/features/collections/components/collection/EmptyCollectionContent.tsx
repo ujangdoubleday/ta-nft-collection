@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/atoms/button";
 
 interface EmptyCollectionContentProps {
   onAddNew: () => void;
@@ -23,3 +23,4 @@ export function EmptyCollectionContent({
     </div>
   );
 }
+

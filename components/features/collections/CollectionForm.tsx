@@ -1,6 +1,6 @@
 'use client';
 
-import { Win98Window } from '@/components/ui/win98';
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -137,3 +137,4 @@ export function CollectionForm({}: CollectionFormProps) {
     </Win98Window>
   );
 }
+

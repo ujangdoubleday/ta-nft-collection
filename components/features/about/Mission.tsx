@@ -1,4 +1,4 @@
-import { Win98Window } from "@/components/ui/win98";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 
 export function Mission() {
   return (
@@ -40,3 +40,4 @@ export function Mission() {
     </Win98Window>
   );
 }
+

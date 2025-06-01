@@ -1,21 +1,32 @@
 'use client';
 
-import { Container } from '@/components/ui/container';
+import { Container } from '@/components/core/layout';
 import { CollectionGallery } from '@/components/features/collections';
 import { useWallet } from '@/lib/hooks/wallet';
-import { Win98Window } from '@/components/ui/win98';
+import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { WalletButton } from '@/components/features/wallet/components/WalletButton';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export function CollectionsPage() {
   const { isConnected, isAuthenticated } = useWallet();
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect');
 
   // Handle client-side rendering
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Handle redirect after authentication
+  useEffect(() => {
+    if (mounted && isConnected && isAuthenticated && redirectPath) {
+      router.push(redirectPath);
+    }
+  }, [mounted, isConnected, isAuthenticated, redirectPath, router]);
 
   // Return early during SSR
   if (!mounted) {
@@ -56,7 +67,9 @@ export function CollectionsPage() {
               />
               <h2 className="text-xl font-bold mb-2">Wallet Connection Required</h2>
               <p className="text-center mb-6">
-                You need to connect your wallet to view your NFT collections.
+                {redirectPath === '/collections/new'
+                  ? 'You need to connect your wallet to create a new NFT collection.'
+                  : 'You need to connect your wallet to view your NFT collections.'}
               </p>
               <div className="flex justify-center">
                 <WalletButton />

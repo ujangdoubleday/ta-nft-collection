@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/atoms/button";
 
 interface CollectionFormActionsProps {
   onCancel: () => void;
@@ -36,3 +36,4 @@ export function CollectionFormActions({
     </div>
   );
 }
+

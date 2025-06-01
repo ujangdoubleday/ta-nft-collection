@@ -1,11 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Win98Window } from "@/components/ui/win98";
-import { Toggle } from "@/components/ui/toggle";
-import { Input } from "@/components/ui/input";
-import { Trash2, CheckSquare, Edit, X } from "lucide-react";
+import { useState } from 'react';
+import { Button, Input, Toggle } from '@/components/ui/atoms';
+import { Win98Window } from '@/components/ui/organisms/Win98Window';
+import { Trash2, CheckSquare, Edit, X } from 'lucide-react';
 
 interface TodoItemProps {
   id: string;
@@ -28,7 +26,7 @@ export function TodoItem({
 }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
-  const [editedDescription, setEditedDescription] = useState(description || "");
+  const [editedDescription, setEditedDescription] = useState(description || '');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleSave = () => {
@@ -69,11 +67,7 @@ export function TodoItem({
             </label>
 
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsEditing(false)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
                 <X className="w-4 h-4 mr-1" />
                 Cancel
               </Button>
@@ -95,18 +89,12 @@ export function TodoItem({
               />
               <div className="flex-1">
                 <h3
-                  className={`text-lg font-medium ${
-                    completed ? "line-through text-gray-500" : ""
-                  }`}
+                  className={`text-lg font-medium ${completed ? 'line-through text-gray-500' : ''}`}
                 >
                   {title}
                 </h3>
                 {description && (
-                  <p
-                    className={`text-sm text-gray-600 ${
-                      completed ? "line-through" : ""
-                    }`}
-                  >
+                  <p className={`text-sm text-gray-600 ${completed ? 'line-through' : ''}`}>
                     {description}
                   </p>
                 )}
@@ -135,22 +123,12 @@ export function TodoItem({
           {showDeleteConfirm && (
             <div className="p-3 bg-gray-100 border-t border-t-gray-300">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-red-600">
-                  Delete this task?
-                </p>
+                <p className="text-sm font-medium text-red-600">Delete this task?</p>
                 <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowDeleteConfirm(false)}
-                  >
+                  <Button size="sm" variant="outline" onClick={() => setShowDeleteConfirm(false)}>
                     Cancel
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => onDelete(id)}
-                  >
+                  <Button size="sm" variant="destructive" onClick={() => onDelete(id)}>
                     Delete
                   </Button>
                 </div>

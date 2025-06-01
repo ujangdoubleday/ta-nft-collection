@@ -39,6 +39,7 @@ export async function signInWithEthereum(message: string, signature: string) {
       message,
       signature,
       redirect: false,
+      callbackUrl: window.location.href,
     });
 
     return { success: res?.ok ?? false, error: res?.error };

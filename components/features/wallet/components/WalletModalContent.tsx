@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Win98Spinner } from '@/components/ui/win98';
-import { MetaMaskIcon } from '@/components/ui/MetaMaskIcon';
+import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/molecules';
+import { Win98Spinner } from '@/components/ui/organisms';
+import { MetaMaskIcon } from '@/components/shared/icons';
 import { Copy, Check, LogOut } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
 import { LogMessage } from './useWalletModal';
