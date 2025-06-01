@@ -15,6 +15,13 @@ export async function createSiweMessage(address: string, statement: string) {
     const domain = window.location.host;
     const origin = window.location.origin;
 
+    console.log('SIWE Message Creation:', {
+      domain,
+      origin,
+      csrfToken,
+      address,
+    });
+
     // Create a properly formatted EIP-4361 message string
     const messageToSign = `${statement}
 
@@ -26,6 +33,7 @@ Issued At: ${new Date().toISOString()}`;
 
     return messageToSign;
   } catch (error) {
+    console.error('Error creating SIWE message:', error);
     throw error;
   }
 }
@@ -35,14 +43,23 @@ Issued At: ${new Date().toISOString()}`;
  */
 export async function signInWithEthereum(message: string, signature: string) {
   try {
+    console.log('Signing in with Ethereum:', {
+      messageLength: message.length,
+      signatureLength: signature.length,
+    });
+
     const res = await signIn('credentials', {
       message,
       signature,
       redirect: false,
+      callbackUrl: window.location.href,
     });
+
+    console.log('SIWE sign in result:', res);
 
     return { success: res?.ok ?? false, error: res?.error };
   } catch (error) {
+    console.error('Error signing in with Ethereum:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
