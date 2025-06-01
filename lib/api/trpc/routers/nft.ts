@@ -33,6 +33,25 @@ export const nftRouter = router({
       });
     }),
 
+  getByContractAddress: publicProcedure
+    .input(z.object({ contractAddress: z.string() }))
+    .query(async ({ input }) => {
+      const { contractAddress } = input;
+      return prisma.nFT.findMany({
+        where: { contractAddress },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              address: true,
+              name: true,
+            },
+          },
+        },
+      });
+    }),
+
   getById: publicProcedure.input(z.object({ id: z.string() })).query(async ({ input }) => {
     const { id } = input;
     return prisma.nFT.findUnique({
