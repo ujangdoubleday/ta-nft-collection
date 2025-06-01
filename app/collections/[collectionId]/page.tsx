@@ -1,7 +1,7 @@
 import { Container } from '@/components/core/layout/container';
 import { ClientCollectionDetail, CollectionErrorMessage } from '@/components/features/collections';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 // Define types for the collection items
 type CollectionItem = {

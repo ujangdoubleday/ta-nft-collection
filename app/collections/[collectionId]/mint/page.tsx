@@ -1,7 +1,7 @@
 import { Container } from '@/components/core/layout/container';
 import { ClientNFTMintForm, CollectionErrorMessage } from '@/components/features/collections';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 // Sample collections data for header display
 const collections = {

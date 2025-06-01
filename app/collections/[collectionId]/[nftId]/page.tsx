@@ -5,7 +5,7 @@ import {
   CollectionErrorMessage,
 } from '@/components/features/collections';
 
-export const runtime = 'edge';
+// export const runtime = 'edge';
 
 // Define type for NFT history item
 type HistoryItem = {
