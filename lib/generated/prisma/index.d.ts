@@ -7045,10 +7045,12 @@ export namespace Prisma {
   export type CollectionMinAggregateOutputType = {
     id: string | null
     name: string | null
+    symbol: string | null
     description: string | null
     contractURI: string | null
     contractAddress: string | null
     ownerAddress: string | null
+    pinataGroupId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7056,10 +7058,12 @@ export namespace Prisma {
   export type CollectionMaxAggregateOutputType = {
     id: string | null
     name: string | null
+    symbol: string | null
     description: string | null
     contractURI: string | null
     contractAddress: string | null
     ownerAddress: string | null
+    pinataGroupId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7067,10 +7071,12 @@ export namespace Prisma {
   export type CollectionCountAggregateOutputType = {
     id: number
     name: number
+    symbol: number
     description: number
     contractURI: number
     contractAddress: number
     ownerAddress: number
+    pinataGroupId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -7080,10 +7086,12 @@ export namespace Prisma {
   export type CollectionMinAggregateInputType = {
     id?: true
     name?: true
+    symbol?: true
     description?: true
     contractURI?: true
     contractAddress?: true
     ownerAddress?: true
+    pinataGroupId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -7091,10 +7099,12 @@ export namespace Prisma {
   export type CollectionMaxAggregateInputType = {
     id?: true
     name?: true
+    symbol?: true
     description?: true
     contractURI?: true
     contractAddress?: true
     ownerAddress?: true
+    pinataGroupId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -7102,10 +7112,12 @@ export namespace Prisma {
   export type CollectionCountAggregateInputType = {
     id?: true
     name?: true
+    symbol?: true
     description?: true
     contractURI?: true
     contractAddress?: true
     ownerAddress?: true
+    pinataGroupId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -7186,10 +7198,12 @@ export namespace Prisma {
   export type CollectionGroupByOutputType = {
     id: string
     name: string
+    symbol: string | null
     description: string | null
     contractURI: string | null
     contractAddress: string
     ownerAddress: string
+    pinataGroupId: string | null
     createdAt: Date
     updatedAt: Date
     _count: CollectionCountAggregateOutputType | null
@@ -7214,10 +7228,12 @@ export namespace Prisma {
   export type CollectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    symbol?: boolean
     description?: boolean
     contractURI?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
+    pinataGroupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -7226,10 +7242,12 @@ export namespace Prisma {
   export type CollectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    symbol?: boolean
     description?: boolean
     contractURI?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
+    pinataGroupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -7238,10 +7256,12 @@ export namespace Prisma {
   export type CollectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    symbol?: boolean
     description?: boolean
     contractURI?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
+    pinataGroupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -7250,15 +7270,17 @@ export namespace Prisma {
   export type CollectionSelectScalar = {
     id?: boolean
     name?: boolean
+    symbol?: boolean
     description?: boolean
     contractURI?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
+    pinataGroupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "contractURI" | "contractAddress" | "ownerAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["collection"]>
+  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "symbol" | "description" | "contractURI" | "contractAddress" | "ownerAddress" | "pinataGroupId" | "createdAt" | "updatedAt", ExtArgs["result"]["collection"]>
   export type CollectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -7277,10 +7299,12 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
+      symbol: string | null
       description: string | null
       contractURI: string | null
       contractAddress: string
       ownerAddress: string
+      pinataGroupId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["collection"]>
@@ -7709,10 +7733,12 @@ export namespace Prisma {
   interface CollectionFieldRefs {
     readonly id: FieldRef<"Collection", 'String'>
     readonly name: FieldRef<"Collection", 'String'>
+    readonly symbol: FieldRef<"Collection", 'String'>
     readonly description: FieldRef<"Collection", 'String'>
     readonly contractURI: FieldRef<"Collection", 'String'>
     readonly contractAddress: FieldRef<"Collection", 'String'>
     readonly ownerAddress: FieldRef<"Collection", 'String'>
+    readonly pinataGroupId: FieldRef<"Collection", 'String'>
     readonly createdAt: FieldRef<"Collection", 'DateTime'>
     readonly updatedAt: FieldRef<"Collection", 'DateTime'>
   }
@@ -9235,10 +9261,12 @@ export namespace Prisma {
   export const CollectionScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    symbol: 'symbol',
     description: 'description',
     contractURI: 'contractURI',
     contractAddress: 'contractAddress',
     ownerAddress: 'ownerAddress',
+    pinataGroupId: 'pinataGroupId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -9713,10 +9741,12 @@ export namespace Prisma {
     NOT?: CollectionWhereInput | CollectionWhereInput[]
     id?: StringFilter<"Collection"> | string
     name?: StringFilter<"Collection"> | string
+    symbol?: StringNullableFilter<"Collection"> | string | null
     description?: StringNullableFilter<"Collection"> | string | null
     contractURI?: StringNullableFilter<"Collection"> | string | null
     contractAddress?: StringFilter<"Collection"> | string
     ownerAddress?: StringFilter<"Collection"> | string
+    pinataGroupId?: StringNullableFilter<"Collection"> | string | null
     createdAt?: DateTimeFilter<"Collection"> | Date | string
     updatedAt?: DateTimeFilter<"Collection"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9725,10 +9755,12 @@ export namespace Prisma {
   export type CollectionOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     contractURI?: SortOrderInput | SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     owner?: UserOrderByWithRelationInput
@@ -9741,9 +9773,11 @@ export namespace Prisma {
     OR?: CollectionWhereInput[]
     NOT?: CollectionWhereInput | CollectionWhereInput[]
     name?: StringFilter<"Collection"> | string
+    symbol?: StringNullableFilter<"Collection"> | string | null
     description?: StringNullableFilter<"Collection"> | string | null
     contractURI?: StringNullableFilter<"Collection"> | string | null
     ownerAddress?: StringFilter<"Collection"> | string
+    pinataGroupId?: StringNullableFilter<"Collection"> | string | null
     createdAt?: DateTimeFilter<"Collection"> | Date | string
     updatedAt?: DateTimeFilter<"Collection"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9752,10 +9786,12 @@ export namespace Prisma {
   export type CollectionOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     contractURI?: SortOrderInput | SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CollectionCountOrderByAggregateInput
@@ -9769,10 +9805,12 @@ export namespace Prisma {
     NOT?: CollectionScalarWhereWithAggregatesInput | CollectionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Collection"> | string
     name?: StringWithAggregatesFilter<"Collection"> | string
+    symbol?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     description?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     contractURI?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     contractAddress?: StringWithAggregatesFilter<"Collection"> | string
     ownerAddress?: StringWithAggregatesFilter<"Collection"> | string
+    pinataGroupId?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Collection"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Collection"> | Date | string
   }
@@ -10226,9 +10264,11 @@ export namespace Prisma {
   export type CollectionCreateInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutCollectionsInput
@@ -10237,10 +10277,12 @@ export namespace Prisma {
   export type CollectionUncheckedCreateInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
     ownerAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10248,9 +10290,11 @@ export namespace Prisma {
   export type CollectionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutCollectionsNestedInput
@@ -10259,10 +10303,12 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
     ownerAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10270,10 +10316,12 @@ export namespace Prisma {
   export type CollectionCreateManyInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
     ownerAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10281,9 +10329,11 @@ export namespace Prisma {
   export type CollectionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10291,10 +10341,12 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
     ownerAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10795,10 +10847,12 @@ export namespace Prisma {
   export type CollectionCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrder
     description?: SortOrder
     contractURI?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10806,10 +10860,12 @@ export namespace Prisma {
   export type CollectionMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrder
     description?: SortOrder
     contractURI?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10817,10 +10873,12 @@ export namespace Prisma {
   export type CollectionMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrder
     description?: SortOrder
     contractURI?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -11488,9 +11546,11 @@ export namespace Prisma {
   export type CollectionCreateWithoutOwnerInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11498,9 +11558,11 @@ export namespace Prisma {
   export type CollectionUncheckedCreateWithoutOwnerInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11630,10 +11692,12 @@ export namespace Prisma {
     NOT?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
     id?: StringFilter<"Collection"> | string
     name?: StringFilter<"Collection"> | string
+    symbol?: StringNullableFilter<"Collection"> | string | null
     description?: StringNullableFilter<"Collection"> | string | null
     contractURI?: StringNullableFilter<"Collection"> | string | null
     contractAddress?: StringFilter<"Collection"> | string
     ownerAddress?: StringFilter<"Collection"> | string
+    pinataGroupId?: StringNullableFilter<"Collection"> | string | null
     createdAt?: DateTimeFilter<"Collection"> | Date | string
     updatedAt?: DateTimeFilter<"Collection"> | Date | string
   }
@@ -11858,9 +11922,11 @@ export namespace Prisma {
   export type CollectionCreateManyOwnerInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11927,9 +11993,11 @@ export namespace Prisma {
   export type CollectionUpdateWithoutOwnerInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11937,9 +12005,11 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateWithoutOwnerInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11947,9 +12017,11 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateManyWithoutOwnerInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
