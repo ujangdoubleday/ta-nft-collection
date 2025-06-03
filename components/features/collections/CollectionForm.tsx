@@ -14,7 +14,7 @@ import { useWallet } from '@/lib/hooks/wallet';
 import { Button } from '@/components/ui/atoms';
 
 interface CollectionFormProps {
-  // Props can be added if needed
+  // Props dapat ditambahkan jika perlu
 }
 
 export function CollectionForm({}: CollectionFormProps) {
@@ -64,28 +64,28 @@ export function CollectionForm({}: CollectionFormProps) {
     setConsoleMessages((prev) => [...prev, message]);
   };
 
-  // Function to create Pinata folder automatically
+  // Fungsi untuk membuat folder Pinata secara otomatis
   const createCollectionFolder = async (collectionName: string) => {
     if (folderCreated || !collectionName) return null;
 
     try {
-      // Create folder name based on collection name and timestamp
+      // Buat nama folder berdasarkan nama koleksi dan timestamp
       const folderName = `${collectionName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
-      addConsoleMessage(`> Creating Pinata group: ${folderName}`);
+      addConsoleMessage(`> Membuat grup Pinata: ${folderName}`);
 
       const folder = await createFolder(folderName);
       if (folder) {
         setFolderCreated(true);
         setCollectionFolder(folder);
-        addConsoleMessage(`> Group successfully created: ${folder.name} (${folder.id})`);
+        addConsoleMessage(`> Grup berhasil dibuat: ${folder.name} (${folder.id})`);
         return folder;
       }
     } catch (error) {
-      // If folder creation fails, show message but continue process
+      // Jika gagal membuat folder, tampilkan pesan tapi lanjutkan proses
       addConsoleMessage(
-        `> Note: Cannot create Pinata group: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `> Catatan: Tidak dapat membuat grup Pinata: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
-      addConsoleMessage('> Continuing upload without group...');
+      addConsoleMessage('> Melanjutkan upload tanpa grup...');
     }
     return null;
   };
@@ -115,14 +115,14 @@ export function CollectionForm({}: CollectionFormProps) {
       const contractAddress = `0x${Math.random().toString(16).slice(2, 42)}`;
       addConsoleMessage(`> Contract Address: ${contractAddress}`);
 
-      // Create automatic folder for this collection
+      // Buat folder otomatis untuk koleksi ini
       const folder = await createCollectionFolder(formData.name);
       const folderId = folder?.id;
 
       if (folderId) {
-        addConsoleMessage(`> Pinata group will be used: ${folder.name} (${folderId})`);
+        addConsoleMessage(`> Grup Pinata akan digunakan: ${folder.name} (${folderId})`);
       } else {
-        addConsoleMessage('> Upload will be done without Pinata group');
+        addConsoleMessage('> Upload akan dilakukan tanpa grup Pinata');
       }
 
       // Upload image to Pinata if available
@@ -160,12 +160,10 @@ export function CollectionForm({}: CollectionFormProps) {
         // Use tRPC to create collection with the connected wallet address
         await createCollectionMutation.mutateAsync({
           name: formData.name,
-          symbol: formData.symbol || undefined,
           description: formData.description || undefined,
           contractURI: contractURI || undefined,
           contractAddress,
           ownerAddress: address,
-          pinataGroupId: folderId || undefined,
         });
 
         addConsoleMessage('> Collection created successfully!');
@@ -189,12 +187,10 @@ export function CollectionForm({}: CollectionFormProps) {
             try {
               await createCollectionMutation.mutateAsync({
                 name: formData.name,
-                symbol: formData.symbol || undefined,
                 description: formData.description || undefined,
                 contractURI: contractURI || undefined,
                 contractAddress,
                 ownerAddress: address,
-                pinataGroupId: folderId || undefined,
               });
 
               addConsoleMessage('> Collection created successfully!');
@@ -248,14 +244,15 @@ export function CollectionForm({}: CollectionFormProps) {
           <p className="text-sm mt-1">
             {collectionFolder ? (
               <>
-                Group to be used: <span className="font-mono text-xs">{collectionFolder.name}</span>
+                Grup yang akan digunakan:{' '}
+                <span className="font-mono text-xs">{collectionFolder.name}</span>
               </>
             ) : (
-              <>Group will be created automatically when collection is created</>
+              <>Grup akan dibuat otomatis saat koleksi dibuat</>
             )}
           </p>
           <p className="text-xs text-[#808080] mt-1">
-            Files and metadata will be stored in the same group on Pinata
+            File dan metadata akan disimpan dalam grup yang sama di Pinata
           </p>
         </div>
 
