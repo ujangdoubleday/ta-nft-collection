@@ -1,13 +1,13 @@
 'use client';
 
 import { Button, Input } from '@/components/ui/atoms';
-import { ChangeEvent } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
+import Image from 'next/image';
 
 export type NFTFormData = {
   title: string;
   description: string;
-  externalUrl: string;
-  file: any;
+  file: File | null;
   properties: Array<{
     name: string;
     value: string;
@@ -25,6 +25,36 @@ interface NFTFormFieldsProps {
 }
 
 export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFTFormFieldsProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      // Update form data
+      const event = {
+        target: {
+          name: 'file',
+          value: file,
+        },
+      };
+      handleChange(event as any);
+    }
+  };
+
+  const openFileSelector = () => {
+    fileInputRef.current?.click();
+  };
+
+  const removeFile = () => {
+    const event = {
+      target: {
+        name: 'file',
+        value: null,
+      },
+    };
+    handleChange(event as any);
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
@@ -55,44 +85,53 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
           </div>
 
           <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-            <label className="text-black text-xs font-bold block mb-1">External URL</label>
-            <Input
-              placeholder="https://"
-              name="externalUrl"
-              value={formData.externalUrl}
-              onChange={handleChange}
-              className="hover:border-[#0000ff] focus:border-[#0000ff]"
-            />
-            <p className="text-xs text-[#808080] mt-1">Link to additional content (optional)</p>
+            <div className="win98-bar h-6 flex items-center px-2 mb-3">
+              <span className="text-white text-xs font-semibold tracking-tight">
+                NFT File Upload
+              </span>
+            </div>
+
+            <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white p-4 bg-white flex flex-col items-center justify-center">
+              <div className="text-center">
+                <Button
+                  size="sm"
+                  className="text-xs hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
+                  onClick={openFileSelector}
+                  type="button"
+                >
+                  {formData.file ? 'Change Image' : 'Browse Files...'}
+                </Button>
+                {formData.file && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs ml-2 hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
+                    onClick={removeFile}
+                    type="button"
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              {formData.file && (
+                <p className="text-xs text-center mt-2">Selected file: {formData.file.name}</p>
+              )}
+            </div>
+            <p className="text-xs text-[#808080] mt-1">
+              Supported formats: PNG, JPG, GIF, MP4 (max 30MB)
+            </p>
           </div>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-          <div className="win98-bar h-6 flex items-center px-2 mb-3">
-            <span className="text-white text-xs font-semibold tracking-tight">NFT File Upload</span>
-          </div>
-
-          <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white h-40 w-full bg-white p-2 flex flex-col items-center justify-center">
-            <div className="text-center mb-2">
-              <div className="w-16 h-16 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] flex items-center justify-center mx-auto mb-2 hover:bg-[#d0d0d0] cursor-pointer">
-                <span className="text-black text-2xl">+</span>
-              </div>
-              <p className="text-xs text-black">Upload your NFT file</p>
-            </div>
-            <Button
-              size="sm"
-              className="text-xs hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
-            >
-              Browse Files...
-            </Button>
-          </div>
-          <p className="text-xs text-[#808080] mt-1">
-            Supported formats: PNG, JPG, GIF, MP4 (max 30MB)
-          </p>
-        </div>
-
         <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
           <div className="win98-bar h-6 flex items-center px-2 mb-3">
             <span className="text-white text-xs font-semibold tracking-tight">Properties</span>

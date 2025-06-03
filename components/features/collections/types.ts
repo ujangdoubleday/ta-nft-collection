@@ -3,6 +3,7 @@ export type CollectionItem = {
   name: string;
   type: string;
   image: string;
+  blurhash?: string;
   attributes: {
     rarity?: string;
     pixels?: string;
