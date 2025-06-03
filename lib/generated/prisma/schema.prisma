@@ -68,12 +68,10 @@ model NFT {
   tokenId         String
   name            String
   description     String?
-  imageUrl        String
+  metadataUrl     String   @default("")
   contractAddress String
   ownerAddress    String
   owner           User     @relation(fields: [ownerAddress], references: [address])
-  price           Float?
-  listed          Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
