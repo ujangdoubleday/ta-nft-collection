@@ -32,8 +32,7 @@ export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardPr
           alt={item.name}
           fill={true}
           sizes="(max-width: 768px) 100vw, 300px"
-          placeholderType="blur"
-          blurDataURL={item.blurhash}
+          placeholderType="win98"
           className="object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1 text-xs opacity-0 hover:opacity-100 transition-opacity z-10">
