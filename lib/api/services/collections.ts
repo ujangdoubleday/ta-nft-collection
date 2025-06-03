@@ -22,7 +22,7 @@ export async function getCollectionByContractAddress(contractAddress: string) {
  */
 export async function getNFTsByContractAddress(contractAddress: string) {
   try {
-    const result = await serverClient.nft.getByCollectionAddress({ contractAddress });
+    const result = await serverClient.nft.getByContractAddress({ contractAddress });
     return makeSerializable(result || []);
   } catch (error) {
     console.error('Error fetching NFTs by contract address:', error);

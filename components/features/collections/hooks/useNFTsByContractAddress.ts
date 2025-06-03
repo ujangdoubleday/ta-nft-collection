@@ -8,7 +8,7 @@ import { trpc } from '@/lib/api/trpc/client';
  * @returns The NFTs data, loading state, and error
  */
 export function useNFTsByContractAddress(contractAddress: string) {
-  const { data, isLoading, error } = trpc.nft.getByCollectionAddress.useQuery(
+  const { data, isLoading, error } = trpc.nft.getByContractAddress.useQuery(
     { contractAddress },
     {
       enabled: !!contractAddress,

@@ -34,37 +34,6 @@ const baseConfig = {
       },
     ]
   },
-  // Configure allowed image domains
-  images: {
-    domains: [
-      'gateway.pinata.cloud',
-      'ipfs.io',
-      'cloudflare-ipfs.com',
-      'dweb.link',
-      'cyan-dead-reptile-256.mypinata.cloud',
-    ],
-  },
-  // Configure webpack to ignore binary files from sharp
-  webpack: (config, { isServer }) => {
-    // Ignore binary files from sharp
-    config.module = {
-      ...config.module,
-      exprContextCritical: false,
-      rules: [
-        ...config.module.rules,
-        {
-          test: /node_modules[\\/]sharp[\\/]build[\\/]Release[\\/].+\.node$/,
-          use: 'node-loader',
-        },
-        {
-          test: /\.node$/,
-          use: 'node-loader',
-        },
-      ],
-    };
-    
-    return config;
-  },
 }
 
 const nextConfig = withAnalyzer(baseConfig)

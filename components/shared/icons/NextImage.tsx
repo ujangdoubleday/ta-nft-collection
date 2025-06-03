@@ -8,7 +8,6 @@ interface NextImageProps extends Omit<ImageProps, 'placeholder' | 'blurDataURL'>
   fallbackSrc?: string;
   placeholderType?: 'blur' | 'empty' | 'win98';
   wrapperClassName?: string;
-  blurDataURL?: string;
 }
 
 export function NextImage({
@@ -21,7 +20,6 @@ export function NextImage({
   wrapperClassName,
   className,
   onError,
-  blurDataURL,
   ...rest
 }: NextImageProps) {
   const [imgSrc, setImgSrc] = useState<string | null>(null);
@@ -46,8 +44,8 @@ export function NextImage({
     if (onError) onError(e);
   };
 
-  // Blur data URL for placeholder type 'blur'
-  const defaultBlurDataURL =
+  // Blur data URL untuk placeholder tipe 'blur'
+  const blurDataURL =
     'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2MwYzBjMCIvPjwvc3ZnPg==';
 
   // Placeholder styles berdasarkan tipe
@@ -117,7 +115,7 @@ export function NextImage({
         onLoad={handleLoad}
         onError={handleError}
         placeholder={placeholderType === 'blur' ? 'blur' : undefined}
-        blurDataURL={placeholderType === 'blur' ? blurDataURL || defaultBlurDataURL : undefined}
+        blurDataURL={placeholderType === 'blur' ? blurDataURL : undefined}
         {...rest}
       />
     </div>
