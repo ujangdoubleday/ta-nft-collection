@@ -7,11 +7,13 @@ async function main() {
   await prisma.nFT.deleteMany();
   await prisma.collection.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.todo.deleteMany();
 
   // Create a test user
   const user = await prisma.user.create({
     data: {
       address: '0x1234567890123456789012345678901234567890',
+      name: 'Test User',
     },
   });
 
@@ -21,6 +23,7 @@ async function main() {
   const collection = await prisma.collection.create({
     data: {
       name: 'Sample Collection',
+      symbol: 'SMPL',
       description: 'A sample NFT collection for testing',
       contractAddress: '0xabcdef1234567890abcdef1234567890abcdef12',
       contractURI: 'https://picsum.photos/id/1/500/500/metadata.json',
@@ -34,6 +37,7 @@ async function main() {
   const collection2 = await prisma.collection.create({
     data: {
       name: 'Pixel Art Collection',
+      symbol: 'PAC',
       description: 'A collection of pixel art NFTs',
       contractAddress: '0x9876543210987654321098765432109876543210',
       contractURI: 'https://picsum.photos/id/10/500/500/metadata.json',
@@ -49,11 +53,9 @@ async function main() {
       tokenId: '1',
       name: 'Sample NFT',
       description: 'A sample NFT for testing',
-      imageUrl: 'https://picsum.photos/id/2/500/500',
+      metadataUrl: 'https://picsum.photos/id/2/500/500',
       contractAddress: collection.contractAddress,
       ownerAddress: user.address,
-      price: 0.1,
-      listed: true,
     },
   });
 
@@ -65,15 +67,36 @@ async function main() {
       tokenId: '1',
       name: 'Pixel Art NFT',
       description: 'A pixel art NFT for testing',
-      imageUrl: 'https://picsum.photos/id/3/500/500',
+      metadataUrl: 'https://picsum.photos/id/3/500/500',
       contractAddress: collection2.contractAddress,
       ownerAddress: user.address,
-      price: 0.05,
-      listed: true,
     },
   });
 
   console.log('Created second test NFT:', nft2);
+
+  // Create some todo items
+  const todo1 = await prisma.todo.create({
+    data: {
+      title: 'Create NFT marketplace',
+      description: 'Build a decentralized NFT marketplace',
+      completed: false,
+      authorName: 'Admin',
+    },
+  });
+
+  console.log('Created todo item:', todo1);
+
+  const todo2 = await prisma.todo.create({
+    data: {
+      title: 'Implement wallet connection',
+      description: 'Add support for multiple wallet providers',
+      completed: true,
+      authorName: user.name || 'Test User',
+    },
+  });
+
+  console.log('Created todo item:', todo2);
 }
 
 main()

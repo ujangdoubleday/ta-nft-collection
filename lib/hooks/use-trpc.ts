@@ -38,19 +38,10 @@ export function useNFTs() {
 }
 
 export function useUserNFTs(ownerAddress: string | undefined) {
-  return trpc.nft.getByOwner.useQuery(
+  return trpc.nft.getByOwnerAddress.useQuery(
     { ownerAddress: ownerAddress! },
     {
       enabled: !!ownerAddress,
-    },
-  );
-}
-
-export function useNFTById(id: string | undefined) {
-  return trpc.nft.getById.useQuery(
-    { id: id! },
-    {
-      enabled: !!id,
     },
   );
 }
@@ -64,10 +55,6 @@ export function useNFTByTokenId(tokenId: string | undefined, contractAddress: st
 
 export function useCreateNFT() {
   return trpc.nft.create.useMutation();
-}
-
-export function useUpdateNFT() {
-  return trpc.nft.update.useMutation();
 }
 
 // Collection hooks
