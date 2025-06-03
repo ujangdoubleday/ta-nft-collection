@@ -50,11 +50,19 @@ export const uploadRouter = router({
         name: z.string().optional(),
         description: z.string().optional(),
         folderId: z.string().optional(), // Optional folder ID
+        attributes: z
+          .array(
+            z.object({
+              trait_type: z.string(),
+              value: z.string(),
+            }),
+          )
+          .optional(), // Optional array of attributes
       }),
     )
     .mutation(async ({ input }) => {
       try {
-        const { file, fileName, name, description, folderId } = input;
+        const { file, fileName, name, description, folderId, attributes } = input;
 
         // Convert the array back to Buffer
         const fileBuffer = Buffer.from(file);
@@ -74,17 +82,16 @@ export const uploadRouter = router({
           name: name || fileName,
           description: description || '',
           image: result.url,
-          attributes: [],
+          attributes: attributes || [],
         };
 
         console.log(`Creating metadata for: ${name || fileName}`);
+        if (attributes && attributes.length > 0) {
+          console.log(`Including ${attributes.length} attributes in metadata`);
+        }
 
         // Upload metadata to Pinata
-        const metadataResult = await uploadMetadataToPinata(
-          metadata,
-          `${name || 'collection'}-metadata`,
-          folderId,
-        );
+        const metadataResult = await uploadMetadataToPinata(metadata, `metadata`, folderId);
 
         console.log(`Metadata uploaded successfully. CID: ${metadataResult.cid}`);
 

@@ -19,6 +19,15 @@ interface PinataFolder {
   name: string;
 }
 
+interface NFTMetadata {
+  name?: string;
+  description?: string;
+  attributes?: Array<{
+    trait_type: string;
+    value: string;
+  }>;
+}
+
 export function usePinataUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
@@ -62,11 +71,7 @@ export function usePinataUpload() {
   };
 
   // Upload file to Pinata
-  const uploadToPinata = async (
-    file: File,
-    metadata: { name?: string; description?: string } = {},
-    folderId?: string,
-  ) => {
+  const uploadToPinata = async (file: File, metadata: NFTMetadata = {}, folderId?: string) => {
     if (!file) return;
 
     setIsUploading(true);
@@ -91,6 +96,7 @@ export function usePinataUpload() {
         fileName: file.name,
         name: metadata.name,
         description: metadata.description,
+        attributes: metadata.attributes,
         folderId: folderId || selectedFolder?.id, // Use provided folderId or selected folder
       });
 
