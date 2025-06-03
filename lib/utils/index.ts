@@ -3,5 +3,3 @@ export * from './formatting';
 
 // Export helper utilities
 export * from './helpers';
-
-// Export from validation (to be added)

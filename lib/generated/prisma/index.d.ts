@@ -5868,18 +5868,8 @@ export namespace Prisma {
 
   export type AggregateNFT = {
     _count: NFTCountAggregateOutputType | null
-    _avg: NFTAvgAggregateOutputType | null
-    _sum: NFTSumAggregateOutputType | null
     _min: NFTMinAggregateOutputType | null
     _max: NFTMaxAggregateOutputType | null
-  }
-
-  export type NFTAvgAggregateOutputType = {
-    price: number | null
-  }
-
-  export type NFTSumAggregateOutputType = {
-    price: number | null
   }
 
   export type NFTMinAggregateOutputType = {
@@ -5887,11 +5877,9 @@ export namespace Prisma {
     tokenId: string | null
     name: string | null
     description: string | null
-    imageUrl: string | null
+    metadataUrl: string | null
     contractAddress: string | null
     ownerAddress: string | null
-    price: number | null
-    listed: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5901,11 +5889,9 @@ export namespace Prisma {
     tokenId: string | null
     name: string | null
     description: string | null
-    imageUrl: string | null
+    metadataUrl: string | null
     contractAddress: string | null
     ownerAddress: string | null
-    price: number | null
-    listed: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5915,35 +5901,23 @@ export namespace Prisma {
     tokenId: number
     name: number
     description: number
-    imageUrl: number
+    metadataUrl: number
     contractAddress: number
     ownerAddress: number
-    price: number
-    listed: number
     createdAt: number
     updatedAt: number
     _all: number
   }
 
 
-  export type NFTAvgAggregateInputType = {
-    price?: true
-  }
-
-  export type NFTSumAggregateInputType = {
-    price?: true
-  }
-
   export type NFTMinAggregateInputType = {
     id?: true
     tokenId?: true
     name?: true
     description?: true
-    imageUrl?: true
+    metadataUrl?: true
     contractAddress?: true
     ownerAddress?: true
-    price?: true
-    listed?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5953,11 +5927,9 @@ export namespace Prisma {
     tokenId?: true
     name?: true
     description?: true
-    imageUrl?: true
+    metadataUrl?: true
     contractAddress?: true
     ownerAddress?: true
-    price?: true
-    listed?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5967,11 +5939,9 @@ export namespace Prisma {
     tokenId?: true
     name?: true
     description?: true
-    imageUrl?: true
+    metadataUrl?: true
     contractAddress?: true
     ownerAddress?: true
-    price?: true
-    listed?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -6015,18 +5985,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: NFTAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: NFTSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: NFTMinAggregateInputType
@@ -6057,8 +6015,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: NFTCountAggregateInputType | true
-    _avg?: NFTAvgAggregateInputType
-    _sum?: NFTSumAggregateInputType
     _min?: NFTMinAggregateInputType
     _max?: NFTMaxAggregateInputType
   }
@@ -6068,16 +6024,12 @@ export namespace Prisma {
     tokenId: string
     name: string
     description: string | null
-    imageUrl: string
+    metadataUrl: string
     contractAddress: string
     ownerAddress: string
-    price: number | null
-    listed: boolean
     createdAt: Date
     updatedAt: Date
     _count: NFTCountAggregateOutputType | null
-    _avg: NFTAvgAggregateOutputType | null
-    _sum: NFTSumAggregateOutputType | null
     _min: NFTMinAggregateOutputType | null
     _max: NFTMaxAggregateOutputType | null
   }
@@ -6101,11 +6053,9 @@ export namespace Prisma {
     tokenId?: boolean
     name?: boolean
     description?: boolean
-    imageUrl?: boolean
+    metadataUrl?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
-    price?: boolean
-    listed?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -6116,11 +6066,9 @@ export namespace Prisma {
     tokenId?: boolean
     name?: boolean
     description?: boolean
-    imageUrl?: boolean
+    metadataUrl?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
-    price?: boolean
-    listed?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -6131,11 +6079,9 @@ export namespace Prisma {
     tokenId?: boolean
     name?: boolean
     description?: boolean
-    imageUrl?: boolean
+    metadataUrl?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
-    price?: boolean
-    listed?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -6146,16 +6092,14 @@ export namespace Prisma {
     tokenId?: boolean
     name?: boolean
     description?: boolean
-    imageUrl?: boolean
+    metadataUrl?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
-    price?: boolean
-    listed?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type NFTOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tokenId" | "name" | "description" | "imageUrl" | "contractAddress" | "ownerAddress" | "price" | "listed" | "createdAt" | "updatedAt", ExtArgs["result"]["nFT"]>
+  export type NFTOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tokenId" | "name" | "description" | "metadataUrl" | "contractAddress" | "ownerAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["nFT"]>
   export type NFTInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -6176,11 +6120,9 @@ export namespace Prisma {
       tokenId: string
       name: string
       description: string | null
-      imageUrl: string
+      metadataUrl: string
       contractAddress: string
       ownerAddress: string
-      price: number | null
-      listed: boolean
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["nFT"]>
@@ -6611,11 +6553,9 @@ export namespace Prisma {
     readonly tokenId: FieldRef<"NFT", 'String'>
     readonly name: FieldRef<"NFT", 'String'>
     readonly description: FieldRef<"NFT", 'String'>
-    readonly imageUrl: FieldRef<"NFT", 'String'>
+    readonly metadataUrl: FieldRef<"NFT", 'String'>
     readonly contractAddress: FieldRef<"NFT", 'String'>
     readonly ownerAddress: FieldRef<"NFT", 'String'>
-    readonly price: FieldRef<"NFT", 'Float'>
-    readonly listed: FieldRef<"NFT", 'Boolean'>
     readonly createdAt: FieldRef<"NFT", 'DateTime'>
     readonly updatedAt: FieldRef<"NFT", 'DateTime'>
   }
@@ -7045,10 +6985,12 @@ export namespace Prisma {
   export type CollectionMinAggregateOutputType = {
     id: string | null
     name: string | null
+    symbol: string | null
     description: string | null
     contractURI: string | null
     contractAddress: string | null
     ownerAddress: string | null
+    pinataGroupId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7056,10 +6998,12 @@ export namespace Prisma {
   export type CollectionMaxAggregateOutputType = {
     id: string | null
     name: string | null
+    symbol: string | null
     description: string | null
     contractURI: string | null
     contractAddress: string | null
     ownerAddress: string | null
+    pinataGroupId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7067,10 +7011,12 @@ export namespace Prisma {
   export type CollectionCountAggregateOutputType = {
     id: number
     name: number
+    symbol: number
     description: number
     contractURI: number
     contractAddress: number
     ownerAddress: number
+    pinataGroupId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -7080,10 +7026,12 @@ export namespace Prisma {
   export type CollectionMinAggregateInputType = {
     id?: true
     name?: true
+    symbol?: true
     description?: true
     contractURI?: true
     contractAddress?: true
     ownerAddress?: true
+    pinataGroupId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -7091,10 +7039,12 @@ export namespace Prisma {
   export type CollectionMaxAggregateInputType = {
     id?: true
     name?: true
+    symbol?: true
     description?: true
     contractURI?: true
     contractAddress?: true
     ownerAddress?: true
+    pinataGroupId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -7102,10 +7052,12 @@ export namespace Prisma {
   export type CollectionCountAggregateInputType = {
     id?: true
     name?: true
+    symbol?: true
     description?: true
     contractURI?: true
     contractAddress?: true
     ownerAddress?: true
+    pinataGroupId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -7186,10 +7138,12 @@ export namespace Prisma {
   export type CollectionGroupByOutputType = {
     id: string
     name: string
+    symbol: string | null
     description: string | null
     contractURI: string | null
     contractAddress: string
     ownerAddress: string
+    pinataGroupId: string | null
     createdAt: Date
     updatedAt: Date
     _count: CollectionCountAggregateOutputType | null
@@ -7214,10 +7168,12 @@ export namespace Prisma {
   export type CollectionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    symbol?: boolean
     description?: boolean
     contractURI?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
+    pinataGroupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -7226,10 +7182,12 @@ export namespace Prisma {
   export type CollectionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    symbol?: boolean
     description?: boolean
     contractURI?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
+    pinataGroupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -7238,10 +7196,12 @@ export namespace Prisma {
   export type CollectionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     name?: boolean
+    symbol?: boolean
     description?: boolean
     contractURI?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
+    pinataGroupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     owner?: boolean | UserDefaultArgs<ExtArgs>
@@ -7250,15 +7210,17 @@ export namespace Prisma {
   export type CollectionSelectScalar = {
     id?: boolean
     name?: boolean
+    symbol?: boolean
     description?: boolean
     contractURI?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
+    pinataGroupId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "contractURI" | "contractAddress" | "ownerAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["collection"]>
+  export type CollectionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "symbol" | "description" | "contractURI" | "contractAddress" | "ownerAddress" | "pinataGroupId" | "createdAt" | "updatedAt", ExtArgs["result"]["collection"]>
   export type CollectionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -7277,10 +7239,12 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
+      symbol: string | null
       description: string | null
       contractURI: string | null
       contractAddress: string
       ownerAddress: string
+      pinataGroupId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["collection"]>
@@ -7709,10 +7673,12 @@ export namespace Prisma {
   interface CollectionFieldRefs {
     readonly id: FieldRef<"Collection", 'String'>
     readonly name: FieldRef<"Collection", 'String'>
+    readonly symbol: FieldRef<"Collection", 'String'>
     readonly description: FieldRef<"Collection", 'String'>
     readonly contractURI: FieldRef<"Collection", 'String'>
     readonly contractAddress: FieldRef<"Collection", 'String'>
     readonly ownerAddress: FieldRef<"Collection", 'String'>
+    readonly pinataGroupId: FieldRef<"Collection", 'String'>
     readonly createdAt: FieldRef<"Collection", 'DateTime'>
     readonly updatedAt: FieldRef<"Collection", 'DateTime'>
   }
@@ -9220,11 +9186,9 @@ export namespace Prisma {
     tokenId: 'tokenId',
     name: 'name',
     description: 'description',
-    imageUrl: 'imageUrl',
+    metadataUrl: 'metadataUrl',
     contractAddress: 'contractAddress',
     ownerAddress: 'ownerAddress',
-    price: 'price',
-    listed: 'listed',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -9235,10 +9199,12 @@ export namespace Prisma {
   export const CollectionScalarFieldEnum: {
     id: 'id',
     name: 'name',
+    symbol: 'symbol',
     description: 'description',
     contractURI: 'contractURI',
     contractAddress: 'contractAddress',
     ownerAddress: 'ownerAddress',
+    pinataGroupId: 'pinataGroupId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -9331,6 +9297,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -9341,13 +9314,6 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
   /**
    * Deep Input Types
@@ -9627,11 +9593,9 @@ export namespace Prisma {
     tokenId?: StringFilter<"NFT"> | string
     name?: StringFilter<"NFT"> | string
     description?: StringNullableFilter<"NFT"> | string | null
-    imageUrl?: StringFilter<"NFT"> | string
+    metadataUrl?: StringFilter<"NFT"> | string
     contractAddress?: StringFilter<"NFT"> | string
     ownerAddress?: StringFilter<"NFT"> | string
-    price?: FloatNullableFilter<"NFT"> | number | null
-    listed?: BoolFilter<"NFT"> | boolean
     createdAt?: DateTimeFilter<"NFT"> | Date | string
     updatedAt?: DateTimeFilter<"NFT"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9642,11 +9606,9 @@ export namespace Prisma {
     tokenId?: SortOrder
     name?: SortOrder
     description?: SortOrderInput | SortOrder
-    imageUrl?: SortOrder
+    metadataUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
-    price?: SortOrderInput | SortOrder
-    listed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     owner?: UserOrderByWithRelationInput
@@ -9661,11 +9623,9 @@ export namespace Prisma {
     tokenId?: StringFilter<"NFT"> | string
     name?: StringFilter<"NFT"> | string
     description?: StringNullableFilter<"NFT"> | string | null
-    imageUrl?: StringFilter<"NFT"> | string
+    metadataUrl?: StringFilter<"NFT"> | string
     contractAddress?: StringFilter<"NFT"> | string
     ownerAddress?: StringFilter<"NFT"> | string
-    price?: FloatNullableFilter<"NFT"> | number | null
-    listed?: BoolFilter<"NFT"> | boolean
     createdAt?: DateTimeFilter<"NFT"> | Date | string
     updatedAt?: DateTimeFilter<"NFT"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9676,18 +9636,14 @@ export namespace Prisma {
     tokenId?: SortOrder
     name?: SortOrder
     description?: SortOrderInput | SortOrder
-    imageUrl?: SortOrder
+    metadataUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
-    price?: SortOrderInput | SortOrder
-    listed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: NFTCountOrderByAggregateInput
-    _avg?: NFTAvgOrderByAggregateInput
     _max?: NFTMaxOrderByAggregateInput
     _min?: NFTMinOrderByAggregateInput
-    _sum?: NFTSumOrderByAggregateInput
   }
 
   export type NFTScalarWhereWithAggregatesInput = {
@@ -9698,11 +9654,9 @@ export namespace Prisma {
     tokenId?: StringWithAggregatesFilter<"NFT"> | string
     name?: StringWithAggregatesFilter<"NFT"> | string
     description?: StringNullableWithAggregatesFilter<"NFT"> | string | null
-    imageUrl?: StringWithAggregatesFilter<"NFT"> | string
+    metadataUrl?: StringWithAggregatesFilter<"NFT"> | string
     contractAddress?: StringWithAggregatesFilter<"NFT"> | string
     ownerAddress?: StringWithAggregatesFilter<"NFT"> | string
-    price?: FloatNullableWithAggregatesFilter<"NFT"> | number | null
-    listed?: BoolWithAggregatesFilter<"NFT"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"NFT"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"NFT"> | Date | string
   }
@@ -9713,10 +9667,12 @@ export namespace Prisma {
     NOT?: CollectionWhereInput | CollectionWhereInput[]
     id?: StringFilter<"Collection"> | string
     name?: StringFilter<"Collection"> | string
+    symbol?: StringNullableFilter<"Collection"> | string | null
     description?: StringNullableFilter<"Collection"> | string | null
     contractURI?: StringNullableFilter<"Collection"> | string | null
     contractAddress?: StringFilter<"Collection"> | string
     ownerAddress?: StringFilter<"Collection"> | string
+    pinataGroupId?: StringNullableFilter<"Collection"> | string | null
     createdAt?: DateTimeFilter<"Collection"> | Date | string
     updatedAt?: DateTimeFilter<"Collection"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9725,10 +9681,12 @@ export namespace Prisma {
   export type CollectionOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     contractURI?: SortOrderInput | SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     owner?: UserOrderByWithRelationInput
@@ -9741,9 +9699,11 @@ export namespace Prisma {
     OR?: CollectionWhereInput[]
     NOT?: CollectionWhereInput | CollectionWhereInput[]
     name?: StringFilter<"Collection"> | string
+    symbol?: StringNullableFilter<"Collection"> | string | null
     description?: StringNullableFilter<"Collection"> | string | null
     contractURI?: StringNullableFilter<"Collection"> | string | null
     ownerAddress?: StringFilter<"Collection"> | string
+    pinataGroupId?: StringNullableFilter<"Collection"> | string | null
     createdAt?: DateTimeFilter<"Collection"> | Date | string
     updatedAt?: DateTimeFilter<"Collection"> | Date | string
     owner?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -9752,10 +9712,12 @@ export namespace Prisma {
   export type CollectionOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     contractURI?: SortOrderInput | SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: CollectionCountOrderByAggregateInput
@@ -9769,10 +9731,12 @@ export namespace Prisma {
     NOT?: CollectionScalarWhereWithAggregatesInput | CollectionScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Collection"> | string
     name?: StringWithAggregatesFilter<"Collection"> | string
+    symbol?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     description?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     contractURI?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     contractAddress?: StringWithAggregatesFilter<"Collection"> | string
     ownerAddress?: StringWithAggregatesFilter<"Collection"> | string
+    pinataGroupId?: StringNullableWithAggregatesFilter<"Collection"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Collection"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Collection"> | Date | string
   }
@@ -10131,10 +10095,8 @@ export namespace Prisma {
     tokenId: string
     name: string
     description?: string | null
-    imageUrl: string
+    metadataUrl?: string
     contractAddress: string
-    price?: number | null
-    listed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutNftsInput
@@ -10145,11 +10107,9 @@ export namespace Prisma {
     tokenId: string
     name: string
     description?: string | null
-    imageUrl: string
+    metadataUrl?: string
     contractAddress: string
     ownerAddress: string
-    price?: number | null
-    listed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10159,10 +10119,8 @@ export namespace Prisma {
     tokenId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: StringFieldUpdateOperationsInput | string
+    metadataUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
-    price?: NullableFloatFieldUpdateOperationsInput | number | null
-    listed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutNftsNestedInput
@@ -10173,11 +10131,9 @@ export namespace Prisma {
     tokenId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: StringFieldUpdateOperationsInput | string
+    metadataUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     ownerAddress?: StringFieldUpdateOperationsInput | string
-    price?: NullableFloatFieldUpdateOperationsInput | number | null
-    listed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10187,11 +10143,9 @@ export namespace Prisma {
     tokenId: string
     name: string
     description?: string | null
-    imageUrl: string
+    metadataUrl?: string
     contractAddress: string
     ownerAddress: string
-    price?: number | null
-    listed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10201,10 +10155,8 @@ export namespace Prisma {
     tokenId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: StringFieldUpdateOperationsInput | string
+    metadataUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
-    price?: NullableFloatFieldUpdateOperationsInput | number | null
-    listed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10214,11 +10166,9 @@ export namespace Prisma {
     tokenId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: StringFieldUpdateOperationsInput | string
+    metadataUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     ownerAddress?: StringFieldUpdateOperationsInput | string
-    price?: NullableFloatFieldUpdateOperationsInput | number | null
-    listed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10226,9 +10176,11 @@ export namespace Prisma {
   export type CollectionCreateInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     owner: UserCreateNestedOneWithoutCollectionsInput
@@ -10237,10 +10189,12 @@ export namespace Prisma {
   export type CollectionUncheckedCreateInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
     ownerAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10248,9 +10202,11 @@ export namespace Prisma {
   export type CollectionUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     owner?: UserUpdateOneRequiredWithoutCollectionsNestedInput
@@ -10259,10 +10215,12 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
     ownerAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10270,10 +10228,12 @@ export namespace Prisma {
   export type CollectionCreateManyInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
     ownerAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -10281,9 +10241,11 @@ export namespace Prisma {
   export type CollectionUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10291,10 +10253,12 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
     ownerAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -10697,22 +10661,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type FloatNullableFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NFTTokenIdContractAddressCompoundUniqueInput = {
     tokenId: string
     contractAddress: string
@@ -10723,17 +10671,11 @@ export namespace Prisma {
     tokenId?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    imageUrl?: SortOrder
+    metadataUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
-    price?: SortOrder
-    listed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type NFTAvgOrderByAggregateInput = {
-    price?: SortOrder
   }
 
   export type NFTMaxOrderByAggregateInput = {
@@ -10741,11 +10683,9 @@ export namespace Prisma {
     tokenId?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    imageUrl?: SortOrder
+    metadataUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
-    price?: SortOrder
-    listed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10755,50 +10695,22 @@ export namespace Prisma {
     tokenId?: SortOrder
     name?: SortOrder
     description?: SortOrder
-    imageUrl?: SortOrder
+    metadataUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
-    price?: SortOrder
-    listed?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-  }
-
-  export type NFTSumOrderByAggregateInput = {
-    price?: SortOrder
-  }
-
-  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type CollectionCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrder
     description?: SortOrder
     contractURI?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10806,10 +10718,12 @@ export namespace Prisma {
   export type CollectionMaxOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrder
     description?: SortOrder
     contractURI?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -10817,12 +10731,19 @@ export namespace Prisma {
   export type CollectionMinOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
+    symbol?: SortOrder
     description?: SortOrder
     contractURI?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
+    pinataGroupId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type TodoCountOrderByAggregateInput = {
@@ -10853,6 +10774,14 @@ export namespace Prisma {
     authorName?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type UserCreateNestedOneWithoutAccountsInput = {
@@ -11081,18 +11010,6 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
-  export type NullableFloatFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type UserUpdateOneRequiredWithoutNftsNestedInput = {
     create?: XOR<UserCreateWithoutNftsInput, UserUncheckedCreateWithoutNftsInput>
     connectOrCreate?: UserCreateOrConnectWithoutNftsInput
@@ -11113,6 +11030,10 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutCollectionsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCollectionsInput, UserUpdateWithoutCollectionsInput>, UserUncheckedUpdateWithoutCollectionsInput>
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -11281,22 +11202,6 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
-  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedFloatNullableFilter<$PrismaModel>
-    _min?: NestedFloatNullableFilter<$PrismaModel>
-    _max?: NestedFloatNullableFilter<$PrismaModel>
-  }
-
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
     not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
@@ -11454,10 +11359,8 @@ export namespace Prisma {
     tokenId: string
     name: string
     description?: string | null
-    imageUrl: string
+    metadataUrl?: string
     contractAddress: string
-    price?: number | null
-    listed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11467,10 +11370,8 @@ export namespace Prisma {
     tokenId: string
     name: string
     description?: string | null
-    imageUrl: string
+    metadataUrl?: string
     contractAddress: string
-    price?: number | null
-    listed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11488,9 +11389,11 @@ export namespace Prisma {
   export type CollectionCreateWithoutOwnerInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11498,9 +11401,11 @@ export namespace Prisma {
   export type CollectionUncheckedCreateWithoutOwnerInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11599,11 +11504,9 @@ export namespace Prisma {
     tokenId?: StringFilter<"NFT"> | string
     name?: StringFilter<"NFT"> | string
     description?: StringNullableFilter<"NFT"> | string | null
-    imageUrl?: StringFilter<"NFT"> | string
+    metadataUrl?: StringFilter<"NFT"> | string
     contractAddress?: StringFilter<"NFT"> | string
     ownerAddress?: StringFilter<"NFT"> | string
-    price?: FloatNullableFilter<"NFT"> | number | null
-    listed?: BoolFilter<"NFT"> | boolean
     createdAt?: DateTimeFilter<"NFT"> | Date | string
     updatedAt?: DateTimeFilter<"NFT"> | Date | string
   }
@@ -11630,10 +11533,12 @@ export namespace Prisma {
     NOT?: CollectionScalarWhereInput | CollectionScalarWhereInput[]
     id?: StringFilter<"Collection"> | string
     name?: StringFilter<"Collection"> | string
+    symbol?: StringNullableFilter<"Collection"> | string | null
     description?: StringNullableFilter<"Collection"> | string | null
     contractURI?: StringNullableFilter<"Collection"> | string | null
     contractAddress?: StringFilter<"Collection"> | string
     ownerAddress?: StringFilter<"Collection"> | string
+    pinataGroupId?: StringNullableFilter<"Collection"> | string | null
     createdAt?: DateTimeFilter<"Collection"> | Date | string
     updatedAt?: DateTimeFilter<"Collection"> | Date | string
   }
@@ -11847,10 +11752,8 @@ export namespace Prisma {
     tokenId: string
     name: string
     description?: string | null
-    imageUrl: string
+    metadataUrl?: string
     contractAddress: string
-    price?: number | null
-    listed?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11858,9 +11761,11 @@ export namespace Prisma {
   export type CollectionCreateManyOwnerInput = {
     id?: string
     name: string
+    symbol?: string | null
     description?: string | null
     contractURI?: string | null
     contractAddress: string
+    pinataGroupId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -11890,10 +11795,8 @@ export namespace Prisma {
     tokenId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: StringFieldUpdateOperationsInput | string
+    metadataUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
-    price?: NullableFloatFieldUpdateOperationsInput | number | null
-    listed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11903,10 +11806,8 @@ export namespace Prisma {
     tokenId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: StringFieldUpdateOperationsInput | string
+    metadataUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
-    price?: NullableFloatFieldUpdateOperationsInput | number | null
-    listed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11916,10 +11817,8 @@ export namespace Prisma {
     tokenId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
-    imageUrl?: StringFieldUpdateOperationsInput | string
+    metadataUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
-    price?: NullableFloatFieldUpdateOperationsInput | number | null
-    listed?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11927,9 +11826,11 @@ export namespace Prisma {
   export type CollectionUpdateWithoutOwnerInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11937,9 +11838,11 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateWithoutOwnerInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -11947,9 +11850,11 @@ export namespace Prisma {
   export type CollectionUncheckedUpdateManyWithoutOwnerInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
+    symbol?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     contractURI?: NullableStringFieldUpdateOperationsInput | string | null
     contractAddress?: StringFieldUpdateOperationsInput | string
+    pinataGroupId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

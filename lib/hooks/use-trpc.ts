@@ -38,7 +38,7 @@ export function useNFTs() {
 }
 
 export function useUserNFTs(ownerAddress: string | undefined) {
-  return trpc.nft.getByOwner.useQuery(
+  return trpc.nft.getByOwnerAddress.useQuery(
     { ownerAddress: ownerAddress! },
     {
       enabled: !!ownerAddress,

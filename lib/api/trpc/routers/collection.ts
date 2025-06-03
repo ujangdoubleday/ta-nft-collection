@@ -71,10 +71,12 @@ export const collectionRouter = router({
     .input(
       z.object({
         name: z.string(),
+        symbol: z.string().optional(),
         description: z.string().optional(),
         contractURI: z.string().optional(),
         contractAddress: z.string(),
         ownerAddress: z.string(),
+        pinataGroupId: z.string().optional(),
       }),
     )
     .mutation(async ({ input }) => {
@@ -128,6 +130,7 @@ export const collectionRouter = router({
       z.object({
         id: z.string(),
         name: z.string().optional(),
+        symbol: z.string().optional(),
         description: z.string().optional(),
         contractURI: z.string().optional(),
         ownerAddress: z.string().optional(),
