@@ -15,12 +15,6 @@ export function useNFTByTokenId(tokenId: string, contractAddress: string) {
       enabled: !!tokenId && !!contractAddress,
       // Don't refetch on window focus for better UX
       refetchOnWindowFocus: false,
-      // Cache data for 5 minutes
-      staleTime: 5 * 60 * 1000,
-      // Keep cached data for 10 minutes
-      gcTime: 10 * 60 * 1000,
-      // Use a consistent cache key
-      queryKey: ['nft', contractAddress, tokenId],
     },
   );
 
