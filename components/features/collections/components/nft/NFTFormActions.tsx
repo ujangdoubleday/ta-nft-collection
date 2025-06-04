@@ -15,7 +15,7 @@ export function NFTFormActions({
   showConfirmation = false,
 }: NFTFormActionsProps) {
   return (
-    <div className="flex justify-between mt-6">
+    <div className="flex justify-end mt-8 py-2">
       <Button
         type="button"
         variant="outline"
