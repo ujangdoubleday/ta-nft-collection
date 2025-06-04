@@ -9,6 +9,7 @@ interface NextImageProps extends Omit<ImageProps, 'placeholder' | 'blurDataURL'>
   placeholderType?: 'blur' | 'empty' | 'win98';
   wrapperClassName?: string;
   blurDataURL?: string;
+  unoptimized?: boolean;
 }
 
 export function NextImage({
@@ -17,11 +18,12 @@ export function NextImage({
   width,
   height,
   fallbackSrc = '/assets/images/placeholders/image-placeholder.svg',
-  placeholderType = 'win98',
+  placeholderType = 'blur',
   wrapperClassName,
   className,
   onError,
   blurDataURL,
+  unoptimized = true,
   ...rest
 }: NextImageProps) {
   const [imgSrc, setImgSrc] = useState<string | null>(null);
@@ -116,8 +118,8 @@ export function NextImage({
         )}
         onLoad={handleLoad}
         onError={handleError}
-        placeholder={placeholderType === 'blur' ? 'blur' : undefined}
-        blurDataURL={placeholderType === 'blur' ? blurDataURL || defaultBlurDataURL : undefined}
+        placeholder="blur"
+        blurDataURL={blurDataURL || defaultBlurDataURL}
         {...rest}
       />
     </div>
