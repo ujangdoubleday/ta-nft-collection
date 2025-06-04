@@ -1,5 +1,6 @@
 import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev'
 import withBundleAnalyzer from '@next/bundle-analyzer'
+import withPlaiceholder from '@plaiceholder/next'
 
 const withAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -67,7 +68,8 @@ const baseConfig = {
   },
 }
 
-const nextConfig = withAnalyzer(baseConfig)
+// Apply plaiceholder and bundle analyzer
+const nextConfig = withPlaiceholder(withAnalyzer(baseConfig))
 
 if (process.env.NODE_ENV === 'development') {
   await setupDevPlatform()

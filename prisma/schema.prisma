@@ -69,6 +69,7 @@ model NFT {
   name            String
   description     String?
   metadataUrl     String   @default("")
+  imageUrl        String   @default("")
   contractAddress String
   ownerAddress    String
   owner           User     @relation(fields: [ownerAddress], references: [address])
@@ -79,7 +80,8 @@ model NFT {
 }
 
 model Collection {
-  id              String   @id @default(uuid())
+  id String @id @default(uuid())
+
   name            String
   symbol          String?
   description     String?

@@ -5,6 +5,8 @@ import { ClientNFTDetail } from './ClientNFTDetail';
 import { Win98Spinner } from '@/components/ui/organisms/Win98Spinner';
 import { CollectionErrorMessage, NFTErrorMessage } from '../errors';
 import { useEffect, useState } from 'react';
+import { formatIPFSUrl } from '@/lib/utils/helpers/url';
+import { generateSimpleColorPlaceholder } from '@/lib/utils/helpers/plaiceholder';
 
 // Define gateway URL from environment variable or use default
 const gatewayUrl = 'cyan-dead-reptile-256.mypinata.cloud';
@@ -55,6 +57,7 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const [metadataError, setMetadataError] = useState(false);
   const [metadataTimeout, setMetadataTimeout] = useState(false);
+  const [placeholderImage, setPlaceholderImage] = useState<string | null>(null);
 
   // Fetch collection data using tRPC hook
   const {
@@ -70,6 +73,23 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
     error: nftError,
   } = useNFTByTokenId(nftId, contractAddress);
 
+  // Generate a placeholder for the NFT
+  useEffect(() => {
+    if (dbNft) {
+      const generatePlaceholder = async () => {
+        try {
+          // Generate a placeholder based on NFT ID
+          const placeholder = await generateSimpleColorPlaceholder(dbNft.imageUrl);
+          setPlaceholderImage(placeholder);
+        } catch (error) {
+          console.error('Error generating placeholder:', error);
+        }
+      };
+
+      generatePlaceholder();
+    }
+  }, [dbNft]);
+
   // Fetch metadata from IPFS with timeout
   useEffect(() => {
     if (dbNft?.metadataUrl && !metadata && !isLoadingMetadata) {
@@ -84,12 +104,32 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
         }, 5000); // 5 seconds timeout
 
         try {
-          // Extract CID from metadataUrl
+          // Use imageUrl from database if available
+          let imageUrl = '';
+
+          if (dbNft.imageUrl) {
+            // Format the image URL properly if it's an IPFS URL
+            imageUrl = formatIPFSUrl(dbNft.imageUrl);
+            console.log('Using imageUrl from database:', imageUrl);
+
+            // Create minimal metadata with the database image
+            setMetadata({
+              name: dbNft.name,
+              description: dbNft.description || '',
+              image: imageUrl,
+              directImageUrl: imageUrl,
+              attributes: [],
+            });
+            clearTimeout(timeoutId);
+            setIsLoadingMetadata(false);
+            return;
+          }
+
+          // If no imageUrl in database, extract CID from metadataUrl as fallback
           const cidMatch = dbNft.metadataUrl.match(/\/ipfs\/([^/]+)/);
           const cid = cidMatch ? cidMatch[1] : null;
 
           // Construct image URL directly if we have CID
-          let imageUrl = '/assets/images/nfts/placeholder.svg';
           if (cid) {
             // Use CID directly as the image URL with the gateway from env
             imageUrl = `https://${gatewayUrl}/ipfs/${cid}`;
@@ -97,7 +137,10 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
 
           // Fetch metadata for attributes and other details
           const controller = new AbortController();
-          const fetchTimeoutId = setTimeout(() => controller.abort(), 3000); // 3 seconds fetch timeout
+          const fetchTimeoutId = setTimeout(
+            () => controller.abort(new DOMException('Timeout', 'TimeoutError')),
+            3000,
+          ); // 3 seconds fetch timeout
 
           const response = await fetch(dbNft.metadataUrl, {
             signal: controller.signal,
@@ -108,10 +151,21 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
 
           if (response.ok) {
             const data = await response.json();
+
+            // Process the image URL from metadata
+            let metadataImageUrl = data.image || '';
+
+            // If the image URL is an IPFS URL, convert it to use our gateway
+            if (metadataImageUrl.includes('ipfs://')) {
+              const ipfsCid = metadataImageUrl.replace('ipfs://', '').split('/')[0];
+              metadataImageUrl = `https://${gatewayUrl}/ipfs/${ipfsCid}`;
+            }
+
             // Add the direct image URL to the metadata
             setMetadata({
               ...data,
-              directImageUrl: imageUrl,
+              image: metadataImageUrl,
+              directImageUrl: metadataImageUrl || imageUrl,
             });
             clearTimeout(timeoutId); // Clear the timeout if successful
           } else {
@@ -172,6 +226,16 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
     attributes.rarity = 'Common';
   }
 
+  // Get the image URL with fallbacks
+  let imageUrl = '';
+  if (dbNft.imageUrl) {
+    imageUrl = formatIPFSUrl(dbNft.imageUrl);
+  } else if (metadata?.directImageUrl) {
+    imageUrl = metadata.directImageUrl;
+  } else if (metadata?.image) {
+    imageUrl = metadata.image;
+  }
+
   // Convert database NFT to the expected format
   const nft: NFTItem = {
     name: metadata?.name || dbNft.name,
@@ -187,7 +251,7 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
       : new Date().toISOString().split('T')[0],
     tokenId: dbNft.tokenId,
     blockchain: 'Ethereum', // Assuming Ethereum for now
-    image: metadata?.directImageUrl || metadata?.image || '/assets/images/nfts/placeholder.svg',
+    image: imageUrl || '',
     attributes: attributes,
     history: [
       {
@@ -208,6 +272,7 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
       nftId={nftId}
       nft={nft}
       collectionName={collection.name}
+      placeholderImage={placeholderImage}
     />
   );
 };

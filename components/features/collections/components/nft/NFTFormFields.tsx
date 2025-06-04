@@ -85,11 +85,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
           </div>
 
           <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-            <div className="win98-bar h-6 flex items-center px-2 mb-3">
-              <span className="text-white text-xs font-semibold tracking-tight">
-                NFT File Upload
-              </span>
-            </div>
+            <label className="text-black text-xs font-bold block mb-1">NFT File Upload</label>
 
             <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white p-4 bg-white flex flex-col items-center justify-center">
               <div className="text-center">
@@ -124,7 +120,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
                 <p className="text-xs text-center mt-2">Selected file: {formData.file.name}</p>
               )}
             </div>
-            <p className="text-xs text-[#808080] mt-1">
+            <p className="text-xs text-[#505050] mt-1">
               Supported formats: PNG, JPG, GIF, MP4 (max 30MB)
             </p>
           </div>
@@ -133,9 +129,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
 
       <div className="space-y-4">
         <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-          <div className="win98-bar h-6 flex items-center px-2 mb-3">
-            <span className="text-white text-xs font-semibold tracking-tight">Properties</span>
-          </div>
+          <label className="text-black text-xs font-bold block mb-1">Properties</label>
 
           <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white p-2 bg-white">
             {formData.properties.map((prop, index) => (

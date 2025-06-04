@@ -2,13 +2,64 @@
 
 import { CollectionItem } from '@/components/features/collections/types';
 import { NextImage } from '@/components/shared/icons';
+import { useState, useEffect } from 'react';
 
 interface CollectionItemCardProps {
   item: CollectionItem;
   onViewDetails: (itemId: string) => void;
 }
 
+// Image placeholder component
+const ImagePlaceholder = ({ placeholder }: { placeholder?: string }) => {
+  return (
+    <div
+      className="w-full h-full flex items-center justify-center bg-gray-200"
+      style={{
+        backgroundImage: placeholder ? `url(${placeholder})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        filter: 'blur(4px)',
+      }}
+    >
+      <span className="text-white text-sm">Loading...</span>
+    </div>
+  );
+};
+
 export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const [placeholder, setPlaceholder] = useState<string | undefined>(undefined);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Generate placeholder URL for the API
+  useEffect(() => {
+    if (item.placeholder) {
+      // Use the placeholder provided by the item
+      setPlaceholder(item.placeholder);
+    } else if (item.blurhash) {
+      // Use the blurhash provided by the item
+      setPlaceholder(item.blurhash);
+    } else if (item.image) {
+      // Use the API route with the image URL as parameter
+      const encodedUrl = encodeURIComponent(item.image);
+      setPlaceholder(`/api/placeholder?url=${encodedUrl}`);
+    } else if (item.id) {
+      // Fallback to using ID if no image URL
+      setPlaceholder(`/api/placeholder?id=${item.id}`);
+    }
+  }, [item.image, item.id, item.placeholder, item.blurhash]);
+
+  // Handle image error
+  const handleImageError = () => {
+    console.error(`Failed to load image: ${item.image}`);
+    setImageError(true);
+  };
+
+  // Handle image load
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
   return (
     <div
       key={item.id}
@@ -19,23 +70,34 @@ export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardPr
       </div>
 
       <div
-        className="bg-white mb-2 cursor-pointer overflow-hidden relative transition-all duration-200 hover:opacity-90 hover:shadow-md"
+        className="bg-black mb-2 cursor-pointer overflow-hidden relative transition-all duration-200 hover:opacity-90 hover:shadow-md"
         style={{
           aspectRatio: '1/1',
           width: '100%',
-          position: 'relative',
         }}
         onClick={() => onViewDetails(item.id)}
       >
-        <NextImage
-          src={item.image}
-          alt={item.name}
-          fill={true}
-          sizes="(max-width: 768px) 100vw, 300px"
-          placeholderType="blur"
-          blurDataURL={item.blurhash}
-          className="object-cover"
-        />
+        {item.image && !imageError ? (
+          <>
+            {!imageLoaded && <ImagePlaceholder placeholder={placeholder} />}
+            <NextImage
+              src={item.image}
+              alt={item.name}
+              fill={true}
+              sizes="(max-width: 768px) 100vw, 300px"
+              className={`object-contain transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+              placeholderType="blur"
+              blurDataURL={placeholder}
+              onError={handleImageError}
+              onLoad={handleImageLoad}
+              unoptimized={true} // Disable Next.js image optimization for external URLs
+            />
+          </>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-white text-sm">No image available</span>
+          </div>
+        )}
         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1 text-xs opacity-0 hover:opacity-100 transition-opacity z-10">
           View Details
         </div>

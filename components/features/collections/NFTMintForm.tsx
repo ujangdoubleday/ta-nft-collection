@@ -173,6 +173,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
           name: formData.title,
           description: formData.description || undefined,
           metadataUrl,
+          imageUrl: imageUrl,
           contractAddress: collectionId,
           ownerAddress: address,
         });
@@ -210,7 +211,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
   return (
     <Win98Window
       title={`Create NFT - ${collectionName}`}
-      className="max-w-6xl mx-auto"
+      className="max-w-12xl mx-auto"
       icon="/assets/icons/window/gallery-create.png"
     >
       <form onSubmit={handleSubmit} className="p-4 bg-[#c0c0c0]">

@@ -1,13 +1,12 @@
 'use client';
 
-import { Win98Window } from "@/components/ui/organisms/Win98Window";
+import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { useRouter } from 'next/navigation';
 import { Collection } from '@/components/features/collections/types';
 import {
   CollectionHeader,
   EmptyCollectionContent,
   CollectionItemCard,
-  AddNewButton,
 } from './components/collection';
 
 interface CollectionDetailProps {
@@ -29,8 +28,8 @@ export function CollectionDetail({ collectionId, collection }: CollectionDetailP
   return (
     <Win98Window
       title={`Collection: ${collection.name}`}
-      className="max-w-6xl mx-auto"
       icon="/assets/icons/window/gallery.png"
+      className="max-w-12xl mx-auto"
     >
       <div className="p-4">
         <CollectionHeader description={collection.description} />
@@ -44,10 +43,7 @@ export function CollectionDetail({ collectionId, collection }: CollectionDetailP
             ))}
           </div>
         )}
-
-        <AddNewButton onClick={handleAddNewClick} />
       </div>
     </Win98Window>
   );
 }
-

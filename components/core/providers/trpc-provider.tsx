@@ -14,6 +14,10 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
           queries: {
             retry: false,
             refetchOnWindowFocus: false,
+            // Cache data for 5 minutes
+            staleTime: 5 * 60 * 1000,
+            // Keep cached data for 10 minutes
+            gcTime: 10 * 60 * 1000,
           },
         },
       }),
