@@ -97,7 +97,10 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
 
           // Fetch metadata for attributes and other details
           const controller = new AbortController();
-          const fetchTimeoutId = setTimeout(() => controller.abort(), 3000); // 3 seconds fetch timeout
+          const fetchTimeoutId = setTimeout(
+            () => controller.abort(new DOMException('Timeout', 'TimeoutError')),
+            3000,
+          ); // 3 seconds fetch timeout
 
           const response = await fetch(dbNft.metadataUrl, {
             signal: controller.signal,
@@ -108,10 +111,21 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
 
           if (response.ok) {
             const data = await response.json();
+
+            // Process the image URL from metadata
+            let metadataImageUrl = data.image || '';
+
+            // If the image URL is an IPFS URL, convert it to use our gateway
+            if (metadataImageUrl.includes('ipfs://')) {
+              const ipfsCid = metadataImageUrl.replace('ipfs://', '').split('/')[0];
+              metadataImageUrl = `https://${gatewayUrl}/ipfs/${ipfsCid}`;
+            }
+
             // Add the direct image URL to the metadata
             setMetadata({
               ...data,
-              directImageUrl: imageUrl,
+              image: metadataImageUrl,
+              directImageUrl: metadataImageUrl || imageUrl,
             });
             clearTimeout(timeoutId); // Clear the timeout if successful
           } else {
