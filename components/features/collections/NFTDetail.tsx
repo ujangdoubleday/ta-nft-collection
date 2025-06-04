@@ -14,9 +14,10 @@ interface NFTDetailProps {
   collectionId: string;
   nftId: string;
   nft: NFTItem;
+  placeholderImage?: string | null;
 }
 
-export function NFTDetail({ collectionId, nftId: _nftId, nft }: NFTDetailProps) {
+export function NFTDetail({ collectionId, nftId: _nftId, nft, placeholderImage }: NFTDetailProps) {
   return (
     <Win98Window
       title={`NFT: ${nft.name}`}
@@ -26,7 +27,12 @@ export function NFTDetail({ collectionId, nftId: _nftId, nft }: NFTDetailProps) 
       <div className="p-3">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
           <div className="md:col-span-6">
-            <NFTPreview name={nft.name} description={nft.description} image={nft.image} />
+            <NFTPreview
+              name={nft.name}
+              description={nft.description}
+              image={nft.image}
+              placeholderImage={placeholderImage}
+            />
           </div>
 
           <div className="md:col-span-6">

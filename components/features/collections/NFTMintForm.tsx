@@ -173,6 +173,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
           name: formData.title,
           description: formData.description || undefined,
           metadataUrl,
+          imageUrl: imageUrl,
           contractAddress: collectionId,
           ownerAddress: address,
         });
