@@ -2,6 +2,7 @@
 
 import { CollectionItem } from '@/components/features/collections/types';
 import { NextImage } from '@/components/shared/icons';
+import Image from 'next/image';
 
 interface CollectionItemCardProps {
   item: CollectionItem;
@@ -19,22 +20,20 @@ export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardPr
       </div>
 
       <div
-        className="bg-white mb-2 cursor-pointer overflow-hidden relative transition-all duration-200 hover:opacity-90 hover:shadow-md"
+        className="bg-black mb-2 cursor-pointer overflow-hidden relative transition-all duration-200 hover:opacity-90 hover:shadow-md"
         style={{
           aspectRatio: '1/1',
           width: '100%',
-          position: 'relative',
         }}
         onClick={() => onViewDetails(item.id)}
       >
-        <NextImage
+        <Image
           src={item.image}
           alt={item.name}
           fill={true}
           sizes="(max-width: 768px) 100vw, 300px"
-          placeholderType="blur"
-          blurDataURL={item.blurhash}
-          className="object-cover"
+          className="object-contain"
+          unoptimized={true}
         />
         <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1 text-xs opacity-0 hover:opacity-100 transition-opacity z-10">
           View Details

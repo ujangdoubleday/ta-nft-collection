@@ -122,7 +122,10 @@ export const TrpcCollectionDetail = ({ contractAddress }: TrpcCollectionDetailPr
             if (nft.metadataUrl) {
               try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 seconds timeout per request
+                const timeoutId = setTimeout(
+                  () => controller.abort(new DOMException('Timeout', 'TimeoutError')),
+                  3000,
+                ); // 3 seconds timeout per request
 
                 // Fetch the metadata from the metadataUrl
                 const response = await fetch(nft.metadataUrl, {

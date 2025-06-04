@@ -230,7 +230,7 @@ export function CollectionForm({}: CollectionFormProps) {
   return (
     <Win98Window
       title="Create Collection - NFT Creator Wizard"
-      className="max-w-6xl mx-auto"
+      className="max-w-12xl mx-auto"
       icon="/assets/icons/window/gallery-create.png"
     >
       <form onSubmit={handleSubmit} className="p-4 bg-[#c0c0c0]">
