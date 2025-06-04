@@ -90,6 +90,7 @@ export const nftRouter = router({
         name: z.string(),
         description: z.string().optional(),
         metadataUrl: z.string(),
+        imageUrl: z.string(),
         contractAddress: z.string(),
         ownerAddress: z.string(),
       }),

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { NFTDetail } from "@/components/features/collections";
+import { NFTDetail } from '@/components/features/collections';
 
 // Type definition for NFT history
 type HistoryItem = {
@@ -31,16 +31,24 @@ interface ClientNFTDetailProps {
   nftId: string;
   nft: NFTItem;
   collectionName: string;
+  placeholderImage?: string | null;
 }
 
 export const ClientNFTDetail = ({
   collectionId,
   nftId,
   nft,
+  collectionName,
+  placeholderImage,
 }: ClientNFTDetailProps) => {
   return (
     <>
-      <NFTDetail collectionId={collectionId} nftId={nftId} nft={nft} />
+      <NFTDetail
+        collectionId={collectionId}
+        nftId={nftId}
+        nft={nft}
+        placeholderImage={placeholderImage}
+      />
     </>
   );
 };

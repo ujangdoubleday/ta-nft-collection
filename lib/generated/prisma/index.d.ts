@@ -5878,6 +5878,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     metadataUrl: string | null
+    imageUrl: string | null
     contractAddress: string | null
     ownerAddress: string | null
     createdAt: Date | null
@@ -5890,6 +5891,7 @@ export namespace Prisma {
     name: string | null
     description: string | null
     metadataUrl: string | null
+    imageUrl: string | null
     contractAddress: string | null
     ownerAddress: string | null
     createdAt: Date | null
@@ -5902,6 +5904,7 @@ export namespace Prisma {
     name: number
     description: number
     metadataUrl: number
+    imageUrl: number
     contractAddress: number
     ownerAddress: number
     createdAt: number
@@ -5916,6 +5919,7 @@ export namespace Prisma {
     name?: true
     description?: true
     metadataUrl?: true
+    imageUrl?: true
     contractAddress?: true
     ownerAddress?: true
     createdAt?: true
@@ -5928,6 +5932,7 @@ export namespace Prisma {
     name?: true
     description?: true
     metadataUrl?: true
+    imageUrl?: true
     contractAddress?: true
     ownerAddress?: true
     createdAt?: true
@@ -5940,6 +5945,7 @@ export namespace Prisma {
     name?: true
     description?: true
     metadataUrl?: true
+    imageUrl?: true
     contractAddress?: true
     ownerAddress?: true
     createdAt?: true
@@ -6025,6 +6031,7 @@ export namespace Prisma {
     name: string
     description: string | null
     metadataUrl: string
+    imageUrl: string
     contractAddress: string
     ownerAddress: string
     createdAt: Date
@@ -6054,6 +6061,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     metadataUrl?: boolean
+    imageUrl?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
     createdAt?: boolean
@@ -6067,6 +6075,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     metadataUrl?: boolean
+    imageUrl?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
     createdAt?: boolean
@@ -6080,6 +6089,7 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     metadataUrl?: boolean
+    imageUrl?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
     createdAt?: boolean
@@ -6093,13 +6103,14 @@ export namespace Prisma {
     name?: boolean
     description?: boolean
     metadataUrl?: boolean
+    imageUrl?: boolean
     contractAddress?: boolean
     ownerAddress?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type NFTOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tokenId" | "name" | "description" | "metadataUrl" | "contractAddress" | "ownerAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["nFT"]>
+  export type NFTOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "tokenId" | "name" | "description" | "metadataUrl" | "imageUrl" | "contractAddress" | "ownerAddress" | "createdAt" | "updatedAt", ExtArgs["result"]["nFT"]>
   export type NFTInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     owner?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -6121,6 +6132,7 @@ export namespace Prisma {
       name: string
       description: string | null
       metadataUrl: string
+      imageUrl: string
       contractAddress: string
       ownerAddress: string
       createdAt: Date
@@ -6554,6 +6566,7 @@ export namespace Prisma {
     readonly name: FieldRef<"NFT", 'String'>
     readonly description: FieldRef<"NFT", 'String'>
     readonly metadataUrl: FieldRef<"NFT", 'String'>
+    readonly imageUrl: FieldRef<"NFT", 'String'>
     readonly contractAddress: FieldRef<"NFT", 'String'>
     readonly ownerAddress: FieldRef<"NFT", 'String'>
     readonly createdAt: FieldRef<"NFT", 'DateTime'>
@@ -9187,6 +9200,7 @@ export namespace Prisma {
     name: 'name',
     description: 'description',
     metadataUrl: 'metadataUrl',
+    imageUrl: 'imageUrl',
     contractAddress: 'contractAddress',
     ownerAddress: 'ownerAddress',
     createdAt: 'createdAt',
@@ -9594,6 +9608,7 @@ export namespace Prisma {
     name?: StringFilter<"NFT"> | string
     description?: StringNullableFilter<"NFT"> | string | null
     metadataUrl?: StringFilter<"NFT"> | string
+    imageUrl?: StringFilter<"NFT"> | string
     contractAddress?: StringFilter<"NFT"> | string
     ownerAddress?: StringFilter<"NFT"> | string
     createdAt?: DateTimeFilter<"NFT"> | Date | string
@@ -9607,6 +9622,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     metadataUrl?: SortOrder
+    imageUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
     createdAt?: SortOrder
@@ -9624,6 +9640,7 @@ export namespace Prisma {
     name?: StringFilter<"NFT"> | string
     description?: StringNullableFilter<"NFT"> | string | null
     metadataUrl?: StringFilter<"NFT"> | string
+    imageUrl?: StringFilter<"NFT"> | string
     contractAddress?: StringFilter<"NFT"> | string
     ownerAddress?: StringFilter<"NFT"> | string
     createdAt?: DateTimeFilter<"NFT"> | Date | string
@@ -9637,6 +9654,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrderInput | SortOrder
     metadataUrl?: SortOrder
+    imageUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
     createdAt?: SortOrder
@@ -9655,6 +9673,7 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"NFT"> | string
     description?: StringNullableWithAggregatesFilter<"NFT"> | string | null
     metadataUrl?: StringWithAggregatesFilter<"NFT"> | string
+    imageUrl?: StringWithAggregatesFilter<"NFT"> | string
     contractAddress?: StringWithAggregatesFilter<"NFT"> | string
     ownerAddress?: StringWithAggregatesFilter<"NFT"> | string
     createdAt?: DateTimeWithAggregatesFilter<"NFT"> | Date | string
@@ -10096,6 +10115,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     metadataUrl?: string
+    imageUrl?: string
     contractAddress: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -10108,6 +10128,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     metadataUrl?: string
+    imageUrl?: string
     contractAddress: string
     ownerAddress: string
     createdAt?: Date | string
@@ -10120,6 +10141,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     metadataUrl?: StringFieldUpdateOperationsInput | string
+    imageUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10132,6 +10154,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     metadataUrl?: StringFieldUpdateOperationsInput | string
+    imageUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     ownerAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10144,6 +10167,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     metadataUrl?: string
+    imageUrl?: string
     contractAddress: string
     ownerAddress: string
     createdAt?: Date | string
@@ -10156,6 +10180,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     metadataUrl?: StringFieldUpdateOperationsInput | string
+    imageUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10167,6 +10192,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     metadataUrl?: StringFieldUpdateOperationsInput | string
+    imageUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     ownerAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -10672,6 +10698,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     metadataUrl?: SortOrder
+    imageUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
     createdAt?: SortOrder
@@ -10684,6 +10711,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     metadataUrl?: SortOrder
+    imageUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
     createdAt?: SortOrder
@@ -10696,6 +10724,7 @@ export namespace Prisma {
     name?: SortOrder
     description?: SortOrder
     metadataUrl?: SortOrder
+    imageUrl?: SortOrder
     contractAddress?: SortOrder
     ownerAddress?: SortOrder
     createdAt?: SortOrder
@@ -11360,6 +11389,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     metadataUrl?: string
+    imageUrl?: string
     contractAddress: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11371,6 +11401,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     metadataUrl?: string
+    imageUrl?: string
     contractAddress: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11505,6 +11536,7 @@ export namespace Prisma {
     name?: StringFilter<"NFT"> | string
     description?: StringNullableFilter<"NFT"> | string | null
     metadataUrl?: StringFilter<"NFT"> | string
+    imageUrl?: StringFilter<"NFT"> | string
     contractAddress?: StringFilter<"NFT"> | string
     ownerAddress?: StringFilter<"NFT"> | string
     createdAt?: DateTimeFilter<"NFT"> | Date | string
@@ -11753,6 +11785,7 @@ export namespace Prisma {
     name: string
     description?: string | null
     metadataUrl?: string
+    imageUrl?: string
     contractAddress: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -11796,6 +11829,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     metadataUrl?: StringFieldUpdateOperationsInput | string
+    imageUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11807,6 +11841,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     metadataUrl?: StringFieldUpdateOperationsInput | string
+    imageUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -11818,6 +11853,7 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     metadataUrl?: StringFieldUpdateOperationsInput | string
+    imageUrl?: StringFieldUpdateOperationsInput | string
     contractAddress?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
