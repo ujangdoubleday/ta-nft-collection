@@ -3,7 +3,17 @@ export type CollectionItem = {
   name: string;
   type: string;
   image: string;
+  /**
+   * @deprecated Use NextImage with placeholderType instead
+   * The blurhash field is maintained for backwards compatibility
+   * but will contain a data URL for a color-based placeholder
+   */
   blurhash?: string;
+  /**
+   * Data URL for the image placeholder
+   * This can be used with NextImage component's blurDataURL prop
+   */
+  placeholder?: string;
   attributes: {
     rarity?: string;
     pixels?: string;
