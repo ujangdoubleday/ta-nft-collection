@@ -1,4 +1,4 @@
-import { Win98Window } from "@/components/ui/win98";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import Image from "next/image";
 
 export function Welcome() {
@@ -50,3 +50,4 @@ export function Welcome() {
     </Win98Window>
   );
 }
+

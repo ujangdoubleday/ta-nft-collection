@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Win98Window } from "@/components/ui/win98";
+import { Button } from "@/components/ui/atoms/button";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import { useRouter } from "next/navigation";
 
 interface NFTErrorMessageProps {
@@ -55,3 +55,5 @@ export const NFTErrorMessage = ({
     </Win98Window>
   );
 };
+
+

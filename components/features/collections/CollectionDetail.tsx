@@ -1,24 +1,20 @@
-"use client";
+'use client';
 
-import { Win98Window } from "@/components/ui/win98";
-import { useRouter } from "next/navigation";
-import { Collection } from "./types";
+import { Win98Window } from '@/components/ui/organisms/Win98Window';
+import { useRouter } from 'next/navigation';
+import { Collection } from '@/components/features/collections/types';
 import {
   CollectionHeader,
   EmptyCollectionContent,
   CollectionItemCard,
-  AddNewButton,
-} from "./components/collection";
+} from './components/collection';
 
 interface CollectionDetailProps {
   collectionId: string;
   collection: Collection;
 }
 
-export function CollectionDetail({
-  collectionId,
-  collection,
-}: CollectionDetailProps) {
+export function CollectionDetail({ collectionId, collection }: CollectionDetailProps) {
   const router = useRouter();
 
   const handleAddNewClick = () => {
@@ -32,8 +28,8 @@ export function CollectionDetail({
   return (
     <Win98Window
       title={`Collection: ${collection.name}`}
-      className="max-w-6xl mx-auto"
       icon="/assets/icons/window/gallery.png"
+      className="max-w-12xl mx-auto"
     >
       <div className="p-4">
         <CollectionHeader description={collection.description} />
@@ -43,16 +39,10 @@ export function CollectionDetail({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {collection.items.map((item) => (
-              <CollectionItemCard
-                key={item.id}
-                item={item}
-                onViewDetails={handleViewDetails}
-              />
+              <CollectionItemCard key={item.id} item={item} onViewDetails={handleViewDetails} />
             ))}
           </div>
         )}
-
-        <AddNewButton onClick={handleAddNewClick} />
       </div>
     </Win98Window>
   );

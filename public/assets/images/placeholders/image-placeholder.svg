@@ -1,0 +1,15 @@
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="200" fill="#c0c0c0"/>
+  
+  <!-- Border Win98-style -->
+  <rect x="0" y="0" width="198" height="198" fill="none" 
+        stroke-width="2" stroke="#ffffff" />
+  <rect x="2" y="2" width="196" height="196" fill="none" 
+        stroke-width="2" stroke="#808080" />
+  
+  <!-- Image icon -->
+  <rect x="50" y="50" width="100" height="80" fill="#ffffff" stroke="#000000"/>
+  <circle cx="75" cy="75" r="10" fill="#000000"/>
+  <polygon points="60,120 95,90 120,110 150,70 150,120 60,120" fill="#000000"/>
+</svg> 

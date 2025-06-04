@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Win98Window } from "@/components/ui/win98";
+import { Button } from "@/components/ui/atoms/button";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import Image from "next/image";
 
 export type CollectionCardProps = {
@@ -54,3 +54,5 @@ export function CollectionCard({
     </Win98Window>
   );
 }
+
+

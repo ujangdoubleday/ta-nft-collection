@@ -1,9 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Win98Window } from "@/components/ui/win98";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { Win98Window } from '@/components/ui/organisms/Win98Window';
+import { Button, Input } from '@/components/ui/atoms';
 
 type FormData = {
   name: string;
@@ -15,19 +14,17 @@ type FormData = {
 
 export function ContactForm() {
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-    category: "general",
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+    category: 'general',
   });
 
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -39,42 +36,35 @@ export function ContactForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Here you would normally send the form data to a server
-    console.log("Form submitted:", formData);
+    console.log('Form submitted:', formData);
     // Show success message
     setShowSuccess(true);
     // Reset form after 3 seconds
     setTimeout(() => {
       setFormData({
-        name: "",
-        email: "",
-        subject: "",
-        message: "",
-        category: "general",
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+        category: 'general',
       });
       setShowSuccess(false);
     }, 3000);
   };
 
   return (
-    <Win98Window
-      title="Message Form"
-      icon="/assets/icons/window/form.png"
-      className="mb-4"
-    >
+    <Win98Window title="Message Form" icon="/assets/icons/window/form.png" className="mb-4">
       <div className="p-4 text-black">
         <div className="mb-4 win98-shadow-inset p-3 bg-white">
           <p className="text-xs">
-            Have a question, suggestion, or just want to say hello? Fill out the
-            form below and I&apos;ll get back to you as soon as possible. All
-            fields marked with * are required.
+            Have a question, suggestion, or just want to say hello? Fill out the form below and
+            I&apos;ll get back to you as soon as possible. All fields marked with * are required.
           </p>
         </div>
 
         {showSuccess && (
           <div className="mb-4 bg-[#c1ffc1] p-2 border-[2px] border-t-[#008000] border-l-[#008000] border-r-[#00ff00] border-b-[#00ff00]">
-            <p className="text-xs text-[#005000] font-bold">
-              Message sent successfully!
-            </p>
+            <p className="text-xs text-[#005000] font-bold">Message sent successfully!</p>
             <p className="text-xs text-[#005000]">
               Thank you for reaching out. I&apos;ll respond as soon as possible.
             </p>
@@ -165,11 +155,11 @@ export function ContactForm() {
                 className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
                 onClick={() =>
                   setFormData({
-                    name: "",
-                    email: "",
-                    subject: "",
-                    message: "",
-                    category: "general",
+                    name: '',
+                    email: '',
+                    subject: '',
+                    message: '',
+                    category: 'general',
                   })
                 }
               >

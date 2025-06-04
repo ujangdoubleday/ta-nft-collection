@@ -1,4 +1,4 @@
-import { Win98Window } from "@/components/ui/win98";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 
 type Feature = {
   icon: string;
@@ -79,3 +79,4 @@ export function Features() {
     </Win98Window>
   );
 }
+

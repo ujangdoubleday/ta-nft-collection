@@ -380,3 +380,167 @@ main > div {
 .win98-dot-spinner-2 {
   animation: win98Dot 1s infinite 0.4s;
 }
+
+/* Console animations and styling */
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+.console-text {
+  color: #33ff33;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.loading-text {
+  overflow: hidden;
+  border-right: 0.15em solid #33ff33;
+  white-space: nowrap;
+  margin: 0 auto;
+  animation: 
+    typing 3s steps(40, end),
+    blink-cursor .75s step-end infinite;
+}
+
+.console-container {
+  background-color: #000000;
+  color: #33ff33;
+  font-family: 'Courier New', monospace;
+  padding: 0.5rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.console-line {
+  margin-bottom: 0.25rem;
+}
+
+.console-cursor {
+  display: inline-block;
+  background-color: #33ff33;
+  width: 0.5rem;
+  height: 1rem;
+  animation: blink-cursor 1s infinite;
+}
+
+/* Success text in console */
+.console-success {
+  color: #33ff33;
+}
+
+/* Info text in console */
+.console-info {
+  color: #33ccff;
+}
+
+/* Warning text in console */
+.console-warning {
+  color: #ffcc00;
+}
+
+/* Error text in console */
+.console-error {
+  color: #ff3333;
+}
+
+/* Windows 98 Console */
+.win98-console {
+  font-family: 'Consolas', 'Courier New', monospace;
+  background-color: #000000;
+  color: #cccccc;
+  overflow: auto;
+}
+
+.win98-console-title {
+  background: linear-gradient(90deg, #000080, #1084d0);
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.win98-console-content {
+  padding: 8px;
+  font-size: 12px;
+}
+
+.win98-console-prompt {
+  color: #cccccc;
+  margin-bottom: 4px;
+}
+
+.win98-console-text {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+}
+
+.win98-console-success {
+  color: #00ff00;
+}
+
+.win98-console-info {
+  color: #aaaaaa;
+}
+
+.win98-console-warning {
+  color: #ffff00;
+}
+
+.win98-console-error {
+  color: #ff0000;
+}
+
+.win98-console-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 12px;
+  background-color: #cccccc;
+  animation: blink-cursor 1s step-end infinite;
+}
+
+/* Blinking cursor animation */
+@keyframes win98-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.win98-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  background-color: #cccccc;
+  animation: win98-cursor-blink 1s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+}
+
+/* Windows 98 progress animation */
+@keyframes win98-progress {
+  0% { background-position: 0 0; }
+  100% { background-position: 30px 0; }
+}
+
+.win98-progress-bar {
+  height: 8px;
+  background-image: linear-gradient(
+    -45deg,
+    #000080 25%,
+    #1084d0 25%,
+    #1084d0 50%,
+    #000080 50%,
+    #000080 75%,
+    #1084d0 75%,
+    #1084d0
+  );
+  background-size: 30px 30px;
+  animation: win98-progress 1s linear infinite;
+}

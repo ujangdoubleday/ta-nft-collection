@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/atoms/button";
 import { FileUp } from "lucide-react";
 
 interface AddNewButtonProps {
@@ -20,3 +20,4 @@ export function AddNewButton({ onClick }: AddNewButtonProps) {
     </div>
   );
 }
+

@@ -1,25 +1,43 @@
-import { useState, useEffect, useCallback } from "react";
-import { ethers } from "ethers";
-import detectEthereumProvider from "@metamask/detect-provider";
+'use client';
 
-// Deklarasi tipe untuk window global
-declare global {
-  interface Window {
-    ethereum?: {
-      request: (args: { method: string; params?: any[] }) => Promise<any>;
-      on: (eventName: string, handler: (...args: any[]) => void) => void;
-      removeListener: (
-        eventName: string,
-        handler: (...args: any[]) => void
-      ) => void;
-      removeAllListeners: (eventName: string) => void;
-      isMetaMask?: boolean;
-    };
-    _forceWalletReconnect?: boolean;
-  }
-}
+import { useCallback, useEffect, useState } from 'react';
+import { verifyMessage } from 'viem';
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  useDisconnect,
+  useSignMessage,
+  useWalletClient,
+} from 'wagmi';
+import { injected } from 'wagmi/connectors';
+import { createSiweMessage, signInWithEthereum } from '@/lib/auth/siwe';
+import { useSession, signOut } from 'next-auth/react';
 
-export type WalletState = {
+// Local storage keys
+const DISCONNECTED_KEY = 'wallet_disconnected';
+
+// Helper to check if code is running in browser
+const isBrowser = typeof window !== 'undefined';
+
+// Safe localStorage access
+const getFromStorage = (key: string): string | null => {
+  if (!isBrowser) return null;
+  return localStorage.getItem(key);
+};
+
+const setToStorage = (key: string, value: string): void => {
+  if (!isBrowser) return;
+  localStorage.setItem(key, value);
+};
+
+const removeFromStorage = (key: string): void => {
+  if (!isBrowser) return;
+  localStorage.removeItem(key);
+};
+
+// Wallet state interface
+interface WalletState {
   address: string | null;
   chainId: string | null;
   isConnecting: boolean;
@@ -28,168 +46,70 @@ export type WalletState = {
   manuallyDisconnected: boolean;
   isAuthenticated: boolean;
   isAuthenticating: boolean;
-};
+}
 
-// Tambahkan local storage key untuk menyimpan status disconnect
-const DISCONNECTED_KEY = "wallet_manually_disconnected";
-// Key untuk menyimpan status autentikasi
-const AUTHENTICATED_KEY = "wallet_authenticated";
-
-/**
- * Hook untuk mengelola koneksi wallet dan autentikasi
- */
-export function useWallet() {
-  // Inisialisasi state dengan memeriksa local storage
+export function useWalletWagmi() {
+  // Initialize state with dummy values for SSR
   const [state, setState] = useState<WalletState>({
     address: null,
     chainId: null,
     isConnecting: false,
     isConnected: false,
     error: null,
-    manuallyDisconnected: localStorage.getItem(DISCONNECTED_KEY) === "true",
-    isAuthenticated: localStorage.getItem(AUTHENTICATED_KEY) === "true",
+    manuallyDisconnected: false,
+    isAuthenticated: false,
     isAuthenticating: false,
   });
 
-  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
-
-  // Reset error state setiap kali component re-render
+  // Update state with localStorage values after mount
   useEffect(() => {
-    if (state.error) {
-      // Auto-clear errors after 5 seconds
-      const timer = setTimeout(() => {
-        setState((prev) => ({ ...prev, error: null }));
-      }, 5000);
+    setState((prev) => ({
+      ...prev,
+      manuallyDisconnected: getFromStorage(DISCONNECTED_KEY) === 'true',
+    }));
+  }, []);
 
-      return () => clearTimeout(timer);
+  // Wagmi hooks
+  const { address, isConnected } = useAccount();
+  const chainId = useChainId();
+  const { connectAsync, isPending: isConnectPending } = useConnect();
+  const { disconnectAsync } = useDisconnect();
+  const { data: walletClient } = useWalletClient();
+  const { signMessageAsync, isPending: isSignPending } = useSignMessage();
+
+  // Next Auth session
+  const { data: session, status } = useSession();
+
+  // Update state when account or session changes
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      address: address || null,
+      chainId: chainId ? chainId.toString() : null,
+      isConnected,
+      isConnecting: isConnectPending,
+      isAuthenticating: isSignPending,
+      // Set authenticated based on NextAuth session
+      isAuthenticated: status === 'authenticated',
+    }));
+  }, [address, isConnected, chainId, isConnectPending, isSignPending, status]);
+
+  // Update localStorage when manual disconnect changes
+  useEffect(() => {
+    if (!isBrowser) return;
+
+    if (state.manuallyDisconnected) {
+      setToStorage(DISCONNECTED_KEY, 'true');
+    } else {
+      removeFromStorage(DISCONNECTED_KEY);
     }
-  }, [state.error]);
-
-  // Initialize provider
-  useEffect(() => {
-    const initProvider = async () => {
-      try {
-        const ethereumProvider = await detectEthereumProvider();
-
-        if (ethereumProvider && window.ethereum) {
-          const provider = new ethers.BrowserProvider(window.ethereum as any);
-          setProvider(provider);
-
-          // Check if manually disconnected from local storage
-          const wasDisconnected =
-            localStorage.getItem(DISCONNECTED_KEY) === "true";
-
-          // Only auto-connect if user hasn't manually disconnected
-          if (!wasDisconnected) {
-            try {
-              const accounts = await provider.listAccounts();
-              if (accounts.length > 0) {
-                const network = await provider.getNetwork();
-
-                // Check if previously authenticated
-                const isAuth =
-                  localStorage.getItem(AUTHENTICATED_KEY) === "true";
-
-                setState((prev) => ({
-                  ...prev,
-                  address: accounts[0].address,
-                  chainId: network.chainId.toString(),
-                  isConnected: true,
-                  isAuthenticated: isAuth,
-                  error: null, // Reset any previous errors
-                }));
-              }
-            } catch (accountError) {
-              console.warn("Failed to auto-connect accounts:", accountError);
-              // Silently fail for auto-connect - don't update error state
-            }
-          } else {
-            // If we were manually disconnected, ensure the state reflects this
-            // This prevents any automatic connection attempts by MetaMask
-            setState((prev) => ({
-              ...prev,
-              isConnected: false,
-              isAuthenticated: false,
-              manuallyDisconnected: true,
-              address: null,
-              chainId: null,
-            }));
-          }
-
-          // Listen for account changes
-          window.ethereum.on("accountsChanged", (accounts: string[]) => {
-            if (accounts.length === 0) {
-              // User disconnected
-              setState((prev) => ({
-                ...prev,
-                address: null,
-                isConnected: false,
-                isAuthenticated: false,
-                error: null, // Reset any previous errors
-              }));
-              localStorage.removeItem(AUTHENTICATED_KEY);
-            } else {
-              // Account changed - only update if not manually disconnected
-              const wasDisconnected =
-                localStorage.getItem(DISCONNECTED_KEY) === "true";
-              if (!wasDisconnected) {
-                setState((prev) => ({
-                  ...prev,
-                  address: accounts[0],
-                  isAuthenticated: false, // Require re-authentication on account change
-                  error: null, // Reset any previous errors
-                }));
-                localStorage.removeItem(AUTHENTICATED_KEY);
-              }
-            }
-          });
-
-          // Listen for chain changes
-          window.ethereum.on("chainChanged", (chainId: string) => {
-            setState((prev) => ({
-              ...prev,
-              chainId,
-              isAuthenticated: false, // Require re-authentication on chain change
-              error: null, // Reset any previous errors
-            }));
-            localStorage.removeItem(AUTHENTICATED_KEY);
-          });
-        } else {
-          setState((prev) => ({
-            ...prev,
-            error: "Please install MetaMask to use this feature",
-          }));
-        }
-      } catch (error) {
-        console.error("Error initializing provider:", error);
-        setState((prev) => ({
-          ...prev,
-          error: "Failed to initialize wallet connection",
-        }));
-      }
-    };
-
-    initProvider();
-
-    // Cleanup listeners
-    return () => {
-      if (window.ethereum) {
-        window.ethereum.removeAllListeners("accountsChanged");
-        window.ethereum.removeAllListeners("chainChanged");
-      }
-    };
-  }, []); // Remove dependency on state.manuallyDisconnected, use localStorage instead
+  }, [state.manuallyDisconnected]);
 
   /**
    * Connect to the wallet
    */
   const connect = useCallback(async () => {
-    if (!provider || !window.ethereum) {
-      setState((prev) => ({
-        ...prev,
-        error: "Wallet provider not initialized",
-        isConnecting: false,
-      }));
+    if (!isBrowser) {
       return false;
     }
 
@@ -202,81 +122,65 @@ export function useWallet() {
       }));
 
       // Remove the disconnected flag from localStorage
-      localStorage.removeItem(DISCONNECTED_KEY);
+      removeFromStorage(DISCONNECTED_KEY);
 
-      // Force new connection request if previously disconnected
-      const wasDisconnected = window._forceWalletReconnect;
-      if (wasDisconnected) {
-        // Reset the force reconnect flag
-        delete window._forceWalletReconnect;
-
-        // Force clear any existing connections first
-        try {
-          await window.ethereum.request({
-            method: "wallet_requestPermissions",
-            params: [{ eth_accounts: {} }],
-          });
-        } catch (_e) {
-          console.log(
-            "wallet_requestPermissions failed, falling back to eth_requestAccounts"
-          );
-        }
-      }
-
-      // Request account access
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
+      const result = await connectAsync({
+        connector: injected(),
       });
 
-      if (!accounts || accounts.length === 0) {
-        throw new Error("No accounts returned from wallet");
+      if (!result?.accounts || result.accounts.length === 0) {
+        throw new Error('No accounts returned from wallet');
       }
-
-      const network = await provider.getNetwork();
 
       setState((prev) => ({
         ...prev,
-        address: accounts[0],
-        chainId: network.chainId.toString(),
+        address: result.accounts[0],
+        chainId: result.chainId.toString(),
         isConnected: true,
         isConnecting: false,
         isAuthenticated: false, // Always reset authentication state on connect
         error: null,
       }));
 
-      // Remove authenticated status from localstorage
-      localStorage.removeItem(AUTHENTICATED_KEY);
-
       return true;
     } catch (error: any) {
-      console.error("Error connecting wallet:", error);
+      console.error('Error connecting wallet:', error);
 
-      // Check for user rejected error - common MetaMask error pattern
+      // Check for user rejected error
       const errorMessage = error?.message || String(error);
       const isUserRejected =
-        errorMessage.includes("rejected") ||
-        errorMessage.includes("denied") ||
-        errorMessage.includes("canceled") ||
-        errorMessage.includes("cancelled") ||
-        errorMessage.includes("User rejected");
+        errorMessage.includes('rejected') ||
+        errorMessage.includes('denied') ||
+        errorMessage.includes('canceled') ||
+        errorMessage.includes('cancelled') ||
+        errorMessage.includes('User rejected');
 
       setState((prev) => ({
         ...prev,
         isConnecting: false,
         isConnected: false,
         error: isUserRejected
-          ? "Connection was rejected by user"
+          ? 'Connection was rejected by user'
           : `Error connecting: ${errorMessage}`,
       }));
 
       return false;
     }
-  }, [provider]);
+  }, [connectAsync]);
 
   /**
    * Disconnect from the wallet
    */
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback(async () => {
+    try {
+      await disconnectAsync();
+
+      // Sign out from NextAuth
+      await signOut({ redirect: false });
+    } catch (err) {
+      console.error('Error disconnecting:', err);
+    }
+
     setState((prev) => ({
       ...prev,
       address: null,
@@ -287,117 +191,68 @@ export function useWallet() {
       error: null,
     }));
 
-    // Set flag to force reconnect on next attempt
-    window._forceWalletReconnect = true;
-
     // Store disconnected state to prevent auto-reconnect
-    localStorage.setItem(DISCONNECTED_KEY, "true");
-    // Remove authenticated status
-    localStorage.removeItem(AUTHENTICATED_KEY);
-  }, []);
+    setToStorage(DISCONNECTED_KEY, 'true');
+  }, [disconnectAsync]);
 
   /**
-   * Authenticate the connected wallet
+   * Authenticate the connected wallet using SIWE and NextAuth
    */
-  const authenticate = useCallback(async () => {
-    // Check if window is defined (for SSR)
-    if (typeof window === "undefined") {
-      console.error("Window is not defined, cannot authenticate");
-      return false;
-    }
-
-    // Check if provider and ethereum are available
-    if (!window.ethereum) {
-      console.error("MetaMask is not installed");
-      setState((prev) => ({
-        ...prev,
-        error:
-          "MetaMask tidak terinstall. Harap install MetaMask dan refresh halaman.",
-        isAuthenticating: false,
-      }));
-      return false;
-    }
-
-    if (!provider || !state.address) {
-      setState((prev) => ({
-        ...prev,
-        error: "Connect wallet before authenticating",
-        isAuthenticating: false,
-      }));
-      return false;
-    }
-
-    try {
-      setState((prev) => ({
-        ...prev,
-        isAuthenticating: true,
-        error: null,
-      }));
-
-      console.log("Starting authentication process");
-
-      // Ensure accounts are accessible - this often wakes up MetaMask
-      try {
-        console.log("Requesting accounts to ensure MetaMask is awake");
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-        console.log("Active account:", accounts[0]);
-
-        // Small delay to ensure MetaMask UI is ready
-        await new Promise((resolve) => setTimeout(resolve, 500));
-      } catch (err) {
-        console.error("Error requesting accounts:", err);
-        throw new Error(
-          "Failed to connect to MetaMask. Please check if MetaMask is unlocked."
-        );
+  const authenticate = useCallback(
+    async (onSignComplete?: () => void) => {
+      if (!isBrowser) {
+        return false;
       }
 
-      // Create signature message
-      const message = `Welcome to MyNFTs.exe!\n\nThis signature verifies your wallet ownership.\nIt does not cost any gas or initiate a transaction.\n\nWallet: ${
-        state.address
-      }\nDate: ${new Date().toISOString()}`;
-
-      console.log("Requesting signature using personal_sign");
-
-      // Convert message to hex
-      const hexMessage = ethers.hexlify(ethers.toUtf8Bytes(message));
-      console.log("Requesting signature for address:", state.address);
+      if (!walletClient || !address) {
+        setState((prev) => ({
+          ...prev,
+          error: 'Connect wallet before authenticating',
+          isAuthenticating: false,
+        }));
+        return false;
+      }
 
       try {
-        // Metode 1: Mencoba langsung dengan window.ethereum
-        console.log("Method 1: Using window.ethereum.request directly");
-        let signature;
+        setState((prev) => ({
+          ...prev,
+          isAuthenticating: true,
+          error: null,
+        }));
+
+        // Create SIWE message with address in the statement
+        const statement = `Sign in to MyNFTs.exe with your Ethereum account ${address}.\nThis signature doesn't cost gas and securely identifies you.`;
 
         try {
-          signature = await window.ethereum.request({
-            method: "personal_sign",
-            params: [hexMessage, state.address],
+          const message = await createSiweMessage(address, statement);
+
+          // Sign the message
+          const signature = await signMessageAsync({ message });
+
+          // Verify the signature on the client side
+          const verified = await verifyMessage({
+            address,
+            message,
+            signature,
           });
-        } catch (directError) {
-          console.warn(
-            "Direct method failed, trying fallback method",
-            directError
-          );
 
-          // Metode 2: Mencoba dengan ethers.js BrowserProvider
-          console.log("Method 2: Using ethers.js BrowserProvider");
-          const signer = await provider.getSigner();
-          signature = await signer.signMessage(message);
-        }
+          if (!verified) {
+            throw new Error('Client-side signature verification failed');
+          }
 
-        console.log("Signature received:", !!signature);
+          // Call the callback to indicate signing is complete
+          // This is where we'll show the account creation modal
+          if (onSignComplete) {
+            onSignComplete();
+          }
 
-        // Verify the signature
-        const recoveredAddress = ethers.verifyMessage(message, signature);
+          // Call Next Auth to verify and create session
+          const { success, error } = await signInWithEthereum(message, signature);
 
-        console.log("Verification:", {
-          original: state.address.toLowerCase(),
-          recovered: recoveredAddress.toLowerCase(),
-        });
+          if (!success) {
+            throw new Error(error || 'Sign-in failed');
+          }
 
-        // Check if the recovered address matches the connected address
-        if (recoveredAddress.toLowerCase() === state.address.toLowerCase()) {
           setState((prev) => ({
             ...prev,
             isAuthenticated: true,
@@ -405,38 +260,32 @@ export function useWallet() {
             error: null,
           }));
 
-          // Store authentication state in localStorage
-          localStorage.setItem(AUTHENTICATED_KEY, "true");
           return true;
-        } else {
-          throw new Error("Signature verification failed");
+        } catch (innerError) {
+          throw innerError;
         }
-      } catch (innerError) {
-        console.error("Error in signature process:", innerError);
-        throw innerError; // Re-throw untuk ditangkap oleh catch di luar
+      } catch (error: any) {
+        // Check for user rejected signatures
+        const errorMessage = error?.message || String(error);
+        const isUserRejected =
+          errorMessage.includes('rejected') ||
+          errorMessage.includes('denied') ||
+          errorMessage.includes('canceled') ||
+          errorMessage.includes('cancelled') ||
+          errorMessage.includes('User rejected');
+
+        setState((prev) => ({
+          ...prev,
+          isAuthenticating: false,
+          error: isUserRejected
+            ? 'Signature was rejected by user'
+            : `Error signing: ${errorMessage}`,
+        }));
+        return false;
       }
-    } catch (error: any) {
-      console.error("Authentication error:", error);
-
-      // Check for user rejected signatures
-      const errorMessage = error?.message || String(error);
-      const isUserRejected =
-        errorMessage.includes("rejected") ||
-        errorMessage.includes("denied") ||
-        errorMessage.includes("canceled") ||
-        errorMessage.includes("cancelled") ||
-        errorMessage.includes("User rejected");
-
-      setState((prev) => ({
-        ...prev,
-        isAuthenticating: false,
-        error: isUserRejected
-          ? "Signature was rejected by user"
-          : `Error signing: ${errorMessage}`,
-      }));
-      return false;
-    }
-  }, [provider, state.address]);
+    },
+    [walletClient, address, signMessageAsync],
+  );
 
   return {
     address: state.address,
@@ -449,5 +298,6 @@ export function useWallet() {
     connect,
     disconnect,
     authenticate,
+    session,
   };
 }

@@ -1,21 +1,16 @@
-"use client";
+'use client';
 
-import { useWallet } from "@/components/features/wallet/hooks/useWallet";
-import { useState, useEffect } from "react";
+import { useWallet } from '@/lib/hooks/wallet';
 
+/**
+ * Hook to get the current wallet address
+ * This is a simple wrapper around useWallet for components that only need the address
+ */
 export function useAddress() {
   const { address } = useWallet();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, _setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    // When address changes, reset loading state
-    setIsLoading(false);
-  }, [address]);
 
   return {
     data: address,
-    isLoading,
-    error,
+    isConnected: !!address,
   };
 }

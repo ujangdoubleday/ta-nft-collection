@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/atoms/button";
 
 export function EmptyCollectionMessage() {
   return (
@@ -15,3 +15,4 @@ export function EmptyCollectionMessage() {
     </div>
   );
 }
+

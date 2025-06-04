@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Win98Window } from "@/components/ui/win98";
+import { Button } from "@/components/ui/atoms/button";
+import { Win98Window } from "@/components/ui/organisms/Win98Window";
 import Link from "next/link";
 
 const steps = [
@@ -69,3 +69,5 @@ export function CreatorsJourney() {
     </Win98Window>
   );
 }
+
+

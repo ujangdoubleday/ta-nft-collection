@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { trpc } from "@/lib/trpc/client";
+import { trpc } from '@/lib/api/trpc/client';
 
 /**
  * A hook that provides access to the tRPC client
@@ -20,7 +20,7 @@ export function useUser(address: string | undefined) {
     { address: address! },
     {
       enabled: !!address,
-    }
+    },
   );
 }
 
@@ -38,30 +38,18 @@ export function useNFTs() {
 }
 
 export function useUserNFTs(ownerAddress: string | undefined) {
-  return trpc.nft.getByOwner.useQuery(
+  return trpc.nft.getByOwnerAddress.useQuery(
     { ownerAddress: ownerAddress! },
     {
       enabled: !!ownerAddress,
-    }
+    },
   );
 }
 
-export function useNFTById(id: string | undefined) {
-  return trpc.nft.getById.useQuery(
-    { id: id! },
-    {
-      enabled: !!id,
-    }
-  );
-}
-
-export function useNFTByTokenId(
-  tokenId: string | undefined,
-  contractAddress: string | undefined
-) {
+export function useNFTByTokenId(tokenId: string | undefined, contractAddress: string | undefined) {
   return trpc.nft.getByTokenId.useQuery(
     { tokenId: tokenId!, contractAddress: contractAddress! },
-    { enabled: !!tokenId && !!contractAddress }
+    { enabled: !!tokenId && !!contractAddress },
   );
 }
 
@@ -69,21 +57,15 @@ export function useCreateNFT() {
   return trpc.nft.create.useMutation();
 }
 
-export function useUpdateNFT() {
-  return trpc.nft.update.useMutation();
-}
-
 // Collection hooks
 export function useCollections() {
   return trpc.collection.getAll.useQuery();
 }
 
-export function useCollectionByContractAddress(
-  contractAddress: string | undefined
-) {
+export function useCollectionByContractAddress(contractAddress: string | undefined) {
   return trpc.collection.getByContractAddress.useQuery(
     { contractAddress: contractAddress! },
-    { enabled: !!contractAddress }
+    { enabled: !!contractAddress },
   );
 }
 

@@ -1,10 +1,5 @@
-import { Container } from "@/components/ui/container";
-import {
-  Welcome,
-  Mission,
-  Creator,
-  Features,
-} from "@/components/features/about";
+import { Container } from '@/components/core/layout/container';
+import { Welcome, Mission, Features, Creator } from '@/components/features/about';
 
 export default function AboutPage() {
   return (
