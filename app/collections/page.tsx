@@ -1,5 +1,9 @@
-import { TrpcCollectionsPage } from '@/components/features/collections';
+import { TrpcCollectionsPage } from '@/components/features/collections/collection';
 
 export default function MyCollectionsPage() {
-  return <TrpcCollectionsPage />;
+  return (
+    <>
+      <TrpcCollectionsPage />
+    </>
+  );
 }
