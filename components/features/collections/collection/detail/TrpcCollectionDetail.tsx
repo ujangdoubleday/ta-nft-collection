@@ -10,9 +10,8 @@ import { CollectionErrorMessage } from '@/components/features/collections/shared
 import { useEffect, useState } from 'react';
 import { generateSimpleColorPlaceholder } from '@/lib/utils/helpers/plaiceholder';
 import { formatIPFSUrl } from '@/lib/utils/helpers/url';
-
-// Define gateway URL from environment variable or use default
-const gatewayUrl = 'cyan-dead-reptile-256.mypinata.cloud';
+import { EmptyCollectionContent } from '@/components/features/collections/collection/empty/EmptyCollectionContent';
+import { useRouter } from 'next/navigation';
 
 // Define types for collection items
 type CollectionItem = {
@@ -71,6 +70,9 @@ const CollectionLoading = () => {
 };
 
 export const TrpcCollectionDetail = ({ contractAddress }: TrpcCollectionDetailProps) => {
+  // Add router
+  const router = useRouter();
+
   // State for collection data
   const [processedItems, setProcessedItems] = useState<CollectionItem[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -78,6 +80,11 @@ export const TrpcCollectionDetail = ({ contractAddress }: TrpcCollectionDetailPr
   const [timeoutItems, setTimeoutItems] = useState<CollectionItem[]>([]);
   const [isDataReady, setIsDataReady] = useState(false);
   const [formattedCollection, setFormattedCollection] = useState<Collection | null>(null);
+
+  // Handler for mint NFT action
+  const handleMintNFT = () => {
+    router.push(`/collections/${contractAddress}/mint`);
+  };
 
   // Fetch collection data using tRPC hook
   const {
@@ -145,7 +152,13 @@ export const TrpcCollectionDetail = ({ contractAddress }: TrpcCollectionDetailPr
 
   // Process NFTs to fetch metadata
   useEffect(() => {
-    if (!nfts || nfts.length === 0 || isProcessing || !collection) return;
+    if (!nfts || nfts.length === 0 || isProcessing || !collection) {
+      // Set data ready to true if we have a collection but no NFTs
+      if ((!nfts || nfts.length === 0) && collection && !isProcessing) {
+        setIsDataReady(true);
+      }
+      return;
+    }
 
     const fetchMetadata = async () => {
       setIsProcessing(true);
@@ -339,10 +352,15 @@ export const TrpcCollectionDetail = ({ contractAddress }: TrpcCollectionDetailPr
     return <CollectionErrorMessage />;
   }
 
+  // Show empty state when collection exists but has no NFTs
+  if (!nfts || nfts.length === 0) {
+    return <EmptyCollectionContent onAddNewAction={handleMintNFT} />;
+  }
+
   // Return the collection detail component with the formatted collection
   return formattedCollection ? (
     <CollectionDetail collectionId={contractAddress} collection={formattedCollection} />
   ) : (
-    <CollectionLoading />
+    <EmptyCollectionContent onAddNewAction={handleMintNFT} />
   );
 };

@@ -239,25 +239,6 @@ export function CollectionForm({}: CollectionFormProps) {
           handleFileChange={handleFileChange}
         />
 
-        {/* Pinata Folder Status */}
-        <div className="mt-4 p-3 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080]">
-          <div className="flex justify-between items-center">
-            <h3 className="font-bold text-sm">Pinata Storage</h3>
-          </div>
-          <p className="text-sm mt-1">
-            {collectionFolder ? (
-              <>
-                Group to be used: <span className="font-mono text-xs">{collectionFolder.name}</span>
-              </>
-            ) : (
-              <>Group will be created automatically when collection is created</>
-            )}
-          </p>
-          <p className="text-xs text-[#808080] mt-1">
-            Files and metadata will be stored in the same group on Pinata
-          </p>
-        </div>
-
         {/* Wallet connection status */}
         <div className="mt-4 p-3 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080]">
           <p className="text-sm">

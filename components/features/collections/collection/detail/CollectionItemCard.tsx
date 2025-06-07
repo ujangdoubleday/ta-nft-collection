@@ -23,7 +23,7 @@ const ImagePlaceholder = ({ placeholder }: { placeholder?: string }) => {
       }}
     >
       <InlineLoading
-        text="Loading image"
+        // text="Loading image"
         spinnerSize="small"
         direction="column"
         className="bg-black bg-opacity-50 p-2 rounded"
