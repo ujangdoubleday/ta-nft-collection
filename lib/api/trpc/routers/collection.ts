@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { publicProcedure, router } from '@/lib/api/trpc/server';
+import { revalidatePath } from 'next/cache';
 
 export const collectionRouter = router({
   getAll: publicProcedure.query(async () => {
@@ -106,7 +107,7 @@ export const collectionRouter = router({
       }
 
       // Create new collection
-      return prisma.collection.create({
+      const newCollection = await prisma.collection.create({
         data: input,
         include: {
           owner: {
@@ -123,6 +124,11 @@ export const collectionRouter = router({
           },
         },
       });
+
+      // Revalidate the collections page to show the new collection immediately
+      revalidatePath('/collections');
+
+      return newCollection;
     }),
 
   update: publicProcedure
