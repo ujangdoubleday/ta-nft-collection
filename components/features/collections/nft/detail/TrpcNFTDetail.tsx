@@ -10,6 +10,7 @@ import { NFTErrorMessage } from '@/components/features/collections/shared/error/
 import { useEffect, useState } from 'react';
 import { formatIPFSUrl } from '@/lib/utils/helpers/url';
 import { generateSimpleColorPlaceholder } from '@/lib/utils/helpers/plaiceholder';
+import { LoadingWindow } from '@/components/shared/loading/LoadingWindow';
 
 // Define gateway URL from environment variable or use default
 const gatewayUrl = 'cyan-dead-reptile-256.mypinata.cloud';
@@ -54,6 +55,18 @@ interface TrpcNFTDetailProps {
   contractAddress: string;
   nftId: string;
 }
+
+// Loading component for NFT detail
+export const NFTDetailLoading = () => {
+  return (
+    <LoadingWindow
+      title="Loading NFT"
+      text="Loading NFT details..."
+      icon="/assets/icons/window/nft.png"
+      minHeight="min-h-[400px]"
+    />
+  );
+};
 
 export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) => {
   const [metadata, setMetadata] = useState<NFTMetadata | null>(null);
@@ -197,6 +210,10 @@ export const TrpcNFTDetail = ({ contractAddress, nftId }: TrpcNFTDetailProps) =>
       fetchMetadata();
     }
   }, [dbNft, metadata, isLoadingMetadata]);
+
+  if (isLoadingCollection || isLoadingNft || isLoadingMetadata) {
+    return <NFTDetailLoading />;
+  }
 
   if (collectionError || !collection) {
     return <CollectionErrorMessage />;
