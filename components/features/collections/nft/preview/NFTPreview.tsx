@@ -36,6 +36,14 @@ export function NFTPreview({
       setPlaceholder(`/api/placeholder?url=${encodedUrl}`);
       console.log('NFTPreview - Setting placeholder URL:', `/api/placeholder?url=${encodedUrl}`);
     }
+
+    // Clean up object URL when component unmounts or image changes
+    return () => {
+      // Check if image is an object URL (starts with 'blob:')
+      if (typeof image === 'string' && image.startsWith('blob:')) {
+        URL.revokeObjectURL(image);
+      }
+    };
   }, [image, placeholderImage]);
 
   // Handle image error

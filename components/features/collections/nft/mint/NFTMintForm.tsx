@@ -1,7 +1,7 @@
 'use client';
 
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
-import { useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { trpc } from '@/lib/api/trpc/client';
 import { useWallet } from '@/lib/hooks/wallet';
@@ -209,9 +209,24 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
   };
 
   // Placeholder image for preview
-  const previewImage = formData.file
-    ? URL.createObjectURL(formData.file)
-    : '/assets/images/nfts/placeholder.svg';
+  const previewImage =
+    formData.file && formData.file instanceof File
+      ? URL.createObjectURL(formData.file)
+      : '/assets/images/placeholder.svg';
+
+  // Clean up object URLs when component unmounts or file changes
+  useEffect(() => {
+    let objectUrl = '';
+    if (formData.file && formData.file instanceof File) {
+      objectUrl = URL.createObjectURL(formData.file);
+    }
+
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [formData.file]);
 
   return (
     <Win98Window
