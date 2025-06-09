@@ -128,7 +128,7 @@ export function useNFTFactoryEvents(transactionHash?: string) {
               if (log.address.toLowerCase() === NFT_FACTORY_ADDRESS.toLowerCase()) {
                 try {
                   // Try to decode the log as a CollectionCreated event
-                  const decodedLog = publicClient.decodeEventLog({
+                  const decodedLog = (publicClient as any).decodeEventLog({
                     abi: NFT_FACTORY_EVENT_ABI,
                     data: log.data,
                     topics: log.topics,
