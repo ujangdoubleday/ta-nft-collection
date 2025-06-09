@@ -3,7 +3,7 @@
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   CollectionFormActions,
   CollectionFormFields,
@@ -11,6 +11,7 @@ import {
 import { CollectionFormData } from '@/components/features/collections/collection/form/CollectionFormFields';
 import { usePinataUpload } from '@/lib/hooks/usePinataUpload';
 import { useWallet } from '@/lib/hooks/wallet';
+import { useNFTFactory, useNFTFactoryEvents } from '@/lib/blockchain/hooks';
 
 interface CollectionFormProps {
   // Props can be added if needed
@@ -26,23 +27,116 @@ export function CollectionForm({}: CollectionFormProps) {
     description: '',
     coverImage: null,
     storage: 'Ethereum',
+    verifyContract: false,
   });
   const [showConsole, setShowConsole] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [consoleMessages, setConsoleMessages] = useState<string[]>([]);
   const [folderCreated, setFolderCreated] = useState(false);
   const [collectionFolder, setCollectionFolder] = useState<any>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [needsDbSave, setNeedsDbSave] = useState(false);
+  const [dbSavePending, setDbSavePending] = useState(false);
+  const [collectionData, setCollectionData] = useState<{
+    name: string;
+    symbol?: string;
+    description?: string;
+    contractURI?: string;
+    contractAddress: string;
+    ownerAddress: string;
+    pinataGroupId?: string;
+  } | null>(null);
 
   // Get the Pinata upload hook
   const { uploadToPinata, createFolder, isUploading, isCreatingFolder } = usePinataUpload();
 
+  // Get the NFT Factory hook
+  const { createCollection, isLoading: isFactoryLoading } = useNFTFactory();
+
+  // Get the NFT Factory events hook
+  const { collectionCreatedEvents, loading: isEventLoading } = useNFTFactoryEvents(
+    txHash || undefined,
+  );
+
   // Get the create collection mutation
   const createCollectionMutation = trpc.collection.create.useMutation({
-    onSuccess: () => {
-      router.push('/collections');
-      router.refresh();
+    onSuccess: (_newCollection) => {
+      // Redirect to collections list
+      addConsoleMessage('> Collection saved to database successfully!');
+      addConsoleMessage('> Redirecting to collections page...');
+
+      // Short delay before redirecting
+      setTimeout(() => {
+        router.push('/collections');
+        router.refresh();
+      }, 1500);
     },
   });
+
+  // Listen for collection creation events and save to database
+  useEffect(() => {
+    const saveCollectionFromEvent = async () => {
+      if (needsDbSave && collectionCreatedEvents.length > 0 && !dbSavePending && collectionData) {
+        try {
+          setDbSavePending(true);
+
+          // Find the event for the current collection (match by name)
+          const event = collectionCreatedEvents.find((e) => e.name === collectionData.name);
+
+          if (event) {
+            addConsoleMessage(`> Collection created on blockchain: ${event.collectionAddress}`);
+
+            // Save the collection to the database with the actual contract address
+            await createCollectionMutation.mutateAsync({
+              ...collectionData,
+              contractAddress: event.collectionAddress,
+            });
+
+            setNeedsDbSave(false);
+          } else {
+            // If we can't find a matching event, just use the transaction hash as the address (temporary)
+            addConsoleMessage('> Warning: Could not find collection address from event logs');
+            addConsoleMessage('> Saving with transaction hash as temporary address');
+
+            await createCollectionMutation.mutateAsync(collectionData);
+
+            setNeedsDbSave(false);
+          }
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
+
+          if (errorMessage.includes('Foreign key constraint')) {
+            addConsoleMessage('> Error: User account not found in the database.');
+            addConsoleMessage('> Creating user account...');
+
+            // Try again after a short delay (the collection router should now create the user)
+            setTimeout(async () => {
+              try {
+                await createCollectionMutation.mutateAsync(collectionData);
+                setNeedsDbSave(false);
+              } catch (retryError) {
+                addConsoleMessage(
+                  `> Error on retry: ${retryError instanceof Error ? retryError.message : 'Unknown error'}`,
+                );
+              }
+            }, 1000);
+          } else {
+            addConsoleMessage(`> Database error: ${errorMessage}`);
+          }
+        } finally {
+          setDbSavePending(false);
+        }
+      }
+    };
+
+    saveCollectionFromEvent();
+  }, [
+    collectionCreatedEvents,
+    needsDbSave,
+    dbSavePending,
+    collectionData,
+    createCollectionMutation,
+  ]);
 
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
@@ -110,10 +204,6 @@ export function CollectionForm({}: CollectionFormProps) {
     addConsoleMessage(`> Owner address: ${address}`);
 
     try {
-      // Generate a mock contract address (in a real app, this would come from blockchain)
-      const contractAddress = `0x${Math.random().toString(16).slice(2, 42)}`;
-      addConsoleMessage(`> Contract Address: ${contractAddress}`);
-
       // Create automatic folder for this collection
       const folder = await createCollectionFolder(formData.name);
       const folderId = folder?.id;
@@ -151,67 +241,124 @@ export function CollectionForm({}: CollectionFormProps) {
           );
           throw error; // Re-throw to be caught by the outer try/catch
         }
+      } else {
+        // If no image is provided, create a minimal metadata JSON and upload it
+        addConsoleMessage('> No image provided. Creating basic metadata...');
+        try {
+          // Create a minimal metadata object
+          const basicMetadata = {
+            name: formData.name,
+            description: formData.description || `Collection of NFTs: ${formData.name}`,
+            image: 'https://ipfs.io/ipfs/QmUFc4dyX7TJn5dPxp8CKjAz9jCdZyiPeBrAmE5W2XRBEg', // Default placeholder image
+          };
+
+          // Convert to blob for upload
+          const metadataBlob = new Blob([JSON.stringify(basicMetadata)], {
+            type: 'application/json',
+          });
+          const metadataFile = new File([metadataBlob], 'metadata.json');
+
+          addConsoleMessage('> Uploading basic metadata to Pinata IPFS...');
+
+          const uploadResult = await uploadToPinata(
+            metadataFile,
+            {
+              name: `${formData.name}-metadata`,
+              description: formData.description,
+            },
+            folderId,
+          );
+
+          if (uploadResult && uploadResult.metadata) {
+            contractURI = uploadResult.metadata.url;
+            addConsoleMessage(`> Basic metadata uploaded successfully to IPFS`);
+            addConsoleMessage(`> Metadata CID: ${uploadResult.metadata.cid}`);
+            addConsoleMessage(`> Metadata URL: ${uploadResult.metadata.url}`);
+          }
+        } catch (error) {
+          addConsoleMessage(
+            `> Error creating basic metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          );
+          throw error;
+        }
       }
 
-      addConsoleMessage('> Creating collection in database...');
+      if (!contractURI) {
+        addConsoleMessage('> Error: Failed to create collection metadata URI');
+        throw new Error('Failed to create collection metadata URI');
+      }
 
-      try {
-        // Use tRPC to create collection with the connected wallet address
-        await createCollectionMutation.mutateAsync({
+      // Create the NFT collection using the factory contract
+      addConsoleMessage('> Creating collection on blockchain...');
+      addConsoleMessage(`> Using Factory contract: ${NFT_FACTORY_ADDRESS}`);
+      addConsoleMessage(`> Collection URI: ${contractURI}`);
+
+      if (formData.verifyContract) {
+        addConsoleMessage('> Contract verification requested');
+        addConsoleMessage('> Note: Verification will happen after contract deployment');
+      }
+
+      const {
+        hash,
+        collectionAddress,
+        error: factoryError,
+        verified,
+      } = await createCollection(
+        formData.name,
+        formData.symbol || 'NFT',
+        contractURI,
+        formData.verifyContract,
+      );
+
+      if (factoryError) {
+        addConsoleMessage(`> Error creating collection: ${factoryError.message}`);
+        throw factoryError;
+      }
+
+      if (hash) {
+        setTxHash(hash);
+        addConsoleMessage(`> Transaction submitted: ${hash}`);
+        addConsoleMessage('> Waiting for transaction confirmation...');
+        addConsoleMessage('> This may take a few minutes. Please wait...');
+
+        if (collectionAddress) {
+          addConsoleMessage(`> Collection deployed at: ${collectionAddress}`);
+
+          if (formData.verifyContract) {
+            addConsoleMessage('> Starting contract verification process...');
+            addConsoleMessage('> This may take a few minutes. Please wait...');
+
+            if (verified) {
+              addConsoleMessage('> Contract was successfully verified on Etherscan');
+              addConsoleMessage(
+                `> View on Etherscan: https://sepolia.etherscan.io/address/${collectionAddress}#code`,
+              );
+            } else {
+              addConsoleMessage('> Contract verification is still pending');
+              addConsoleMessage('> You can check the status on Etherscan later');
+              addConsoleMessage(
+                `> Etherscan link: https://sepolia.etherscan.io/address/${collectionAddress}`,
+              );
+            }
+          }
+        }
+
+        // Prepare collection data for database save
+        const collectionToSave = {
           name: formData.name,
           symbol: formData.symbol || undefined,
           description: formData.description || undefined,
           contractURI: contractURI || undefined,
-          contractAddress,
+          contractAddress: collectionAddress || hash, // Use collection address if available, otherwise tx hash
           ownerAddress: address,
           pinataGroupId: folderId || undefined,
-        });
+        };
 
-        addConsoleMessage('> Collection created successfully!');
-        addConsoleMessage('> Redirecting to collections page...');
+        setCollectionData(collectionToSave);
+        setNeedsDbSave(true);
 
-        // Short delay before redirecting to allow user to see the success message
-        setTimeout(() => {
-          router.push('/collections');
-          router.refresh();
-        }, 1500);
-      } catch (error) {
-        // Handle specific database errors
-        const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
-
-        if (errorMessage.includes('Foreign key constraint')) {
-          addConsoleMessage('> Error: User account not found in the database.');
-          addConsoleMessage('> Creating user account...');
-
-          // Try again after a short delay (the collection router should now create the user)
-          setTimeout(async () => {
-            try {
-              await createCollectionMutation.mutateAsync({
-                name: formData.name,
-                symbol: formData.symbol || undefined,
-                description: formData.description || undefined,
-                contractURI: contractURI || undefined,
-                contractAddress,
-                ownerAddress: address,
-                pinataGroupId: folderId || undefined,
-              });
-
-              addConsoleMessage('> Collection created successfully!');
-              addConsoleMessage('> Redirecting to collections page...');
-
-              setTimeout(() => {
-                router.push('/collections');
-                router.refresh();
-              }, 1500);
-            } catch (retryError) {
-              addConsoleMessage(
-                `> Error on retry: ${retryError instanceof Error ? retryError.message : 'Unknown error'}`,
-              );
-            }
-          }, 1000);
-        } else {
-          addConsoleMessage(`> Database error: ${errorMessage}`);
-        }
+        // Note: The actual saving to the database will happen in the useEffect hook
+        // when the collection creation event is detected
       }
     } catch (error) {
       console.error('Error creating collection:', error);
@@ -283,9 +430,19 @@ export function CollectionForm({}: CollectionFormProps) {
         <CollectionFormActions
           onCancel={handleCancel}
           showConfirmation={showConsole}
-          isSubmitting={isSubmitting || isUploading || isCreatingFolder}
+          isSubmitting={
+            isSubmitting ||
+            isUploading ||
+            isCreatingFolder ||
+            isFactoryLoading ||
+            isEventLoading ||
+            dbSavePending
+          }
         />
       </form>
     </Win98Window>
   );
 }
+
+// NFT Factory contract address for easy reference
+const NFT_FACTORY_ADDRESS = '0x667d34aDc81895967C39277e2Cd2e32585afdeC3';

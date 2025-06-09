@@ -13,15 +13,8 @@ export default function RootLayout({
       <head>
         <title>MyNFTs.exe: Digital Art Creator</title>
         <meta name="description" content="A retro-styled digital art creation platform" />
-        <link
-          rel="preload"
-          href="/assets/fonts/ms-sans-serif.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
       </head>
-      <body className="min-h-screen bg-[#008080] font-['MS_Sans_Serif'] antialiased">
+      <body className="min-h-screen bg-[#008080] antialiased">
         <WagmiProvider>
           <AuthProvider>
             <AppShell>{children}</AppShell>

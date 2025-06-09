@@ -5,7 +5,7 @@ import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { NextImage } from '@/components/shared/icons';
 
 interface NFTPreviewProps {
-  name: string;
+  title: string;
   description: string;
   image: string;
   placeholderImage?: string | null;
@@ -16,7 +16,7 @@ interface NFTPreviewProps {
 }
 
 export function NFTPreview({
-  name,
+  title,
   description,
   image,
   placeholderImage,
@@ -36,6 +36,14 @@ export function NFTPreview({
       setPlaceholder(`/api/placeholder?url=${encodedUrl}`);
       console.log('NFTPreview - Setting placeholder URL:', `/api/placeholder?url=${encodedUrl}`);
     }
+
+    // Clean up object URL when component unmounts or image changes
+    return () => {
+      // Check if image is an object URL (starts with 'blob:')
+      if (typeof image === 'string' && image.startsWith('blob:')) {
+        URL.revokeObjectURL(image);
+      }
+    };
   }, [image, placeholderImage]);
 
   // Handle image error
@@ -50,7 +58,7 @@ export function NFTPreview({
         {image ? (
           <NextImage
             src={imageError ? '' : image}
-            alt={name}
+            alt={title}
             fill={true}
             sizes="(max-width: 768px) 90vw, 500px"
             className="object-contain"
@@ -66,7 +74,7 @@ export function NFTPreview({
         )}
       </div>
 
-      <h3 className="text-black font-bold text-base mb-2">{name}</h3>
+      <h3 className="text-black font-bold text-base mb-2">{title}</h3>
       <p className="text-black text-sm mb-2 max-h-[80px] overflow-y-auto">{description}</p>
 
       {properties && properties.length > 0 && (

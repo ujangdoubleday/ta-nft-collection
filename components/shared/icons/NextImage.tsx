@@ -32,7 +32,7 @@ export function NextImage({
 
   // Reset state when src changes
   useEffect(() => {
-    setImgSrc(typeof src === 'string' ? src : '');
+    setImgSrc(src ? (typeof src === 'string' ? src : '') : '');
     setIsLoading(true);
     setError(false);
   }, [src]);

@@ -35,7 +35,7 @@ export function CollectionDetail({ collectionId, collection }: CollectionDetailP
         <CollectionHeader description={collection.description} />
 
         {collection.items.length === 0 ? (
-          <EmptyCollectionContent onAddNew={handleAddNewClick} />
+          <EmptyCollectionContent onAddNewAction={handleAddNewClick} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {collection.items.map((item) => (
