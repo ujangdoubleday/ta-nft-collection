@@ -38,7 +38,8 @@ export function CollectionForm({}: CollectionFormProps) {
 
   // Get the create collection mutation
   const createCollectionMutation = trpc.collection.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (_newCollection) => {
+      // Redirect to collections list
       router.push('/collections');
       router.refresh();
     },
@@ -157,7 +158,7 @@ export function CollectionForm({}: CollectionFormProps) {
 
       try {
         // Use tRPC to create collection with the connected wallet address
-        await createCollectionMutation.mutateAsync({
+        const newCollection = await createCollectionMutation.mutateAsync({
           name: formData.name,
           symbol: formData.symbol || undefined,
           description: formData.description || undefined,
@@ -186,7 +187,7 @@ export function CollectionForm({}: CollectionFormProps) {
           // Try again after a short delay (the collection router should now create the user)
           setTimeout(async () => {
             try {
-              await createCollectionMutation.mutateAsync({
+              const newCollection = await createCollectionMutation.mutateAsync({
                 name: formData.name,
                 symbol: formData.symbol || undefined,
                 description: formData.description || undefined,

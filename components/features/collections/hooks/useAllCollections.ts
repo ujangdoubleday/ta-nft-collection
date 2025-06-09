@@ -10,12 +10,12 @@ export function useAllCollections() {
   const { data, isLoading, error } = trpc.collection.getAll.useQuery(undefined, {
     // Don't refetch on window focus for better UX
     refetchOnWindowFocus: false,
-    // Refresh cache every minute
-    staleTime: 60 * 1000, // 60 seconds
-    // Force garbage collection after 60 seconds
-    gcTime: 60 * 1000, // 60 seconds
+    // Disable cache completely
+    staleTime: 0,
+    // Don't cache between renders
+    gcTime: 0,
     // Always refetch when component mounts
-    refetchOnMount: true,
+    refetchOnMount: 'always',
   });
 
   return {
