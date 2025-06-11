@@ -34,7 +34,7 @@ export function useVerifyContract() {
         throw new Error('Etherscan API key is not configured');
       }
 
-      // Untuk sepolia network
+      // Etherscan API URL for Sepolia network
       const etherscanApiUrl = 'https://api-sepolia.etherscan.io/api';
 
       // Log verification parameters for debugging
@@ -47,54 +47,65 @@ export function useVerifyContract() {
         runs: params.runs || 200,
       });
 
-      // Siapkan data untuk API call sebagai parameter objek
-      const apiParams = {
-        apikey: ETHERSCAN_API_KEY,
-        module: 'contract',
-        action: 'verifysourcecode',
-        contractaddress: params.contractAddress,
-        sourceCode: params.sourceCode,
-        contractname: params.contractName,
-        compilerversion: params.compilerVersion,
-        optimizationUsed: params.optimizationUsed ? '1' : '0',
-        runs: (params.runs || 200).toString(),
-        constructorArguments: params.constructorArguments,
-        licenseType: '3', // MIT License
-        evmversion: '', // Default EVM version
-      };
+      // Prepare request data according to Etherscan API specification
+      const formData = new FormData();
+      formData.append('apikey', ETHERSCAN_API_KEY);
+      formData.append('module', 'contract');
+      formData.append('action', 'verifysourcecode');
+      formData.append('contractaddress', params.contractAddress);
+      formData.append('sourceCode', params.sourceCode);
+      formData.append('codeformat', 'solidity-single-file');
+      formData.append('contractname', params.contractName);
+      formData.append('compilerversion', params.compilerVersion);
+      formData.append('optimizationUsed', params.optimizationUsed ? '1' : '0');
+      formData.append('runs', (params.runs || 200).toString());
+      formData.append('constructorArguements', params.constructorArguments); // Note: Etherscan uses this spelling
+      formData.append('licenseType', '3'); // MIT License
 
       console.log('Submitting contract verification request to Etherscan...');
       console.log('Etherscan API URL:', etherscanApiUrl);
 
-      // Use axios with the suggested format
       try {
-        console.log('Trying verification with axios...');
-        const axiosResponse = await axios.post(etherscanApiUrl, null, { params: apiParams });
+        console.log('Sending verification request...');
+        const response = await axios.post(etherscanApiUrl, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
 
-        console.log('Verification API response (axios):', axiosResponse.data);
+        console.log('Verification API response:', response.data);
 
-        if (axiosResponse.data.status === '1') {
-          console.log('Verification submission successful. GUID:', axiosResponse.data.result);
+        if (response.data.status === '1') {
+          console.log('Verification submission successful. GUID:', response.data.result);
           const verificationResult = await checkVerificationStatus(
-            axiosResponse.data.result,
+            response.data.result,
             etherscanApiUrl,
           );
           setResult(verificationResult);
           return verificationResult;
         } else {
-          throw new Error(`Verification submission failed: ${axiosResponse.data.result}`);
+          throw new Error(`Verification submission failed: ${response.data.result}`);
         }
       } catch (axiosError) {
-        console.warn('Axios attempt failed:', axiosError);
-        console.log('Falling back to URLSearchParams + fetch...');
+        console.warn('POST request failed:', axiosError);
+        console.log('Trying alternative approach with URLSearchParams...');
 
-        // Convert params to URLSearchParams for fetch API
+        // Alternative approach using URLSearchParams
         const urlParams = new URLSearchParams();
-        Object.entries(apiParams).forEach(([key, value]) => {
-          urlParams.append(key, value as string);
-        });
+        urlParams.append('apikey', ETHERSCAN_API_KEY);
+        urlParams.append('module', 'contract');
+        urlParams.append('action', 'verifysourcecode');
+        urlParams.append('contractaddress', params.contractAddress);
+        urlParams.append('sourceCode', params.sourceCode);
+        urlParams.append('codeformat', 'solidity-single-file');
+        urlParams.append('contractname', params.contractName);
+        urlParams.append('compilerversion', params.compilerVersion);
+        urlParams.append('optimizationUsed', params.optimizationUsed ? '1' : '0');
+        urlParams.append('runs', (params.runs || 200).toString());
+        urlParams.append('constructorArguements', params.constructorArguments);
+        urlParams.append('licenseType', '3'); // MIT License
 
-        const response = await fetch(etherscanApiUrl, {
+        const fetchResponse = await fetch(etherscanApiUrl, {
           method: 'POST',
           body: urlParams,
           headers: {
@@ -102,11 +113,11 @@ export function useVerifyContract() {
           },
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (!fetchResponse.ok) {
+          throw new Error(`HTTP error! status: ${fetchResponse.status}`);
         }
 
-        const data = await response.json();
+        const data = await fetchResponse.json();
         console.log('Verification API response (fetch):', data);
 
         if (data.status === '1') {
@@ -128,7 +139,7 @@ export function useVerifyContract() {
     }
   }, []);
 
-  // Helper function untuk cek status verifikasi
+  // Helper function to check verification status
   const checkVerificationStatus = async (
     guid: string,
     apiUrl: string,
@@ -137,30 +148,40 @@ export function useVerifyContract() {
     try {
       console.log(`Checking verification status (attempt ${retryCount + 1})...`);
 
-      // Tunggu sebentar untuk memberi waktu verifikasi
+      // Wait a bit to allow verification to process
       await new Promise((resolve) => setTimeout(resolve, 5000));
 
-      const params = {
+      const params = new URLSearchParams({
         apikey: ETHERSCAN_API_KEY,
         module: 'contract',
         action: 'checkverifystatus',
         guid,
-      };
+      });
 
       console.log(
         `Verification status check URL: ${apiUrl}?module=contract&action=checkverifystatus&guid=${guid.substring(0, 8)}...`,
       );
 
-      // Use axios with the suggested format
-      const response = await axios.get(apiUrl, { params });
-      const data = response.data;
+      // Use POST method as required by Etherscan
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        body: params,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
       console.log('Verification status check response:', data);
 
       if (data.status === '1') {
         return { status: 'success', message: 'Contract successfully verified' };
       } else if (data.result === 'Pending in queue') {
-        // Masih dalam antrian, coba cek lagi
+        // Still in queue, try checking again
         console.log('Verification still pending, checking again...');
 
         // Limit retries to prevent infinite recursion

@@ -1,129 +1,13 @@
 import { useCallback, useState } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { parseEther, zeroAddress, encodeAbiParameters, parseAbiParameters } from 'viem';
+import { encodeAbiParameters, parseAbiParameters } from 'viem';
 import { sepolia } from 'wagmi/chains';
 import { useVerifyContract } from './useVerifyContract';
+import axios from 'axios';
 
-// NFT Factory contract source code untuk verifikasi
-const NFT_FACTORY_SOURCE_CODE = `// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-
-// The NFT Collection contract that will be created by the factory
-contract NFTCollection is ERC721URIStorage, Ownable {
-    using Counters for Counters.Counter;
-    Counters.Counter private _tokenIds;
-
-    // Collection metadata
-    string public collectionURI;
-
-    constructor(
-        string memory name,
-        string memory symbol,
-        address initialOwner,
-        string memory _collectionURI
-    ) ERC721(name, symbol) Ownable(initialOwner) {
-        collectionURI = _collectionURI;
-    }
-
-    // Function to mint a new NFT
-    function mintNFT(
-        address recipient,
-        string memory tokenURI
-    ) public onlyOwner returns (uint256) {
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-
-        _mint(recipient, newItemId);
-        _setTokenURI(newItemId, tokenURI);
-
-        return newItemId;
-    }
-
-    // Function to update collection metadata
-    function setCollectionURI(string memory _collectionURI) public onlyOwner {
-        collectionURI = _collectionURI;
-    }
-}
-
-// The factory contract that creates new NFT collections
-contract NFTFactory {
-    // Event emitted when a new collection is created
-    event CollectionCreated(
-        address collectionAddress,
-        string name,
-        string symbol,
-        address owner
-    );
-
-    // Function to create a new NFT collection
-    function createCollection(
-        string memory name,
-        string memory symbol,
-        string memory collectionURI
-    ) public returns (address) {
-        // Create a new NFT collection contract
-        NFTCollection newCollection = new NFTCollection(
-            name,
-            symbol,
-            msg.sender,
-            collectionURI
-        );
-
-        // Emit an event with the collection info
-        emit CollectionCreated(
-            address(newCollection),
-            name,
-            symbol,
-            msg.sender
-        );
-
-        // Return the address of the newly created collection
-        return address(newCollection);
-    }
-}`;
-
-// NFTFactory contract ABI for the createCollection function
-const NFT_FACTORY_ABI = [
-  {
-    name: 'createCollection',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'name', type: 'string' },
-      { name: 'symbol', type: 'string' },
-      { name: 'collectionURI', type: 'string' },
-    ],
-    outputs: [{ name: '', type: 'address' }],
-  },
-  {
-    name: 'CollectionCreated',
-    type: 'event',
-    inputs: [
-      { indexed: false, name: 'collectionAddress', type: 'address' },
-      { indexed: false, name: 'name', type: 'string' },
-      { indexed: false, name: 'symbol', type: 'string' },
-      { indexed: false, name: 'owner', type: 'address' },
-    ],
-  },
-];
-
-// NFT Collection contract ABI for verification
-const NFT_COLLECTION_ABI = [
-  {
-    name: 'constructor',
-    type: 'constructor',
-    inputs: [
-      { name: 'name', type: 'string' },
-      { name: 'symbol', type: 'string' },
-      { name: 'initialOwner', type: 'address' },
-      { name: 'collectionURI', type: 'string' },
-    ],
-  },
-];
+// Import ABIs from the Hardhat-compiled contracts
+// @ts-ignore - This will be imported properly as JSON
+import NFT_FACTORY_ABI from '../abi/NFTFactory.json';
 
 // Factory contract address on Sepolia
 const NFT_FACTORY_ADDRESS = '0x667d34aDc81895967C39277e2Cd2e32585afdeC3';
@@ -286,7 +170,7 @@ export function useNFTFactory(): UseNFTFactoryReturn {
           }
         }
 
-        // Jika opsi verifikasi kontrak diaktifkan
+        // Contract verification option
         let verificationResult = { verified: false };
 
         if (verifyContract && collectionAddress) {
@@ -307,24 +191,39 @@ export function useNFTFactory(): UseNFTFactoryReturn {
 
             console.log(`Using owner address for verification: ${ownerAddress}`);
 
-            // Encode constructor arguments
+            // Encode constructor arguments - Etherscan expects without 0x prefix
+            // Format: string name, string symbol, address initialOwner, string contractURI
             const constructorArgs = encodeAbiParameters(
               parseAbiParameters('string, string, address, string'),
               [name, symbol, ownerAddress, collectionURI],
             ).slice(2); // remove 0x prefix
 
-            console.log('Constructor arguments:', constructorArgs);
+            console.log('Constructor arguments (hex):', constructorArgs);
             console.log('Contract address to verify:', collectionAddress);
 
             // Add delay to make sure the contract is deployed and available for verification
             console.log('Waiting 10 seconds before attempting verification...');
             await new Promise((resolve) => setTimeout(resolve, 10000));
 
+            // Fetch contract source code from API
+            const sourceCodeResponse = await axios.post('/api/blockchain/verify', {
+              contractName: 'NFTCollection',
+            });
+
+            const sourceCode = sourceCodeResponse.data.sourceCode;
+
+            if (!sourceCode) {
+              throw new Error('Failed to fetch contract source code');
+            }
+
+            console.log('Got source code for verification, length:', sourceCode.length);
+
+            // Call Etherscan API directly to verify the contract
             const verifyResult = await verifyContractOnEtherscan({
               contractAddress: collectionAddress,
-              sourceCode: NFT_FACTORY_SOURCE_CODE,
+              sourceCode,
               contractName: 'NFTCollection',
-              compilerVersion: 'v0.8.20+commit.a1b79de6',
+              compilerVersion: 'v0.8.28+commit.2989371a', // Match hardhat.config.js
               optimizationUsed: false,
               constructorArguments: constructorArgs,
             });
