@@ -83,7 +83,7 @@ contract NFTCollection is ERC721URIStorage, Ownable {
   function setCollectionURI(string memory _collectionURI) public onlyOwner {
     collectionURI = _collectionURI;
   }
-}
+} // End of NFTCollection
 
 /**
  * @title NFTFactory

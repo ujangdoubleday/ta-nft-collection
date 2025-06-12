@@ -1,15 +1,11 @@
 import { useCallback, useState } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { encodeAbiParameters, parseAbiParameters } from 'viem';
 import { sepolia } from 'wagmi/chains';
-import { useVerifyContract } from './useVerifyContract';
-import axios from 'axios';
 
 // Import ABIs from the Hardhat-compiled contracts
 // @ts-ignore - This will be imported properly as JSON
 import NFT_FACTORY_ABI from '../abi/NFTFactory.json';
 
-// Factory contract address on Sepolia
 const NFT_FACTORY_ADDRESS = '0x667d34aDc81895967C39277e2Cd2e32585afdeC3';
 
 export interface UseNFTFactoryReturn {
@@ -17,11 +13,9 @@ export interface UseNFTFactoryReturn {
     name: string,
     symbol: string,
     collectionURI: string,
-    verifyContract?: boolean,
   ) => Promise<{
     hash?: `0x${string}`;
     collectionAddress?: `0x${string}`;
-    verified?: boolean;
     error?: Error;
   }>;
   isLoading: boolean;
@@ -32,13 +26,12 @@ export function useNFTFactory(): UseNFTFactoryReturn {
   const [error, setError] = useState<Error | null>(null);
 
   const { writeContractAsync, isPending: isCreateLoading } = useWriteContract();
-  const { verifyContract: verifyContractOnEtherscan, isVerifying } = useVerifyContract();
-  const { data: receipt, isLoading: isWaitingForReceipt } = useWaitForTransactionReceipt({
+  const { isLoading: isWaitingForReceipt } = useWaitForTransactionReceipt({
     hash: undefined,
   });
 
   const createCollection = useCallback(
-    async (name: string, symbol: string, collectionURI: string, verifyContract = false) => {
+    async (name: string, symbol: string, collectionURI: string) => {
       try {
         setError(null);
 
@@ -47,9 +40,6 @@ export function useNFTFactory(): UseNFTFactoryReturn {
         if (!symbol) throw new Error('Collection symbol is required');
         if (!collectionURI) throw new Error('Collection URI is required');
 
-        console.log(`Creating collection: ${name} (${symbol}) with URI: ${collectionURI}`);
-
-        // Call the contract method
         const hash = await writeContractAsync({
           address: NFT_FACTORY_ADDRESS,
           abi: NFT_FACTORY_ABI,
@@ -58,14 +48,11 @@ export function useNFTFactory(): UseNFTFactoryReturn {
           chainId: sepolia.id,
         });
 
-        console.log(`Transaction hash: ${hash}`);
-
-        // Wait for transaction receipt to get logs
         const txReceipt = await new Promise<any>((resolve) => {
           const checkReceipt = async () => {
             try {
               if (!window.ethereum) {
-                console.error('No ethereum provider found');
+                // Simple error without exposing details
                 setTimeout(checkReceipt, 2000);
                 return;
               }
@@ -82,7 +69,7 @@ export function useNFTFactory(): UseNFTFactoryReturn {
                 setTimeout(checkReceipt, 2000); // Check again in 2 seconds
               }
             } catch (err) {
-              console.error('Error checking receipt:', err);
+              // Silent error handling
               setTimeout(checkReceipt, 2000);
             }
           };
@@ -94,28 +81,10 @@ export function useNFTFactory(): UseNFTFactoryReturn {
         let collectionAddress: `0x${string}` | undefined;
 
         if (txReceipt && txReceipt.logs) {
-          console.log('Transaction receipt:', txReceipt);
-          console.log('Transaction receipt logs:', JSON.stringify(txReceipt.logs));
-
           try {
-            // Try to find the CollectionCreated event log
-            // The event signature for CollectionCreated is the first topic
-            const collectionCreatedEventSignature =
-              '0x5424fbee04a3b38aed6d5c8dd5fb4175c3a30fe1b5ead9e5f42c590984b88550';
-
             for (const log of txReceipt.logs) {
-              console.log('Checking log:', log);
-
-              // Check if this log is from our factory contract
               if (log.address && log.address.toLowerCase() === NFT_FACTORY_ADDRESS.toLowerCase()) {
-                console.log('Found log from factory contract');
-
-                // For non-indexed event parameters, we need to decode the data
-                // In the CollectionCreated event, the first parameter is the collection address
                 if (log.data && log.data.length >= 66) {
-                  // Data format for our event: address(32 bytes) + name + symbol + owner
-                  // We need the first 32 bytes (64 chars after 0x) which is the address
-                  // But Ethereum addresses are 20 bytes, so we need to extract correctly
                   const dataWithoutPrefix = log.data.startsWith('0x')
                     ? log.data.slice(2)
                     : log.data;
@@ -123,12 +92,10 @@ export function useNFTFactory(): UseNFTFactoryReturn {
                   // The address is padded to 32 bytes, so we need to extract the last 40 chars (20 bytes)
                   // of the first 32 bytes (64 chars)
                   const addressHex = '0x' + dataWithoutPrefix.slice(24, 64);
-                  console.log('Extracted address from data:', addressHex);
 
                   // Validate that it's a proper Ethereum address
                   if (/^0x[a-fA-F0-9]{40}$/.test(addressHex)) {
                     collectionAddress = addressHex as `0x${string}`;
-                    console.log(`Valid collection address found: ${collectionAddress}`);
                     break;
                   }
                 }
@@ -137,118 +104,45 @@ export function useNFTFactory(): UseNFTFactoryReturn {
 
             // If we still don't have the address, try another approach
             if (!collectionAddress) {
-              console.log('Trying alternative method to find contract address...');
-
               // Look for contract creation logs
               for (const log of txReceipt.logs) {
                 // Contract creation usually has the contract address as the log address
                 // and the creator (our factory) would be in the topics
                 if (log.topics && log.topics.length > 0) {
                   const potentialAddress = log.address;
-                  console.log('Potential contract address from log address:', potentialAddress);
 
                   if (potentialAddress && /^0x[a-fA-F0-9]{40}$/.test(potentialAddress)) {
                     collectionAddress = potentialAddress as `0x${string}`;
-                    console.log(`Using log address as collection address: ${collectionAddress}`);
                     break;
                   }
                 }
               }
             }
           } catch (parseErr) {
-            console.error('Error parsing transaction logs:', parseErr);
+            // Silent error handling for log parsing
           }
         }
 
         if (!collectionAddress) {
-          console.warn('Could not extract collection address from transaction logs');
-
           // As a last resort, try to get the contract address from the transaction receipt
           if (txReceipt && txReceipt.contractAddress) {
             collectionAddress = txReceipt.contractAddress as `0x${string}`;
-            console.log(`Using transaction receipt contractAddress: ${collectionAddress}`);
           }
         }
 
-        // Contract verification option
-        let verificationResult = { verified: false };
-
-        if (verifyContract && collectionAddress) {
-          try {
-            console.log('Starting contract verification process...');
-
-            // Get the current connected address for the initialOwner parameter
-            if (!window.ethereum) {
-              throw new Error('No ethereum provider found');
-            }
-
-            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-            const ownerAddress = accounts[0];
-
-            if (!ownerAddress) {
-              throw new Error('No connected wallet account found');
-            }
-
-            console.log(`Using owner address for verification: ${ownerAddress}`);
-
-            // Encode constructor arguments - Etherscan expects without 0x prefix
-            // Format: string name, string symbol, address initialOwner, string contractURI
-            const constructorArgs = encodeAbiParameters(
-              parseAbiParameters('string, string, address, string'),
-              [name, symbol, ownerAddress, collectionURI],
-            ).slice(2); // remove 0x prefix
-
-            console.log('Constructor arguments (hex):', constructorArgs);
-            console.log('Contract address to verify:', collectionAddress);
-
-            // Add delay to make sure the contract is deployed and available for verification
-            console.log('Waiting 10 seconds before attempting verification...');
-            await new Promise((resolve) => setTimeout(resolve, 10000));
-
-            // Fetch contract source code from API
-            const sourceCodeResponse = await axios.post('/api/blockchain/verify', {
-              contractName: 'NFTCollection',
-            });
-
-            const sourceCode = sourceCodeResponse.data.sourceCode;
-
-            if (!sourceCode) {
-              throw new Error('Failed to fetch contract source code');
-            }
-
-            console.log('Got source code for verification, length:', sourceCode.length);
-
-            // Call Etherscan API directly to verify the contract
-            const verifyResult = await verifyContractOnEtherscan({
-              contractAddress: collectionAddress,
-              sourceCode,
-              contractName: 'NFTCollection',
-              compilerVersion: 'v0.8.28+commit.2989371a', // Match hardhat.config.js
-              optimizationUsed: false,
-              constructorArguments: constructorArgs,
-            });
-
-            verificationResult.verified = verifyResult.status === 'success';
-            console.log('Verification result:', verifyResult);
-          } catch (verifyError) {
-            console.error('Error verifying contract:', verifyError);
-          }
-        }
-
-        return { hash, collectionAddress, ...verificationResult };
+        return { hash, collectionAddress };
       } catch (err) {
-        console.error('Error creating NFT collection:', err);
         const error = err instanceof Error ? err : new Error('Unknown error occurred');
         setError(error);
         return { error };
       }
     },
-    [writeContractAsync, verifyContractOnEtherscan],
+    [writeContractAsync],
   );
 
   return {
     createCollection,
-    isLoading: isCreateLoading || isVerifying || isWaitingForReceipt,
+    isLoading: isCreateLoading || isWaitingForReceipt,
     error,
   };
 }

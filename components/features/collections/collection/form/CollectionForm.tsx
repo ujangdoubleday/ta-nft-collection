@@ -27,7 +27,6 @@ export function CollectionForm({}: CollectionFormProps) {
     description: '',
     coverImage: null,
     storage: 'Ethereum',
-    verifyContract: false,
   });
   const [showConsole, setShowConsole] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -159,18 +158,20 @@ export function CollectionForm({}: CollectionFormProps) {
 
   // Function to create Pinata folder automatically
   const createCollectionFolder = async (collectionName: string) => {
-    if (folderCreated || !collectionName) return null;
+    if (folderCreated || !collectionName || !address) return null;
 
     try {
-      // Create folder name based on collection name and timestamp
-      const folderName = `${collectionName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+      // Create folder name based on collection name and owner address
+      // Format: collectionName-ownerAddress
+      const shortAddress = `${address.slice(0, 6)}${address.slice(-4)}`;
+      const folderName = `${collectionName.toLowerCase().replace(/\s+/g, '-')}-${shortAddress}`;
       addConsoleMessage(`> Creating Pinata group: ${folderName}`);
 
       const folder = await createFolder(folderName);
       if (folder) {
         setFolderCreated(true);
         setCollectionFolder(folder);
-        addConsoleMessage(`> Group successfully created: ${folder.name} (${folder.id})`);
+        addConsoleMessage(`> Group successfully created: ${folder.name}`);
         return folder;
       }
     } catch (error) {
@@ -232,8 +233,6 @@ export function CollectionForm({}: CollectionFormProps) {
           if (uploadResult && uploadResult.metadata) {
             contractURI = uploadResult.metadata.url;
             addConsoleMessage(`> Image uploaded successfully to IPFS`);
-            addConsoleMessage(`> Metadata CID: ${uploadResult.metadata.cid}`);
-            addConsoleMessage(`> Metadata URL: ${uploadResult.metadata.url}`);
           }
         } catch (error) {
           addConsoleMessage(
@@ -272,8 +271,6 @@ export function CollectionForm({}: CollectionFormProps) {
           if (uploadResult && uploadResult.metadata) {
             contractURI = uploadResult.metadata.url;
             addConsoleMessage(`> Basic metadata uploaded successfully to IPFS`);
-            addConsoleMessage(`> Metadata CID: ${uploadResult.metadata.cid}`);
-            addConsoleMessage(`> Metadata URL: ${uploadResult.metadata.url}`);
           }
         } catch (error) {
           addConsoleMessage(
@@ -290,25 +287,12 @@ export function CollectionForm({}: CollectionFormProps) {
 
       // Create the NFT collection using the factory contract
       addConsoleMessage('> Creating collection on blockchain...');
-      addConsoleMessage(`> Using Factory contract: ${NFT_FACTORY_ADDRESS}`);
-      addConsoleMessage(`> Collection URI: ${contractURI}`);
-
-      if (formData.verifyContract) {
-        addConsoleMessage('> Contract verification requested');
-        addConsoleMessage('> Note: Verification will happen after contract deployment');
-      }
 
       const {
         hash,
         collectionAddress,
         error: factoryError,
-        verified,
-      } = await createCollection(
-        formData.name,
-        formData.symbol || 'NFT',
-        contractURI,
-        formData.verifyContract,
-      );
+      } = await createCollection(formData.name, formData.symbol || 'NFT', contractURI);
 
       if (factoryError) {
         addConsoleMessage(`> Error creating collection: ${factoryError.message}`);
@@ -317,51 +301,40 @@ export function CollectionForm({}: CollectionFormProps) {
 
       if (hash) {
         setTxHash(hash);
-        addConsoleMessage(`> Transaction submitted: ${hash}`);
+        // Don't log the full transaction hash for security
+        addConsoleMessage(`> Transaction submitted successfully`);
         addConsoleMessage('> Waiting for transaction confirmation...');
         addConsoleMessage('> This may take a few minutes. Please wait...');
 
         if (collectionAddress) {
-          addConsoleMessage(`> Collection deployed at: ${collectionAddress}`);
+          // Don't show the full collection address
+          addConsoleMessage(`> Collection deployed successfully`);
 
-          if (formData.verifyContract) {
-            addConsoleMessage('> Starting contract verification process...');
-            addConsoleMessage('> This may take a few minutes. Please wait...');
+          // Show only a generic link to Etherscan without exposing the exact address
+          addConsoleMessage('> Your collection will be visible on Etherscan shortly');
 
-            if (verified) {
-              addConsoleMessage('> Contract was successfully verified on Etherscan');
-              addConsoleMessage(
-                `> View on Etherscan: https://sepolia.etherscan.io/address/${collectionAddress}#code`,
-              );
-            } else {
-              addConsoleMessage('> Contract verification is still pending');
-              addConsoleMessage('> You can check the status on Etherscan later');
-              addConsoleMessage(
-                `> Etherscan link: https://sepolia.etherscan.io/address/${collectionAddress}`,
-              );
-            }
-          }
+          addConsoleMessage('> Proceeding with collection registration...');
+
+          // Prepare collection data for database save
+          const collectionToSave = {
+            name: formData.name,
+            symbol: formData.symbol || undefined,
+            description: formData.description || undefined,
+            contractURI: contractURI || undefined,
+            contractAddress: collectionAddress || hash, // Use collection address if available, otherwise tx hash
+            ownerAddress: address,
+            pinataGroupId: folderId || undefined,
+          };
+
+          setCollectionData(collectionToSave);
+          setNeedsDbSave(true);
+
+          // Note: The actual saving to the database will happen in the useEffect hook
+          // when the collection creation event is detected
         }
-
-        // Prepare collection data for database save
-        const collectionToSave = {
-          name: formData.name,
-          symbol: formData.symbol || undefined,
-          description: formData.description || undefined,
-          contractURI: contractURI || undefined,
-          contractAddress: collectionAddress || hash, // Use collection address if available, otherwise tx hash
-          ownerAddress: address,
-          pinataGroupId: folderId || undefined,
-        };
-
-        setCollectionData(collectionToSave);
-        setNeedsDbSave(true);
-
-        // Note: The actual saving to the database will happen in the useEffect hook
-        // when the collection creation event is detected
       }
     } catch (error) {
-      console.error('Error creating collection:', error);
+      // Just add to console without logging details to browser console
       addConsoleMessage(`> Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       // Don't show alert, we already show the error in the console
     } finally {
@@ -392,7 +365,7 @@ export function CollectionForm({}: CollectionFormProps) {
             <span className="font-bold">Collection Owner:</span>{' '}
             {address ? (
               <span className="font-mono text-xs">
-                {address} <b>{'(YOU)'}</b>{' '}
+                {address.slice(0, 6)}...{address.slice(-4)} <b>{'(YOU)'}</b>{' '}
               </span>
             ) : (
               <span className="text-red-600">No wallet connected. Please connect your wallet.</span>
@@ -443,6 +416,3 @@ export function CollectionForm({}: CollectionFormProps) {
     </Win98Window>
   );
 }
-
-// NFT Factory contract address for easy reference
-const NFT_FACTORY_ADDRESS = '0x667d34aDc81895967C39277e2Cd2e32585afdeC3';
