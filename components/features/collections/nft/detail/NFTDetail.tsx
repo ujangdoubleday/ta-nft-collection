@@ -49,7 +49,11 @@ export function NFTDetail({ collectionId, nftId: _nftId, nft, placeholderImage }
 
             <NFTHistory history={nft.history} />
 
-            <NFTTransferForm />
+            <NFTTransferForm
+              contractAddress={collectionId}
+              tokenId={nft.tokenId}
+              ownerAddress={nft.owner}
+            />
           </div>
         </div>
       </div>

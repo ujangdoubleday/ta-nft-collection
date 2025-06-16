@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { usePublicClient, useWatchContractEvent } from 'wagmi';
-import { Log } from 'viem';
+import { Log, decodeEventLog } from 'viem';
 
 // NFT Collection contract ABI for the Transfer event
 const NFT_COLLECTION_EVENT_ABI = [
@@ -21,101 +21,115 @@ export interface NFTTransferEvent {
   tokenId: string;
 }
 
+/**
+ * Hook to watch for NFT transfer events or fetch them from transaction history
+ * @param contractAddress The NFT collection contract address
+ * @param transactionHash Optional transaction hash to fetch events from
+ * @returns The transfer events, loading state, and error
+ */
 export function useNFTCollectionEvents(contractAddress?: string, transactionHash?: string) {
   const [transferEvents, setTransferEvents] = useState<NFTTransferEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-
   const publicClient = usePublicClient();
 
-  // Watch for Transfer events if contract address is provided
+  // Watch for transfer events (only if contract address is provided)
   useWatchContractEvent({
-    address: contractAddress ? (contractAddress as `0x${string}`) : undefined,
+    address: contractAddress as `0x${string}`,
     abi: NFT_COLLECTION_EVENT_ABI,
     eventName: 'Transfer',
     onLogs: (logs) => {
-      console.log('Transfer event detected:', logs);
-      const events = logs.map((log) => {
-        // Extract arguments from the event log
-        const args = (log as any).args as {
-          from: string;
-          to: string;
-          tokenId: bigint;
-        };
+      const newEvents = logs
+        .map((log) => {
+          try {
+            const decoded = decodeEventLog({
+              abi: NFT_COLLECTION_EVENT_ABI,
+              data: log.data,
+              topics: log.topics,
+            });
 
-        return {
-          from: args.from,
-          to: args.to,
-          tokenId: args.tokenId.toString(),
-        };
-      });
+            if (decoded && decoded.args) {
+              return {
+                from: decoded.args.from?.toString() || '0x0',
+                to: decoded.args.to?.toString() || '0x0',
+                tokenId: decoded.args.tokenId ? decoded.args.tokenId.toString() : '0',
+              };
+            }
+            return null;
+          } catch (err) {
+            console.error('Error decoding event log:', err);
+            return null;
+          }
+        })
+        .filter((event): event is NFTTransferEvent => event !== null);
 
-      setTransferEvents((prev) => [...prev, ...events]);
+      if (newEvents.length > 0) {
+        setTransferEvents((prev) => [...prev, ...newEvents]);
+      }
     },
     enabled: !!contractAddress,
   });
 
-  // If a transaction hash is provided, try to find the token ID from the transaction receipt
+  // Fetch transfer events from transaction (if tx hash provided)
   useEffect(() => {
-    if (!transactionHash || !publicClient || !contractAddress) return;
+    if (!transactionHash || !publicClient) return;
 
-    const getTokenFromTx = async () => {
+    const fetchTransferEvents = async () => {
+      setLoading(true);
+      setError(null);
+
       try {
-        setLoading(true);
-        setError(null);
-
-        console.log(`Looking for NFT transfer in transaction: ${transactionHash}`);
-
-        // Wait for transaction receipt
-        const receipt = await publicClient.waitForTransactionReceipt({
+        // Get transaction receipt
+        const receipt = await publicClient.getTransactionReceipt({
           hash: transactionHash as `0x${string}`,
         });
 
-        console.log('Transaction receipt:', receipt);
-
-        // Find Transfer event in the logs
-        if (receipt.logs && receipt.logs.length > 0) {
-          const events: NFTTransferEvent[] = [];
-
-          for (const log of receipt.logs) {
-            if (log.address.toLowerCase() === contractAddress.toLowerCase()) {
-              try {
-                // Try to decode the log as a Transfer event
-                const decodedLog = (publicClient as any).decodeEventLog({
+        // Parse Transfer events from logs
+        const events = receipt.logs
+          .map((log) => {
+            try {
+              // Check if this log matches our event signature
+              if (
+                log.topics.length === 4 &&
+                log.topics[0] ===
+                  '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+              ) {
+                // This is a Transfer event (ERC721 standard)
+                const decoded = decodeEventLog({
                   abi: NFT_COLLECTION_EVENT_ABI,
                   data: log.data,
                   topics: log.topics,
                 });
 
-                if (decodedLog && 'tokenId' in decodedLog) {
-                  console.log('Found transfer event:', decodedLog);
-                  events.push({
-                    from: decodedLog.from as string,
-                    to: decodedLog.to as string,
-                    tokenId: (decodedLog.tokenId as bigint).toString(),
-                  });
+                if (decoded && decoded.args) {
+                  return {
+                    from: decoded.args.from?.toString() || '0x0',
+                    to: decoded.args.to?.toString() || '0x0',
+                    tokenId: decoded.args.tokenId ? decoded.args.tokenId.toString() : '0',
+                  };
                 }
-              } catch (decodeError) {
-                // Ignore decode errors, as not all logs are Transfer events
-                console.log('Could not decode log as Transfer event');
               }
+              return null;
+            } catch (err) {
+              // Skip logs that can't be decoded
+              return null;
             }
-          }
+          })
+          .filter((event): event is NFTTransferEvent => event !== null);
 
-          if (events.length > 0) {
-            setTransferEvents((prev) => [...prev, ...events]);
-          }
+        if (events.length > 0) {
+          setTransferEvents((prev) => [...prev, ...events]);
         }
       } catch (err) {
-        console.error('Error getting token from transaction:', err);
+        console.error('Error fetching transfer events:', err);
         setError(err instanceof Error ? err : new Error('Unknown error occurred'));
       } finally {
         setLoading(false);
       }
     };
 
-    getTokenFromTx();
-  }, [transactionHash, publicClient, contractAddress]);
+    fetchTransferEvents();
+  }, [transactionHash, publicClient]);
 
   return {
     transferEvents,
