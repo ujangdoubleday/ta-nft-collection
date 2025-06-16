@@ -1,17 +1,19 @@
 import { z } from 'zod';
 import { publicProcedure, router } from '@/lib/api/trpc/server';
 import {
-  uploadFileToPinata,
-  uploadMetadataToPinata,
-  createPinataFolder,
-  getPinataFolders,
-} from '@/lib/api/services/pinata';
+  createFolder,
+  getFolders,
+  uploadFile,
+  uploadMetadata,
+  PinataFolder,
+  PinataUploadResult,
+} from '@/lib/api/services/pinata/helper';
 
 export const uploadRouter = router({
   // Get all Pinata folders
   getPinataFolders: publicProcedure.query(async () => {
     try {
-      const folders = await getPinataFolders();
+      const folders = await getFolders();
       return folders;
     } catch (error) {
       console.error('Error getting IPFS folders:', error);
@@ -31,7 +33,7 @@ export const uploadRouter = router({
         const { name } = input;
         console.log(`Creating IPFS folder: ${name}`);
 
-        const folder = await createPinataFolder(name);
+        const folder = await createFolder(name);
         console.log(`Folder created: ${folder.name} (${folder.id})`);
 
         return folder;
@@ -73,7 +75,7 @@ export const uploadRouter = router({
         }
 
         // Upload file to Pinata
-        const result = await uploadFileToPinata(fileBuffer, fileName, folderId);
+        const result = await uploadFile(fileBuffer, fileName, folderId);
 
         console.log(`File uploaded successfully to IPFS. CID: ${result.cid}`);
 
@@ -91,7 +93,7 @@ export const uploadRouter = router({
         }
 
         // Upload metadata to Pinata
-        const metadataResult = await uploadMetadataToPinata(metadata, `metadata`, folderId);
+        const metadataResult = await uploadMetadata(metadata, `metadata`, folderId);
 
         console.log(`Metadata uploaded successfully to IPFS. CID: ${metadataResult.cid}`);
 

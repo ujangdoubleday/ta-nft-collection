@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react';
 import { usePublicClient, useWatchContractEvent } from 'wagmi';
 import { Log, decodeEventLog } from 'viem';
 
+// Define the type for the decoded arguments
+interface TransferEventArgs {
+  from: `0x${string}`;
+  to: `0x${string}`;
+  tokenId: bigint;
+}
+
 // NFT Collection contract ABI for the Transfer event
 const NFT_COLLECTION_EVENT_ABI = [
   {
@@ -49,10 +56,12 @@ export function useNFTCollectionEvents(contractAddress?: string, transactionHash
             });
 
             if (decoded && decoded.args) {
+              // Destructure array items directly
+              const [from, to, tokenId] = decoded.args;
               return {
-                from: decoded.args.from?.toString() || '0x0',
-                to: decoded.args.to?.toString() || '0x0',
-                tokenId: decoded.args.tokenId ? decoded.args.tokenId.toString() : '0',
+                from: from?.toString() || '0x0',
+                to: to?.toString() || '0x0',
+                tokenId: tokenId ? tokenId.toString() : '0',
               };
             }
             return null;
@@ -102,10 +111,12 @@ export function useNFTCollectionEvents(contractAddress?: string, transactionHash
                 });
 
                 if (decoded && decoded.args) {
+                  // Destructure array items directly
+                  const [from, to, tokenId] = decoded.args;
                   return {
-                    from: decoded.args.from?.toString() || '0x0',
-                    to: decoded.args.to?.toString() || '0x0',
-                    tokenId: decoded.args.tokenId ? decoded.args.tokenId.toString() : '0',
+                    from: from?.toString() || '0x0',
+                    to: to?.toString() || '0x0',
+                    tokenId: tokenId ? tokenId.toString() : '0',
                   };
                 }
               }
