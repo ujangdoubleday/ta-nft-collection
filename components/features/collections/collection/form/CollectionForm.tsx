@@ -1,7 +1,6 @@
 'use client';
 
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
-import { Win98Spinner } from '@/components/ui/organisms';
 import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -28,6 +27,7 @@ export function CollectionForm({}: CollectionFormProps) {
     description: '',
     coverImage: null,
     storage: 'Ethereum',
+    verifyContract: false,
   });
   const [showConsole, setShowConsole] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,7 +37,6 @@ export function CollectionForm({}: CollectionFormProps) {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [needsDbSave, setNeedsDbSave] = useState(false);
   const [dbSavePending, setDbSavePending] = useState(false);
-  const [showProgressBar, setShowProgressBar] = useState(false);
   const [collectionData, setCollectionData] = useState<{
     name: string;
     symbol?: string;
@@ -160,28 +159,26 @@ export function CollectionForm({}: CollectionFormProps) {
 
   // Function to create Pinata folder automatically
   const createCollectionFolder = async (collectionName: string) => {
-    if (folderCreated || !collectionName || !address) return null;
+    if (folderCreated || !collectionName) return null;
 
     try {
-      // Create name based on collection name and owner address
-      // Format: collectionName-ownerAddress
-      const shortAddress = `${address.slice(0, 6)}${address.slice(-4)}`;
-      const storageName = `${collectionName.toLowerCase().replace(/\s+/g, '-')}-${shortAddress}`;
-      addConsoleMessage('> Initializing IPFS storage...');
+      // Create folder name based on collection name and timestamp
+      const folderName = `${collectionName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+      addConsoleMessage(`> Creating Pinata group: ${folderName}`);
 
-      const result = await createFolder(storageName);
-      if (result) {
+      const folder = await createFolder(folderName);
+      if (folder) {
         setFolderCreated(true);
-        setCollectionFolder(result);
-        addConsoleMessage('> IPFS storage successfully initialized.');
-        return result;
+        setCollectionFolder(folder);
+        addConsoleMessage(`> Group successfully created: ${folder.name} (${folder.id})`);
+        return folder;
       }
     } catch (error) {
-      // If creation fails, show message but continue process
+      // If folder creation fails, show message but continue process
       addConsoleMessage(
-        `> Warning: Unable to set up IPFS storage: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `> Note: Cannot create Pinata group: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
-      addConsoleMessage('> Proceeding with upload without structured IPFS storage...');
+      addConsoleMessage('> Continuing upload without group...');
     }
     return null;
   };
@@ -202,7 +199,6 @@ export function CollectionForm({}: CollectionFormProps) {
     }
 
     setIsSubmitting(true);
-    setShowProgressBar(true);
     setConsoleMessages([]);
     addConsoleMessage('> Processing data...');
     addConsoleMessage(`> Owner address: ${address}`);
@@ -212,10 +208,16 @@ export function CollectionForm({}: CollectionFormProps) {
       const folder = await createCollectionFolder(formData.name);
       const folderId = folder?.id;
 
+      if (folderId) {
+        addConsoleMessage(`> Pinata group will be used: ${folder.name} (${folderId})`);
+      } else {
+        addConsoleMessage('> Upload will be done without Pinata group');
+      }
+
       // Upload image to Pinata if available
       let contractURI = null;
       if (formData.coverImage) {
-        addConsoleMessage('> Uploading image to IPFS...');
+        addConsoleMessage('> Uploading image to Pinata IPFS...');
 
         try {
           const uploadResult = await uploadToPinata(
@@ -230,10 +232,12 @@ export function CollectionForm({}: CollectionFormProps) {
           if (uploadResult && uploadResult.metadata) {
             contractURI = uploadResult.metadata.url;
             addConsoleMessage(`> Image uploaded successfully to IPFS`);
+            addConsoleMessage(`> Metadata CID: ${uploadResult.metadata.cid}`);
+            addConsoleMessage(`> Metadata URL: ${uploadResult.metadata.url}`);
           }
         } catch (error) {
           addConsoleMessage(
-            `> Error uploading to IPFS: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            `> Error uploading to Pinata: ${error instanceof Error ? error.message : 'Unknown error'}`,
           );
           throw error; // Re-throw to be caught by the outer try/catch
         }
@@ -254,7 +258,7 @@ export function CollectionForm({}: CollectionFormProps) {
           });
           const metadataFile = new File([metadataBlob], 'metadata.json');
 
-          addConsoleMessage('> Uploading basic metadata to IPFS...');
+          addConsoleMessage('> Uploading basic metadata to Pinata IPFS...');
 
           const uploadResult = await uploadToPinata(
             metadataFile,
@@ -268,6 +272,8 @@ export function CollectionForm({}: CollectionFormProps) {
           if (uploadResult && uploadResult.metadata) {
             contractURI = uploadResult.metadata.url;
             addConsoleMessage(`> Basic metadata uploaded successfully to IPFS`);
+            addConsoleMessage(`> Metadata CID: ${uploadResult.metadata.cid}`);
+            addConsoleMessage(`> Metadata URL: ${uploadResult.metadata.url}`);
           }
         } catch (error) {
           addConsoleMessage(
@@ -282,14 +288,27 @@ export function CollectionForm({}: CollectionFormProps) {
         throw new Error('Failed to create collection metadata URI');
       }
 
+      // Create the NFT collection using the factory contract
       addConsoleMessage('> Creating collection on blockchain...');
-      addConsoleMessage('> Waiting for transaction confirmation...');
+      addConsoleMessage(`> Using Factory contract: ${NFT_FACTORY_ADDRESS}`);
+      addConsoleMessage(`> Collection URI: ${contractURI}`);
+
+      if (formData.verifyContract) {
+        addConsoleMessage('> Contract verification requested');
+        addConsoleMessage('> Note: Verification will happen after contract deployment');
+      }
 
       const {
         hash,
         collectionAddress,
         error: factoryError,
-      } = await createCollection(formData.name, formData.symbol || 'NFT', contractURI);
+        verified,
+      } = await createCollection(
+        formData.name,
+        formData.symbol || 'NFT',
+        contractURI,
+        formData.verifyContract,
+      );
 
       if (factoryError) {
         addConsoleMessage(`> Error creating collection: ${factoryError.message}`);
@@ -298,26 +317,51 @@ export function CollectionForm({}: CollectionFormProps) {
 
       if (hash) {
         setTxHash(hash);
-        addConsoleMessage(`> Transaction submitted successfully`);
+        addConsoleMessage(`> Transaction submitted: ${hash}`);
+        addConsoleMessage('> Waiting for transaction confirmation...');
         addConsoleMessage('> This may take a few minutes. Please wait...');
 
         if (collectionAddress) {
-          const collectionToSave = {
-            name: formData.name,
-            symbol: formData.symbol || undefined,
-            description: formData.description || undefined,
-            contractURI: contractURI || undefined,
-            contractAddress: collectionAddress || hash, // Use collection address if available, otherwise tx hash
-            ownerAddress: address,
-            pinataGroupId: folderId || undefined,
-          };
+          addConsoleMessage(`> Collection deployed at: ${collectionAddress}`);
 
-          setCollectionData(collectionToSave);
-          setNeedsDbSave(true);
+          if (formData.verifyContract) {
+            addConsoleMessage('> Starting contract verification process...');
+            addConsoleMessage('> This may take a few minutes. Please wait...');
+
+            if (verified) {
+              addConsoleMessage('> Contract was successfully verified on Etherscan');
+              addConsoleMessage(
+                `> View on Etherscan: https://sepolia.etherscan.io/address/${collectionAddress}#code`,
+              );
+            } else {
+              addConsoleMessage('> Contract verification is still pending');
+              addConsoleMessage('> You can check the status on Etherscan later');
+              addConsoleMessage(
+                `> Etherscan link: https://sepolia.etherscan.io/address/${collectionAddress}`,
+              );
+            }
+          }
         }
+
+        // Prepare collection data for database save
+        const collectionToSave = {
+          name: formData.name,
+          symbol: formData.symbol || undefined,
+          description: formData.description || undefined,
+          contractURI: contractURI || undefined,
+          contractAddress: collectionAddress || hash, // Use collection address if available, otherwise tx hash
+          ownerAddress: address,
+          pinataGroupId: folderId || undefined,
+        };
+
+        setCollectionData(collectionToSave);
+        setNeedsDbSave(true);
+
+        // Note: The actual saving to the database will happen in the useEffect hook
+        // when the collection creation event is detected
       }
     } catch (error) {
-      // Just add to console without logging details to browser console
+      console.error('Error creating collection:', error);
       addConsoleMessage(`> Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       // Don't show alert, we already show the error in the console
     } finally {
@@ -348,7 +392,7 @@ export function CollectionForm({}: CollectionFormProps) {
             <span className="font-bold">Collection Owner:</span>{' '}
             {address ? (
               <span className="font-mono text-xs">
-                {address.slice(0, 6)}...{address.slice(-4)} <b>{'(YOU)'}</b>{' '}
+                {address} <b>{'(YOU)'}</b>{' '}
               </span>
             ) : (
               <span className="text-red-600">No wallet connected. Please connect your wallet.</span>
@@ -358,37 +402,29 @@ export function CollectionForm({}: CollectionFormProps) {
 
         {/* Console Style Note - appears above buttons */}
         {showConsole && (
-          <>
-            <div className="mt-6 mb-4 bg-black text-[#00FF00] p-3 font-mono text-sm border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white">
-              <div className="bg-[#000080] text-white px-2 py-1 -mt-3 -mx-3 mb-2 flex items-center">
-                <span className="text-xs font-bold">Console</span>
-              </div>
-              {consoleMessages.length > 0 ? (
-                consoleMessages.map((message, index) => (
-                  <p
-                    key={index}
-                    className={message.includes('Error') ? 'text-red-400 mb-1' : 'mb-1'}
-                  >
-                    {message}
-                  </p>
-                ))
-              ) : (
-                <>
-                  <p className="mb-1">{'> Processing data...'}</p>
-                  <p className="text-white">{`> Owner: ${address || 'Not connected'}`}</p>
-                  <p className="text-white">{"> Click 'Create Collection' again to confirm."}</p>
-                </>
-              )}
+          <div className="mt-6 mb-4 bg-black text-[#00FF00] p-3 font-mono text-sm border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white">
+            <div className="bg-[#000080] text-white px-2 py-1 -mt-3 -mx-3 mb-2 flex items-center">
+              <span className="text-xs font-bold">Console</span>
             </div>
-            {showProgressBar && (
-              <div className="flex items-center mb-4">
-                <div className="w-full h-4 bg-white border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white overflow-hidden mr-2">
-                  <div className="win98-progress-bar h-full"></div>
-                </div>
-                <Win98Spinner size="small" />
-              </div>
+            {consoleMessages.length > 0 ? (
+              consoleMessages.map((message, index) => (
+                <p key={index} className={message.includes('Error') ? 'text-red-400 mb-1' : 'mb-1'}>
+                  {message}
+                </p>
+              ))
+            ) : (
+              <>
+                <p className="mb-1">{'> Processing data...'}</p>
+                <p className="mb-1 text-yellow-400">
+                  {
+                    '> Note: Creating a collection is the first step to bringing your digital artwork to life.'
+                  }
+                </p>
+                <p className="text-white">{`> Owner: ${address || 'Not connected'}`}</p>
+                <p className="text-white">{"> Click 'Create Collection' again to confirm."}</p>
+              </>
             )}
-          </>
+          </div>
         )}
 
         <CollectionFormActions
@@ -407,3 +443,6 @@ export function CollectionForm({}: CollectionFormProps) {
     </Win98Window>
   );
 }
+
+// NFT Factory contract address for easy reference
+const NFT_FACTORY_ADDRESS = '0x667d34aDc81895967C39277e2Cd2e32585afdeC3';

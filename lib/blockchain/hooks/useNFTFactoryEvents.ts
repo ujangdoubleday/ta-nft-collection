@@ -3,8 +3,19 @@ import { usePublicClient, useWatchContractEvent } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { Log, TransactionReceipt } from 'viem';
 
-// Import ABI from compiled contracts
-import NFT_FACTORY_EVENTS_ABI from '../abi/NFTFactoryEvents.json';
+// NFTFactory contract ABI for the CollectionCreated event
+const NFT_FACTORY_EVENT_ABI = [
+  {
+    name: 'CollectionCreated',
+    type: 'event',
+    inputs: [
+      { indexed: false, name: 'collectionAddress', type: 'address' },
+      { indexed: false, name: 'name', type: 'string' },
+      { indexed: false, name: 'symbol', type: 'string' },
+      { indexed: false, name: 'owner', type: 'address' },
+    ],
+  },
+];
 
 // Factory contract address on Sepolia
 const NFT_FACTORY_ADDRESS = '0x667d34aDc81895967C39277e2Cd2e32585afdeC3';
@@ -28,7 +39,7 @@ export function useNFTFactoryEvents(transactionHash?: string) {
   // Watch for CollectionCreated events
   useWatchContractEvent({
     address: NFT_FACTORY_ADDRESS,
-    abi: NFT_FACTORY_EVENTS_ABI,
+    abi: NFT_FACTORY_EVENT_ABI,
     eventName: 'CollectionCreated',
     onLogs: (logs) => {
       console.log('CollectionCreated event detected:', logs);
@@ -118,7 +129,7 @@ export function useNFTFactoryEvents(transactionHash?: string) {
                 try {
                   // Try to decode the log as a CollectionCreated event
                   const decodedLog = (publicClient as any).decodeEventLog({
-                    abi: NFT_FACTORY_EVENTS_ABI,
+                    abi: NFT_FACTORY_EVENT_ABI,
                     data: log.data,
                     topics: log.topics,
                   });

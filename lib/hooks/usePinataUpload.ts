@@ -57,7 +57,7 @@ export function usePinataUpload() {
       // Return the created folder
       return result;
     } catch (error) {
-      console.error('Error creating IPFS folder:', error);
+      console.error('Error creating folder:', error);
       throw error;
     } finally {
       setIsCreatingFolder(false);
@@ -106,7 +106,7 @@ export function usePinataUpload() {
       console.error('Upload error:', error);
       setUploadResult({
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error uploading to IPFS',
+        error: error instanceof Error ? error.message : 'Unknown error uploading to Pinata',
       });
       throw error;
     } finally {

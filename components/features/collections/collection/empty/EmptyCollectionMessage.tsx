@@ -13,7 +13,7 @@ export function EmptyCollectionMessage() {
     >
       <div className="p-4 text-center">
         <p className="text-black text-sm mb-4">
-          You don&apos;t have any collections yet. Create your first NFT collection!
+          Your gallery is empty. Start your creative journey today!
         </p>
         <Link href="/collections/new">
           <Button>Create Your First Collection</Button>

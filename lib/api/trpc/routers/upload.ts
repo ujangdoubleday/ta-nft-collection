@@ -14,7 +14,7 @@ export const uploadRouter = router({
       const folders = await getPinataFolders();
       return folders;
     } catch (error) {
-      console.error('Error getting IPFS folders:', error);
+      console.error('Error getting Pinata folders:', error);
       throw new Error(error instanceof Error ? error.message : 'Unknown error');
     }
   }),
@@ -29,14 +29,14 @@ export const uploadRouter = router({
     .mutation(async ({ input }) => {
       try {
         const { name } = input;
-        console.log(`Creating IPFS folder: ${name}`);
+        console.log(`Creating Pinata folder: ${name}`);
 
         const folder = await createPinataFolder(name);
         console.log(`Folder created: ${folder.name} (${folder.id})`);
 
         return folder;
       } catch (error) {
-        console.error('Error creating IPFS folder:', error);
+        console.error('Error creating Pinata folder:', error);
         throw new Error(error instanceof Error ? error.message : 'Unknown error');
       }
     }),
@@ -69,13 +69,13 @@ export const uploadRouter = router({
 
         console.log(`Processing file: ${fileName}, size: ${fileBuffer.length} bytes`);
         if (folderId) {
-          console.log(`Using IPFS folder ID: ${folderId}`);
+          console.log(`Using folder ID: ${folderId}`);
         }
 
         // Upload file to Pinata
         const result = await uploadFileToPinata(fileBuffer, fileName, folderId);
 
-        console.log(`File uploaded successfully to IPFS. CID: ${result.cid}`);
+        console.log(`File uploaded successfully. CID: ${result.cid}`);
 
         // Create and upload metadata
         const metadata = {
@@ -93,7 +93,7 @@ export const uploadRouter = router({
         // Upload metadata to Pinata
         const metadataResult = await uploadMetadataToPinata(metadata, `metadata`, folderId);
 
-        console.log(`Metadata uploaded successfully to IPFS. CID: ${metadataResult.cid}`);
+        console.log(`Metadata uploaded successfully. CID: ${metadataResult.cid}`);
 
         return {
           success: true,

@@ -14,7 +14,6 @@ import {
 import { NFTPreview } from '@/components/features/collections/nft/preview';
 import { NFTFormData } from '@/components/features/collections/nft/mint/NFTFormFields';
 import { useNFTCollection, useNFTCollectionEvents } from '@/lib/blockchain/hooks';
-import { Win98Spinner } from '@/components/ui/organisms';
 
 interface NFTMintFormProps {
   collectionId: string;
@@ -30,7 +29,6 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
   const [txHash, setTxHash] = useState<string | null>(null);
   const [needsDbSave, setNeedsDbSave] = useState(false);
   const [dbSavePending, setDbSavePending] = useState(false);
-  const [showProgressBar, setShowProgressBar] = useState(false);
   const [nftData, setNftData] = useState<{
     tokenId: string;
     name: string;
@@ -64,13 +62,14 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
   // Get the create NFT mutation
   const createNFTMutation = trpc.nft.create.useMutation({
     onSuccess: () => {
+      addConsoleMessage('> NFT saved to database successfully!');
       addConsoleMessage('> Redirecting to collection page...');
 
       // Short delay before redirecting
       setTimeout(() => {
         router.push(`/collections/${collectionId}`);
         router.refresh();
-      }, 1000);
+      }, 1500);
     },
   });
 
@@ -91,11 +90,9 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
           const event = transferEvents[transferEvents.length - 1];
 
           if (event) {
-            addConsoleMessage(`> Blockchain confirmation received!`);
-            addConsoleMessage(`> NFT created successfully`);
+            addConsoleMessage(`> NFT minted with token ID: ${event.tokenId}`);
 
             // Save the NFT to the database with the actual token ID
-            addConsoleMessage(`> Save NFT Metadata in the system...`);
             await createNFTMutation.mutateAsync({
               ...nftData,
               tokenId: event.tokenId,
@@ -104,16 +101,16 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
             setNeedsDbSave(false);
           } else {
             // If we can't find a transfer event, use a temporary token ID
-            addConsoleMessage('> Warning: Could not find event information');
-            addConsoleMessage('> Using temporary ID for registration');
+            addConsoleMessage('> Warning: Could not find token ID from event logs');
+            addConsoleMessage('> Saving with temporary token ID');
 
             await createNFTMutation.mutateAsync(nftData);
 
             setNeedsDbSave(false);
           }
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          addConsoleMessage(`> System error: ${errorMessage}`);
+          const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
+          addConsoleMessage(`> Database error: ${errorMessage}`);
         } finally {
           setDbSavePending(false);
         }
@@ -183,18 +180,21 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
     }
 
     setIsSubmitting(true);
-    setShowProgressBar(true);
     setConsoleMessages([]);
     addConsoleMessage('> Processing data...');
-    addConsoleMessage(`> Owner address: ${address?.slice(0, 6)}...${address?.slice(-4)}`);
-    addConsoleMessage(`> Collection: ${collectionName}`);
+    addConsoleMessage(`> Owner address: ${address}`);
+    addConsoleMessage(`> Collection: ${collectionName} (${collectionId})`);
 
     try {
-      // Get IPFS folder ID from collection if available
-      const ipfsFolderId = collection?.pinataGroupId || undefined;
+      // Generate a temporary token ID (will be replaced with the actual one from blockchain)
+      const tempTokenId = `${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+      addConsoleMessage(`> Temporary Token ID: ${tempTokenId}`);
 
-      // Upload image to IPFS
-      addConsoleMessage('> Uploading asset to IPFS...');
+      // Get Pinata group ID from collection if available
+      const pinataGroupId = collection?.pinataGroupId || undefined;
+
+      // Upload image to Pinata
+      addConsoleMessage('> Uploading image to IPFS...');
       let imageUrl = '';
       let metadataUrl = '';
 
@@ -209,14 +209,25 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
           })),
         };
 
-        const uploadResult = await uploadToPinata(formData.file, nftMetadata, ipfsFolderId);
+        // Add properties to console output
+        addConsoleMessage(`> Properties: ${formData.properties.length} attributes`);
+        formData.properties.forEach((prop) => {
+          if (prop.name && prop.value) {
+            addConsoleMessage(`>   ${prop.name}: ${prop.value}`);
+          }
+        });
+
+        const uploadResult = await uploadToPinata(formData.file, nftMetadata, pinataGroupId);
 
         if (uploadResult) {
           imageUrl = uploadResult.image.url;
           metadataUrl = uploadResult.metadata.url;
 
-          addConsoleMessage(`> Asset uploaded successfully to IPFS`);
-          addConsoleMessage(`> Metadata prepared successfully`);
+          addConsoleMessage(`> Image uploaded successfully to IPFS`);
+          addConsoleMessage(`> Image CID: ${uploadResult.image.cid}`);
+          addConsoleMessage(`> Image URL: ${uploadResult.image.url}`);
+          addConsoleMessage(`> Metadata CID: ${uploadResult.metadata.cid}`);
+          addConsoleMessage(`> Metadata URL: ${uploadResult.metadata.url}`);
         }
       } catch (error) {
         addConsoleMessage(
@@ -225,42 +236,45 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
         throw error; // Re-throw to be caught by the outer try/catch
       }
 
-      // Prepare NFT data for database save (will be saved after blockchain confirmation)
-      const nftToSave = {
-        tokenId: `${Date.now()}-temp`, // Temporary token ID, will be replaced with actual one from event
-        name: formData.title,
-        description: formData.description || undefined,
-        metadataUrl,
-        imageUrl,
-        contractAddress: collectionId,
-        ownerAddress: address,
-      };
-
       // Mint the NFT using the smart contract
-      addConsoleMessage('> Creating NFT on blockchain...');
-      addConsoleMessage('> Waiting for wallet confirmation...');
+      addConsoleMessage('> Minting NFT on blockchain...');
+      addConsoleMessage(`> Using NFT Collection contract: ${collectionId}`);
+      addConsoleMessage(`> Token URI: ${metadataUrl}`);
 
       const { hash, error: mintError } = await mintNFT(collectionId, address, metadataUrl);
 
       if (mintError) {
-        addConsoleMessage(`> Error creating NFT: ${mintError.message}`);
+        addConsoleMessage(`> Error minting NFT: ${mintError.message}`);
         throw mintError;
       }
 
       if (hash) {
         setTxHash(hash);
-        addConsoleMessage(`> Transaction submitted successfully`);
+        addConsoleMessage(`> Transaction submitted: ${hash}`);
+        addConsoleMessage('> Waiting for transaction confirmation...');
         addConsoleMessage('> This may take a few minutes. Please wait...');
 
-        // Store NFT data for saving to database after blockchain confirmation
+        // Prepare NFT data for database save
+        const nftToSave = {
+          tokenId: tempTokenId, // Temporary token ID, will be replaced with actual one from event
+          name: formData.title,
+          description: formData.description || undefined,
+          metadataUrl,
+          imageUrl,
+          contractAddress: collectionId,
+          ownerAddress: address,
+        };
+
         setNftData(nftToSave);
         setNeedsDbSave(true);
+
+        // Note: The actual saving to the database will happen in the useEffect hook
+        // when the NFT transfer event is detected
       }
     } catch (error) {
       console.error('Error creating NFT:', error);
       addConsoleMessage(`> Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setIsSubmitting(false);
-      setShowProgressBar(false);
     }
   };
 
@@ -311,7 +325,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
                 <span className="font-bold">NFT Owner:</span>{' '}
                 {address ? (
                   <span className="font-mono text-xs">
-                    {address.slice(0, 6)}...{address.slice(-4)} <b>{'(YOU)'}</b>{' '}
+                    {address} <b>{'(YOU)'}</b>{' '}
                   </span>
                 ) : (
                   <span className="text-red-600">
@@ -323,40 +337,32 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
 
             {/* Console Output */}
             {showConsole && (
-              <>
-                <div className="mt-6 mb-4 bg-black text-[#00FF00] p-3 font-mono text-sm border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white">
-                  <div className="bg-[#000080] text-white px-2 py-1 -mt-3 -mx-3 mb-2 flex items-center">
-                    <span className="text-xs font-bold">Console</span>
-                  </div>
-                  {consoleMessages.length > 0 ? (
-                    consoleMessages.map((message, index) => (
-                      <p
-                        key={index}
-                        className={message.includes('Error') ? 'text-red-400 mb-1' : 'mb-1'}
-                      >
-                        {message}
-                      </p>
-                    ))
-                  ) : (
-                    <>
-                      <p className="mb-1">{'> Processing data...'}</p>
-                      <p className="mb-1 text-yellow-400">
-                        {'> Note: Creating an NFT requires asset uploading and blockchain minting.'}
-                      </p>
-                      <p className="text-white">{`> Owner: ${address ? address.slice(0, 6) + '...' + address.slice(-4) : 'Not connected'}`}</p>
-                      <p className="text-white">{"> Click 'Create NFT' again to confirm."}</p>
-                    </>
-                  )}
+              <div className="mt-6 mb-4 bg-black text-[#00FF00] p-3 font-mono text-sm border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white">
+                <div className="bg-[#000080] text-white px-2 py-1 -mt-3 -mx-3 mb-2 flex items-center">
+                  <span className="text-xs font-bold">Console</span>
                 </div>
-                {showProgressBar && (
-                  <div className="flex items-center mb-4">
-                    <div className="w-full h-4 bg-white border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white overflow-hidden mr-2">
-                      <div className="win98-progress-bar h-full"></div>
-                    </div>
-                    <Win98Spinner size="small" />
-                  </div>
+                {consoleMessages.length > 0 ? (
+                  consoleMessages.map((message, index) => (
+                    <p
+                      key={index}
+                      className={message.includes('Error') ? 'text-red-400 mb-1' : 'mb-1'}
+                    >
+                      {message}
+                    </p>
+                  ))
+                ) : (
+                  <>
+                    <p className="mb-1">{'> Processing data...'}</p>
+                    <p className="mb-1 text-yellow-400">
+                      {
+                        '> Note: Creating an NFT requires two steps: uploading to IPFS and minting on the blockchain.'
+                      }
+                    </p>
+                    <p className="text-white">{`> Owner: ${address || 'Not connected'}`}</p>
+                    <p className="text-white">{"> Click 'Create NFT' again to confirm."}</p>
+                  </>
                 )}
-              </>
+              </div>
             )}
           </div>
 
