@@ -1,4 +1,3 @@
-import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev'
 import withBundleAnalyzer from '@next/bundle-analyzer'
 import withPlaiceholder from '@plaiceholder/next'
 
@@ -40,39 +39,13 @@ const baseConfig = {
     domains: [
       'gateway.pinata.cloud',
       'ipfs.io',
-      'cloudflare-ipfs.com',
       'dweb.link',
       'cyan-dead-reptile-256.mypinata.cloud',
     ],
-  },
-  // Configure webpack to ignore binary files from sharp
-  webpack: (config, { isServer }) => {
-    // Ignore binary files from sharp
-    config.module = {
-      ...config.module,
-      exprContextCritical: false,
-      rules: [
-        ...config.module.rules,
-        {
-          test: /node_modules[\\/]sharp[\\/]build[\\/]Release[\\/].+\.node$/,
-          use: 'node-loader',
-        },
-        {
-          test: /\.node$/,
-          use: 'node-loader',
-        },
-      ],
-    };
-    
-    return config;
-  },
+  }
 }
 
 // Apply plaiceholder and bundle analyzer
 const nextConfig = withPlaiceholder(withAnalyzer(baseConfig))
-
-if (process.env.NODE_ENV === 'development') {
-  await setupDevPlatform()
-}
 
 export default nextConfig

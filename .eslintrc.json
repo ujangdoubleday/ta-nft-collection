@@ -1,10 +1,7 @@
 {
   "extends": [
-    "next/core-web-vitals",
-    "plugin:next-on-pages/recommended"
+    "next/core-web-vitals"
   ],
-  "plugins": [
-    "next-on-pages"
-  ],
+  "plugins": [],
   "rules": {}
 }

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc/client';
+import { PinataFolder } from '@/lib/api/services/pinata/helper';
 
 interface UploadResult {
   success: boolean;
@@ -12,11 +13,6 @@ interface UploadResult {
     url: string;
   };
   error?: string;
-}
-
-interface PinataFolder {
-  id: string;
-  name: string;
 }
 
 interface NFTMetadata {
