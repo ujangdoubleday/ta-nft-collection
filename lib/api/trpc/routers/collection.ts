@@ -24,6 +24,37 @@ export const collectionRouter = router({
     });
   }),
 
+  getByOwner: publicProcedure
+    .input(z.object({ ownerAddress: z.string() }))
+    .query(async ({ input }) => {
+      const { ownerAddress } = input;
+
+      if (!ownerAddress) {
+        return [];
+      }
+
+      return prisma.collection.findMany({
+        where: {
+          ownerAddress,
+        },
+        orderBy: { createdAt: 'desc' },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              address: true,
+              createdAt: true,
+              updatedAt: true,
+              name: true,
+              email: true,
+              emailVerified: true,
+              image: true,
+            },
+          },
+        },
+      });
+    }),
+
   getByContractAddress: publicProcedure
     .input(z.object({ contractAddress: z.string() }))
     .query(async ({ input }) => {
