@@ -4,21 +4,21 @@ import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { LoadingWindow } from '@/components/shared/loading';
 import { CollectionCard } from '@/components/features/collections/collection/list';
 import { EmptyCollectionMessage } from '@/components/features/collections/collection/empty';
-import { useAllCollections } from '@/components/features/collections/hooks';
+import { useUserCollections } from '@/components/features/collections/hooks';
 
 interface TrpcCollectionGalleryProps {
   // Props can be added if needed
 }
 
 export function TrpcCollectionGallery({}: TrpcCollectionGalleryProps) {
-  const { collections, isLoading, error } = useAllCollections();
+  const { collections, isLoading, error } = useUserCollections();
 
   // Show loading state
   if (isLoading) {
     return (
       <LoadingWindow
         title="Loading Collections"
-        text="Loading collections..."
+        text="Loading your collections..."
         icon="/assets/icons/window/gallery.png"
       />
     );
@@ -33,7 +33,9 @@ export function TrpcCollectionGallery({}: TrpcCollectionGalleryProps) {
         className="mb-4"
       >
         <div className="flex flex-col items-center justify-center min-h-[200px] p-6">
-          <p className="text-center text-red-600">An error occurred while loading collections.</p>
+          <p className="text-center text-red-600">
+            An error occurred while loading your collections.
+          </p>
           <p className="text-center mt-2">Please try again later.</p>
         </div>
       </Win98Window>

@@ -98,7 +98,14 @@ export const TrpcCollectionDetail = ({ contractAddress }: TrpcCollectionDetailPr
     nfts,
     isLoading: isLoadingNFTs,
     error: nftsError,
+    refetch: refetchNFTs,
   } = useNFTsByContractAddress(contractAddress);
+
+  // Refresh data on component mount
+  useEffect(() => {
+    // Force refresh NFT data when the component mounts
+    refetchNFTs();
+  }, [refetchNFTs]);
 
   // Set a timeout to prevent infinite loading
   useEffect(() => {
