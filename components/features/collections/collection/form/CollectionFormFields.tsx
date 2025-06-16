@@ -11,7 +11,6 @@ export type CollectionFormData = {
   coverImage: File | null;
   storage: string;
   ownerAddress?: string; // Made optional
-  verifyContract: boolean; // Opsi untuk verifikasi kontrak
 };
 
 interface CollectionFormFieldsProps {
@@ -170,50 +169,7 @@ export function CollectionFormFields({
       </div>
 
       <div className="mt-6">
-        <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-          <label className="text-black text-xs font-bold block mb-1">Storage Options</label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="radio"
-              id="ethereum"
-              name="storage"
-              value="Ethereum"
-              checked={formData.storage === 'Ethereum'}
-              onChange={handleChange}
-              className="form-radio h-4 w-4"
-            />
-            <label htmlFor="ethereum" className="text-sm">
-              Ethereum + IPFS
-            </label>
-          </div>
-        </div>
-
-        <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3 mt-3">
-          <label className="text-black text-xs font-bold block mb-1">Contract Verification</label>
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="verifyContract"
-              name="verifyContract"
-              checked={formData.verifyContract}
-              onChange={(e) => {
-                handleChange({
-                  target: {
-                    name: 'verifyContract',
-                    value: e.target.checked,
-                  },
-                });
-              }}
-              className="form-checkbox h-4 w-4"
-            />
-            <label htmlFor="verifyContract" className="text-sm">
-              Verifikasi kontrak secara otomatis di Etherscan
-            </label>
-          </div>
-          <p className="text-xs text-gray-700 mt-1">
-            Membutuhkan Etherscan API key di environment variables
-          </p>
-        </div>
+        {/* Storage options and verification options removed as requested */}
       </div>
     </>
   );
