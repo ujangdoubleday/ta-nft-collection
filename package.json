@@ -10,10 +10,7 @@
     "find:unused": "next-unused",
     "prepare": "husky",
     "seed": "bun prisma/seed.ts",
-    "postinstall": "prisma generate --no-engine",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "preview": "npm run pages:build && wrangler pages dev",
-    "deploy": "npm run pages:build && wrangler pages deploy"
+    "postinstall": "prisma generate --no-engine"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.9.1",
@@ -56,7 +53,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.12",
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -64,7 +60,6 @@
     "autoprefixer": "^10.4.21",
     "eslint": "8.57.0",
     "eslint-config-next": "^15.4.0-canary.51",
-    "eslint-plugin-next-on-pages": "^1.13.12",
     "hardhat": "^2.24.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
