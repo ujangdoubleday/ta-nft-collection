@@ -67,6 +67,14 @@ export function useNFTCollection(): UseNFTCollectionReturn {
         });
 
         console.log(`Transaction hash: ${hash}`);
+        console.log(
+          `Transaction submitted successfully! You can view it at https://sepolia.etherscan.io/tx/${hash}`,
+        );
+
+        // Log to help with debugging
+        console.log(
+          `Important: If events are not detected but transaction succeeded, manually refresh the collection view`,
+        );
 
         // Since we can't get the tokenId directly from the transaction,
         // we would typically listen for events, but for now we'll return the tx hash
