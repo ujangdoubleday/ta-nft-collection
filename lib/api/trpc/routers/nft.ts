@@ -1,6 +1,15 @@
 import { z } from 'zod';
 import { publicProcedure, router } from '@/lib/api/trpc/server';
 import { prisma } from '@/lib/db';
+import { createPublicClient, http } from 'viem';
+import { sepolia } from 'viem/chains';
+import { NFT_COLLECTION_ABI } from '@/lib/blockchain/abi';
+
+// Create a public client for blockchain interactions
+const publicClient = createPublicClient({
+  chain: sepolia,
+  transport: http(),
+});
 
 export const nftRouter = router({
   getAll: publicProcedure.query(async () => {
@@ -41,6 +50,26 @@ export const nftRouter = router({
           },
         },
       });
+    }),
+
+  getCollectionOwner: publicProcedure
+    .input(z.object({ collectionAddress: z.string() }))
+    .query(async ({ input }) => {
+      const { collectionAddress } = input;
+
+      try {
+        // Call the owner() function on the NFTCollection contract
+        const owner = await publicClient.readContract({
+          address: collectionAddress as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          functionName: 'owner',
+        });
+
+        return { owner };
+      } catch (error) {
+        console.error(`Error getting owner of collection ${collectionAddress}:`, error);
+        return { owner: null, error: 'Failed to get collection owner' };
+      }
     }),
 
   getByCollectionAddress: publicProcedure

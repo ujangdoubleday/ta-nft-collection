@@ -1,9 +1,13 @@
 import { useCallback, useState } from 'react';
-import { useWriteContract } from 'wagmi';
+import { useWriteContract, useReadContract } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 
+// Import ABIs from the Hardhat-compiled contracts
+// @ts-ignore - This will be imported properly as JSON
+import NFT_COLLECTION_ABI from '../abi/NFTCollection.json';
+
 // NFT Collection contract ABI for the mintNFT function
-const NFT_COLLECTION_ABI = [
+const MINT_NFT_ABI = [
   {
     name: 'mintNFT',
     type: 'function',
@@ -60,13 +64,21 @@ export function useNFTCollection(): UseNFTCollectionReturn {
         // Call the contract method
         const hash = await writeContractAsync({
           address: contractAddress as `0x${string}`,
-          abi: NFT_COLLECTION_ABI,
+          abi: MINT_NFT_ABI,
           functionName: 'mintNFT',
           args: [recipient, tokenURI],
           chainId: sepolia.id,
         });
 
         console.log(`Transaction hash: ${hash}`);
+        console.log(
+          `Transaction submitted successfully! You can view it at https://sepolia.etherscan.io/tx/${hash}`,
+        );
+
+        // Log to help with debugging
+        console.log(
+          `Important: If events are not detected but transaction succeeded, manually refresh the collection view`,
+        );
 
         // Since we can't get the tokenId directly from the transaction,
         // we would typically listen for events, but for now we'll return the tx hash
@@ -86,4 +98,20 @@ export function useNFTCollection(): UseNFTCollectionReturn {
     isLoading: isMintLoading,
     error,
   };
+}
+
+/**
+ * Hook to get the owner of an NFT collection
+ * @param collectionAddress The address of the collection contract
+ * @returns The owner address and loading state
+ */
+export function useCollectionOwner(collectionAddress?: `0x${string}`) {
+  return useReadContract({
+    address: collectionAddress,
+    abi: NFT_COLLECTION_ABI,
+    functionName: 'owner',
+    query: {
+      enabled: !!collectionAddress,
+    },
+  });
 }

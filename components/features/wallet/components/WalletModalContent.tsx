@@ -68,7 +68,7 @@ export function WalletModalContent({
       return (
         <>
           <DialogHeader>
-            <DialogTitle className="text-black">Connect Wallet</DialogTitle>
+            <DialogTitle className="text-black font-bold">Connect Wallet</DialogTitle>
             <DialogDescription className="pt-2 text-xs text-[#555]">
               Connect your wallet to access your NFT collections and create new digital assets.
             </DialogDescription>
@@ -77,7 +77,7 @@ export function WalletModalContent({
             <button
               onClick={onConnect}
               disabled={isConnecting}
-              className="flex items-center justify-center gap-2 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] px-4 py-3 text-black text-sm press-effect"
+              className="flex items-center justify-center gap-2 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] px-4 py-3 font-bold text-black text-sm press-effect"
             >
               {isConnecting ? (
                 <>
@@ -99,7 +99,7 @@ export function WalletModalContent({
       return (
         <>
           <DialogHeader>
-            <DialogTitle className="text-black">Authenticate</DialogTitle>
+            <DialogTitle className="text-black font-bold">Authenticate</DialogTitle>
             <DialogDescription className="pt-2 text-xs text-[#555]">
               Sign a message with your wallet to verify ownership and access your collections.
             </DialogDescription>
@@ -152,7 +152,7 @@ export function WalletModalContent({
       return (
         <>
           <DialogHeader>
-            <DialogTitle className="text-black">Wallet Verification</DialogTitle>
+            <DialogTitle className="text-black font-bold">Wallet Verification</DialogTitle>
             <DialogDescription className="pt-2 text-xs text-[#555]">
               Checking wallet and creating account...
             </DialogDescription>
@@ -198,7 +198,7 @@ export function WalletModalContent({
       return (
         <>
           <DialogHeader>
-            <DialogTitle className="text-black">Wallet Details</DialogTitle>
+            <DialogTitle className="text-black font-bold">Wallet Details</DialogTitle>
             <DialogDescription className="pt-2 text-xs text-[#555]">
               Your wallet is connected and authenticated
             </DialogDescription>

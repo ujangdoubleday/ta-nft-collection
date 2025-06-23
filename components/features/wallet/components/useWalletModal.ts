@@ -1,6 +1,7 @@
 import { useWallet } from '@/lib/hooks/wallet';
 import { formatAddress } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 
 export type WalletModalStep = 'connect' | 'sign' | 'checking' | 'details';
 export type LogMessage = {
@@ -61,6 +62,7 @@ export const useWalletModal = () => {
     setLogMessages([]);
   };
 
+  // Kembali menggunakan useEffect untuk pemantauan status autentikasi
   useEffect(() => {
     if (isAuthenticated && !previousAuthState && !isDisconnecting) {
       setIsCreatingAccount(false);
@@ -81,6 +83,7 @@ export const useWalletModal = () => {
     setPreviousAuthState(isAuthenticated);
   }, [isAuthenticated, previousAuthState, isDisconnecting]);
 
+  // Kembali menggunakan useEffect untuk pemantauan status koneksi
   useEffect(() => {
     if (isConnected) {
       if (isAuthenticated) {
@@ -95,6 +98,7 @@ export const useWalletModal = () => {
     }
   }, [isConnected, isAuthenticated, isCreatingAccount]);
 
+  // Kembali menggunakan useEffect untuk pemantauan error
   useEffect(() => {
     if (error) {
       setIsCreatingAccount(false);
@@ -133,11 +137,24 @@ export const useWalletModal = () => {
     }
   };
 
-  const copyAddress = async () => {
-    if (address) {
-      await navigator.clipboard.writeText(address);
+  // Menggunakan useMutation untuk menyalin alamat wallet
+  const copyAddressMutation = useMutation({
+    mutationFn: async () => {
+      if (address) {
+        return navigator.clipboard.writeText(address);
+      }
+    },
+    onSuccess: () => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    },
+  });
+
+  const copyAddress = (): Promise<void> => {
+    try {
+      return copyAddressMutation.mutateAsync() as Promise<void>;
+    } catch (error) {
+      return Promise.resolve();
     }
   };
 
@@ -157,20 +174,34 @@ export const useWalletModal = () => {
     }
   };
 
-  const handleConnect = async () => {
-    try {
-      const success = await connect();
+  // Menggunakan useMutation untuk koneksi wallet
+  const connectMutation = useMutation({
+    mutationFn: async () => {
+      return connect();
+    },
+    onError: () => {
+      resetWalletStates();
+    },
+    onSuccess: (success) => {
       if (!success) {
         resetWalletStates();
       }
-    } catch (err) {
+    },
+  });
+
+  const handleConnect = (): Promise<void> => {
+    try {
+      return connectMutation.mutateAsync().then(() => {});
+    } catch (error) {
       resetWalletStates();
+      return Promise.resolve();
     }
   };
 
-  const handleAuthenticate = async () => {
-    try {
-      const success = await authenticate(() => {
+  // Menggunakan useMutation untuk autentikasi wallet
+  const authenticateMutation = useMutation({
+    mutationFn: async () => {
+      return authenticate(() => {
         setIsCreatingAccount(true);
         setWalletModalStep('checking');
 
@@ -222,20 +253,32 @@ export const useWalletModal = () => {
           addLogMessage('Finalizing authentication...', 'info');
         }, 3800);
       });
-
+    },
+    onSuccess: (success) => {
       if (!success) {
         disconnect();
         resetWalletStates();
       } else {
         setIsWalletModalOpen(false);
       }
-    } catch (err) {
+    },
+    onError: () => {
       disconnect();
       resetWalletStates();
+    },
+  });
+
+  const handleAuthenticate = (): Promise<void> => {
+    try {
+      return authenticateMutation.mutateAsync().then(() => {});
+    } catch (error) {
+      disconnect();
+      resetWalletStates();
+      return Promise.resolve();
     }
   };
 
-  const handleCancelSign = () => {
+  const handleCancelSign = (): Promise<void> => {
     disconnect();
     setErrorMessage('Authentication Cancelled by User');
     setShowErrorNotification(true);
@@ -245,30 +288,43 @@ export const useWalletModal = () => {
       setShowErrorNotification(false);
       setErrorMessage('');
     }, 5000);
+
+    return Promise.resolve();
   };
 
-  const handleDisconnect = () => {
-    // Set disconnecting flag to prevent authentication notification
-    setIsDisconnecting(true);
+  // Menggunakan useMutation untuk memutuskan koneksi wallet
+  const disconnectMutation = useMutation({
+    mutationFn: async () => {
+      // Set disconnecting flag to prevent authentication notification
+      setIsDisconnecting(true);
 
-    // Cancel all timeouts
-    const maxTimeoutId = Number(setTimeout(() => {}, 0));
-    for (let i = 1; i < maxTimeoutId; i++) {
-      clearTimeout(i);
+      // Cancel all timeouts
+      const maxTimeoutId = Number(setTimeout(() => {}, 0));
+      for (let i = 1; i < maxTimeoutId; i++) {
+        clearTimeout(i);
+      }
+
+      // Immediately hide all notifications
+      setShowSuccessNotification(false);
+      setShowErrorNotification(false);
+
+      // Disconnect wallet and close modal
+      disconnect();
+      setIsWalletModalOpen(false);
+
+      // Reset disconnecting flag after a short delay
+      setTimeout(() => {
+        setIsDisconnecting(false);
+      }, 1000);
+    },
+  });
+
+  const handleDisconnect = (): Promise<void> => {
+    try {
+      return disconnectMutation.mutateAsync().then(() => {});
+    } catch (error) {
+      return Promise.resolve();
     }
-
-    // Immediately hide all notifications
-    setShowSuccessNotification(false);
-    setShowErrorNotification(false);
-
-    // Disconnect wallet and close modal
-    disconnect();
-    setIsWalletModalOpen(false);
-
-    // Reset disconnecting flag after a short delay
-    setTimeout(() => {
-      setIsDisconnecting(false);
-    }, 1000);
   };
 
   const handleWalletButtonClick = () => {

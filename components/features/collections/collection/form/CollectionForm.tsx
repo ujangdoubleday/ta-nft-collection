@@ -4,7 +4,8 @@ import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { Win98Spinner } from '@/components/ui/organisms';
 import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import {
   CollectionFormActions,
   CollectionFormFields,
@@ -12,133 +13,227 @@ import {
 import { CollectionFormData } from '@/components/features/collections/collection/form/CollectionFormFields';
 import { usePinataUpload } from '@/lib/hooks/usePinataUpload';
 import { useWallet } from '@/lib/hooks/wallet';
-import { useNFTFactory, useNFTFactoryEvents } from '@/lib/blockchain/hooks';
+import { useNFTFactoryEvents } from '@/lib/blockchain/hooks';
+import { useAlchemyNFTFactoryEvents } from '@/lib/blockchain/hooks/useAlchemyEvents';
+import { useCreateCollection } from '@/lib/blockchain/hooks/useNFTFactoryWrite';
+import { revalidatePathAction } from '@/lib/utils/helpers/revalidation';
+import { alchemy } from '@/lib/blockchain/utils/alchemy';
 
 interface CollectionFormProps {
   // Props can be added if needed
 }
 
+// Types
+type CollectionData = {
+  name: string;
+  symbol?: string;
+  description?: string;
+  contractURI?: string;
+  contractAddress: string;
+  ownerAddress: string;
+  pinataGroupId?: string;
+};
+
+// Async functions for React Query
+const createPinataFolder = async (
+  collectionName: string,
+  address: string,
+  createFolder: (name: string) => Promise<any>,
+) => {
+  const shortAddress = `${address.slice(0, 6)}${address.slice(-4)}`;
+  const storageName = `${collectionName.toLowerCase().replace(/\s+/g, '-')}-${shortAddress}`;
+  return await createFolder(storageName);
+};
+
+const uploadMetadataToIPFS = async (
+  formData: CollectionFormData,
+  uploadToPinata: (file: File, metadata: any, folderId?: string) => Promise<any>,
+  folderId?: string,
+) => {
+  if (formData.coverImage) {
+    return await uploadToPinata(
+      formData.coverImage,
+      {
+        name: formData.name,
+        description: formData.description,
+      },
+      folderId,
+    );
+  } else {
+    // Create basic metadata
+    const basicMetadata = {
+      name: formData.name,
+      description: formData.description || `Collection of NFTs: ${formData.name}`,
+      image: 'https://ipfs.io/ipfs/QmUFc4dyX7TJn5dPxp8CKjAz9jCdZyiPeBrAmE5W2XRBEg',
+    };
+
+    const metadataBlob = new Blob([JSON.stringify(basicMetadata)], {
+      type: 'application/json',
+    });
+    const metadataFile = new File([metadataBlob], 'metadata.json');
+
+    return await uploadToPinata(
+      metadataFile,
+      {
+        name: `${formData.name}-metadata`,
+        description: formData.description,
+      },
+      folderId,
+    );
+  }
+};
+
 export function CollectionForm({}: CollectionFormProps) {
   const router = useRouter();
   const { address } = useWallet();
 
+  // Form state (keep useState + useEffect for UI state)
   const [formData, setFormData] = useState<CollectionFormData>({
     name: '',
     symbol: '',
     description: '',
     coverImage: null,
     storage: 'Ethereum',
+    totalSupply: '100', // Default total supply
   });
+
+  // UI state management (keep useState + useEffect)
   const [showConsole, setShowConsole] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [consoleMessages, setConsoleMessages] = useState<string[]>([]);
-  const [folderCreated, setFolderCreated] = useState(false);
-  const [collectionFolder, setCollectionFolder] = useState<any>(null);
-  const [txHash, setTxHash] = useState<string | null>(null);
-  const [needsDbSave, setNeedsDbSave] = useState(false);
-  const [dbSavePending, setDbSavePending] = useState(false);
   const [showProgressBar, setShowProgressBar] = useState(false);
-  const [collectionData, setCollectionData] = useState<{
-    name: string;
-    symbol?: string;
-    description?: string;
-    contractURI?: string;
-    contractAddress: string;
-    ownerAddress: string;
-    pinataGroupId?: string;
-  } | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [collectionData, setCollectionData] = useState<CollectionData | null>(null);
+  const [needsDbSave, setNeedsDbSave] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get the Pinata upload hook
+  // Get hooks
   const { uploadToPinata, createFolder, isUploading, isCreatingFolder } = usePinataUpload();
+  const {
+    createCollection,
+    isLoading: isFactoryLoading,
+    error: factoryError,
+  } = useCreateCollection();
+  const { collectionCreatedEvents, loading: isEventLoading } = useNFTFactoryEvents(txHash || '');
+  const { collectionCreatedEvents: alchemyEvents, loading: isAlchemyLoading } =
+    useAlchemyNFTFactoryEvents(txHash || '');
 
-  // Get the NFT Factory hook
-  const { createCollection, isLoading: isFactoryLoading } = useNFTFactory();
+  // UI state management functions (keep useEffect)
+  const addConsoleMessage = useCallback((message: string) => {
+    setConsoleMessages((prev) => [...prev, message]);
+  }, []);
 
-  // Get the NFT Factory events hook
-  const { collectionCreatedEvents, loading: isEventLoading } = useNFTFactoryEvents(
-    txHash || undefined,
-  );
-
-  // Get the create collection mutation
-  const createCollectionMutation = trpc.collection.create.useMutation({
-    onSuccess: (_newCollection) => {
-      // Redirect to collections list
-      addConsoleMessage('> Collection saved to database successfully!');
-      addConsoleMessage('> Redirecting to collections page...');
-
-      // Short delay before redirecting
-      setTimeout(() => {
-        router.push('/collections');
-        router.refresh();
-      }, 1500);
+  // React Query for creating Pinata folder
+  const createPinataFolderMutation = useMutation({
+    mutationFn: ({ collectionName, address }: { collectionName: string; address: string }) =>
+      createPinataFolder(collectionName, address, createFolder),
+    onSuccess: (result) => {
+      if (result) {
+        addConsoleMessage('> IPFS storage successfully initialized.');
+      }
+    },
+    onError: (error) => {
+      addConsoleMessage(
+        `> Warning: Unable to set up IPFS storage: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      addConsoleMessage('> Proceeding with upload without structured IPFS storage...');
     },
   });
 
-  // Listen for collection creation events and save to database
-  useEffect(() => {
-    const saveCollectionFromEvent = async () => {
-      if (needsDbSave && collectionCreatedEvents.length > 0 && !dbSavePending && collectionData) {
-        try {
-          setDbSavePending(true);
-
-          // Find the event for the current collection (match by name)
-          const event = collectionCreatedEvents.find((e) => e.name === collectionData.name);
-
-          if (event) {
-            addConsoleMessage(`> Collection created on blockchain: ${event.collectionAddress}`);
-
-            // Save the collection to the database with the actual contract address
-            await createCollectionMutation.mutateAsync({
-              ...collectionData,
-              contractAddress: event.collectionAddress,
-            });
-
-            setNeedsDbSave(false);
-          } else {
-            // If we can't find a matching event, just use the transaction hash as the address (temporary)
-            addConsoleMessage('> Warning: Could not find collection address from event logs');
-            addConsoleMessage('> Saving with transaction hash as temporary address');
-
-            await createCollectionMutation.mutateAsync(collectionData);
-
-            setNeedsDbSave(false);
-          }
-        } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown database error';
-
-          if (errorMessage.includes('Foreign key constraint')) {
-            addConsoleMessage('> Error: User account not found in the database.');
-            addConsoleMessage('> Creating user account...');
-
-            // Try again after a short delay (the collection router should now create the user)
-            setTimeout(async () => {
-              try {
-                await createCollectionMutation.mutateAsync(collectionData);
-                setNeedsDbSave(false);
-              } catch (retryError) {
-                addConsoleMessage(
-                  `> Error on retry: ${retryError instanceof Error ? retryError.message : 'Unknown error'}`,
-                );
-              }
-            }, 1000);
-          } else {
-            addConsoleMessage(`> Database error: ${errorMessage}`);
-          }
-        } finally {
-          setDbSavePending(false);
+  // React Query for uploading metadata
+  const uploadMetadataMutation = useMutation({
+    mutationFn: ({ formData, folderId }: { formData: CollectionFormData; folderId?: string }) =>
+      uploadMetadataToIPFS(formData, uploadToPinata, folderId),
+    onSuccess: (result) => {
+      if (result?.metadata) {
+        if (formData.coverImage) {
+          addConsoleMessage('> Image uploaded successfully to IPFS');
+        } else {
+          addConsoleMessage('> Basic metadata uploaded successfully to IPFS');
         }
       }
-    };
+    },
+    onError: (error) => {
+      addConsoleMessage(
+        `> Error uploading to IPFS: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    },
+  });
 
-    saveCollectionFromEvent();
-  }, [
-    collectionCreatedEvents,
-    needsDbSave,
-    dbSavePending,
-    collectionData,
-    createCollectionMutation,
-  ]);
+  // React Query for blockchain collection creation
+  const createBlockchainCollectionMutation = useMutation({
+    mutationFn: async ({
+      name,
+      symbol,
+      contractURI,
+      totalSupply,
+    }: {
+      name: string;
+      symbol: string;
+      contractURI: string;
+      totalSupply: bigint;
+    }) => {
+      const result = await createCollection(name, symbol, contractURI, totalSupply);
+      if (result.error) {
+        throw result.error;
+      }
+      return result;
+    },
+    onSuccess: (result) => {
+      if (result.hash) {
+        setTxHash(result.hash);
+        addConsoleMessage('> Transaction submitted successfully');
+        addConsoleMessage('> This may take a few minutes. Please wait...');
+      }
+    },
+    onError: (error) => {
+      addConsoleMessage(
+        `> Error creating collection: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+    },
+  });
 
+  // tRPC mutation for database save
+  const createCollectionMutation = trpc.collection.create.useMutation({
+    onSuccess: async (_newCollection) => {
+      addConsoleMessage('> Collection saved to database successfully!');
+      addConsoleMessage('> Revalidating collections page...');
+
+      try {
+        // Method 1: Use the API endpoint
+        const revalidateResponse = await fetch('/api/revalidate?path=/collections');
+        if (revalidateResponse.ok) {
+          addConsoleMessage('> Collections page revalidated successfully');
+        }
+      } catch (error) {
+        console.error('Error revalidating collections page:', error);
+      }
+
+      addConsoleMessage('> Redirecting to collections page...');
+
+      setTimeout(() => {
+        router.push('/collections');
+        router.refresh(); // Force client-side refresh
+      }, 1500);
+    },
+    onError: (error) => {
+      const errorMessage = error.message;
+      if (errorMessage.includes('Foreign key constraint')) {
+        addConsoleMessage('> Error: User account not found in the database.');
+        addConsoleMessage('> Creating user account...');
+
+        // Retry after delay
+        setTimeout(() => {
+          if (collectionData) {
+            createCollectionMutation.mutate(collectionData);
+          }
+        }, 1000);
+      } else {
+        addConsoleMessage(`> Database error: ${errorMessage}`);
+      }
+    },
+  });
+
+  // Handle form changes (UI state - keep useState)
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -154,48 +249,97 @@ export function CollectionForm({}: CollectionFormProps) {
     }));
   };
 
-  const addConsoleMessage = (message: string) => {
-    setConsoleMessages((prev) => [...prev, message]);
-  };
-
-  // Function to create Pinata folder automatically
-  const createCollectionFolder = async (collectionName: string) => {
-    if (folderCreated || !collectionName || !address) return null;
-
-    try {
-      // Create name based on collection name and owner address
-      // Format: collectionName-ownerAddress
-      const shortAddress = `${address.slice(0, 6)}${address.slice(-4)}`;
-      const storageName = `${collectionName.toLowerCase().replace(/\s+/g, '-')}-${shortAddress}`;
-      addConsoleMessage('> Initializing IPFS storage...');
-
-      const result = await createFolder(storageName);
-      if (result) {
-        setFolderCreated(true);
-        setCollectionFolder(result);
-        addConsoleMessage('> IPFS storage successfully initialized.');
-        return result;
-      }
-    } catch (error) {
-      // If creation fails, show message but continue process
-      addConsoleMessage(
-        `> Warning: Unable to set up IPFS storage: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-      addConsoleMessage('> Proceeding with upload without structured IPFS storage...');
+  // Add console message about blockchain monitoring
+  useEffect(() => {
+    if (txHash) {
+      addConsoleMessage('> Scanning blockchain for collection creation events...');
     }
-    return null;
-  };
+  }, [txHash, addConsoleMessage]);
 
+  // Add console message when events are detected
+
+  // Listen for blockchain events and save to database (side effect - keep useEffect)
+  useEffect(() => {
+    const saveCollectionFromEvent = async () => {
+      if (
+        needsDbSave &&
+        (collectionCreatedEvents.length > 0 || alchemyEvents.length > 0) &&
+        collectionData &&
+        !createCollectionMutation.isPending
+      ) {
+        try {
+          // First try to find event from any source
+          let event = alchemyEvents.find((e) => e.collectionAddress);
+
+          // If not found, try regular events
+          if (!event) {
+            event = collectionCreatedEvents.find((e) => e.collectionAddress);
+          }
+
+          if (event) {
+            addConsoleMessage(`> Collection created on blockchain: ${event.collectionAddress}`);
+            addConsoleMessage('> Event successfully captured from blockchain');
+
+            const updatedCollectionData = {
+              ...collectionData,
+              contractAddress: event.collectionAddress,
+            };
+
+            createCollectionMutation.mutate(updatedCollectionData);
+          } else {
+            addConsoleMessage(
+              '> Warning: Could not find collection address from blockchain events',
+            );
+
+            // Try to get the transaction receipt directly as a last resort
+            try {
+              addConsoleMessage('> Attempting alternative method to find collection...');
+              const receipt = await alchemy.core.getTransactionReceipt(txHash || '');
+
+              if (receipt && receipt.contractAddress) {
+                addConsoleMessage(`> Collection address found: ${receipt.contractAddress}`);
+                const updatedCollectionData = {
+                  ...collectionData,
+                  contractAddress: receipt.contractAddress,
+                };
+                createCollectionMutation.mutate(updatedCollectionData);
+              } else {
+                addConsoleMessage('> Using transaction hash as temporary reference');
+                createCollectionMutation.mutate(collectionData);
+              }
+            } catch (receiptError) {
+              addConsoleMessage('> Using transaction hash as temporary reference');
+              createCollectionMutation.mutate(collectionData);
+            }
+          }
+
+          setNeedsDbSave(false);
+        } catch (error) {
+          console.error('Error in saveCollectionFromEvent:', error);
+        }
+      }
+    };
+
+    saveCollectionFromEvent();
+  }, [
+    collectionCreatedEvents,
+    alchemyEvents,
+    needsDbSave,
+    collectionData,
+    createCollectionMutation,
+    addConsoleMessage,
+    txHash,
+  ]);
+
+  // Main form submission handler
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     if (!showConsole) {
-      // Show console first time button is clicked
       setShowConsole(true);
       return;
     }
 
-    // Validate wallet connection
     if (!address) {
       addConsoleMessage('> Error: No wallet connected. Please connect your wallet first.');
       return;
@@ -208,118 +352,64 @@ export function CollectionForm({}: CollectionFormProps) {
     addConsoleMessage(`> Owner address: ${address}`);
 
     try {
-      // Create automatic folder for this collection
-      const folder = await createCollectionFolder(formData.name);
-      const folderId = folder?.id;
-
-      // Upload image to Pinata if available
-      let contractURI = null;
-      if (formData.coverImage) {
-        addConsoleMessage('> Uploading image to IPFS...');
-
-        try {
-          const uploadResult = await uploadToPinata(
-            formData.coverImage,
-            {
-              name: formData.name,
-              description: formData.description,
-            },
-            folderId,
-          );
-
-          if (uploadResult && uploadResult.metadata) {
-            contractURI = uploadResult.metadata.url;
-            addConsoleMessage(`> Image uploaded successfully to IPFS`);
-          }
-        } catch (error) {
-          addConsoleMessage(
-            `> Error uploading to IPFS: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          );
-          throw error; // Re-throw to be caught by the outer try/catch
-        }
-      } else {
-        // If no image is provided, create a minimal metadata JSON and upload it
-        addConsoleMessage('> No image provided. Creating basic metadata...');
-        try {
-          // Create a minimal metadata object
-          const basicMetadata = {
-            name: formData.name,
-            description: formData.description || `Collection of NFTs: ${formData.name}`,
-            image: 'https://ipfs.io/ipfs/QmUFc4dyX7TJn5dPxp8CKjAz9jCdZyiPeBrAmE5W2XRBEg', // Default placeholder image
-          };
-
-          // Convert to blob for upload
-          const metadataBlob = new Blob([JSON.stringify(basicMetadata)], {
-            type: 'application/json',
-          });
-          const metadataFile = new File([metadataBlob], 'metadata.json');
-
-          addConsoleMessage('> Uploading basic metadata to IPFS...');
-
-          const uploadResult = await uploadToPinata(
-            metadataFile,
-            {
-              name: `${formData.name}-metadata`,
-              description: formData.description,
-            },
-            folderId,
-          );
-
-          if (uploadResult && uploadResult.metadata) {
-            contractURI = uploadResult.metadata.url;
-            addConsoleMessage(`> Basic metadata uploaded successfully to IPFS`);
-          }
-        } catch (error) {
-          addConsoleMessage(
-            `> Error creating basic metadata: ${error instanceof Error ? error.message : 'Unknown error'}`,
-          );
-          throw error;
-        }
+      // Step 1: Create Pinata folder
+      addConsoleMessage('> Initializing IPFS storage...');
+      let folder = null;
+      try {
+        folder = await createPinataFolderMutation.mutateAsync({
+          collectionName: formData.name,
+          address,
+        });
+      } catch (error) {
+        // Continue without folder if creation fails
       }
 
-      if (!contractURI) {
-        addConsoleMessage('> Error: Failed to create collection metadata URI');
+      // Step 2: Upload metadata
+      const uploadMessage = formData.coverImage
+        ? '> Uploading image to IPFS...'
+        : '> No image provided. Creating basic metadata...';
+      addConsoleMessage(uploadMessage);
+
+      const uploadResult = await uploadMetadataMutation.mutateAsync({
+        formData,
+        folderId: folder?.id,
+      });
+
+      if (!uploadResult?.metadata?.url) {
         throw new Error('Failed to create collection metadata URI');
       }
 
+      // Step 3: Create collection on blockchain
       addConsoleMessage('> Creating collection on blockchain...');
       addConsoleMessage('> Waiting for transaction confirmation...');
 
-      const {
-        hash,
-        collectionAddress,
-        error: factoryError,
-      } = await createCollection(formData.name, formData.symbol || 'NFT', contractURI);
+      // Convert totalSupply string to bigint
+      const totalSupplyBigInt = BigInt(parseInt(formData.totalSupply || '100'));
 
-      if (factoryError) {
-        addConsoleMessage(`> Error creating collection: ${factoryError.message}`);
-        throw factoryError;
-      }
+      const blockchainResult = await createBlockchainCollectionMutation.mutateAsync({
+        name: formData.name,
+        symbol: formData.symbol || 'NFT',
+        contractURI: uploadResult.metadata.url,
+        totalSupply: totalSupplyBigInt,
+      });
 
-      if (hash) {
-        setTxHash(hash);
-        addConsoleMessage(`> Transaction submitted successfully`);
-        addConsoleMessage('> This may take a few minutes. Please wait...');
+      // Step 4: Prepare for database save
+      if (blockchainResult.hash) {
+        const collectionToSave: CollectionData = {
+          name: formData.name,
+          symbol: formData.symbol || undefined,
+          description: formData.description || undefined,
+          contractURI: uploadResult.metadata.url,
+          contractAddress: blockchainResult.hash,
+          ownerAddress: address,
+          pinataGroupId: folder?.id || undefined,
+        };
 
-        if (collectionAddress) {
-          const collectionToSave = {
-            name: formData.name,
-            symbol: formData.symbol || undefined,
-            description: formData.description || undefined,
-            contractURI: contractURI || undefined,
-            contractAddress: collectionAddress || hash, // Use collection address if available, otherwise tx hash
-            ownerAddress: address,
-            pinataGroupId: folderId || undefined,
-          };
-
-          setCollectionData(collectionToSave);
-          setNeedsDbSave(true);
-        }
+        setCollectionData(collectionToSave);
+        setNeedsDbSave(true);
       }
     } catch (error) {
-      // Just add to console without logging details to browser console
       addConsoleMessage(`> Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      // Don't show alert, we already show the error in the console
     } finally {
       setIsSubmitting(false);
     }
@@ -328,6 +418,19 @@ export function CollectionForm({}: CollectionFormProps) {
   const handleCancel = () => {
     router.push('/collections');
   };
+
+  // Calculate loading state using correct properties
+  const isLoading =
+    isSubmitting ||
+    createPinataFolderMutation.isPending ||
+    uploadMetadataMutation.isPending ||
+    createBlockchainCollectionMutation.isPending ||
+    isUploading ||
+    isCreatingFolder ||
+    isFactoryLoading ||
+    isEventLoading ||
+    isAlchemyLoading ||
+    createCollectionMutation.isPending;
 
   return (
     <Win98Window
@@ -356,7 +459,7 @@ export function CollectionForm({}: CollectionFormProps) {
           </p>
         </div>
 
-        {/* Console Style Note - appears above buttons */}
+        {/* Console */}
         {showConsole && (
           <>
             <div className="mt-6 mb-4 bg-black text-[#00FF00] p-3 font-mono text-sm border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white">
@@ -394,14 +497,7 @@ export function CollectionForm({}: CollectionFormProps) {
         <CollectionFormActions
           onCancel={handleCancel}
           showConfirmation={showConsole}
-          isSubmitting={
-            isSubmitting ||
-            isUploading ||
-            isCreatingFolder ||
-            isFactoryLoading ||
-            isEventLoading ||
-            dbSavePending
-          }
+          isSubmitting={isLoading}
         />
       </form>
     </Win98Window>

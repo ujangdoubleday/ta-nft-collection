@@ -4,6 +4,7 @@ import { trpc } from '@/lib/api/trpc/client';
 
 /**
  * Hook to fetch all collections from the database
+ * Collections are automatically sorted by createdAt in descending order (newest first)
  * @returns The collections data, loading state, and error
  */
 export function useAllCollections() {
@@ -19,7 +20,7 @@ export function useAllCollections() {
   });
 
   return {
-    collections: data || [],
+    collections: data || [], // Collections are already sorted by createdAt desc from the API
     isLoading,
     error,
   };

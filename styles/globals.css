@@ -2,13 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @font-face {
-  font-family: "Pixelated MS Sans Serif";
-  src: url(https://unpkg.com/98.css@0.1.16/dist/ms_sans_serif.woff) format("woff");
-  src: url(https://unpkg.com/98.css@0.1.16/dist/ms_sans_serif.woff2) format("woff2");
-  font-weight: 400;
+@font-face {
+  font-family: "MS Sans Serif";
+  src: url(/assets/fonts/ms-sans-serif.woff) format("woff");
+  src: url(/assets/fonts/ms-sans-serif.woff2) format("woff2");
+  font-weight: 500;
   font-style: normal;
-} */
+}
 
 @font-face {
   font-family:"Pixelated MS Sans Serif";
@@ -74,6 +74,10 @@
     font-family: 'MS Sans Serif', sans-serif;
     cursor: default;
   }
+  strong, b, [font-weight="700"], [font-weight="bold"], .font-bold {
+    font-family: 'Pixelated MS Sans Serif', sans-serif;
+    font-weight: 700;
+  }
   button, a, select, input[type="submit"], input[type="reset"], input[type="button"], [role="button"] {
     cursor: default;
   }
@@ -81,7 +85,7 @@
 
 html,
 body {
-  font-family: "Pixelated MS Sans Serif",Arial !important;
+  font-family: "MS Sans Serif", Arial !important;
   max-width: 100vw;
   overflow-x: hidden;
 }
