@@ -1,7 +1,7 @@
 'use client';
 
 import { Container } from '@/components/core/layout';
-import { TrpcCollectionGallery } from '@/components/features/collections/collection/list';
+import { CreatorCollectionGallery } from '@/components/features/collections/collection/list';
 import { useWallet } from '@/lib/hooks/wallet';
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { LoadingWindow } from '@/components/shared/loading';
@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export function TrpcCollectionsPage() {
+export function CollectionsPage() {
   const { isConnected, isAuthenticated } = useWallet();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
@@ -82,7 +82,7 @@ export function TrpcCollectionsPage() {
   return (
     <main className="py-4">
       <Container>
-        <TrpcCollectionGallery />
+        <CreatorCollectionGallery />
       </Container>
     </main>
   );

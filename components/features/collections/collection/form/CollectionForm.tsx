@@ -13,7 +13,11 @@ import {
 import { CollectionFormData } from '@/components/features/collections/collection/form/CollectionFormFields';
 import { usePinataUpload } from '@/lib/hooks/usePinataUpload';
 import { useWallet } from '@/lib/hooks/wallet';
-import { useNFTFactory, useNFTFactoryEvents } from '@/lib/blockchain/hooks';
+import { useNFTFactoryEvents } from '@/lib/blockchain/hooks';
+import { useAlchemyNFTFactoryEvents } from '@/lib/blockchain/hooks/useAlchemyEvents';
+import { useCreateCollection } from '@/lib/blockchain/hooks/useNFTFactoryWrite';
+import { revalidatePathAction } from '@/lib/utils/helpers/revalidation';
+import { alchemy } from '@/lib/blockchain/utils/alchemy';
 
 interface CollectionFormProps {
   // Props can be added if needed
@@ -90,6 +94,7 @@ export function CollectionForm({}: CollectionFormProps) {
     description: '',
     coverImage: null,
     storage: 'Ethereum',
+    totalSupply: '100', // Default total supply
   });
 
   // UI state management (keep useState + useEffect)
@@ -103,8 +108,14 @@ export function CollectionForm({}: CollectionFormProps) {
 
   // Get hooks
   const { uploadToPinata, createFolder, isUploading, isCreatingFolder } = usePinataUpload();
-  const { createCollection, isLoading: isFactoryLoading } = useNFTFactory();
+  const {
+    createCollection,
+    isLoading: isFactoryLoading,
+    error: factoryError,
+  } = useCreateCollection();
   const { collectionCreatedEvents, loading: isEventLoading } = useNFTFactoryEvents(txHash || '');
+  const { collectionCreatedEvents: alchemyEvents, loading: isAlchemyLoading } =
+    useAlchemyNFTFactoryEvents(txHash || '');
 
   // UI state management functions (keep useEffect)
   const addConsoleMessage = useCallback((message: string) => {
@@ -154,12 +165,14 @@ export function CollectionForm({}: CollectionFormProps) {
       name,
       symbol,
       contractURI,
+      totalSupply,
     }: {
       name: string;
       symbol: string;
       contractURI: string;
+      totalSupply: bigint;
     }) => {
-      const result = await createCollection(name, symbol, contractURI);
+      const result = await createCollection(name, symbol, contractURI, totalSupply);
       if (result.error) {
         throw result.error;
       }
@@ -181,13 +194,25 @@ export function CollectionForm({}: CollectionFormProps) {
 
   // tRPC mutation for database save
   const createCollectionMutation = trpc.collection.create.useMutation({
-    onSuccess: (_newCollection) => {
+    onSuccess: async (_newCollection) => {
       addConsoleMessage('> Collection saved to database successfully!');
+      addConsoleMessage('> Revalidating collections page...');
+
+      try {
+        // Method 1: Use the API endpoint
+        const revalidateResponse = await fetch('/api/revalidate?path=/collections');
+        if (revalidateResponse.ok) {
+          addConsoleMessage('> Collections page revalidated successfully');
+        }
+      } catch (error) {
+        console.error('Error revalidating collections page:', error);
+      }
+
       addConsoleMessage('> Redirecting to collections page...');
 
       setTimeout(() => {
         router.push('/collections');
-        router.refresh();
+        router.refresh(); // Force client-side refresh
       }, 1500);
     },
     onError: (error) => {
@@ -224,20 +249,36 @@ export function CollectionForm({}: CollectionFormProps) {
     }));
   };
 
+  // Add console message about blockchain monitoring
+  useEffect(() => {
+    if (txHash) {
+      addConsoleMessage('> Scanning blockchain for collection creation events...');
+    }
+  }, [txHash, addConsoleMessage]);
+
+  // Add console message when events are detected
+
   // Listen for blockchain events and save to database (side effect - keep useEffect)
   useEffect(() => {
     const saveCollectionFromEvent = async () => {
       if (
         needsDbSave &&
-        collectionCreatedEvents.length > 0 &&
+        (collectionCreatedEvents.length > 0 || alchemyEvents.length > 0) &&
         collectionData &&
         !createCollectionMutation.isPending
       ) {
         try {
-          const event = collectionCreatedEvents.find((e) => e.name === collectionData.name);
+          // First try to find event from any source
+          let event = alchemyEvents.find((e) => e.collectionAddress);
+
+          // If not found, try regular events
+          if (!event) {
+            event = collectionCreatedEvents.find((e) => e.collectionAddress);
+          }
 
           if (event) {
             addConsoleMessage(`> Collection created on blockchain: ${event.collectionAddress}`);
+            addConsoleMessage('> Event successfully captured from blockchain');
 
             const updatedCollectionData = {
               ...collectionData,
@@ -246,9 +287,30 @@ export function CollectionForm({}: CollectionFormProps) {
 
             createCollectionMutation.mutate(updatedCollectionData);
           } else {
-            addConsoleMessage('> Warning: Could not find collection address from event logs');
-            addConsoleMessage('> Saving with transaction hash as temporary address');
-            createCollectionMutation.mutate(collectionData);
+            addConsoleMessage(
+              '> Warning: Could not find collection address from blockchain events',
+            );
+
+            // Try to get the transaction receipt directly as a last resort
+            try {
+              addConsoleMessage('> Attempting alternative method to find collection...');
+              const receipt = await alchemy.core.getTransactionReceipt(txHash || '');
+
+              if (receipt && receipt.contractAddress) {
+                addConsoleMessage(`> Collection address found: ${receipt.contractAddress}`);
+                const updatedCollectionData = {
+                  ...collectionData,
+                  contractAddress: receipt.contractAddress,
+                };
+                createCollectionMutation.mutate(updatedCollectionData);
+              } else {
+                addConsoleMessage('> Using transaction hash as temporary reference');
+                createCollectionMutation.mutate(collectionData);
+              }
+            } catch (receiptError) {
+              addConsoleMessage('> Using transaction hash as temporary reference');
+              createCollectionMutation.mutate(collectionData);
+            }
           }
 
           setNeedsDbSave(false);
@@ -261,10 +323,12 @@ export function CollectionForm({}: CollectionFormProps) {
     saveCollectionFromEvent();
   }, [
     collectionCreatedEvents,
+    alchemyEvents,
     needsDbSave,
     collectionData,
     createCollectionMutation,
     addConsoleMessage,
+    txHash,
   ]);
 
   // Main form submission handler
@@ -319,10 +383,14 @@ export function CollectionForm({}: CollectionFormProps) {
       addConsoleMessage('> Creating collection on blockchain...');
       addConsoleMessage('> Waiting for transaction confirmation...');
 
+      // Convert totalSupply string to bigint
+      const totalSupplyBigInt = BigInt(parseInt(formData.totalSupply || '100'));
+
       const blockchainResult = await createBlockchainCollectionMutation.mutateAsync({
         name: formData.name,
         symbol: formData.symbol || 'NFT',
         contractURI: uploadResult.metadata.url,
+        totalSupply: totalSupplyBigInt,
       });
 
       // Step 4: Prepare for database save
@@ -332,7 +400,7 @@ export function CollectionForm({}: CollectionFormProps) {
           symbol: formData.symbol || undefined,
           description: formData.description || undefined,
           contractURI: uploadResult.metadata.url,
-          contractAddress: blockchainResult.collectionAddress || blockchainResult.hash,
+          contractAddress: blockchainResult.hash,
           ownerAddress: address,
           pinataGroupId: folder?.id || undefined,
         };
@@ -361,6 +429,7 @@ export function CollectionForm({}: CollectionFormProps) {
     isCreatingFolder ||
     isFactoryLoading ||
     isEventLoading ||
+    isAlchemyLoading ||
     createCollectionMutation.isPending;
 
   return (
