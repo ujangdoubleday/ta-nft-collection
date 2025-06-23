@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Win98Window } from "@/components/ui/organisms/Win98Window";
-import Image from "next/image";
+import { Win98Window } from '@/components/ui/organisms/Win98Window';
+import Image from 'next/image';
 
 export function HeroSection() {
   return (
@@ -13,21 +13,17 @@ export function HeroSection() {
       <div className="space-y-4 text-black p-4">
         <div className="flex flex-col md:flex-row gap-4 items-center">
           <div className="flex-1">
-            <h1 className="text-2xl font-bold mb-2 text-[#0000AA]">
-              Welcome to MyNFTs.exe
-            </h1>
-            <h2 className="text-lg font-bold">
-              Create, Mint & Own Digital Masterpieces
-            </h2>
+            <h1 className="text-2xl font-bold mb-2 text-[#0000AA]">Welcome to MyNFTs.exe</h1>
+            <h2 className="text-lg font-bold">Create, Mint & Own Digital Masterpieces</h2>
             <p className="text-sm my-4">
-              Express your creativity through digital art on the blockchain.
-              Create unique collectibles, build your portfolio, and own
-              exclusive digital assets with our retro-inspired platform.
+              Express your creativity through digital art on the blockchain. Create unique
+              collectibles, build your portfolio, and own exclusive digital assets with our
+              retro-inspired platform.
             </p>
             <div className="win98-shadow-inset bg-white p-2 mt-2">
               <p className="text-xs">
-                <span className="font-bold">🔥 NEW:</span> Windows 98 Pixel Art
-                Collection just dropped! Limited availability.
+                <span className="font-bold">🔥 NEW:</span> Windows 98 Pixel Art Collection just
+                dropped! Limited availability.
               </p>
             </div>
           </div>
@@ -45,4 +41,3 @@ export function HeroSection() {
     </Win98Window>
   );
 }
-
