@@ -1,18 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./NFTCollection.sol";
-import "./lib/access/Ownable.sol";
-import "./lib/security/ReentrancyGuard.sol";
-import "./lib/security/Pausable.sol";
-
 /**
  * @title NFTFactory
  * @dev Enhanced factory contract to create new NFT collections with fee system and blocklist functionality
+ * @author https://github.com/ujangbedog
+ * @notice This contract allows users to create NFT collections with customizable parameters
  */
+
+import "./NFTCollection.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
+
 contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     
-    // Struct untuk menyimpan info collection
+    // Struct to store collection information
     struct CollectionInfo {
         address collectionAddress;
         string contractURI;
@@ -29,7 +32,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     address[] public allCollections;
     mapping(address => bool) public isValidCollection;
     
-    // Mapping untuk menyimpan collection info
+    // Mapping to store collection information
     mapping(address => CollectionInfo) public collectionInfo;
     mapping(address => CollectionInfo[]) public creatorToCollectionInfo;
     
@@ -54,7 +57,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     event AddressBlocked(address indexed blockedAddress);
     event AddressUnblocked(address indexed unblockedAddress);
     
-    // Errors
+    // Custom errors
     error InsufficientPayment();
     error InvalidParameters();
     error CollectionNotFound();
@@ -73,7 +76,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @dev Constructor
+     * @dev Constructor to initialize the factory
      * @param initialOwner Address of the initial owner (factory owner)
      * @param _creationFee Fee required to create a collection (in wei)
      */
@@ -108,7 +111,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
             revert InsufficientPayment();
         }
         
-        // Create new collection
+        // Create new collection contract
         NFTCollection newCollection = new NFTCollection(
             name,
             symbol,
@@ -129,13 +132,13 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
             createdAt: block.timestamp
         });
         
-        // Update state
+        // Update state variables
         totalCollections++;
         totalFeesCollected += creationFee;
         allCollections.push(collectionAddress);
         isValidCollection[collectionAddress] = true;
         
-        // Store collection info
+        // Store collection information
         collectionInfo[collectionAddress] = newCollectionInfo;
         creatorToCollectionInfo[msg.sender].push(newCollectionInfo);
         
@@ -163,7 +166,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     
     /**
      * @dev Add an address to the blocklist (only owner)
-     * @param account Address to block
+     * @param account Address to block from creating collections
      */
     function addToBlocklist(address account) external onlyOwner {
         if (account == address(0)) {
@@ -190,7 +193,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
         
         _blocklist[account] = false;
         
-        // Remove from array
+        // Remove from blocklist array
         for (uint256 i = 0; i < _blocklistAddresses.length; i++) {
             if (_blocklistAddresses[i] == account) {
                 _blocklistAddresses[i] = _blocklistAddresses[_blocklistAddresses.length - 1];
@@ -227,7 +230,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
             if (_blocklist[account]) {
                 _blocklist[account] = false;
                 
-                // Remove from array
+                // Remove from blocklist array
                 for (uint256 j = 0; j < _blocklistAddresses.length; j++) {
                     if (_blocklistAddresses[j] == account) {
                         _blocklistAddresses[j] = _blocklistAddresses[_blocklistAddresses.length - 1];
@@ -244,7 +247,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     /**
      * @dev Check if an address is blocked
      * @param account Address to check
-     * @return True if address is blocked
+     * @return True if address is blocked, false otherwise
      */
     function isBlocked(address account) external view returns (bool) {
         return _blocklist[account];
@@ -268,7 +271,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     
     /**
      * @dev Get blocked addresses with pagination
-     * @param offset Starting index
+     * @param offset Starting index for pagination
      * @param limit Maximum number of addresses to return
      * @return addresses Array of blocked addresses
      * @return total Total number of blocked addresses
@@ -295,10 +298,10 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
         }
     }
     
-    // ========== EXISTING FUNCTIONS ==========
+    // ========== COLLECTION QUERY FUNCTIONS ==========
     
     /**
-     * @dev Get all collections addresses
+     * @dev Get all collection addresses created by this factory
      * @return Array of all collection addresses
      */
     function getAllCollections() external view returns (address[] memory) {
@@ -306,18 +309,18 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Get detailed collection info by creator
-     * @param creator Address of the creator
-     * @return Array of CollectionInfo structs
+     * @dev Get detailed collection information by creator address
+     * @param creator Address of the collection creator
+     * @return Array of CollectionInfo structs created by the address
      */
     function getCollectionInfoByCreator(address creator) external view returns (CollectionInfo[] memory) {
         return creatorToCollectionInfo[creator];
     }
     
     /**
-     * @dev Get single collection info by address
-     * @param collectionAddress Address of the collection
-     * @return CollectionInfo struct
+     * @dev Get single collection information by collection address
+     * @param collectionAddress Address of the collection contract
+     * @return CollectionInfo struct containing collection details
      */
     function getCollectionInfo(address collectionAddress) external view returns (CollectionInfo memory) {
         if (!isValidCollection[collectionAddress]) {
@@ -327,7 +330,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Get factory statistics including contract balance
+     * @dev Get comprehensive factory statistics
      * @return totalCollections Total number of collections created
      * @return totalFeesCollected Total fees collected by factory
      * @return currentCreationFee Current fee to create collection
@@ -347,8 +350,10 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
         );
     }
     
+    // ========== ADMIN FUNCTIONS ==========
+    
     /**
-     * @dev Update creation fee (only owner)
+     * @dev Update the creation fee (only owner)
      * @param _newFee New creation fee in wei
      */
     function setCreationFee(uint256 _newFee) external onlyOwner {
@@ -360,7 +365,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     /**
      * @dev Withdraw accumulated fees (only owner)
      * @param to Address to receive the fees
-     * @param amount Amount to withdraw (0 = withdraw all)
+     * @param amount Amount to withdraw (0 = withdraw all available balance)
      */
     function withdrawFees(address payable to, uint256 amount) external onlyOwner {
         if (to == address(0)) {
@@ -402,14 +407,14 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Pause the contract (only owner)
+     * @dev Pause the contract to prevent new collection creation (only owner)
      */
     function pause() external onlyOwner {
         _pause();
     }
     
     /**
-     * @dev Unpause the contract (only owner)
+     * @dev Unpause the contract to allow collection creation (only owner)
      */
     function unpause() external onlyOwner {
         _unpause();
@@ -418,7 +423,7 @@ contract NFTFactory is Ownable, ReentrancyGuard, Pausable {
     /**
      * @dev Check if an address is a valid collection created by this factory
      * @param collection Address to check
-     * @return True if valid collection
+     * @return True if the address is a valid collection from this factory
      */
     function isCollectionValid(address collection) external view returns (bool) {
         return isValidCollection[collection];
