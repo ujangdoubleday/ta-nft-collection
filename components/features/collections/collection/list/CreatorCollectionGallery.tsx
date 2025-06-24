@@ -44,7 +44,7 @@ export function CreatorCollectionGallery({}: CreatorCollectionGalleryProps) {
   const refreshCollections = useCallback(async () => {
     try {
       // Call the revalidation API
-      const revalidateResponse = await fetch('/api/revalidate?path=/collections');
+      const revalidateResponse = await fetch('/api/revalidate?tag=collections');
       if (!revalidateResponse.ok) {
         console.error('Failed to revalidate collections page');
       }
