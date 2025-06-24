@@ -9,6 +9,12 @@ import {
   PinataUploadResult,
 } from '@/lib/api/services/pinata/helper';
 
+// Metadata types
+const METADATA_TYPE = {
+  COLLECTION: 'collection',
+  NFT: 'nft',
+};
+
 export const uploadRouter = router({
   // Get all Pinata folders
   getPinataFolders: publicProcedure.query(async () => {
@@ -52,19 +58,40 @@ export const uploadRouter = router({
         name: z.string().optional(),
         description: z.string().optional(),
         folderId: z.string().optional(), // Optional folder ID
+        banner_image: z.string().optional(),
+        featured_image: z.string().optional(),
+        external_link: z.string().optional(),
+        external_url: z.string().optional(), // For NFT metadata
+        collaborators: z.array(z.string()).optional(),
         attributes: z
           .array(
             z.object({
               trait_type: z.string(),
-              value: z.string(),
+              value: z.string().or(z.number()),
             }),
           )
-          .optional(), // Optional array of attributes
+          .optional(), // For NFT metadata
+        metadataType: z
+          .enum([METADATA_TYPE.COLLECTION, METADATA_TYPE.NFT])
+          .default(METADATA_TYPE.COLLECTION),
       }),
     )
     .mutation(async ({ input }) => {
       try {
-        const { file, fileName, name, description, folderId, attributes } = input;
+        const {
+          file,
+          fileName,
+          name,
+          description,
+          folderId,
+          banner_image,
+          featured_image,
+          external_link,
+          external_url,
+          collaborators,
+          attributes,
+          metadataType,
+        } = input;
 
         // Convert the array back to Buffer
         const fileBuffer = Buffer.from(file);
@@ -79,18 +106,34 @@ export const uploadRouter = router({
 
         console.log(`File uploaded successfully to IPFS. CID: ${result.cid}`);
 
-        // Create and upload metadata
-        const metadata = {
-          name: name || fileName,
-          description: description || '',
-          image: result.url,
-          attributes: attributes || [],
-        };
+        // Create and upload metadata based on type
+        let metadata;
+
+        if (metadataType === METADATA_TYPE.COLLECTION) {
+          // Collection metadata (contract level)
+          metadata = {
+            name: name || fileName,
+            description: description || '',
+            image: result.url,
+            banner_image: banner_image || '',
+            featured_image: featured_image || '',
+            external_link: external_link || '',
+            collaborators: collaborators || [],
+          };
+          console.log('Creating collection (contract-level) metadata');
+        } else {
+          // NFT metadata (token standard)
+          metadata = {
+            name: name || fileName,
+            description: description || '',
+            image: result.url,
+            external_url: external_url || external_link || '',
+            attributes: attributes || [],
+          };
+          console.log('Creating NFT (token-standard) metadata');
+        }
 
         console.log(`Creating metadata for: ${name || fileName}`);
-        if (attributes && attributes.length > 0) {
-          console.log(`Including ${attributes.length} attributes in metadata`);
-        }
 
         // Upload metadata to Pinata
         const metadataResult = await uploadMetadata(metadata, `metadata`, folderId);

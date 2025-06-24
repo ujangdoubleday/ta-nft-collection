@@ -1,7 +1,16 @@
 {
-  "description": "",
-  "external_url": "",
-  "image": "",
   "name": "",
-  "attributes": []
+  "description": "",
+  "image": "",
+  "external_url": "",
+  "attributes": [
+    {
+      "trait_type": "",
+      "value": ""
+    },
+    {
+      "trait_type": "",
+      "value": ""
+    }
+  ]
 }
