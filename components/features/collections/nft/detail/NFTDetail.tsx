@@ -9,6 +9,7 @@ import {
   NFTTransferForm,
 } from '@/components/features/collections/nft/detail';
 import { NFTPreview } from '@/components/features/collections/nft/preview';
+import { useWallet } from '@/lib/hooks/wallet';
 
 interface NFTDetailProps {
   collectionId: string;
@@ -18,6 +19,12 @@ interface NFTDetailProps {
 }
 
 export function NFTDetail({ collectionId, nftId: _nftId, nft, placeholderImage }: NFTDetailProps) {
+  // Get current user wallet address to check ownership
+  const { address } = useWallet();
+
+  // Check if current user is the NFT owner
+  const isOwner = address && nft.owner && address.toLowerCase() === nft.owner.toLowerCase();
+
   return (
     <Win98Window
       title={`NFT: ${nft.name}`}
@@ -47,13 +54,20 @@ export function NFTDetail({ collectionId, nftId: _nftId, nft, placeholderImage }
               mintDate={nft.mintDate}
             />
 
-            <NFTHistory history={nft.history} />
-
-            <NFTTransferForm
+            <NFTHistory
               contractAddress={collectionId}
               tokenId={nft.tokenId}
-              ownerAddress={nft.owner}
+              history={nft.history}
             />
+
+            {/* Only show transfer form if current user is the NFT owner */}
+            {isOwner && (
+              <NFTTransferForm
+                contractAddress={collectionId}
+                tokenId={nft.tokenId}
+                ownerAddress={nft.owner}
+              />
+            )}
           </div>
         </div>
       </div>

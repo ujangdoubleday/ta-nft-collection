@@ -5,7 +5,6 @@ import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { useState, useEffect } from 'react';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTTransfer } from '@/lib/blockchain/hooks/useNFTTransfer';
-import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
 
 interface NFTTransferFormProps {
@@ -78,29 +77,22 @@ export function NFTTransferForm({ contractAddress, tokenId, ownerAddress }: NFTT
           `To: ${latestEvent.to.substring(0, 6)}...${latestEvent.to.substring(latestEvent.to.length - 4)}`,
           'info',
         );
+
+        // If transfer event is detected and matches our transaction, mark as success
+        if (recipientAddress.toLowerCase() === latestEvent.to.toLowerCase()) {
+          setTransferSuccess(true);
+          setIsSubmitting(false);
+          addConsoleMessage('NFT transfer completed successfully!', 'success');
+
+          // Refresh the page after a brief delay to show updated owner
+          setTimeout(() => {
+            // Force a hard refresh to update all blockchain data
+            window.location.reload();
+          }, 2000);
+        }
       }
     }
-  }, [transferEvents, tokenId]);
-
-  // TRPC mutation for updating ownership in database
-  const updateNFTOwnerMutation = trpc.nft.transferNFT.useMutation({
-    onSuccess: () => {
-      setTransferSuccess(true);
-      setIsSubmitting(false);
-      addConsoleMessage('Database updated with new owner!', 'success');
-      addConsoleMessage('NFT transfer completed successfully!', 'success');
-
-      // Refresh the page after a brief delay to show updated owner
-      setTimeout(() => {
-        router.refresh();
-      }, 2000);
-    },
-    onError: (error) => {
-      setTransferError(`Database error: ${error.message}`);
-      setIsSubmitting(false);
-      addConsoleMessage(`Database error: ${error.message}`, 'error');
-    },
-  });
+  }, [transferEvents, tokenId, recipientAddress, router]);
 
   const handleTransfer = async () => {
     if (!recipientAddress) {
@@ -136,9 +128,9 @@ export function NFTTransferForm({ contractAddress, tokenId, ownerAddress }: NFTT
         `To: ${recipientAddress.substring(0, 6)}...${recipientAddress.substring(recipientAddress.length - 4)}`,
         'info',
       );
-      addConsoleMessage(`Requesting wallet approval...`, 'info');
+      addConsoleMessage(`Requesting wallet approval for safeTransferFrom...`, 'info');
 
-      // Call the blockchain to transfer the NFT
+      // Call the blockchain to transfer the NFT using safeTransferFrom
       const result = await transferNFT(contractAddress, ownerAddress, recipientAddress, tokenId);
 
       if (result.error) {
@@ -154,15 +146,10 @@ export function NFTTransferForm({ contractAddress, tokenId, ownerAddress }: NFTT
           `Transaction hash: ${result.hash.substring(0, 10)}...${result.hash.substring(result.hash.length - 8)}`,
           'info',
         );
-        addConsoleMessage(`Waiting for blockchain confirmation...`, 'info');
+        addConsoleMessage(`Waiting for blockchain confirmation and Transfer event...`, 'info');
 
-        // Update the database with new ownership info
-        addConsoleMessage(`Updating database with new owner information...`, 'info');
-        await updateNFTOwnerMutation.mutateAsync({
-          tokenId,
-          contractAddress,
-          newOwnerAddress: recipientAddress,
-        });
+        // Note: We'll wait for the Transfer event to be detected before marking as success
+        // This happens in the useEffect above that watches transferEvents
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -178,7 +165,7 @@ export function NFTTransferForm({ contractAddress, tokenId, ownerAddress }: NFTT
     : isWaiting
       ? 'Waiting for Confirmation...'
       : isSubmitting
-        ? 'Updating Database...'
+        ? 'Processing Transfer...'
         : 'Transfer NFT';
 
   return (
