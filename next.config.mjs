@@ -41,6 +41,8 @@ const baseConfig = {
       'ipfs.io',
       'dweb.link',
       'cyan-dead-reptile-256.mypinata.cloud',
+      'eth-sepolia.g.alchemy.com',
+      'res.cloudinary.com',
     ],
   }
 }

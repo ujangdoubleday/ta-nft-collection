@@ -4,11 +4,19 @@ import { CollectionItem } from '@/components/features/collections/types';
 import { NextImage } from '@/components/shared/icons';
 import { InlineLoading } from '@/components/shared/loading';
 import { useState, useEffect } from 'react';
+import { useNFTOwner } from '@/lib/blockchain/hooks/useAlchemyNFTs';
+import { useWallet } from '@/lib/hooks/wallet';
 
 interface CollectionItemCardProps {
   item: CollectionItem;
   onViewDetails: (itemId: string) => void;
 }
+
+// Format address for display
+const formatAddress = (address: string): string => {
+  if (!address) return '';
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
 
 // Image placeholder component
 const ImagePlaceholder = ({ placeholder }: { placeholder?: string }) => {
@@ -36,6 +44,11 @@ export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardPr
   const [imageError, setImageError] = useState(false);
   const [placeholder, setPlaceholder] = useState<string | undefined>(undefined);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { address } = useWallet();
+  const { owner: nftOwner, isLoading: isLoadingOwner } = useNFTOwner(
+    item.contractAddress,
+    item.tokenId,
+  );
 
   // Generate placeholder URL for the API
   useEffect(() => {
@@ -66,15 +79,14 @@ export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardPr
     setImageLoaded(true);
   };
 
+  // Determine if current user is the owner
+  const isOwner = address && nftOwner && address.toLowerCase() === nftOwner.toLowerCase();
+
   return (
     <div
       key={item.id}
-      className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-2 hover:shadow-md"
+      className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-1 hover:shadow-md"
     >
-      <div className="flex justify-between items-center mb-2">
-        <div className="text-black text-sm font-bold truncate pr-2">{item.name}</div>
-      </div>
-
       <div
         className="bg-black mb-2 cursor-pointer overflow-hidden relative transition-all duration-200 hover:opacity-90 hover:shadow-md"
         style={{
@@ -109,21 +121,36 @@ export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardPr
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-2">
-        <div className="text-black text-xs bg-[#efefef] px-1 border border-[#808080] rounded-sm">
-          {item.attributes?.rarity || item.attributes?.era || item.attributes?.complexity || ''}
+      {/* Windows 98 style owner info bar */}
+      <div className="mb-1">
+        <div className="flex items-center">
+          <div className="bg-[#000080] text-white px-2 py-0.5 text-xs font-bold flex items-center">
+            <img src="/assets/icons/window/info.png" alt="Owner" className="w-3 h-3 mr-1" />
+            <span>Owner</span>
+          </div>
         </div>
-        <div className="text-black text-xs">Created by: You</div>
-      </div>
-
-      <div className="border border-[#808080] bg-[#f0f0f0] p-1 mb-2 text-[10px]">
-        {item.attributes &&
-          Object.entries(item.attributes).map(([key, value]) => (
-            <div key={key} className="flex justify-between">
-              <span className="font-bold">{key}:</span>
-              <span>{value as string}</span>
+        <div className="border border-[#808080] border-t-white border-l-white bg-[#efefef] p-1.5 text-xs flex justify-between items-center">
+          {isLoadingOwner ? (
+            <div className="flex items-center">
+              <div className="win98-progress-bar w-4 h-3 mr-1.5"></div>
+              <span className="text-gray-700">Loading owner...</span>
             </div>
-          ))}
+          ) : !nftOwner ? (
+            <span className="text-gray-700">Unknown owner</span>
+          ) : (
+            <div className="flex items-center">
+              <div
+                className={`w-2 h-2 rounded-full mr-1.5 ${isOwner ? 'bg-green-600' : 'bg-gray-500'}`}
+              ></div>
+              <span className="font-mono">
+                {formatAddress(nftOwner)}
+                {isOwner && (
+                  <span className="ml-1 bg-[#000080] text-white px-1 text-[10px] rounded">YOU</span>
+                )}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

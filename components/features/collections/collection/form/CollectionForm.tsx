@@ -11,7 +11,7 @@ import {
   CollectionFormFields,
 } from '@/components/features/collections/collection/form';
 import { CollectionFormData } from '@/components/features/collections/collection/form/CollectionFormFields';
-import { usePinataUpload } from '@/lib/hooks/usePinataUpload';
+import { usePinataUpload, METADATA_TYPE } from '@/lib/hooks/usePinataUpload';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTFactoryEvents } from '@/lib/blockchain/hooks';
 import { useAlchemyNFTFactoryEvents } from '@/lib/blockchain/hooks/useAlchemyEvents';
@@ -47,7 +47,12 @@ const createPinataFolder = async (
 
 const uploadMetadataToIPFS = async (
   formData: CollectionFormData,
-  uploadToPinata: (file: File, metadata: any, folderId?: string) => Promise<any>,
+  uploadToPinata: (
+    file: File,
+    metadata: any,
+    folderId?: string,
+    metadataType?: string,
+  ) => Promise<any>,
   folderId?: string,
 ) => {
   if (formData.coverImage) {
@@ -55,31 +60,17 @@ const uploadMetadataToIPFS = async (
       formData.coverImage,
       {
         name: formData.name,
-        description: formData.description,
+        description: formData.description || `Collection of NFTs: ${formData.name}`,
+        banner_image: '',
+        featured_image: '',
+        external_link: '',
+        collaborators: [],
       },
       folderId,
+      METADATA_TYPE.COLLECTION,
     );
   } else {
-    // Create basic metadata
-    const basicMetadata = {
-      name: formData.name,
-      description: formData.description || `Collection of NFTs: ${formData.name}`,
-      image: 'https://ipfs.io/ipfs/QmUFc4dyX7TJn5dPxp8CKjAz9jCdZyiPeBrAmE5W2XRBEg',
-    };
-
-    const metadataBlob = new Blob([JSON.stringify(basicMetadata)], {
-      type: 'application/json',
-    });
-    const metadataFile = new File([metadataBlob], 'metadata.json');
-
-    return await uploadToPinata(
-      metadataFile,
-      {
-        name: `${formData.name}-metadata`,
-        description: formData.description,
-      },
-      folderId,
-    );
+    throw new Error('Collection image is required');
   }
 };
 
@@ -196,23 +187,23 @@ export function CollectionForm({}: CollectionFormProps) {
   const createCollectionMutation = trpc.collection.create.useMutation({
     onSuccess: async (_newCollection) => {
       addConsoleMessage('> Collection saved to database successfully!');
-      addConsoleMessage('> Revalidating collections page...');
+      addConsoleMessage('> Revalidating collections..');
 
       try {
         // Method 1: Use the API endpoint
-        const revalidateResponse = await fetch('/api/revalidate?path=/collections');
+        const revalidateResponse = await fetch('/api/revalidate?tag=collections');
         if (revalidateResponse.ok) {
-          addConsoleMessage('> Collections page revalidated successfully');
+          addConsoleMessage('> Collections tag revalidated successfully');
         }
       } catch (error) {
-        console.error('Error revalidating collections page:', error);
+        console.error('Error revalidating collections tag:', error);
       }
 
       addConsoleMessage('> Redirecting to collections page...');
 
       setTimeout(() => {
         router.push('/collections');
-        router.refresh(); // Force client-side refresh
+        // router.refresh(); // Force client-side refresh
       }, 1500);
     },
     onError: (error) => {
@@ -342,6 +333,25 @@ export function CollectionForm({}: CollectionFormProps) {
 
     if (!address) {
       addConsoleMessage('> Error: No wallet connected. Please connect your wallet first.');
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.name) {
+      addConsoleMessage('> Error: Collection name is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.description) {
+      addConsoleMessage('> Error: Collection description is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.coverImage) {
+      addConsoleMessage('> Error: Collection image is required. Please upload an image.');
+      setIsSubmitting(false);
       return;
     }
 

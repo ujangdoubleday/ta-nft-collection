@@ -177,10 +177,26 @@ export const nftRouter = router({
         tokenId: z.string(),
         contractAddress: z.string(),
         newOwnerAddress: z.string(),
+        transferType: z.string().optional(), // Transfer type (e.g., "Transfer", "Mint")
+        timestamp: z.string().optional(), // Timestamp of the transfer
       }),
     )
     .mutation(async ({ input }) => {
-      const { tokenId, contractAddress, newOwnerAddress } = input;
+      const { tokenId, contractAddress, newOwnerAddress, transferType, timestamp } = input;
+
+      // Find the current NFT to get the current owner
+      const currentNFT = await prisma.nFT.findUnique({
+        where: {
+          tokenId_contractAddress: {
+            tokenId,
+            contractAddress,
+          },
+        },
+      });
+
+      if (!currentNFT) {
+        throw new Error(`NFT with tokenId ${tokenId} not found`);
+      }
 
       // Check if new owner exists
       let newOwner = await prisma.user.findUnique({

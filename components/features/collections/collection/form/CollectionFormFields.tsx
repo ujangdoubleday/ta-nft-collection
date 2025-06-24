@@ -128,7 +128,7 @@ export function CollectionFormFields({
         <div>
           <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3 h-full flex flex-col">
             <label className="text-black text-xs font-bold block mb-1">
-              Collection Metadata Image
+              Collection Metadata Image <span className="text-red-600">*</span>
             </label>
             <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-white p-2 flex flex-col items-center justify-center h-full min-h-[250px]">
               {previewUrl ? (
@@ -170,7 +170,9 @@ export function CollectionFormFields({
                   >
                     <span className="text-black text-2xl">+</span>
                   </div>
-                  <p className="text-xs text-black">Upload an image for your collection metadata</p>
+                  <p className="text-xs text-black">
+                    Upload an image for your collection metadata (required)
+                  </p>
                 </div>
               )}
               {/* Hidden file input */}
@@ -183,7 +185,7 @@ export function CollectionFormFields({
               />
             </div>
             <p className="text-xs text-[#808080] mt-2">
-              This image will be included in the collection&apos;s contract metadata
+              This image is required and will be included in the collection&apos;s contract metadata
             </p>
           </div>
         </div>

@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { revalidateTag } from 'next/cache';
 
 export async function GET(request: NextRequest) {
   try {
-    const path = request.nextUrl.searchParams.get('path');
+    const tag = request.nextUrl.searchParams.get('tag');
 
-    if (!path) {
-      return NextResponse.json({ message: 'Missing path parameter' }, { status: 400 });
+    if (!tag) {
+      return NextResponse.json({ message: 'Missing tag parameter' }, { status: 400 });
     }
 
-    // Revalidate the specific path
-    revalidatePath(path);
+    revalidateTag(tag);
 
-    return NextResponse.json({ revalidated: true, now: Date.now(), path }, { status: 200 });
+    return NextResponse.json({ revalidated: true, now: Date.now(), tag }, { status: 200 });
   } catch (error) {
-    console.error('Error revalidating path:', error);
+    console.error('Error revalidating tag:', error);
     return NextResponse.json(
       { message: 'Error revalidating', error: (error as Error).message },
       { status: 500 },

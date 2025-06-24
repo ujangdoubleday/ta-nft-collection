@@ -1,4 +1,4 @@
-export { CollectionHeader } from './CollectionHeader';
-export { CollectionItemCard } from './CollectionItemCard';
-export { CollectionDetail } from './CollectionDetail';
+export * from './CollectionDetail';
+export * from './CollectionHeader';
+export * from './CollectionItemCard';
 export * from './TrpcCollectionDetail';

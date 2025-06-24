@@ -5,10 +5,10 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { useNFTCollectionEvents } from './useNFTCollectionEvents';
 
-// NFT Collection contract ABI for the transferFrom function
+// NFT Collection contract ABI for the safeTransferFrom function
 const NFT_COLLECTION_ABI = [
   {
-    name: 'transferFrom',
+    name: 'safeTransferFrom',
     type: 'function',
     stateMutability: 'nonpayable',
     inputs: [
@@ -93,11 +93,11 @@ export function useNFTTransfer(): UseNFTTransferReturn {
       // Update contract address to watch events
       setCurrentContractAddress(contractAddress);
 
-      // Make the contract write call
+      // Make the contract write call using safeTransferFrom instead of transferFrom
       const hash = await writeContractAsync({
         abi: NFT_COLLECTION_ABI,
         address: contractAddress as `0x${string}`,
-        functionName: 'transferFrom',
+        functionName: 'safeTransferFrom',
         args: [from, to, tokenIdBigInt],
         chainId: sepolia.id,
       });

@@ -85,7 +85,9 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
           </div>
 
           <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-3">
-            <label className="text-black text-xs font-bold block mb-1">NFT File Upload</label>
+            <label className="text-black text-xs font-bold block mb-1">
+              NFT File Upload <span className="text-red-600">*</span>
+            </label>
 
             <div className="border-[2px] border-t-[#808080] border-l-[#808080] border-r-white border-b-white p-4 bg-white flex flex-col items-center justify-center">
               <div className="text-center">
@@ -121,7 +123,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
               )}
             </div>
             <p className="text-xs text-[#505050] mt-1">
-              Supported formats: PNG, JPG, GIF, MP4 (max 30MB)
+              Supported formats: PNG, JPG, GIF, MP4 (max 30MB). Image is required.
             </p>
           </div>
         </div>

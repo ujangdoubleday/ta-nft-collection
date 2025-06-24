@@ -79,16 +79,18 @@ export function CreatorCollectionCard({ collection }: CreatorCollectionCardProps
               </div>
 
               {/* Collection Info (Right) */}
-              <div className="ml-4 flex-grow">
+              <div className="ml-4 flex-grow overflow-hidden">
                 <div className="flex items-center">
-                  <h3 className="text-lg font-bold mb-1">{name}</h3>
+                  <h3 className="text-lg font-bold mb-1 truncate">{name}</h3>
                 </div>
                 <div className="text-xs text-gray-500 mb-2">
                   {collection?.collectionAddress
                     ? `${collection.collectionAddress.substring(0, 6)}...${collection.collectionAddress.substring(collection.collectionAddress.length - 4)}`
                     : 'Unknown Address'}
                 </div>
-                <p className="text-sm mb-2 line-clamp-2">{description}</p>
+                <p className="text-sm mb-2 line-clamp-3 break-words overflow-hidden">
+                  {description}
+                </p>
               </div>
             </div>
 

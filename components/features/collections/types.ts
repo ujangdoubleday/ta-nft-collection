@@ -14,6 +14,14 @@ export type CollectionItem = {
    * This can be used with NextImage component's blurDataURL prop
    */
   placeholder?: string;
+  /**
+   * The contract address of the NFT collection
+   */
+  contractAddress?: string;
+  /**
+   * The token ID of the NFT
+   */
+  tokenId?: string;
   attributes: {
     rarity?: string;
     pixels?: string;
@@ -34,6 +42,7 @@ export type Collection = {
 };
 
 export type HistoryItem = {
+  [x: string]: string | undefined;
   type: string;
   from: string;
   to: string;

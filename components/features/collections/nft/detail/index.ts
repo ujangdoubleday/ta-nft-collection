@@ -1,7 +1,8 @@
-export { ClientNFTDetail } from './ClientNFTDetail';
-export { NFTDetail } from './NFTDetail';
-export { NFTDetails } from './NFTDetails';
-export { NFTHistory } from './NFTHistory';
-export { NFTProperties } from './NFTProperties';
-export { NFTTransferForm } from './NFTTransferForm';
-export { TrpcNFTDetail } from './TrpcNFTDetail';
+export * from './ClientNFTDetail';
+export * from './NFTDetail';
+export * from './NFTDetails';
+export * from './NFTHistory';
+export * from './NFTProperties';
+export * from './NFTTransferForm';
+export * from './TrpcNFTDetail';
+export * from './AlchemyNFTDetail';
