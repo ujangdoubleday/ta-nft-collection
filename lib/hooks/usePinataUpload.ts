@@ -2,6 +2,12 @@ import { useState } from 'react';
 import { trpc } from '@/lib/api/trpc/client';
 import { PinataFolder } from '@/lib/api/services/pinata/helper';
 
+// Metadata types
+export const METADATA_TYPE = {
+  COLLECTION: 'collection',
+  NFT: 'nft',
+};
+
 interface UploadResult {
   success: boolean;
   image?: {
@@ -15,14 +21,32 @@ interface UploadResult {
   error?: string;
 }
 
-interface NFTMetadata {
+// Base metadata interface with common fields
+interface BaseMetadata {
   name?: string;
   description?: string;
+  image?: string;
+}
+
+// Collection metadata (contract level)
+interface CollectionMetadata extends BaseMetadata {
+  banner_image?: string;
+  featured_image?: string;
+  external_link?: string;
+  collaborators?: string[];
+}
+
+// NFT metadata (token standard)
+interface NFTTokenMetadata extends BaseMetadata {
+  external_url?: string;
   attributes?: Array<{
     trait_type: string;
-    value: string;
+    value: string | number;
   }>;
 }
+
+// Union type for both metadata types
+export type NFTMetadata = CollectionMetadata | NFTTokenMetadata;
 
 export function usePinataUpload() {
   const [isUploading, setIsUploading] = useState(false);
@@ -67,7 +91,12 @@ export function usePinataUpload() {
   };
 
   // Upload file to Pinata
-  const uploadToPinata = async (file: File, metadata: NFTMetadata = {}, folderId?: string) => {
+  const uploadToPinata = async (
+    file: File,
+    metadata: NFTMetadata = {},
+    folderId?: string,
+    metadataType: string = METADATA_TYPE.COLLECTION,
+  ) => {
     if (!file) return;
 
     setIsUploading(true);
@@ -86,15 +115,36 @@ export function usePinataUpload() {
         throw new Error('File size exceeds 10MB limit');
       }
 
-      // Use tRPC mutation to upload
-      const result = await uploadMutation.mutateAsync({
-        file: Array.from(uint8Array), // Convert to regular array for serialization
-        fileName: file.name,
+      // Extract metadata fields based on type
+      const commonFields = {
         name: metadata.name,
         description: metadata.description,
-        attributes: metadata.attributes,
+      };
+
+      // Prepare upload data
+      const uploadData: any = {
+        file: Array.from(uint8Array), // Convert to regular array for serialization
+        fileName: file.name,
+        ...commonFields,
         folderId: folderId || selectedFolder?.id, // Use provided folderId or selected folder
-      });
+        metadataType,
+      };
+
+      // Add type-specific fields
+      if (metadataType === METADATA_TYPE.COLLECTION) {
+        const collectionMetadata = metadata as CollectionMetadata;
+        uploadData.banner_image = collectionMetadata.banner_image;
+        uploadData.featured_image = collectionMetadata.featured_image;
+        uploadData.external_link = collectionMetadata.external_link;
+        uploadData.collaborators = collectionMetadata.collaborators;
+      } else {
+        const nftMetadata = metadata as NFTTokenMetadata;
+        uploadData.external_url = nftMetadata.external_url;
+        uploadData.attributes = nftMetadata.attributes;
+      }
+
+      // Use tRPC mutation to upload
+      const result = await uploadMutation.mutateAsync(uploadData);
 
       setUploadResult(result);
       return result;

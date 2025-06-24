@@ -9,7 +9,7 @@ import NFT_COLLECTION_ABI from '../abi/NFTCollection.json';
 // NFT Collection contract ABI for the mintNFT function
 const MINT_NFT_ABI = [
   {
-    name: 'mintNFT',
+    name: 'mintArtwork',
     type: 'function',
     stateMutability: 'nonpayable',
     inputs: [
@@ -58,14 +58,14 @@ export function useNFTCollection(): UseNFTCollectionReturn {
         if (!recipient) throw new Error('Recipient address is required');
         if (!tokenURI) throw new Error('Token URI is required');
 
-        console.log(`Minting NFT to ${recipient} with URI: ${tokenURI}`);
+        console.log(`Minting Artwork to ${recipient} with URI: ${tokenURI}`);
         console.log(`Using NFT Collection contract: ${contractAddress}`);
 
         // Call the contract method
         const hash = await writeContractAsync({
           address: contractAddress as `0x${string}`,
           abi: MINT_NFT_ABI,
-          functionName: 'mintNFT',
+          functionName: 'mintArtwork',
           args: [recipient, tokenURI],
           chainId: sepolia.id,
         });

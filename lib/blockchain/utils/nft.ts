@@ -2,6 +2,9 @@
  * NFT Helper utilities
  */
 import { z } from 'zod';
+import { AlchemyNFT } from './alchemy';
+import { generateSimpleColorPlaceholder } from '@/lib/utils/helpers/plaiceholder';
+import { formatIPFSUrl } from '@/lib/utils/helpers/url';
 
 /**
  * Standard NFT metadata schema
@@ -88,33 +91,83 @@ export function getTraitValue(
   return attribute?.value;
 }
 
+// Define types for collection items
+export type CollectionItem = {
+  id: string;
+  name: string;
+  type: string;
+  image: string;
+  blurhash?: string;
+  placeholder?: string;
+  contractAddress: string;
+  tokenId: string;
+  attributes: {
+    rarity?: string;
+    pixels?: string;
+    dimensions?: string;
+    complexity?: string;
+    era?: string;
+    style?: string;
+    category?: string;
+    resolution?: string;
+    [key: string]: string | undefined;
+  };
+};
+
 /**
- * Format IPFS URL to gateway URL
- * @param url IPFS URL (ipfs://)
- * @param gateway Gateway URL (defaults to Pinata gateway)
- * @returns Formatted gateway URL
+ * Processes an Alchemy NFT into a standardized CollectionItem format
+ * @param nft The Alchemy NFT to process
+ * @returns Promise with the processed CollectionItem
  */
-export function formatIPFSUrl(url: string, gateway?: string): string {
-  if (!url) return '';
+export const processAlchemyNFT = async (nft: AlchemyNFT): Promise<CollectionItem> => {
+  // Generate default placeholder
+  const placeholder = await generateSimpleColorPlaceholder(nft.tokenId || 'default');
 
-  const ipfsGateway =
-    gateway || process.env.NEXT_PUBLIC_GATEWAY_URL || 'https://gateway.pinata.cloud';
-
-  // Handle ipfs:// protocol
-  if (url.startsWith('ipfs://')) {
-    const cid = url.replace('ipfs://', '');
-    return `${ipfsGateway}/ipfs/${cid}`;
+  // Get the best available image URL
+  let imageUrl = '';
+  if (nft.raw?.metadata.image) {
+    imageUrl = nft.raw.metadata.image;
+  } else if (nft.image?.originalUrl) {
+    imageUrl = nft.image.originalUrl;
+  } else if (nft.raw?.metadata?.image) {
+    imageUrl = nft.raw.metadata.image;
   }
 
-  // Already a HTTP URL
-  if (url.startsWith('http')) {
-    return url;
+  // Format the image URL if it's an IPFS URL
+  const image = imageUrl ? formatIPFSUrl(imageUrl) : '';
+
+  // Process attributes
+  let attributes: Record<string, string> = { rarity: 'Common' };
+  if (nft.raw?.metadata?.attributes && nft.raw.metadata.attributes.length > 0) {
+    attributes = nft.raw.metadata.attributes.reduce(
+      (acc, attr) => {
+        if (attr.trait_type && attr.value) {
+          acc[attr.trait_type.toLowerCase()] = attr.value;
+        }
+        return acc;
+      },
+      { rarity: 'Common' } as Record<string, string>,
+    );
   }
 
-  // Just a CID
-  if (url.startsWith('Qm') || url.startsWith('bafy')) {
-    return `${ipfsGateway}/ipfs/${url}`;
-  }
+  return {
+    id: nft.tokenId,
+    name: nft.name || `NFT #${nft.tokenId}`,
+    type: attributes.type || 'Digital Art',
+    image,
+    blurhash: placeholder,
+    placeholder,
+    contractAddress: nft.contract.address,
+    tokenId: nft.tokenId,
+    attributes,
+  };
+};
 
-  return url;
-}
+/**
+ * Processes multiple Alchemy NFTs into standardized CollectionItems
+ * @param nfts Array of Alchemy NFTs to process
+ * @returns Promise with array of processed CollectionItems
+ */
+export const processAlchemyNFTs = async (nfts: AlchemyNFT[]): Promise<CollectionItem[]> => {
+  return Promise.all(nfts.map((nft) => processAlchemyNFT(nft)));
+};
