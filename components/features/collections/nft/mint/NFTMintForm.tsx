@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { trpc } from '@/lib/api/trpc/client';
 import { useWallet } from '@/lib/hooks/wallet';
-import { usePinataUpload } from '@/lib/hooks/usePinataUpload';
+import { usePinataUpload, METADATA_TYPE } from '@/lib/hooks/usePinataUpload';
 import {
   NFTFormFields,
   NFTFormActions,
@@ -16,21 +16,12 @@ import { NFTPreview } from '@/components/features/collections/nft/preview';
 import { NFTFormData } from '@/components/features/collections/nft/mint/NFTFormFields';
 import { useNFTCollection, useNFTCollectionEvents } from '@/lib/blockchain/hooks';
 import { Win98Spinner } from '@/components/ui/organisms';
+import { refreshNFTMetadata } from '@/lib/blockchain/utils';
 
 interface NFTMintFormProps {
   collectionId: string;
   collectionName: string;
 }
-
-type NFTData = {
-  tokenId: string;
-  name: string;
-  description?: string;
-  metadataUrl: string;
-  imageUrl: string;
-  contractAddress: string;
-  ownerAddress: string;
-};
 
 type UploadResult = {
   success: boolean;
@@ -50,15 +41,21 @@ const createNFTMetadata = (formData: NFTFormData) => ({
     trait_type: prop.name,
     value: prop.value,
   })),
+  external_url: '', // Optional for NFT metadata
 });
 
 const uploadNFTToIPFS = async (
   file: File,
   metadata: any,
-  uploadToPinata: (file: File, metadata: any, folderId?: string) => Promise<any>,
+  uploadToPinata: (
+    file: File,
+    metadata: any,
+    folderId?: string,
+    metadataType?: string,
+  ) => Promise<any>,
   folderId?: string,
 ): Promise<UploadResult> => {
-  const result = await uploadToPinata(file, metadata, folderId);
+  const result = await uploadToPinata(file, metadata, folderId, METADATA_TYPE.NFT);
   if (!result) {
     throw new Error('Failed to upload to IPFS');
   }
@@ -98,8 +95,6 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
   const [consoleMessages, setConsoleMessages] = useState<string[]>([]);
   const [showProgressBar, setShowProgressBar] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [nftData, setNftData] = useState<NFTData | null>(null);
-  const [needsDbSave, setNeedsDbSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { uploadToPinata, isUploading } = usePinataUpload();
@@ -159,18 +154,53 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
     },
   });
 
-  const createNFTMutation = trpc.nft.create.useMutation({
-    onSuccess: () => {
-      addConsoleMessage('> Redirecting to collection page...');
-      setTimeout(() => {
-        router.push(`/collections/${collectionId}`);
-        router.refresh();
-      }, 1000);
-    },
-    onError: (error) => {
-      addConsoleMessage(`> System error: ${error.message}`);
-    },
-  });
+  // Handle blockchain confirmation and redirect
+  useEffect(() => {
+    const handleConfirmationAndRedirect = async () => {
+      if (transferEvents.length > 0 && txHash) {
+        try {
+          const event = transferEvents[transferEvents.length - 1];
+          if (event) {
+            addConsoleMessage('> Blockchain confirmation received!');
+            addConsoleMessage('> NFT created successfully');
+
+            // Refresh NFT metadata on Alchemy
+            addConsoleMessage('> Refreshing NFT metadata.');
+            try {
+              await refreshNFTMetadata(collectionId, event.tokenId);
+              addConsoleMessage('> Metadata refresh request sent to Alchemy');
+            } catch (refreshError) {
+              console.error('Error refreshing metadata:', refreshError);
+              addConsoleMessage('> Warning: Failed to refresh metadata, continuing anyway');
+            }
+
+            addConsoleMessage('> Redirecting to collection page...');
+            setTimeout(() => {
+              router.push(`/collections/${collectionId}`);
+              router.refresh();
+            }, 3000); // 3 second delay before redirect
+          }
+        } catch (error) {
+          console.error('Error in handleConfirmationAndRedirect:', error);
+        }
+      }
+    };
+
+    handleConfirmationAndRedirect();
+  }, [transferEvents, txHash, addConsoleMessage, collectionId, router]);
+
+  // Cleanup object URL
+  useEffect(() => {
+    let objectUrl = '';
+    if (formData.file && formData.file instanceof File) {
+      objectUrl = createObjectURL(formData.file);
+    }
+    return () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [formData.file]);
 
   // Preview image URL
   const previewImage = useMemo(() => {
@@ -213,52 +243,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
     });
   };
 
-  // Save NFT after blockchain confirmation
-  useEffect(() => {
-    const saveNFTFromEvent = async () => {
-      if (needsDbSave && transferEvents.length > 0 && nftData && !createNFTMutation.isPending) {
-        try {
-          const event = transferEvents[transferEvents.length - 1];
-          if (event) {
-            addConsoleMessage('> Blockchain confirmation received!');
-            addConsoleMessage('> NFT created successfully');
-            addConsoleMessage('> Save NFT Metadata in the system...');
-
-            const updatedNftData = {
-              ...nftData,
-              tokenId: event.tokenId,
-            };
-
-            createNFTMutation.mutate(updatedNftData);
-          } else {
-            addConsoleMessage('> Warning: Could not find event information');
-            addConsoleMessage('> Using temporary ID for registration');
-            createNFTMutation.mutate(nftData);
-          }
-          setNeedsDbSave(false);
-        } catch (error) {
-          console.error('Error in saveNFTFromEvent:', error);
-        }
-      }
-    };
-
-    saveNFTFromEvent();
-  }, [transferEvents, needsDbSave, nftData, createNFTMutation, addConsoleMessage]);
-
-  // Cleanup object URL
-  useEffect(() => {
-    let objectUrl = '';
-    if (formData.file && formData.file instanceof File) {
-      objectUrl = createObjectURL(formData.file);
-    }
-    return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [formData.file]);
-
-  // Submit handler
+  // Main form submission handler
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
@@ -272,8 +257,16 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
       return;
     }
 
+    // Validate required fields
+    if (!formData.title) {
+      addConsoleMessage('> Error: NFT title is required.');
+      setIsSubmitting(false);
+      return;
+    }
+
     if (!formData.file) {
-      addConsoleMessage('> Error: Please upload an image for your NFT.');
+      addConsoleMessage('> Error: NFT image is required. Please upload an image.');
+      setIsSubmitting(false);
       return;
     }
 
@@ -281,7 +274,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
     setShowProgressBar(true);
     setConsoleMessages([]);
     addConsoleMessage('> Processing data...');
-    addConsoleMessage(`> Owner address: ${formatAddress(address)}`);
+    addConsoleMessage(`> Owner address: ${address}`);
     addConsoleMessage(`> Collection: ${collectionName}`);
 
     try {
@@ -295,16 +288,6 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
         folderId: ipfsFolderId,
       });
 
-      const nftToSave: NFTData = {
-        tokenId: `${Date.now()}-temp`,
-        name: formData.title,
-        description: formData.description || undefined,
-        metadataUrl: uploadResult.metadata.url,
-        imageUrl: uploadResult.image.url,
-        contractAddress: collectionId,
-        ownerAddress: address,
-      };
-
       addConsoleMessage('> Creating NFT on blockchain...');
       addConsoleMessage('> Waiting for wallet confirmation...');
 
@@ -314,18 +297,17 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
         metadataUrl: uploadResult.metadata.url,
       });
 
-      // Add more detailed logging and set a timer for fallback
+      // Add more detailed logging
       addConsoleMessage('> Transaction submitted to blockchain');
-      setNftData(nftToSave);
-      setNeedsDbSave(true);
+      addConsoleMessage('> Waiting for blockchain confirmation...');
 
       // Add a fallback timer in case event listening fails
       const fallbackTimer = setTimeout(() => {
-        if (needsDbSave && nftData) {
+        if (!transferEvents.length) {
           addConsoleMessage('> Using fallback: Event detection timed out');
-          addConsoleMessage('> Saving NFT with temporary token ID');
-          createNFTMutation.mutate(nftData);
-          setNeedsDbSave(false);
+          addConsoleMessage('> Redirecting to collection page...');
+          router.push(`/collections/${collectionId}`);
+          router.refresh();
         }
       }, 15000); // 15 second fallback
 
@@ -349,8 +331,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
     mintNFTMutation.isPending ||
     isUploading ||
     isMintLoading ||
-    isEventLoading ||
-    createNFTMutation.isPending;
+    isEventLoading;
 
   return (
     <Win98Window
@@ -412,32 +393,6 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
                       <div className="win98-progress-bar h-full"></div>
                     </div>
                     <Win98Spinner size="small" />
-                  </div>
-                )}
-
-                {txHash && needsDbSave && (
-                  <div className="mt-4 p-3 bg-yellow-100 border border-yellow-500 text-black">
-                    <p className="font-bold mb-2">Transaction Submitted to Blockchain</p>
-                    <p className="text-sm mb-2">
-                      If the NFT does not appear in your collection after a few minutes, you may
-                      need to save it manually.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (nftData) {
-                          addConsoleMessage('> Manual save initiated');
-                          createNFTMutation.mutate(nftData);
-                          setNeedsDbSave(false);
-                        }
-                      }}
-                      className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] px-3 py-1 text-sm"
-                    >
-                      Manual Save NFT
-                    </button>
-                    <p className="text-xs mt-2">
-                      Transaction Hash: {txHash.slice(0, 10)}...{txHash.slice(-8)}
-                    </p>
                   </div>
                 )}
               </>
