@@ -1,9 +1,9 @@
-import { CreateCollectionPageWrapper } from '@/components/features/collections/collection';
+import { CollectionCreateWrapper } from '@/components/features/collections/collection';
 
 export default function CreateCollectionPage() {
   return (
     <>
-      <CreateCollectionPageWrapper />
+      <CollectionCreateWrapper />
     </>
   );
 }

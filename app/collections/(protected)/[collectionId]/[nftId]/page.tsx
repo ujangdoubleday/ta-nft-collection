@@ -1,7 +1,5 @@
 import { Container } from '@/components/core/layout/container';
-import { AlchemyNFTDetail } from '@/components/features/collections/nft/detail';
-import { CollectionErrorMessage } from '@/components/features/collections/shared/error/CollectionErrorMessage';
-import { getCollectionByContractAddress } from '@/lib/api/services';
+import { NFTDetailWrapper } from '@/components/features/collections/nft/detail';
 
 type Params = Promise<{
   collectionId: string;
@@ -21,25 +19,10 @@ export default async function NFTDetailPage({
   const contractAddress = resolvedParams.collectionId;
   const { nftId } = resolvedParams;
 
-  const collection = await getCollectionByContractAddress(contractAddress);
-
-  if (!collection) {
-    return (
-      <main className="py-4">
-        <Container>
-          <CollectionErrorMessage
-            title="Error - Collection Not Found"
-            icon="/assets/icons/window/document-error.png"
-          />
-        </Container>
-      </main>
-    );
-  }
-
   return (
     <main className="py-4">
       <Container>
-        <AlchemyNFTDetail contractAddress={contractAddress} tokenId={nftId} />
+        <NFTDetailWrapper contractAddress={contractAddress} tokenId={nftId} />
       </Container>
     </main>
   );
