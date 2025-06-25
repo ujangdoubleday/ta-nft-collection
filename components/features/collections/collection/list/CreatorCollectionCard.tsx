@@ -4,9 +4,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { EnrichedCollectionInfo } from '@/lib/blockchain/utils/collection';
-import { useCollectionOwner } from '@/lib/blockchain/hooks/useNFTCollectionRead';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useState, useEffect } from 'react';
+import { trpc } from '@/lib/api/trpc/client';
 
 interface CreatorCollectionCardProps {
   collection: EnrichedCollectionInfo;
@@ -15,17 +15,26 @@ interface CreatorCollectionCardProps {
 export function CreatorCollectionCard({ collection }: CreatorCollectionCardProps) {
   const { address } = useWallet();
   const [isOwner, setIsOwner] = useState<boolean | null>(null);
-  const { data: owner, isLoading: isLoadingOwner } = useCollectionOwner(
-    collection?.collectionAddress as `0x${string}`,
-  );
+
+  const { data: ownerData, isLoading: isLoadingOwner } =
+    trpc.collection.getCollectionOwner.useQuery(
+      { collectionAddress: collection?.collectionAddress as string },
+      {
+        enabled: !!collection?.collectionAddress,
+        refetchInterval: 30000, // Refetch every 30 seconds
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+        refetchOnReconnect: true,
+      },
+    );
 
   // Check if the current user is the owner
   useEffect(() => {
-    if (!address || !owner) return;
+    if (!address || !ownerData) return;
 
-    const isCurrentOwner = (owner as string).toLowerCase() === address.toLowerCase();
+    const isCurrentOwner = ownerData.toLowerCase() === address.toLowerCase();
     setIsOwner(isCurrentOwner);
-  }, [address, owner]);
+  }, [address, ownerData]);
 
   // Use try-catch for all property access to prevent rendering errors
   try {
@@ -50,8 +59,11 @@ export function CreatorCollectionCard({ collection }: CreatorCollectionCardProps
     // Check if collection is new (less than 24 hours old)
     const isNew = Date.now() - createdAt < 24 * 60 * 60 * 1000;
 
-    // Get image URL with fallback
+    // Get image URL with fallback - now this should be processed by tRPC
     const imageUrl = collection?.imageUrl || '/assets/images/placeholders/image-placeholder.svg';
+
+    // Check if metadata is missing (for debugging/UX)
+    const hasMetadata = collection?.metadata && Object.keys(collection.metadata).length > 0;
 
     return (
       <Link href={`/collections/${collection?.collectionAddress || '#'}`}>
@@ -82,6 +94,11 @@ export function CreatorCollectionCard({ collection }: CreatorCollectionCardProps
               <div className="ml-4 flex-grow overflow-hidden">
                 <div className="flex items-center">
                   <h3 className="text-lg font-bold mb-1 truncate">{name}</h3>
+                  {isNew && (
+                    <span className="ml-2 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
+                      NEW
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-500 mb-2">
                   {collection?.collectionAddress
@@ -91,6 +108,11 @@ export function CreatorCollectionCard({ collection }: CreatorCollectionCardProps
                 <p className="text-sm mb-2 line-clamp-3 break-words overflow-hidden">
                   {description}
                 </p>
+
+                {/* Show warning if metadata is missing */}
+                {!hasMetadata && (
+                  <p className="text-xs text-yellow-600 mb-2">⚠️ Metadata not loaded</p>
+                )}
               </div>
             </div>
 
@@ -105,6 +127,8 @@ export function CreatorCollectionCard({ collection }: CreatorCollectionCardProps
               <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
                 Created: {fullFormattedDate}
               </span>
+
+              {/* Ownership status */}
               {isLoadingOwner ? (
                 <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
                   Checking ownership...
