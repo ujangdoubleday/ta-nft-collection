@@ -1,37 +1,29 @@
 'use client';
 
-import { useNFTsByContractAddress } from '@/components/features/collections/hooks/useNFTsByContractAddress';
 import { NFTMintForm } from './NFTMintForm';
 import { LoadingWindow } from '@/components/shared/loading';
 import { CollectionErrorMessage } from '@/components/features/collections/shared/error/CollectionErrorMessage';
 import { trpc } from '@/lib/api/trpc/client';
 
 interface NFTMintWrapperProps {
-  contractAddressC: string;
+  contractAddress: string;
 }
 
-export const NFTMintWrapper = ({ contractAddressC }: NFTMintWrapperProps) => {
-  // Fetch collection data using tRPC hook
+export const NFTMintWrapper = ({ contractAddress }: NFTMintWrapperProps) => {
   const {
-    nfts,
-    isLoading: nftsLoading,
-    error: nftsError,
-  } = useNFTsByContractAddress(contractAddressC);
-
-  // Fetch collection details to get the name
-  const {
-    data: collection,
+    data: isValid,
     isLoading: collectionLoading,
     error: collectionError,
-  } = trpc.collection.getByContractAddress.useQuery(
-    { contractAddress: contractAddressC },
-    { enabled: !!contractAddressC },
+  } = trpc.collection.isCollectionValid.useQuery(
+    { collectionAddress: contractAddress },
+    { enabled: !!contractAddress },
   );
 
-  const isLoading = nftsLoading || collectionLoading;
-  const error = nftsError || collectionError || (!collection && !nftsLoading);
+  console.log('contractAddress:', contractAddress);
 
-  // Show loading state
+  const isLoading = collectionLoading;
+  const isError = collectionError || !isValid;
+
   if (isLoading) {
     return (
       <LoadingWindow
@@ -42,15 +34,14 @@ export const NFTMintWrapper = ({ contractAddressC }: NFTMintWrapperProps) => {
     );
   }
 
-  // Show error state
-  if (error || !collection) {
+  if (isError) {
     return (
       <CollectionErrorMessage
-        title="Error - Collection Not Found"
+        title="Error - Collection Not Found or Invalid"
         icon="/assets/icons/window/gallery-create.png"
       />
     );
   }
 
-  return <NFTMintForm collectionId={contractAddressC} collectionName={collection.name} />;
+  return <NFTMintForm collectionId={contractAddress} />;
 };

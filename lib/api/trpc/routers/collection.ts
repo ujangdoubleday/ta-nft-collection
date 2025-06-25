@@ -6,6 +6,7 @@ import {
   fetchCreatorCollections,
   fetchCreatorCollectionsBasic,
   fetchCollectionOwner,
+  isCollectionValid,
 } from '@/lib/blockchain/utils/collection';
 import { ipfsToHttp } from '@/lib/blockchain/utils/collection';
 
@@ -438,5 +439,21 @@ export const collectionRouter = router({
         console.error('Error fetching collection owner:', error);
         throw new Error('Failed to fetch collection owner');
       }
+    }),
+
+  isCollectionValid: publicProcedure
+    .input(z.object({ collectionAddress: z.string() }))
+    .query(async ({ input }) => {
+      const { collectionAddress } = input;
+
+      if (!collectionAddress) {
+        throw new Error('Collection address is required');
+      }
+
+      // Akan throw error jika tidak valid
+      await isCollectionValid(collectionAddress as `0x${string}`);
+
+      // Kalau valid, bisa return true atau data tambahan jika mau
+      return true;
     }),
 });

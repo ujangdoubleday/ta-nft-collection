@@ -374,3 +374,28 @@ export async function fetchCollectionOwner(collectionAddress: string): Promise<s
     return null;
   }
 }
+
+export async function isCollectionValid(collectionAddress: string): Promise<boolean> {
+  if (!collectionAddress) throw new Error('Collection address is required');
+
+  try {
+    console.log(`Checking validity for collection: ${collectionAddress}`);
+    const { NFT_FACTORY_ABI } = await import('../abi');
+
+    const isValid = await publicClient.readContract({
+      address: NFT_FACTORY_ADDRESS as `0x${string}`,
+      abi: NFT_FACTORY_ABI,
+      functionName: 'isCollectionValid',
+      args: [collectionAddress],
+    });
+
+    if (!isValid) {
+      throw new Error('Invalid collection');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error validating collection:', error);
+    throw new Error('Invalid collection or unable to verify');
+  }
+}
