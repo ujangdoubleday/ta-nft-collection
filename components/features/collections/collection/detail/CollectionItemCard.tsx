@@ -9,7 +9,7 @@ import { useWallet } from '@/lib/hooks/wallet';
 
 interface CollectionItemCardProps {
   item: CollectionItem;
-  onViewDetails: (itemId: string) => void;
+  onViewDetailsAction: (itemId: string) => void;
 }
 
 // Format address for display
@@ -40,7 +40,7 @@ const ImagePlaceholder = ({ placeholder }: { placeholder?: string }) => {
   );
 };
 
-export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardProps) {
+export function CollectionItemCard({ item, onViewDetailsAction }: CollectionItemCardProps) {
   const [imageError, setImageError] = useState(false);
   const [placeholder, setPlaceholder] = useState<string | undefined>(undefined);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -93,7 +93,7 @@ export function CollectionItemCard({ item, onViewDetails }: CollectionItemCardPr
           aspectRatio: '1/1',
           width: '100%',
         }}
-        onClick={() => onViewDetails(item.id)}
+        onClick={() => onViewDetailsAction(item.id)}
       >
         {item.image && !imageError ? (
           <>

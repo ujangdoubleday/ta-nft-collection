@@ -1,9 +1,7 @@
 'use client';
 
 import { Button, Input } from '@/components/ui/atoms';
-import { ChangeEvent, useRef, useState } from 'react';
-import Image from 'next/image';
-
+import { ChangeEvent, useRef } from 'react';
 export type NFTFormData = {
   title: string;
   description: string;
@@ -16,15 +14,19 @@ export type NFTFormData = {
 
 interface NFTFormFieldsProps {
   formData: NFTFormData;
-  handleChange: (
+  handleChangeAction: (
     e: ChangeEvent<HTMLInputElement>,
     propertyIndex?: number | null,
     field?: string | null,
   ) => void;
-  handleAddProperty: () => void;
+  handleAddPropertyAction: () => void;
 }
 
-export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFTFormFieldsProps) {
+export function NFTFormFields({
+  formData,
+  handleChangeAction,
+  handleAddPropertyAction,
+}: NFTFormFieldsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +39,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
           value: file,
         },
       };
-      handleChange(event as any);
+      handleChangeAction(event as any);
     }
   };
 
@@ -52,7 +54,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
         value: null,
       },
     };
-    handleChange(event as any);
+    handleChangeAction(event as any);
   };
 
   return (
@@ -68,7 +70,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
               required
               name="title"
               value={formData.title}
-              onChange={handleChange}
+              onChange={handleChangeAction}
               className="hover:border-[#0000ff] focus:border-[#0000ff]"
             />
           </div>
@@ -80,7 +82,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
               placeholder="Tell the story behind your NFT"
               name="description"
               value={formData.description}
-              onChange={(e) => handleChange(e as any)}
+              onChange={(e) => handleChangeAction(e as any)}
             ></textarea>
           </div>
 
@@ -140,13 +142,13 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
                   placeholder="Property name"
                   className="mr-2 hover:border-[#0000ff] focus:border-[#0000ff]"
                   value={prop.name}
-                  onChange={(e) => handleChange(e, index, 'name')}
+                  onChange={(e) => handleChangeAction(e, index, 'name')}
                 />
                 <Input
                   placeholder="Value"
                   className="hover:border-[#0000ff] focus:border-[#0000ff]"
                   value={prop.value}
-                  onChange={(e) => handleChange(e, index, 'value')}
+                  onChange={(e) => handleChangeAction(e, index, 'value')}
                 />
               </div>
             ))}
@@ -154,7 +156,7 @@ export function NFTFormFields({ formData, handleChange, handleAddProperty }: NFT
               size="sm"
               className="w-full text-xs mt-1 hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
               type="button"
-              onClick={handleAddProperty}
+              onClick={handleAddPropertyAction}
             >
               + Add Property
             </Button>

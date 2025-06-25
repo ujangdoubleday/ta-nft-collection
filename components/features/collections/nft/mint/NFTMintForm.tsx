@@ -344,8 +344,8 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
           <div className="md:col-span-2">
             <NFTFormFields
               formData={formData}
-              handleChange={handleChange}
-              handleAddProperty={handleAddProperty}
+              handleChangeAction={handleChange}
+              handleAddPropertyAction={handleAddProperty}
             />
             <NFTFormNote />
 
@@ -409,7 +409,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
         </div>
 
         <NFTFormActions
-          onCancel={handleCancel}
+          onCancelAction={handleCancel}
           showConfirmation={showConsole}
           isSubmitting={isLoading}
         />

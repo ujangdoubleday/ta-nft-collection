@@ -15,8 +15,7 @@ import { usePinataUpload, METADATA_TYPE } from '@/lib/hooks/usePinataUpload';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTFactoryEvents } from '@/lib/blockchain/hooks';
 import { useAlchemyNFTFactoryEvents } from '@/lib/blockchain/hooks/useAlchemyEvents';
-import { useCreateCollection } from '@/lib/blockchain/hooks/useNFTFactoryWrite';
-import { revalidatePathAction } from '@/lib/utils/helpers/revalidation';
+import { useNFTFactory } from '@/lib/blockchain/hooks';
 import { alchemy } from '@/lib/blockchain/utils/alchemy';
 
 interface CollectionFormProps {
@@ -99,11 +98,7 @@ export function CollectionForm({}: CollectionFormProps) {
 
   // Get hooks
   const { uploadToPinata, createFolder, isUploading, isCreatingFolder } = usePinataUpload();
-  const {
-    createCollection,
-    isLoading: isFactoryLoading,
-    error: factoryError,
-  } = useCreateCollection();
+  const { createCollection, isLoading: isFactoryLoading, error: factoryError } = useNFTFactory();
   const { collectionCreatedEvents, loading: isEventLoading } = useNFTFactoryEvents(txHash || '');
   const { collectionCreatedEvents: alchemyEvents, loading: isAlchemyLoading } =
     useAlchemyNFTFactoryEvents(txHash || '');
@@ -451,8 +446,8 @@ export function CollectionForm({}: CollectionFormProps) {
       <form onSubmit={handleSubmit} className="p-4 bg-[#c0c0c0]">
         <CollectionFormFields
           formData={formData}
-          handleChange={handleChange}
-          handleFileChange={handleFileChange}
+          handleChangeAction={handleChange}
+          handleFileChangeAction={handleFileChange}
         />
 
         {/* Wallet connection status */}
@@ -505,7 +500,7 @@ export function CollectionForm({}: CollectionFormProps) {
         )}
 
         <CollectionFormActions
-          onCancel={handleCancel}
+          onCancelAction={handleCancel}
           showConfirmation={showConsole}
           isSubmitting={isLoading}
         />
