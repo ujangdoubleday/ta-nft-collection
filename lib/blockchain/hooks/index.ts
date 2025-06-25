@@ -1,7 +1,7 @@
 // Core hooks
 export * from './useNFTCollection';
 // export * from './useNFTCollectionRead';
-export * from './useNFTCollectionWrite';
+// export * from './useNFTCollectionWrite';
 export * from './useNFTCollectionEvents';
 
 // Factory hooks

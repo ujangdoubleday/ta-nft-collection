@@ -4,6 +4,8 @@ import { prisma } from '@/lib/db';
 import { createPublicClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
 import { NFT_COLLECTION_ABI } from '@/lib/blockchain/abi';
+import { formatIPFSUrl } from '@/lib/utils/helpers/url';
+import { fetchNFTsForContract, fetchNFTByTokenId } from '@/lib/blockchain/utils/alchemy';
 
 // Create a public client for blockchain interactions
 const publicClient = createPublicClient({
@@ -32,24 +34,37 @@ export const nftRouter = router({
     .input(z.object({ tokenId: z.string(), contractAddress: z.string() }))
     .query(async ({ input }) => {
       const { tokenId, contractAddress } = input;
-      return prisma.nFT.findUnique({
-        where: {
-          tokenId_contractAddress: {
-            tokenId,
-            contractAddress,
-          },
-        },
-        include: {
-          owner: {
-            select: {
-              id: true,
-              address: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-      });
+
+      try {
+        // Fetch NFT directly from blockchain using Alchemy API
+        const nft = await fetchNFTByTokenId(contractAddress, tokenId);
+
+        if (!nft) {
+          console.error(`NFT not found: ${contractAddress} - Token ID: ${tokenId}`);
+          return null;
+        }
+
+        // Extract metadata from Alchemy response
+        const metadata = nft.raw?.metadata || {};
+
+        return {
+          tokenId: nft.tokenId,
+          name: nft.name || `NFT #${nft.tokenId}`,
+          description: nft.description || metadata.description || '',
+          metadataUrl: nft.tokenUri || nft.raw?.tokenUri || '',
+          imageUrl: nft.image?.originalUrl || metadata.image || '',
+          contractAddress: nft.contract.address,
+          ownerAddress: '', // Note: Alchemy doesn't provide owner in this endpoint
+          createdAt: new Date(nft.timeLastUpdated || Date.now()),
+          updatedAt: new Date(nft.timeLastUpdated || Date.now()),
+        };
+      } catch (error) {
+        console.error(
+          `Error fetching NFT from blockchain: ${contractAddress} - Token ID: ${tokenId}`,
+          error,
+        );
+        return null;
+      }
     }),
 
   getCollectionOwner: publicProcedure
@@ -76,20 +91,54 @@ export const nftRouter = router({
     .input(z.object({ contractAddress: z.string() }))
     .query(async ({ input }) => {
       const { contractAddress } = input;
-      return prisma.nFT.findMany({
-        where: { contractAddress },
-        orderBy: { createdAt: 'desc' },
-        include: {
-          owner: {
-            select: {
-              id: true,
-              address: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-      });
+
+      try {
+        // Fetch NFTs directly from blockchain using Alchemy API
+        const alchemyResponse = await fetchNFTsForContract(contractAddress);
+
+        if (alchemyResponse.nfts.length === 0) {
+          // If no NFTs found, check if the collection exists on-chain
+          try {
+            const totalSupply = await publicClient.readContract({
+              address: contractAddress as `0x${string}`,
+              abi: NFT_COLLECTION_ABI,
+              functionName: 'totalSupply',
+            });
+
+            if (Number(totalSupply) > 0) {
+              console.log(
+                `Collection ${contractAddress} has ${Number(totalSupply)} NFTs on-chain but none returned from Alchemy`,
+              );
+            }
+          } catch (error) {
+            console.error(`Error checking totalSupply for collection ${contractAddress}:`, error);
+          }
+        }
+
+        // Map Alchemy NFTs to our application's format
+        return alchemyResponse.nfts.map((nft) => {
+          // Extract metadata from Alchemy response
+          const metadata = nft.raw?.metadata || {};
+
+          return {
+            tokenId: nft.tokenId,
+            name: nft.name || `NFT #${nft.tokenId}`,
+            description: nft.description || metadata.description || '',
+            metadataUrl: nft.tokenUri || nft.raw?.tokenUri || '',
+            imageUrl: nft.raw?.metadata.image || metadata.image || '',
+            contractAddress: nft.contract.address,
+            ownerAddress: '', // Note: Alchemy doesn't provide owner in this endpoint
+            createdAt: new Date(nft.timeLastUpdated || Date.now()),
+            updatedAt: new Date(nft.timeLastUpdated || Date.now()),
+          };
+        });
+      } catch (error) {
+        console.error(
+          `Error fetching NFTs from blockchain for collection ${contractAddress}:`,
+          error,
+        );
+        return [];
+      }
     }),
 
   getByOwnerAddress: publicProcedure
