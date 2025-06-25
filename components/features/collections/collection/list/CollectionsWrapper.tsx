@@ -10,8 +10,8 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export function CollectionsPage() {
-  const { isConnected, isAuthenticated } = useWallet();
+export function CollectionsWrapper() {
+  const { isConnected, isAuthenticated, address } = useWallet();
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();

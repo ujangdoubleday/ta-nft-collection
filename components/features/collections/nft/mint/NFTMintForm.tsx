@@ -20,7 +20,6 @@ import { refreshNFTMetadata } from '@/lib/blockchain/utils';
 
 interface NFTMintFormProps {
   collectionId: string;
-  collectionName: string;
 }
 
 type UploadResult = {
@@ -75,7 +74,7 @@ const mintNFTOnBlockchain = async (
   return result;
 };
 
-export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) {
+export function NFTMintForm({ collectionId }: NFTMintFormProps) {
   const router = useRouter();
   const { address } = useWallet();
 
@@ -275,7 +274,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
     setConsoleMessages([]);
     addConsoleMessage('> Processing data...');
     addConsoleMessage(`> Owner address: ${address}`);
-    addConsoleMessage(`> Collection: ${collectionName}`);
+    addConsoleMessage(`> Collection: ${collectionId}`);
 
     try {
       addConsoleMessage('> Uploading asset to IPFS...');
@@ -335,7 +334,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
 
   return (
     <Win98Window
-      title={`Create NFT - ${collectionName}`}
+      title={'Create NFT'}
       className="max-w-12xl mx-auto"
       icon="/assets/icons/window/gallery-create.png"
     >
@@ -344,8 +343,8 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
           <div className="md:col-span-2">
             <NFTFormFields
               formData={formData}
-              handleChange={handleChange}
-              handleAddProperty={handleAddProperty}
+              handleChangeAction={handleChange}
+              handleAddPropertyAction={handleAddProperty}
             />
             <NFTFormNote />
 
@@ -409,7 +408,7 @@ export function NFTMintForm({ collectionId, collectionName }: NFTMintFormProps) 
         </div>
 
         <NFTFormActions
-          onCancel={handleCancel}
+          onCancelAction={handleCancel}
           showConfirmation={showConsole}
           isSubmitting={isLoading}
         />

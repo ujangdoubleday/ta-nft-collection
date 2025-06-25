@@ -16,14 +16,14 @@ export type CollectionFormData = {
 
 interface CollectionFormFieldsProps {
   formData: CollectionFormData;
-  handleChange: (e: { target: { name: any; value: any } }) => void;
-  handleFileChange?: (file: File | null) => void;
+  handleChangeAction: (e: { target: { name: any; value: any } }) => void;
+  handleFileChangeAction?: (file: File | null) => void;
 }
 
 export function CollectionFormFields({
   formData,
-  handleChange,
-  handleFileChange,
+  handleChangeAction,
+  handleFileChangeAction,
 }: CollectionFormFieldsProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,13 +37,13 @@ export function CollectionFormFields({
       setPreviewUrl(objectUrl);
 
       // Handle file change in parent component
-      if (handleFileChange) {
-        handleFileChange(file);
+      if (handleFileChangeAction) {
+        handleFileChangeAction(file);
       }
     } else {
       setPreviewUrl(null);
-      if (handleFileChange) {
-        handleFileChange(null);
+      if (handleFileChangeAction) {
+        handleFileChangeAction(null);
       }
     }
   };
@@ -66,7 +66,7 @@ export function CollectionFormFields({
               required
               name="name"
               value={formData.name}
-              onChange={handleChange}
+              onChange={handleChangeAction}
               className="hover:border-[#0000ff] focus:border-[#0000ff]"
             />
             <p className="text-xs text-[#808080] mt-1">
@@ -84,7 +84,7 @@ export function CollectionFormFields({
               maxLength={5}
               name="symbol"
               value={formData.symbol}
-              onChange={handleChange}
+              onChange={handleChangeAction}
               className="hover:border-[#0000ff] focus:border-[#0000ff]"
             />
             <p className="text-xs text-[#808080] mt-1">
@@ -104,7 +104,7 @@ export function CollectionFormFields({
               max="10000"
               name="totalSupply"
               value={formData.totalSupply}
-              onChange={handleChange}
+              onChange={handleChangeAction}
               className="hover:border-[#0000ff] focus:border-[#0000ff]"
             />
             <p className="text-xs text-[#808080] mt-1">
@@ -119,7 +119,7 @@ export function CollectionFormFields({
               placeholder="Tell the story behind your collection"
               name="description"
               value={formData.description}
-              onChange={handleChange}
+              onChange={handleChangeAction}
             ></textarea>
           </div>
         </div>
@@ -155,7 +155,7 @@ export function CollectionFormFields({
                       className="text-xs hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset]"
                       onClick={() => {
                         setPreviewUrl(null);
-                        if (handleFileChange) handleFileChange(null);
+                        if (handleFileChangeAction) handleFileChangeAction(null);
                       }}
                     >
                       Remove

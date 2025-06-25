@@ -12,9 +12,7 @@ import NFT_FACTORY_ABI from '../abi/NFTFactory.json';
 export const NFT_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}`;
 export const IPFS_GATEWAY_URL =
   process.env.NEXT_PUBLIC_GATEWAY_URL || 'cyan-dead-reptile-256.mypinata.cloud';
-export const ALCHEMY_RPC_URL =
-  process.env.NEXT_PUBLIC_ALCHEMY_HTTP ||
-  'https://eth-sepolia.g.alchemy.com/v2/yXhQ8MjEA5FQdiDCQ8Xnv';
+export const ALCHEMY_RPC_URL = process.env.ALCHEMY_HTTP_URL || '';
 
 // Create a public client with Alchemy transport
 export const publicClient = createPublicClient({
@@ -178,7 +176,6 @@ export async function fetchCreatorCollections(
         functionName: 'getCollectionInfoByCreator',
         args: [creatorAddress],
       })) as any[];
-      console.log('Successfully called getCollectionInfoByCreator');
     } catch (err) {
       console.log('getCollectionInfoByCreator failed, trying getCollectionsByCreator');
       // If that fails, try getCollectionsByCreator
@@ -189,8 +186,6 @@ export async function fetchCreatorCollections(
           functionName: 'getCollectionsByCreator',
           args: [creatorAddress],
         })) as `0x${string}`[];
-
-        console.log('Got collection addresses:', collectionAddresses);
 
         // For each address, get the collection info
         collectionsInfo = await Promise.all(
@@ -218,8 +213,6 @@ export async function fetchCreatorCollections(
       }
     }
 
-    console.log('Raw collections data:', collectionsInfo);
-
     if (!collectionsInfo) {
       console.error('Invalid response from contract: null or undefined');
       return [];
@@ -241,8 +234,6 @@ export async function fetchCreatorCollections(
         collections = [parsedCollection];
       }
     }
-
-    console.log('Parsed collections:', collections);
 
     // Fetch metadata for each collection
     const enrichedCollections: EnrichedCollectionInfo[] = await Promise.all(
@@ -268,5 +259,143 @@ export async function fetchCreatorCollections(
   } catch (error) {
     console.error('Error fetching creator collections:', error);
     return [];
+  }
+}
+
+export async function fetchCreatorCollectionsBasic(
+  creatorAddress: `0x${string}`,
+): Promise<CollectionInfo[]> {
+  if (!creatorAddress || !NFT_FACTORY_ADDRESS) return [];
+
+  try {
+    console.log(`Fetching collections for creator: ${creatorAddress}`);
+
+    // Call the contract method to get collections by creator
+    let collectionsInfo;
+
+    try {
+      // Try getCollectionInfoByCreator first
+      collectionsInfo = (await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'getCollectionInfoByCreator',
+        args: [creatorAddress],
+      })) as any[];
+    } catch (err) {
+      console.log('getCollectionInfoByCreator failed, trying getCollectionsByCreator');
+      // If that fails, try getCollectionsByCreator
+      try {
+        const collectionAddresses = (await publicClient.readContract({
+          address: NFT_FACTORY_ADDRESS,
+          abi: NFT_FACTORY_ABI,
+          functionName: 'getCollectionsByCreator',
+          args: [creatorAddress],
+        })) as `0x${string}`[];
+
+        // For each address, get the collection info
+        collectionsInfo = await Promise.all(
+          collectionAddresses.map(async (address) => {
+            try {
+              // Try to get collection info
+              const info = (await publicClient.readContract({
+                address: NFT_FACTORY_ADDRESS,
+                abi: NFT_FACTORY_ABI,
+                functionName: 'getCollectionInfo',
+                args: [address],
+              })) as any;
+
+              return info;
+            } catch (infoErr) {
+              console.error('Error getting collection info:', infoErr);
+              // Return minimal info if we can't get full info
+              return [address, '', 'Collection ' + address.slice(0, 6), 'NFT', 0, 0];
+            }
+          }),
+        );
+      } catch (err2) {
+        console.error('Both methods failed:', err2);
+        throw err2;
+      }
+    }
+
+    if (!collectionsInfo) {
+      console.error('Invalid response from contract: null or undefined');
+      return [];
+    }
+
+    // Transform the data into a more usable format with validation
+    let collections: CollectionInfo[] = [];
+
+    // Handle array of collections
+    if (Array.isArray(collectionsInfo)) {
+      collections = collectionsInfo
+        .map(safeParseCollectionInfo)
+        .filter((info): info is CollectionInfo => info !== null);
+    }
+    // Handle single collection object
+    else if (typeof collectionsInfo === 'object') {
+      const parsedCollection = safeParseCollectionInfo(collectionsInfo);
+      if (parsedCollection) {
+        collections = [parsedCollection];
+      }
+    }
+
+    return collections;
+  } catch (error) {
+    console.error('Error fetching creator collections:', error);
+    return [];
+  }
+}
+
+/**
+ * Fetch the owner of a collection contract
+ * @param collectionAddress The address of the collection contract
+ * @returns The owner address or null if not found
+ */
+export async function fetchCollectionOwner(collectionAddress: string): Promise<string | null> {
+  if (!collectionAddress) return null;
+
+  try {
+    console.log(`Fetching owner for collection: ${collectionAddress}`);
+
+    // Import the NFT Collection ABI
+    const { NFT_COLLECTION_ABI } = await import('../abi');
+
+    // Call the owner function on the collection contract
+    const owner = await publicClient.readContract({
+      address: collectionAddress as `0x${string}`,
+      abi: NFT_COLLECTION_ABI,
+      functionName: 'owner',
+    });
+
+    return owner as string;
+  } catch (error) {
+    console.error('Error fetching collection owner:', error);
+    return null;
+  }
+}
+
+export async function isCollectionValid(collectionAddress: string): Promise<boolean> {
+  if (!collectionAddress) throw new Error('Collection address is required');
+
+  try {
+    console.log(`Checking validity for collection: ${collectionAddress}`);
+    const { NFT_FACTORY_ABI } = await import('../abi');
+
+    const isValid = await publicClient.readContract({
+      address: NFT_FACTORY_ADDRESS as `0x${string}`,
+      abi: NFT_FACTORY_ABI,
+      functionName: 'isCollectionValid',
+      args: [collectionAddress],
+    });
+
+    if (!isValid) {
+      throw new Error('Invalid collection');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error validating collection:', error);
+    throw new Error('Invalid collection or unable to verify');
   }
 }

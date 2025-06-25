@@ -3,13 +3,13 @@
 import { Button } from '@/components/ui/atoms/button';
 
 interface CollectionFormActionsProps {
-  onCancel: () => void;
+  onCancelAction: () => void;
   showConfirmation?: boolean;
   isSubmitting?: boolean;
 }
 
 export function CollectionFormActions({
-  onCancel,
+  onCancelAction,
   showConfirmation = false,
   isSubmitting = false,
 }: CollectionFormActionsProps) {
@@ -19,7 +19,7 @@ export function CollectionFormActions({
         type="button"
         variant="outline"
         className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:bg-[#d0d0d0] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.1)_inset] px-6"
-        onClick={onCancel}
+        onClick={onCancelAction}
         disabled={isSubmitting}
       >
         Cancel

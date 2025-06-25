@@ -7,7 +7,7 @@ import { CollectionForm } from '@/components/features/collections/collection/for
 import { Container } from '@/components/core/layout/container';
 import { AuthenticationRequired } from '@/components/features/collections/shared/auth/AuthenticationRequired';
 
-export function CreateCollectionPageWrapper() {
+export function CollectionCreateWrapper() {
   const { isConnected, isAuthenticated } = useWallet();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);

@@ -5,29 +5,9 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { useNFTCollectionEvents } from './useNFTCollectionEvents';
 
-// NFT Collection contract ABI for the safeTransferFrom function
-const NFT_COLLECTION_ABI = [
-  {
-    name: 'safeTransferFrom',
-    type: 'function',
-    stateMutability: 'nonpayable',
-    inputs: [
-      { name: 'from', type: 'address' },
-      { name: 'to', type: 'address' },
-      { name: 'tokenId', type: 'uint256' },
-    ],
-    outputs: [],
-  },
-  {
-    name: 'Transfer',
-    type: 'event',
-    inputs: [
-      { indexed: true, name: 'from', type: 'address' },
-      { indexed: true, name: 'to', type: 'address' },
-      { indexed: true, name: 'tokenId', type: 'uint256' },
-    ],
-  },
-];
+// Import the full ABI from the Hardhat-compiled contracts
+// @ts-ignore - This will be imported properly as JSON
+import NFT_COLLECTION_ABI from '../abi/NFTCollection.json';
 
 export interface UseNFTTransferReturn {
   transferNFT: (

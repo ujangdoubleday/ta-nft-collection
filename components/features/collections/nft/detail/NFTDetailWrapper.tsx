@@ -1,21 +1,17 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatIPFSUrl } from '@/lib/utils/helpers/url';
 import { generateSimpleColorPlaceholder } from '@/lib/utils/helpers/plaiceholder';
 import { LoadingWindow } from '@/components/shared/loading/LoadingWindow';
-import { useCollectionByContractAddress } from '@/components/features/collections/hooks';
-import { ClientNFTDetail } from './ClientNFTDetail';
+import { NFTDetail } from './NFTDetail';
 import { CollectionErrorMessage } from '@/components/features/collections/shared/error/CollectionErrorMessage';
 import { NFTErrorMessage } from '@/components/features/collections/shared/error/NFTErrorMessage';
-import { processAlchemyNFT } from '@/lib/blockchain/utils/nft';
 import { useAlchemyNFT, useNFTOwner } from '@/lib/blockchain/hooks/useAlchemyNFTs';
-import { AlchemyNFT } from '@/lib/blockchain/utils/alchemy';
-
-// Define gateway URL from environment variable or use default
-const GATEWAY_URL =
-  process.env.NEXT_PUBLIC_PINATA_GATEWAY || 'cyan-dead-reptile-256.mypinata.cloud';
+import { useContractURI, useCollectionInfo } from '@/lib/blockchain/hooks/useNFTCollectionRead';
+import { fetchMetadata } from '@/lib/blockchain/utils/collection';
+import { useCollectionOwner } from '@/lib/blockchain/hooks/useNFTCollectionRead';
 
 // Define type for NFT history item
 type HistoryItem = {
@@ -41,7 +37,7 @@ type NFTItem = {
   history?: HistoryItem[];
 };
 
-interface AlchemyNFTDetailProps {
+interface NFTDetailWrapperProps {
   contractAddress: string;
   tokenId: string;
 }
@@ -56,7 +52,7 @@ const generatePlaceholder = async (imageUrl: string): Promise<string> => {
 };
 
 // Loading component for NFT detail
-export const AlchemyNFTDetailLoading = () => {
+export const NFTDetailWrapperLoading = () => {
   return (
     <LoadingWindow
       title="Loading NFT"
@@ -67,13 +63,43 @@ export const AlchemyNFTDetailLoading = () => {
   );
 };
 
-export const AlchemyNFTDetail = ({ contractAddress, tokenId }: AlchemyNFTDetailProps) => {
-  // Fetch collection data using tRPC hook (keep this for now for collection info)
+export const NFTDetailWrapper = ({ contractAddress, tokenId }: NFTDetailWrapperProps) => {
+  // Fetch collection metadata URI from the contract
   const {
-    collection,
-    isLoading: isLoadingCollection,
-    error: collectionError,
-  } = useCollectionByContractAddress(contractAddress);
+    data: contractURI,
+    isLoading: isLoadingURI,
+    error: uriError,
+  } = useContractURI(contractAddress as `0x${string}`);
+
+  // Fetch collection info from the contract
+  const {
+    data: collectionInfo,
+    isLoading: isLoadingInfo,
+    error: infoError,
+  } = useCollectionInfo(contractAddress as `0x${string}`);
+
+  // Fetch collection owner
+  const {
+    data: collectionOwner,
+    isLoading: isLoadingCollectionOwner,
+    error: ownerError,
+  } = useCollectionOwner(contractAddress as `0x${string}`);
+
+  // Fetch collection metadata from IPFS
+  const {
+    data: metadata,
+    isLoading: isLoadingMetadata,
+    error: metadataError,
+  } = useQuery({
+    queryKey: ['collection-metadata', contractAddress, contractURI],
+    queryFn: async () => {
+      if (!contractURI) return null;
+      return fetchMetadata(contractURI as string);
+    },
+    enabled: !!contractURI,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+  });
 
   // Fetch NFT data using Alchemy
   const {
@@ -144,15 +170,19 @@ export const AlchemyNFTDetail = ({ contractAddress, tokenId }: AlchemyNFTDetailP
     ];
   }, [alchemyNft, nftOwner]);
 
+  // Cast collectionInfo to an array type to access numeric indices
+  const collectionInfoArray = collectionInfo as unknown as string[];
+  const collectionName = metadata?.name || collectionInfoArray?.[2] || 'Unnamed Collection';
+
   // Convert Alchemy NFT to the expected format (derived state)
   const nft = useMemo((): NFTItem | null => {
-    if (!alchemyNft || !collection) return null;
+    if (!alchemyNft) return null;
 
     return {
       name: alchemyNft.name || `NFT #${alchemyNft.tokenId}`,
-      description: alchemyNft.description || `An NFT from the ${collection.name} collection.`,
+      description: alchemyNft.description || `An NFT from the ${collectionName} collection.`,
       type: 'Digital Art',
-      creator: collection.owner.address,
+      creator: (collectionOwner as string) || '0x0000000000000000000000000000000000000000',
       owner: nftOwner || '0x0000000000000000000000000000000000000000',
       mintDate: alchemyNft.timeLastUpdated
         ? formatDate(alchemyNft.timeLastUpdated)
@@ -163,18 +193,33 @@ export const AlchemyNFTDetail = ({ contractAddress, tokenId }: AlchemyNFTDetailP
       attributes: processedAttributes,
       history: nftHistory,
     };
-  }, [alchemyNft, collection, imageUrl, processedAttributes, nftHistory, nftOwner]);
+  }, [
+    alchemyNft,
+    collectionName,
+    collectionOwner,
+    imageUrl,
+    processedAttributes,
+    nftHistory,
+    nftOwner,
+  ]);
 
   // Calculate loading state
-  const isLoading = isLoadingCollection || isLoadingNft || isLoadingOwner;
+  const isLoading =
+    isLoadingURI ||
+    isLoadingInfo ||
+    isLoadingMetadata ||
+    isLoadingCollectionOwner ||
+    isLoadingNft ||
+    isLoadingOwner;
 
   // Show loading state
   if (isLoading) {
-    return <AlchemyNFTDetailLoading />;
+    return <NFTDetailWrapperLoading />;
   }
 
   // Show error states
-  if (collectionError || !collection) {
+  const hasError = uriError || infoError || metadataError || ownerError;
+  if (hasError) {
     return <CollectionErrorMessage />;
   }
 
@@ -187,12 +232,11 @@ export const AlchemyNFTDetail = ({ contractAddress, tokenId }: AlchemyNFTDetailP
   }
 
   return (
-    <ClientNFTDetail
+    <NFTDetail
       collectionId={contractAddress}
       nftId={tokenId}
       nft={nft}
-      collectionName={collection.name}
-      placeholderImage={placeholderImage || null}
+      placeholderImage={placeholderImage}
     />
   );
 };

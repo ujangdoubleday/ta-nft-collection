@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useWriteContract, useReadContract } from 'wagmi';
+import { useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 
 // Import ABIs from the Hardhat-compiled contracts
@@ -47,6 +47,9 @@ export function useNFTCollection(): UseNFTCollectionReturn {
   const [error, setError] = useState<Error | null>(null);
 
   const { writeContractAsync, isPending: isMintLoading } = useWriteContract();
+  const { isLoading: isWaitingForReceipt } = useWaitForTransactionReceipt({
+    hash: undefined,
+  });
 
   const mintNFT = useCallback(
     async (contractAddress: string, recipient: string, tokenURI: string) => {
@@ -64,7 +67,7 @@ export function useNFTCollection(): UseNFTCollectionReturn {
         // Call the contract method
         const hash = await writeContractAsync({
           address: contractAddress as `0x${string}`,
-          abi: MINT_NFT_ABI,
+          abi: NFT_COLLECTION_ABI,
           functionName: 'mintArtwork',
           args: [recipient, tokenURI],
           chainId: sepolia.id,
@@ -95,7 +98,7 @@ export function useNFTCollection(): UseNFTCollectionReturn {
 
   return {
     mintNFT,
-    isLoading: isMintLoading,
+    isLoading: isMintLoading || isWaitingForReceipt,
     error,
   };
 }

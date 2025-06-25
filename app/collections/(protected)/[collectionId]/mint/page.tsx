@@ -1,12 +1,12 @@
 import { Container } from '@/components/core/layout/container';
-import { TrpcNFTMintForm } from '@/components/features/collections/nft';
+import { NFTMintWrapper } from '@/components/features/collections/nft/mint';
 import { CollectionErrorMessage } from '@/components/features/collections/shared/error/CollectionErrorMessage';
 import { getCollectionByContractAddress } from '@/lib/api/services';
 
 type Params = Promise<{ collectionId: string }>;
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-export default async function CreateNFTPage({
+export default async function NFTMintPage({
   params,
   searchParams: _searchParams,
 }: {
@@ -34,7 +34,7 @@ export default async function CreateNFTPage({
   return (
     <main className="py-4">
       <Container>
-        <TrpcNFTMintForm contractAddress={contractAddress} />
+        <NFTMintWrapper contractAddress={contractAddress} />
       </Container>
     </main>
   );

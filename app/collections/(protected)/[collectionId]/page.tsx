@@ -1,12 +1,10 @@
 import { Container } from '@/components/core/layout/container';
-import { TrpcCollectionDetail } from '@/components/features/collections/collection/detail';
-import { CollectionErrorMessage } from '@/components/features/collections/shared/error/CollectionErrorMessage';
-import { getCollectionByContractAddress } from '@/lib/api/services';
+import { CollectionDetailWrapper } from '@/components/features/collections/collection/detail';
 
 type Params = Promise<{ collectionId: string }>;
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-export default async function CollectionPage({
+export default async function CollectionDetailPage({
   params,
   searchParams: _searchParams,
 }: {
@@ -16,22 +14,10 @@ export default async function CollectionPage({
   const resolvedParams = await params;
   const contractAddress = resolvedParams.collectionId;
 
-  const collection = await getCollectionByContractAddress(contractAddress);
-
-  if (!collection) {
-    return (
-      <main className="py-4">
-        <Container>
-          <CollectionErrorMessage />
-        </Container>
-      </main>
-    );
-  }
-
   return (
     <main className="py-4">
       <Container>
-        <TrpcCollectionDetail contractAddress={contractAddress} />
+        <CollectionDetailWrapper contractAddress={contractAddress} />
       </Container>
     </main>
   );

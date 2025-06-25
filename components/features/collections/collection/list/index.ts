@@ -1,5 +1,3 @@
-export { CollectionCard } from './CollectionCard';
-export { TrpcCollectionGallery } from './TrpcCollectionGallery';
-export { CollectionsPage } from './CollectionsPage';
+export { CollectionsWrapper } from './CollectionsWrapper';
 export { CreatorCollectionGallery } from './CreatorCollectionGallery';
 export { CreatorCollectionCard } from './CreatorCollectionCard';
