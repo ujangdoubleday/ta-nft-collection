@@ -1,17 +1,35 @@
 'use client';
 
-import { useCollectionByContractAddress } from '../../hooks';
+import { useNFTsByContractAddress } from '@/components/features/collections/hooks/useNFTsByContractAddress';
 import { NFTMintForm } from './NFTMintForm';
 import { LoadingWindow } from '@/components/shared/loading';
 import { CollectionErrorMessage } from '@/components/features/collections/shared/error/CollectionErrorMessage';
+import { trpc } from '@/lib/api/trpc/client';
 
 interface NFTMintWrapperProps {
-  contractAddress: string;
+  contractAddressC: string;
 }
 
-export const NFTMintWrapper = ({ contractAddress }: NFTMintWrapperProps) => {
+export const NFTMintWrapper = ({ contractAddressC }: NFTMintWrapperProps) => {
   // Fetch collection data using tRPC hook
-  const { collection, isLoading, error } = useCollectionByContractAddress(contractAddress);
+  const {
+    nfts,
+    isLoading: nftsLoading,
+    error: nftsError,
+  } = useNFTsByContractAddress(contractAddressC);
+
+  // Fetch collection details to get the name
+  const {
+    data: collection,
+    isLoading: collectionLoading,
+    error: collectionError,
+  } = trpc.collection.getByContractAddress.useQuery(
+    { contractAddress: contractAddressC },
+    { enabled: !!contractAddressC },
+  );
+
+  const isLoading = nftsLoading || collectionLoading;
+  const error = nftsError || collectionError || (!collection && !nftsLoading);
 
   // Show loading state
   if (isLoading) {
@@ -34,5 +52,5 @@ export const NFTMintWrapper = ({ contractAddress }: NFTMintWrapperProps) => {
     );
   }
 
-  return <NFTMintForm collectionId={contractAddress} collectionName={collection.name} />;
+  return <NFTMintForm collectionId={contractAddressC} collectionName={collection.name} />;
 };
