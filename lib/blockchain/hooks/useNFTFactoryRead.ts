@@ -4,7 +4,7 @@ import { sepolia } from 'wagmi/chains';
 // Import ABIs from the Hardhat-compiled contracts
 // @ts-ignore - This will be imported properly as JSON
 import NFT_FACTORY_ABI from '../abi/NFTFactory.json';
-import { NFT_FACTORY_ADDRESS } from '../utils/collection';
+import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
 
 /**
  * Hook to get a collection by address from the NFTFactory contract

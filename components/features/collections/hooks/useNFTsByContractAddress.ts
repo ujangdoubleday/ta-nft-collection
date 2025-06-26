@@ -22,8 +22,8 @@ export function useNFTsByContractAddress(contractAddress: string) {
         // Retry failed queries
         retry: maxRetries,
         retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
-        // Cache for 2 minutes (reduced since blockchain data can change)
-        staleTime: 2 * 60 * 1000,
+        // Cache for 5 minutes (reduced since blockchain data can change)
+        staleTime: 5 * 60 * 1000,
       },
     );
 

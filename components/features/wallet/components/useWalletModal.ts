@@ -67,8 +67,6 @@ export const useWalletModal = () => {
     if (isAuthenticated && !previousAuthState && !isDisconnecting) {
       setIsCreatingAccount(false);
       setWalletModalStep('details');
-      addLogMessage('Authentication completed successfully!', 'success');
-      clearLogMessages();
 
       setSuccessMessage('Your wallet has been connected and authenticated successfully!');
       setShowSuccessNotification(true);
@@ -204,54 +202,7 @@ export const useWalletModal = () => {
       return authenticate(() => {
         setIsCreatingAccount(true);
         setWalletModalStep('checking');
-
-        clearLogMessages();
-        addLogMessage('Starting wallet verification protocol...', 'info');
-        addLogMessage('Checking signature...', 'info');
-
-        setTimeout(() => {
-          addLogMessage('Signature verified successfully.', 'success');
-          addLogMessage('Scanning blockchain for wallet address...', 'info');
-        }, 800);
-
-        setTimeout(() => {
-          const addressDisplay = address ? formatAddress(address) : '0x...';
-          addLogMessage(`Address found: ${addressDisplay}`, 'success');
-          addLogMessage('Checking user database...', 'info');
-        }, 1600);
-
-        setTimeout(() => {
-          if (Math.random() > 0.5) {
-            addLogMessage('WARNING: User record not found!', 'warning');
-            addLogMessage('Creating new user profile...', 'info');
-
-            setTimeout(() => {
-              addLogMessage('Allocating database storage...', 'info');
-            }, 600);
-
-            setTimeout(() => {
-              addLogMessage('User profile created successfully!', 'success');
-              addLogMessage('Generating authentication token...', 'info');
-            }, 1200);
-          } else {
-            addLogMessage('User record found in database.', 'success');
-            addLogMessage('Validating wallet credentials...', 'info');
-
-            setTimeout(() => {
-              addLogMessage('Credentials validated.', 'success');
-              addLogMessage('Generating authentication token...', 'info');
-            }, 800);
-          }
-        }, 2400);
-
-        setTimeout(() => {
-          addLogMessage('Establishing secure session...', 'info');
-        }, 3200);
-
-        setTimeout(() => {
-          addLogMessage('Session established successfully.', 'success');
-          addLogMessage('Finalizing authentication...', 'info');
-        }, 3800);
+        // No log messages or timeouts needed anymore
       });
     },
     onSuccess: (success) => {

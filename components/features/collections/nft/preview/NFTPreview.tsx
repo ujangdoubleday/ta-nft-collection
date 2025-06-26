@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
-import { NextImage } from '@/components/shared/icons';
+import { NextImage } from '@/components/shared/media';
 
 interface NFTPreviewProps {
   title: string;
@@ -23,34 +23,14 @@ export function NFTPreview({
   properties = [],
 }: NFTPreviewProps) {
   const [imageError, setImageError] = useState(false);
-  const [placeholder, setPlaceholder] = useState<string | undefined>(undefined);
-
-  // Use provided placeholderImage or generate one via API
-  useEffect(() => {
-    if (placeholderImage) {
-      setPlaceholder(placeholderImage);
-      console.log('NFTPreview - Using provided placeholder');
-    } else if (image) {
-      // Use the API route with the image URL as parameter
-      const encodedUrl = encodeURIComponent(image);
-      setPlaceholder(`/api/placeholder?url=${encodedUrl}`);
-      console.log('NFTPreview - Setting placeholder URL:', `/api/placeholder?url=${encodedUrl}`);
-    }
-
-    // Clean up object URL when component unmounts or image changes
-    return () => {
-      // Check if image is an object URL (starts with 'blob:')
-      if (typeof image === 'string' && image.startsWith('blob:')) {
-        URL.revokeObjectURL(image);
-      }
-    };
-  }, [image, placeholderImage]);
 
   // Handle image error
   const handleImageError = () => {
     console.error(`NFTPreview - Failed to load image: ${image}`);
     setImageError(true);
   };
+
+  const placeholder = `/api/placeholder?url=${placeholderImage}`;
 
   return (
     <Win98Window title="NFT Preview" icon="/assets/icons/window/gallery.png" className="mb-3">
@@ -65,7 +45,7 @@ export function NFTPreview({
             onError={handleImageError}
             unoptimized={true}
             placeholderType="blur"
-            blurDataURL={placeholder}
+            blurDataURL={placeholder || ''}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

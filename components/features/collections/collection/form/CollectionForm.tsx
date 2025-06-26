@@ -2,7 +2,6 @@
 
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { Win98Spinner } from '@/components/ui/organisms';
-import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -16,7 +15,6 @@ import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTFactoryEvents } from '@/lib/blockchain/hooks';
 import { useAlchemyNFTFactoryEvents } from '@/lib/blockchain/hooks/useAlchemyEvents';
 import { useNFTFactory } from '@/lib/blockchain/hooks';
-import { alchemy } from '@/lib/blockchain/utils/alchemy';
 
 interface CollectionFormProps {
   // Props can be added if needed
@@ -178,47 +176,6 @@ export function CollectionForm({}: CollectionFormProps) {
     },
   });
 
-  // tRPC mutation for database save
-  const createCollectionMutation = trpc.collection.create.useMutation({
-    onSuccess: async (_newCollection) => {
-      addConsoleMessage('> Collection saved to database successfully!');
-      addConsoleMessage('> Revalidating collections..');
-
-      try {
-        // Method 1: Use the API endpoint
-        const revalidateResponse = await fetch('/api/revalidate?tag=collections');
-        if (revalidateResponse.ok) {
-          addConsoleMessage('> Collections tag revalidated successfully');
-        }
-      } catch (error) {
-        console.error('Error revalidating collections tag:', error);
-      }
-
-      addConsoleMessage('> Redirecting to collections page...');
-
-      setTimeout(() => {
-        router.push('/collections');
-        // router.refresh(); // Force client-side refresh
-      }, 1500);
-    },
-    onError: (error) => {
-      const errorMessage = error.message;
-      if (errorMessage.includes('Foreign key constraint')) {
-        addConsoleMessage('> Error: User account not found in the database.');
-        addConsoleMessage('> Creating user account...');
-
-        // Retry after delay
-        setTimeout(() => {
-          if (collectionData) {
-            createCollectionMutation.mutate(collectionData);
-          }
-        }, 1000);
-      } else {
-        addConsoleMessage(`> Database error: ${errorMessage}`);
-      }
-    },
-  });
-
   // Handle form changes (UI state - keep useState)
   const handleChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
@@ -245,77 +202,6 @@ export function CollectionForm({}: CollectionFormProps) {
   // Add console message when events are detected
 
   // Listen for blockchain events and save to database (side effect - keep useEffect)
-  useEffect(() => {
-    const saveCollectionFromEvent = async () => {
-      if (
-        needsDbSave &&
-        (collectionCreatedEvents.length > 0 || alchemyEvents.length > 0) &&
-        collectionData &&
-        !createCollectionMutation.isPending
-      ) {
-        try {
-          // First try to find event from any source
-          let event = alchemyEvents.find((e) => e.collectionAddress);
-
-          // If not found, try regular events
-          if (!event) {
-            event = collectionCreatedEvents.find((e) => e.collectionAddress);
-          }
-
-          if (event) {
-            addConsoleMessage(`> Collection created on blockchain: ${event.collectionAddress}`);
-            addConsoleMessage('> Event successfully captured from blockchain');
-
-            const updatedCollectionData = {
-              ...collectionData,
-              contractAddress: event.collectionAddress,
-            };
-
-            createCollectionMutation.mutate(updatedCollectionData);
-          } else {
-            addConsoleMessage(
-              '> Warning: Could not find collection address from blockchain events',
-            );
-
-            // Try to get the transaction receipt directly as a last resort
-            try {
-              addConsoleMessage('> Attempting alternative method to find collection...');
-              const receipt = await alchemy.core.getTransactionReceipt(txHash || '');
-
-              if (receipt && receipt.contractAddress) {
-                addConsoleMessage(`> Collection address found: ${receipt.contractAddress}`);
-                const updatedCollectionData = {
-                  ...collectionData,
-                  contractAddress: receipt.contractAddress,
-                };
-                createCollectionMutation.mutate(updatedCollectionData);
-              } else {
-                addConsoleMessage('> Using transaction hash as temporary reference');
-                createCollectionMutation.mutate(collectionData);
-              }
-            } catch (receiptError) {
-              addConsoleMessage('> Using transaction hash as temporary reference');
-              createCollectionMutation.mutate(collectionData);
-            }
-          }
-
-          setNeedsDbSave(false);
-        } catch (error) {
-          console.error('Error in saveCollectionFromEvent:', error);
-        }
-      }
-    };
-
-    saveCollectionFromEvent();
-  }, [
-    collectionCreatedEvents,
-    alchemyEvents,
-    needsDbSave,
-    collectionData,
-    createCollectionMutation,
-    addConsoleMessage,
-    txHash,
-  ]);
 
   // Main form submission handler
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -435,7 +321,7 @@ export function CollectionForm({}: CollectionFormProps) {
     isFactoryLoading ||
     isEventLoading ||
     isAlchemyLoading ||
-    createCollectionMutation.isPending;
+    isEventLoading;
 
   return (
     <Win98Window

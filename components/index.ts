@@ -12,7 +12,7 @@ export * from './ui/templates';
 // Shared components
 export * from './shared/forms';
 export * from './shared/modals';
-export * from './shared/icons';
+export * from './shared/media';
 export * from './shared/hooks';
 
 // Feature components

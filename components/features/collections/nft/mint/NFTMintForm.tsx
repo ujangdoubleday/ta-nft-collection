@@ -107,14 +107,6 @@ export function NFTMintForm({ collectionId }: NFTMintFormProps) {
     setConsoleMessages((prev) => [...prev, message]);
   }, []);
 
-  const { data: collection } = trpc.collection.getByContractAddress.useQuery(
-    { contractAddress: collectionId },
-    {
-      enabled: !!collectionId,
-      staleTime: 300000,
-    },
-  );
-
   const uploadToIPFSMutation = useMutation({
     mutationFn: ({ file, metadata, folderId }: { file: File; metadata: any; folderId?: string }) =>
       uploadNFTToIPFS(file, metadata, uploadToPinata, folderId),
@@ -279,7 +271,7 @@ export function NFTMintForm({ collectionId }: NFTMintFormProps) {
     try {
       addConsoleMessage('> Uploading asset to IPFS...');
       const nftMetadata = createNFTMetadata(formData);
-      const ipfsFolderId = collection?.pinataGroupId || undefined;
+      const ipfsFolderId = undefined;
 
       const uploadResult = await uploadToIPFSMutation.mutateAsync({
         file: formData.file,

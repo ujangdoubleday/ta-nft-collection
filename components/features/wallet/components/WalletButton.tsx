@@ -82,12 +82,12 @@ export const WalletButton = () => {
             isConnecting={isConnecting}
             isAuthenticating={isAuthenticating}
             copied={copied}
-            getNetworkName={getNetworkName}
-            onConnect={handleConnect}
-            onAuthenticate={handleAuthenticate}
-            onCopyAddress={copyAddress}
-            onDisconnect={handleDisconnect}
-            onCancelSign={handleCancelSign}
+            getNetworkNameAction={getNetworkName}
+            onConnectAction={handleConnect}
+            onAuthenticateAction={handleAuthenticate}
+            onCopyAddressAction={copyAddress}
+            onDisconnectAction={handleDisconnect}
+            onCancelSignAction={handleCancelSign}
             logMessages={logMessages}
           />
         </Win98DialogContent>

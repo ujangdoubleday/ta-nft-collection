@@ -1,14 +1,6 @@
-export function MetaMaskIcon({
-  className = "w-6 h-6",
-}: {
-  className?: string;
-}) {
+export function MetaMaskIcon({ className = 'w-6 h-6' }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 142 136.878"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg className={className} viewBox="0 0 142 136.878" xmlns="http://www.w3.org/2000/svg">
       <path
         fill="#FF5C16"
         d="M132.682,132.192l-30.583-9.106l-23.063,13.787l-16.092-0.007l-23.077-13.78l-30.569,9.106L0,100.801 l9.299-34.839L0,36.507L9.299,0l47.766,28.538h27.85L132.682,0l9.299,36.507l-9.299,29.455l9.299,34.839L132.682,132.192 L132.682,132.192z"

@@ -9,10 +9,8 @@ import { EmptyCollectionContent } from '@/components/features/collections/collec
 import { useRouter } from 'next/navigation';
 import { useNFTsByContractAddress } from '@/components/features/collections/hooks';
 import { CollectionItem } from '@/lib/blockchain/utils/nft';
-import { useContractURI, useCollectionInfo } from '@/lib/blockchain/hooks/useNFTCollectionRead';
-import { fetchMetadata } from '@/lib/blockchain/utils/collection';
-import { generateSimpleColorPlaceholder } from '@/lib/utils/helpers/plaiceholder';
 import { formatIPFSUrl } from '@/lib/utils/helpers/url';
+import { trpc } from '@/lib/api/trpc/client';
 
 type Collection = {
   id: string;
@@ -48,42 +46,46 @@ export const CollectionDetailWrapper = ({ contractAddress }: CollectionDetailWra
     router.push(`/collections/${contractAddress}/mint`);
   };
 
-  // Fetch collection metadata URI from the contract
+  // Fetch collection metadata URI and collection info from the server using tRPC
   const {
-    data: contractURI,
-    isLoading: isLoadingURI,
-    error: uriError,
-  } = useContractURI(contractAddress as `0x${string}`);
+    data: contractData,
+    isLoading: isLoadingContract,
+    error: contractError,
+  } = trpc.collection.getContractURI.useQuery(
+    { contractAddress: contractAddress as `0x${string}` },
+    { enabled: !!contractAddress },
+  );
 
-  // Fetch collection info from the contract
-  const {
-    data: collectionInfo,
-    isLoading: isLoadingInfo,
-    error: infoError,
-  } = useCollectionInfo(contractAddress as `0x${string}`);
+  // Extract contractURI and collectionInfo from the combined response
+  const contractURI = contractData?.contractURI;
+  const collectionInfo = contractData?.collectionInfo;
+  const isLoadingURI = isLoadingContract;
+  const isLoadingInfo = isLoadingContract;
+  const uriError = contractError;
+  const infoError = contractError;
 
-  // Fetch collection metadata from IPFS
+  // Fetch collection metadata from IPFS using tRPC
   const {
-    data: metadata,
+    data: metadataResult,
     isLoading: isLoadingMetadata,
     error: metadataError,
-  } = useQuery({
-    queryKey: ['collection-metadata', contractAddress, contractURI],
-    queryFn: async () => {
-      if (!contractURI) return null;
-      return fetchMetadata(contractURI as string);
+  } = trpc.collection.fetchProcessedMetadata.useQuery(
+    { uri: contractURI as string },
+    {
+      enabled: !!contractURI,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 2,
     },
-    enabled: !!contractURI,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-  });
+  );
+
+  // Extract metadata from the response
+  const metadata = metadataResult?.metadata;
 
   // Fetch NFTs using tRPC procedure (now fetches directly from blockchain)
   const {
     nfts: blockchainNfts,
     isLoading: isLoadingNFTs,
     error: nftsError,
-    refetch: refetchNFTs,
     isError: isNftsError,
   } = useNFTsByContractAddress(contractAddress);
 
@@ -97,63 +99,31 @@ export const CollectionDetailWrapper = ({ contractAddress }: CollectionDetailWra
         return Promise.all(
           blockchainNfts.map(async (nft) => {
             try {
-              // Generate placeholder for the image
-              const placeholder = await generateSimpleColorPlaceholder(nft.tokenId || 'default');
+              // Generate placeholder using the API route instead of direct function call
+              const placeholderUrl = `/api/placeholder?url=${encodeURIComponent(formatIPFSUrl(nft.imageUrl)) || 'default'}`;
+              const placeholder = placeholderUrl;
 
               // Format image URL if it's an IPFS URL
               const image = nft.imageUrl ? formatIPFSUrl(nft.imageUrl) : '';
-
-              // Create attributes object from metadata if available
-              let attributes: Record<string, string> = { rarity: 'Common' };
-              try {
-                if (nft.metadataUrl) {
-                  const metadataResponse = await fetch(formatIPFSUrl(nft.metadataUrl));
-                  if (!metadataResponse.ok) {
-                    throw new Error(`Failed to fetch metadata: ${metadataResponse.statusText}`);
-                  }
-
-                  const nftMetadata = await metadataResponse.json();
-
-                  if (nftMetadata.attributes && Array.isArray(nftMetadata.attributes)) {
-                    attributes = nftMetadata.attributes.reduce(
-                      (acc: { [x: string]: string }, attr: { trait_type: string; value: any }) => {
-                        if (attr.trait_type && attr.value) {
-                          acc[attr.trait_type.toLowerCase()] = String(attr.value);
-                        }
-                        return acc;
-                      },
-                      { rarity: 'Common' } as Record<string, string>,
-                    );
-                  }
-                }
-              } catch (error) {
-                console.error(`Error fetching metadata for NFT ${nft.tokenId}:`, error);
-                // Continue with default attributes
-              }
+              let processedImageUrl = image;
 
               // Return formatted collection item
               return {
                 id: nft.tokenId,
-                name: nft.name || `NFT #${nft.tokenId}`,
-                type: attributes.type || 'Digital Art',
-                image,
+                image: processedImageUrl,
                 blurhash: placeholder,
                 placeholder,
                 contractAddress: nft.contractAddress,
                 tokenId: nft.tokenId,
-                attributes,
               } as CollectionItem;
             } catch (itemError) {
               console.error(`Error processing NFT ${nft.tokenId}:`, itemError);
               // Return a fallback item to prevent the entire collection from failing
               return {
                 id: nft.tokenId,
-                name: `NFT #${nft.tokenId}`,
-                type: 'Digital Art',
                 image: '',
                 contractAddress: nft.contractAddress,
                 tokenId: nft.tokenId,
-                attributes: { rarity: 'Common' },
               } as CollectionItem;
             }
           }),
@@ -201,11 +171,6 @@ export const CollectionDetailWrapper = ({ contractAddress }: CollectionDetailWra
       setIsDataReady(false);
     }
   }, [metadata, blockchainNfts, formattedCollection, processedNfts]);
-
-  // Refresh data on component mount
-  useEffect(() => {
-    refetchNFTs();
-  }, [refetchNFTs]);
 
   // Determine loading state
   const isLoading =

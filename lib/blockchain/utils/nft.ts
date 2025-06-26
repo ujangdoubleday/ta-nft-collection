@@ -3,7 +3,6 @@
  */
 import { z } from 'zod';
 import { AlchemyNFT } from './alchemy';
-import { generateSimpleColorPlaceholder } from '@/lib/utils/helpers/plaiceholder';
 import { formatIPFSUrl } from '@/lib/utils/helpers/url';
 
 /**
@@ -120,8 +119,8 @@ export type CollectionItem = {
  * @returns Promise with the processed CollectionItem
  */
 export const processAlchemyNFT = async (nft: AlchemyNFT): Promise<CollectionItem> => {
-  // Generate default placeholder
-  const placeholder = await generateSimpleColorPlaceholder(nft.tokenId || 'default');
+  // Generate placeholder URL using the API instead of direct function call
+  let placeholder = `/api/placeholder?id=${nft.tokenId || 'default'}`;
 
   // Get the best available image URL
   let imageUrl = '';
@@ -135,6 +134,11 @@ export const processAlchemyNFT = async (nft: AlchemyNFT): Promise<CollectionItem
 
   // Format the image URL if it's an IPFS URL
   const image = imageUrl ? formatIPFSUrl(imageUrl) : '';
+
+  // If we have an image URL, use it for a better placeholder
+  if (image) {
+    placeholder = `/api/placeholder?url=${encodeURIComponent(image)}`;
+  }
 
   // Process attributes
   let attributes: Record<string, string> = { rarity: 'Common' };
