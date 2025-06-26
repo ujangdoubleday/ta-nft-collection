@@ -22,6 +22,8 @@ export function NFTDetail({ collectionId, nftId: _nftId, nft, placeholderImage }
   // Get current user wallet address to check ownership
   const { address } = useWallet();
 
+  // console.log('placeholder', placeholderImage);
+
   // Check if current user is the NFT owner
   const isOwner = address && nft.owner && address.toLowerCase() === nft.owner.toLowerCase();
 

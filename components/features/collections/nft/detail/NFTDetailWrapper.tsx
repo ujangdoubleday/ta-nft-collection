@@ -1,17 +1,13 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { formatIPFSUrl } from '@/lib/utils/helpers/url';
-import { generateSimpleColorPlaceholder } from '@/lib/utils/helpers/plaiceholder';
 import { LoadingWindow } from '@/components/shared/loading/LoadingWindow';
 import { NFTDetail } from './NFTDetail';
 import { CollectionErrorMessage } from '@/components/features/collections/shared/error/CollectionErrorMessage';
 import { NFTErrorMessage } from '@/components/features/collections/shared/error/NFTErrorMessage';
-import { useAlchemyNFT, useNFTOwner } from '@/lib/blockchain/hooks/useAlchemyNFTs';
-import { useContractURI, useCollectionInfo } from '@/lib/blockchain/hooks/useNFTCollectionRead';
 import { fetchMetadata } from '@/lib/blockchain/utils/collection';
-import { useCollectionOwner } from '@/lib/blockchain/hooks/useNFTCollectionRead';
+import { trpc } from '@/lib/api/trpc/client';
 
 // Define type for NFT history item
 type HistoryItem = {
@@ -47,10 +43,6 @@ const formatDate = (date: Date | string): string => {
   return new Date(date).toISOString().split('T')[0];
 };
 
-const generatePlaceholder = async (imageUrl: string): Promise<string> => {
-  return await generateSimpleColorPlaceholder(imageUrl);
-};
-
 // Loading component for NFT detail
 export const NFTDetailWrapperLoading = () => {
   return (
@@ -64,66 +56,82 @@ export const NFTDetailWrapperLoading = () => {
 };
 
 export const NFTDetailWrapper = ({ contractAddress, tokenId }: NFTDetailWrapperProps) => {
-  // Fetch collection metadata URI from the contract
+  // Fetch collection metadata URI and collection info from the server using tRPC
   const {
-    data: contractURI,
-    isLoading: isLoadingURI,
-    error: uriError,
-  } = useContractURI(contractAddress as `0x${string}`);
+    data: contractData,
+    isLoading: isLoadingContract,
+    error: contractError,
+  } = trpc.collection.getContractURI.useQuery(
+    { contractAddress: contractAddress as `0x${string}` },
+    { enabled: !!contractAddress },
+  );
 
-  // Fetch collection info from the contract
-  const {
-    data: collectionInfo,
-    isLoading: isLoadingInfo,
-    error: infoError,
-  } = useCollectionInfo(contractAddress as `0x${string}`);
+  // Extract contractURI and collectionInfo from the combined response
+  const contractURI = contractData?.contractURI;
+  const collectionInfo = contractData?.collectionInfo;
+  const isLoadingURI = isLoadingContract;
+  const isLoadingInfo = isLoadingContract;
+  const uriError = contractError;
+  const infoError = contractError;
 
-  // Fetch collection owner
+  // Fetch collection owner using tRPC
   const {
-    data: collectionOwner,
+    data: ownerData,
     isLoading: isLoadingCollectionOwner,
     error: ownerError,
-  } = useCollectionOwner(contractAddress as `0x${string}`);
+  } = trpc.nft.getCollectionOwner.useQuery(
+    { collectionAddress: contractAddress as `0x${string}` },
+    { enabled: !!contractAddress },
+  );
 
-  // Fetch collection metadata from IPFS
+  const collectionOwner = ownerData?.owner;
+
+  // Fetch collection metadata from IPFS using tRPC
   const {
-    data: metadata,
+    data: metadataResult,
     isLoading: isLoadingMetadata,
     error: metadataError,
-  } = useQuery({
-    queryKey: ['collection-metadata', contractAddress, contractURI],
-    queryFn: async () => {
-      if (!contractURI) return null;
-      return fetchMetadata(contractURI as string);
+  } = trpc.collection.fetchProcessedMetadata.useQuery(
+    { uri: contractURI as string },
+    {
+      enabled: !!contractURI,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 2,
     },
-    enabled: !!contractURI,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-  });
+  );
 
-  // Fetch NFT data using Alchemy
+  // Extract metadata from the response
+  const metadata = metadataResult?.metadata;
+
+  // Fetch NFT data using tRPC from blockchain
   const {
-    nft: alchemyNft,
+    data: alchemyNft,
     isLoading: isLoadingNft,
     error: nftError,
-  } = useAlchemyNFT(contractAddress, tokenId);
+  } = trpc.nft.getRawNFTByTokenId.useQuery(
+    { contractAddress, tokenId },
+    {
+      enabled: !!contractAddress && !!tokenId,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 2,
+    },
+  );
 
-  // Fetch NFT owner
-  const { owner: nftOwner, isLoading: isLoadingOwner } = useNFTOwner(contractAddress, tokenId);
+  // Fetch NFT owner from blockchain
+  const { data: nftOwnerData, isLoading: isLoadingOwner } = trpc.nft.getNFTOwner.useQuery(
+    { contractAddress, tokenId },
+    {
+      enabled: !!contractAddress && !!tokenId,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  );
 
-  // React Query for generating placeholder
-  const { data: placeholderImage, isLoading: isGeneratingPlaceholder } = useQuery({
-    queryKey: ['nft-placeholder', alchemyNft?.tokenId || tokenId],
-    queryFn: () =>
-      generatePlaceholder(
-        alchemyNft?.image?.originalUrl ||
-          alchemyNft?.raw?.metadata?.image ||
-          alchemyNft?.tokenId ||
-          tokenId,
-      ),
-    enabled: !!alchemyNft,
-    staleTime: 10 * 60 * 1000, // 10 minutes
-  });
+  const nftOwner = nftOwnerData?.owner;
+
+  // Generate placeholder URL
+  const placeholderImage = alchemyNft?.raw?.metadata?.image
+    ? encodeURIComponent(formatIPFSUrl(alchemyNft.raw.metadata.image))
+    : '';
 
   // Get image URL with fallbacks (derived state)
   const imageUrl = useMemo((): string => {
