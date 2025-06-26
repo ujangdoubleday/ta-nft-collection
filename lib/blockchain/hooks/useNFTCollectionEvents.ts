@@ -37,7 +37,7 @@ export function useNFTCollectionEvents(contractAddress?: string, transactionHash
   const safeDecodeEventLog = (log: any) => {
     try {
       // First try standard decode
-      console.log('Attempting to decode log:', log);
+      // console.log('Attempting to decode log:', log);
 
       // Try with full ABI first for more accurate decoding
       const decoded = decodeEventLog({
@@ -46,7 +46,7 @@ export function useNFTCollectionEvents(contractAddress?: string, transactionHash
         topics: log.topics,
       });
 
-      console.log('Successfully decoded:', decoded);
+      // console.log('Successfully decoded:', decoded);
 
       if (decoded && decoded.args) {
         // Extract by position if needed
@@ -91,14 +91,14 @@ export function useNFTCollectionEvents(contractAddress?: string, transactionHash
     abi: TRANSFER_EVENT_ABI,
     eventName: 'Transfer',
     onLogs: (logs) => {
-      console.log('Received contract event logs:', logs);
+      // console.log('Received contract event logs:', logs);
 
       const newEvents = logs
         .map((log) => safeDecodeEventLog(log))
         .filter((event): event is NFTTransferEvent => event !== null);
 
       if (newEvents.length > 0) {
-        console.log('Successfully decoded events:', newEvents);
+        // console.log('Successfully decoded events:', newEvents);
         setTransferEvents((prev) => [...prev, ...newEvents]);
       } else {
         console.warn('No events could be decoded from logs');
@@ -116,14 +116,14 @@ export function useNFTCollectionEvents(contractAddress?: string, transactionHash
       setError(null);
 
       try {
-        console.log('Fetching receipt for transaction:', transactionHash);
+        // console.log('Fetching receipt for transaction:', transactionHash);
 
         // Get transaction receipt
         const receipt = await publicClient.getTransactionReceipt({
           hash: transactionHash as `0x${string}`,
         });
 
-        console.log('Transaction receipt logs:', receipt.logs);
+        // console.log('Transaction receipt logs:', receipt.logs);
 
         // Parse Transfer events from logs
         const events = receipt.logs
@@ -141,7 +141,7 @@ export function useNFTCollectionEvents(contractAddress?: string, transactionHash
           .filter((event): event is NFTTransferEvent => event !== null);
 
         if (events.length > 0) {
-          console.log('Found Transfer events in transaction:', events);
+          // console.log('Found Transfer events in transaction:', events);
           setTransferEvents((prev) => [...prev, ...events]);
         } else {
           console.warn('No Transfer events found in transaction receipt');

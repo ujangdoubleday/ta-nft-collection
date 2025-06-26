@@ -45,7 +45,7 @@ export function useNFTHistory(contractAddress: string | undefined, tokenId: stri
           return;
         }
 
-        // Convert to history items
+        // Convert to history items - ensure we keep all events in the history
         const historyItems = transferEvents.map(
           (event: { from: string; to: string; timestamp: number; transactionHash: string }) => {
             const isZeroAddress = event.from === '0x0000000000000000000000000000000000000000';
@@ -64,9 +64,9 @@ export function useNFTHistory(contractAddress: string | undefined, tokenId: stri
 
         console.log('Processed history items:', historyItems);
 
-        // Sort by date (newest first) for display purposes
-        // We're already getting events in ascending order from Alchemy, so just reverse for display
-        const sortedHistory = [...historyItems].reverse();
+        // Sort by date (oldest first) for chronological display
+        // This ensures mint event is first, followed by transfers
+        const sortedHistory = [...historyItems];
         console.log('Final sorted history:', sortedHistory);
 
         setHistory(sortedHistory);
