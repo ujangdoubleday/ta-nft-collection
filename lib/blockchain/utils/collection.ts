@@ -344,7 +344,7 @@ export async function fetchCollectionOwner(collectionAddress: string): Promise<s
   if (!collectionAddress) return null;
 
   try {
-    console.log(`Fetching owner for collection: ${collectionAddress}`);
+    // console.log(`Fetching owner for collection: ${collectionAddress}`);
 
     // Import the NFT Collection ABI
     const { NFT_COLLECTION_ABI } = await import('../abi');
