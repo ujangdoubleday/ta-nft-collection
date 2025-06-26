@@ -13,7 +13,6 @@ export * from './useNFTFactoryEvents';
 // Alchemy hooks
 // export * from './useAlchemyEvents';
 export * from './useAlchemyNFTs';
-export * from './useNFTTransfer';
 
 // New hook
 export * from './useNFTHistory';
