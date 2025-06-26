@@ -10,7 +10,6 @@
     "build:analyze": "ANALYZE=true npm run build",
     "find:unused": "next-unused",
     "prepare": "husky",
-    "seed": "bun prisma/seed.ts",
     "postinstall": "prisma generate --no-engine",
     "studio": "bunx prisma studio",
     "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
