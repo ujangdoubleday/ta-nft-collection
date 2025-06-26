@@ -48,17 +48,8 @@ export function NextImage({
     if (onError) onError(e);
   };
 
-  // Blur data URL for placeholder type 'blur'
   const defaultBlurDataURL =
     'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2MwYzBjMCIvPjwvc3ZnPg==';
-
-  // Placeholder styles berdasarkan tipe
-  const placeholderStyles = {
-    blur: 'blur-sm',
-    empty: 'bg-[#c0c0c0]',
-    win98:
-      'bg-[#c0c0c0] border-2 border-t-white border-l-white border-r-[#808080] border-b-[#808080]',
-  };
 
   return (
     <div
@@ -76,35 +67,6 @@ export function NextImage({
           : { width: '100%', height: '100%' }
       }
     >
-      {isLoading && (
-        <div
-          className={cn(
-            'absolute inset-0 flex items-center justify-center',
-            placeholderStyles[placeholderType],
-          )}
-          style={rest.fill ? { position: 'absolute', inset: 0 } : {}}
-        >
-          {placeholderType === 'win98' && (
-            <div className="flex items-center justify-center w-full h-full">
-              <svg
-                className="w-8 h-8 text-[#808080]"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="M21 15l-5-5L5 21" />
-              </svg>
-            </div>
-          )}
-        </div>
-      )}
-
       <Image
         src={imgSrc || fallbackSrc}
         alt={alt}
