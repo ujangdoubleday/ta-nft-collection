@@ -1,7 +1,7 @@
 'use client';
 
 import { CollectionItem } from '@/components/features/collections/types';
-import { NextImage } from '@/components/shared/icons';
+import { NextImage } from '@/components/shared/media';
 import { InlineLoading } from '@/components/shared/loading';
 import { useState, useEffect } from 'react';
 import { useNFTOwner } from '@/lib/blockchain/hooks/useAlchemyNFTs';
@@ -100,7 +100,7 @@ export function CollectionItemCard({ item, onViewDetailsAction }: CollectionItem
             {!imageLoaded && <ImagePlaceholder placeholder={placeholder} />}
             <NextImage
               src={item.image}
-              alt={item.name}
+              alt={item.name || ''}
               fill={true}
               sizes="(max-width: 768px) 100vw, 300px"
               className={`object-contain transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
