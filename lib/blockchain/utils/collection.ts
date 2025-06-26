@@ -1,24 +1,12 @@
 /**
  * Collection-related utilities for blockchain operations
  */
-import { createPublicClient, http } from 'viem';
-import { sepolia } from 'wagmi/chains';
+import { publicClient } from '@/lib/blockchain/viem';
+import { NFT_FACTORY_ADDRESS, IPFS_GATEWAY_URL } from '@/lib/blockchain';
 
 // Import ABIs from the Hardhat-compiled contracts
 // @ts-ignore - This will be imported properly as JSON
 import NFT_FACTORY_ABI from '../abi/NFTFactory.json';
-
-// Constants for collection operations
-export const NFT_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}`;
-export const IPFS_GATEWAY_URL =
-  process.env.NEXT_PUBLIC_GATEWAY_URL || 'cyan-dead-reptile-256.mypinata.cloud';
-export const ALCHEMY_RPC_URL = process.env.ALCHEMY_HTTP_URL || '';
-
-// Create a public client with Alchemy transport
-export const publicClient = createPublicClient({
-  chain: sepolia,
-  transport: http(ALCHEMY_RPC_URL),
-});
 
 // Define the interface for collection info from contract
 export interface CollectionInfo {
