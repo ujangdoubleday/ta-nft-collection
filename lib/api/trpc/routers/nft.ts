@@ -1,35 +1,14 @@
 import { z } from 'zod';
 import { publicProcedure, router } from '@/lib/api/trpc/server';
-import { prisma } from '@/lib/db';
-import { createPublicClient, http } from 'viem';
-import { sepolia } from 'viem/chains';
+import { publicClient } from '@/lib/blockchain/viem';
 import { NFT_COLLECTION_ABI } from '@/lib/blockchain/abi';
-import { formatIPFSUrl } from '@/lib/utils/helpers/url';
-import { fetchNFTsForContract, fetchNFTByTokenId } from '@/lib/blockchain/utils/alchemy';
-
-// Create a public client for blockchain interactions
-const publicClient = createPublicClient({
-  chain: sepolia,
-  transport: http(),
-});
+import {
+  fetchNFTsForContract,
+  fetchNFTByTokenId,
+  getNFTOwner,
+} from '@/lib/blockchain/utils/alchemy';
 
 export const nftRouter = router({
-  getAll: publicProcedure.query(async () => {
-    return prisma.nFT.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        owner: {
-          select: {
-            id: true,
-            address: true,
-            name: true,
-            image: true,
-          },
-        },
-      },
-    });
-  }),
-
   getByTokenId: publicProcedure
     .input(z.object({ tokenId: z.string(), contractAddress: z.string() }))
     .query(async ({ input }) => {
@@ -141,138 +120,41 @@ export const nftRouter = router({
       }
     }),
 
-  getByOwnerAddress: publicProcedure
-    .input(z.object({ ownerAddress: z.string() }))
+  // New procedure to get raw NFT data from Alchemy
+  getRawNFTByTokenId: publicProcedure
+    .input(z.object({ tokenId: z.string(), contractAddress: z.string() }))
     .query(async ({ input }) => {
-      const { ownerAddress } = input;
-      return prisma.nFT.findMany({
-        where: { ownerAddress },
-        orderBy: { createdAt: 'desc' },
-        include: {
-          owner: {
-            select: {
-              id: true,
-              address: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-      });
+      const { tokenId, contractAddress } = input;
+
+      try {
+        // Fetch NFT directly from blockchain using Alchemy API with raw data
+        const nft = await fetchNFTByTokenId(contractAddress, tokenId);
+        return nft;
+      } catch (error) {
+        console.error(
+          `Error fetching raw NFT from blockchain: ${contractAddress} - Token ID: ${tokenId}`,
+          error,
+        );
+        return null;
+      }
     }),
 
-  create: publicProcedure
-    .input(
-      z.object({
-        tokenId: z.string(),
-        name: z.string(),
-        description: z.string().optional(),
-        metadataUrl: z.string(),
-        imageUrl: z.string(),
-        contractAddress: z.string(),
-        ownerAddress: z.string(),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      // Check if NFT already exists
-      const existingNFT = await prisma.nFT.findUnique({
-        where: {
-          tokenId_contractAddress: {
-            tokenId: input.tokenId,
-            contractAddress: input.contractAddress,
-          },
-        },
-      });
+  // New procedure to get NFT owner
+  getNFTOwner: publicProcedure
+    .input(z.object({ contractAddress: z.string(), tokenId: z.string() }))
+    .query(async ({ input }) => {
+      const { contractAddress, tokenId } = input;
 
-      if (existingNFT) {
-        return existingNFT;
+      try {
+        // Fetch NFT owner directly from blockchain
+        const owner = await getNFTOwner(contractAddress, tokenId);
+        return { owner };
+      } catch (error) {
+        console.error(
+          `Error fetching NFT owner from blockchain: ${contractAddress} - Token ID: ${tokenId}`,
+          error,
+        );
+        return { owner: null, error: 'Failed to get NFT owner' };
       }
-
-      // Check if user exists
-      let user = await prisma.user.findUnique({
-        where: { address: input.ownerAddress },
-      });
-
-      // Create user if it doesn't exist
-      if (!user) {
-        user = await prisma.user.create({
-          data: {
-            address: input.ownerAddress,
-            name: `User-${input.ownerAddress.substring(0, 8)}`,
-          },
-        });
-        console.log(`Created new user with address: ${input.ownerAddress}`);
-      }
-
-      // Create new NFT
-      return prisma.nFT.create({
-        data: input,
-        include: {
-          owner: {
-            select: {
-              id: true,
-              address: true,
-              name: true,
-              image: true,
-            },
-          },
-        },
-      });
-    }),
-
-  transferNFT: publicProcedure
-    .input(
-      z.object({
-        tokenId: z.string(),
-        contractAddress: z.string(),
-        newOwnerAddress: z.string(),
-        transferType: z.string().optional(), // Transfer type (e.g., "Transfer", "Mint")
-        timestamp: z.string().optional(), // Timestamp of the transfer
-      }),
-    )
-    .mutation(async ({ input }) => {
-      const { tokenId, contractAddress, newOwnerAddress, transferType, timestamp } = input;
-
-      // Find the current NFT to get the current owner
-      const currentNFT = await prisma.nFT.findUnique({
-        where: {
-          tokenId_contractAddress: {
-            tokenId,
-            contractAddress,
-          },
-        },
-      });
-
-      if (!currentNFT) {
-        throw new Error(`NFT with tokenId ${tokenId} not found`);
-      }
-
-      // Check if new owner exists
-      let newOwner = await prisma.user.findUnique({
-        where: { address: newOwnerAddress },
-      });
-
-      // Create new owner if it doesn't exist
-      if (!newOwner) {
-        newOwner = await prisma.user.create({
-          data: {
-            address: newOwnerAddress,
-            name: `User-${newOwnerAddress.substring(0, 8)}`,
-          },
-        });
-      }
-
-      // Update NFT ownership
-      return prisma.nFT.update({
-        where: {
-          tokenId_contractAddress: {
-            tokenId,
-            contractAddress,
-          },
-        },
-        data: {
-          ownerAddress: newOwnerAddress,
-        },
-      });
     }),
 });
