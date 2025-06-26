@@ -32,43 +32,9 @@ export function useUpdateUser() {
   return trpc.user.update.useMutation();
 }
 
-// NFT hooks
-export function useNFTs() {
-  return trpc.nft.getAll.useQuery();
-}
-
-export function useUserNFTs(ownerAddress: string | undefined) {
-  return trpc.nft.getByOwnerAddress.useQuery(
-    { ownerAddress: ownerAddress! },
-    {
-      enabled: !!ownerAddress,
-    },
-  );
-}
-
 export function useNFTByTokenId(tokenId: string | undefined, contractAddress: string | undefined) {
   return trpc.nft.getByTokenId.useQuery(
     { tokenId: tokenId!, contractAddress: contractAddress! },
     { enabled: !!tokenId && !!contractAddress },
   );
-}
-
-export function useCreateNFT() {
-  return trpc.nft.create.useMutation();
-}
-
-// Collection hooks
-export function useCollections() {
-  return trpc.collection.getAll.useQuery();
-}
-
-export function useCollectionByContractAddress(contractAddress: string | undefined) {
-  return trpc.collection.getByContractAddress.useQuery(
-    { contractAddress: contractAddress! },
-    { enabled: !!contractAddress },
-  );
-}
-
-export function useCreateCollection() {
-  return trpc.collection.create.useMutation();
 }

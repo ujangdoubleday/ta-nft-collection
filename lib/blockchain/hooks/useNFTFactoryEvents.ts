@@ -1,10 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useWatchContractEvent } from 'wagmi';
-import { sepolia } from 'wagmi/chains';
-import { Log, TransactionReceipt, decodeEventLog, parseAbiItem } from 'viem';
-import { useReadContract } from 'wagmi';
+import { decodeEventLog, parseAbiItem } from 'viem';
 import { useQuery } from '@tanstack/react-query';
-import { createPublicClient, http } from 'viem';
 
 // Import ABI from compiled contracts
 import NFT_FACTORY_EVENTS_ABI from '../abi/NFTFactoryEvents.json';
@@ -14,7 +11,8 @@ import NFT_FACTORY_EVENTS_ABI from '../abi/NFTFactoryEvents.json';
 import NFT_FACTORY_ABI from '../abi/NFTFactory.json';
 
 // Import Alchemy utilities
-import { alchemy, getLogsForTransaction } from '../utils/alchemy';
+import { getLogsForTransaction } from '../utils/alchemy';
+import { publicClient } from '../viem';
 
 // Get the factory address from environment variable
 const NFT_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}`;
@@ -22,11 +20,6 @@ const NFT_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${stri
 // Create a public client with Alchemy transport
 const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 const alchemyRpcUrl = `https://eth-sepolia.g.alchemy.com/v2/${alchemyApiKey}`;
-
-const publicClient = createPublicClient({
-  chain: sepolia,
-  transport: http(alchemyRpcUrl),
-});
 
 // Parse the event ABI item for proper decoding
 const collectionCreatedEventAbi = parseAbiItem(

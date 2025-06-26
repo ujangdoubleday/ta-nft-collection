@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { alchemy, subscribeToContractEvents } from '../utils/alchemy';
+import { subscribeToContractEvents } from '../utils/alchemy';
+import { alchemy } from '../alchemy';
 import { parseAbiItem, decodeEventLog } from 'viem';
 
 // Get the factory address from environment variable
