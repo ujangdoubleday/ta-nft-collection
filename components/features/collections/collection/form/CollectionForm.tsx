@@ -3,7 +3,7 @@
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
 import { Win98Spinner } from '@/components/ui/organisms';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   CollectionFormActions,
@@ -12,9 +12,22 @@ import {
 import { CollectionFormData } from '@/components/features/collections/collection/form/CollectionFormFields';
 import { usePinataUpload, METADATA_TYPE } from '@/lib/hooks/usePinataUpload';
 import { useWallet } from '@/lib/hooks/wallet';
-import { useNFTFactoryEvents } from '@/lib/blockchain/hooks';
-import { useAlchemyNFTFactoryEvents } from '@/lib/blockchain/hooks/useAlchemyEvents';
 import { useNFTFactory } from '@/lib/blockchain/hooks';
+import { subscribeToContractEvents } from '@/lib/blockchain/utils/alchemy';
+import { decodeEventLog, parseAbiItem } from 'viem';
+import { trpc } from '@/lib/api/trpc/client';
+
+// Get the factory address from environment variable
+const NFT_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}`;
+
+// Event signature for CollectionCreated
+const COLLECTION_CREATED_EVENT_SIGNATURE =
+  'CollectionCreated(address,string,string,address,uint256,uint256,uint256)';
+
+// Parse the event ABI item for proper decoding
+const collectionCreatedEventAbi = parseAbiItem(
+  'event CollectionCreated(address indexed collectionAddress, string name, string symbol, address indexed creator, uint256 totalSupply, uint256 indexed collectionId, uint256 feesPaid)',
+);
 
 interface CollectionFormProps {
   // Props can be added if needed
@@ -29,6 +42,14 @@ type CollectionData = {
   contractAddress: string;
   ownerAddress: string;
   pinataGroupId?: string;
+};
+
+// Collection event type
+type CollectionCreatedEvent = {
+  collectionAddress: string;
+  name: string;
+  symbol: string;
+  owner: string;
 };
 
 // Async functions for React Query
@@ -74,39 +95,76 @@ const uploadMetadataToIPFS = async (
 export function CollectionForm({}: CollectionFormProps) {
   const router = useRouter();
   const { address } = useWallet();
+  const utils = trpc.useContext();
 
-  // Form state (keep useState + useEffect for UI state)
+  // Refs to prevent unnecessary re-renders and fetches
+  const hasSetupWebsocket = useRef(false);
+  const hasRefreshedData = useRef(false);
+  const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Form state
   const [formData, setFormData] = useState<CollectionFormData>({
     name: '',
     symbol: '',
     description: '',
     coverImage: null,
     storage: 'Ethereum',
-    totalSupply: '100', // Default total supply
+    totalSupply: '100',
   });
 
-  // UI state management (keep useState + useEffect)
+  // UI state management
   const [showConsole, setShowConsole] = useState(false);
   const [consoleMessages, setConsoleMessages] = useState<string[]>([]);
   const [showProgressBar, setShowProgressBar] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [collectionData, setCollectionData] = useState<CollectionData | null>(null);
-  const [needsDbSave, setNeedsDbSave] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // Removed websocketEvents state - tidak diperlukan lagi
+  const [isWebsocketConnected, setIsWebsocketConnected] = useState(false);
 
   // Get hooks
   const { uploadToPinata, createFolder, isUploading, isCreatingFolder } = usePinataUpload();
   const { createCollection, isLoading: isFactoryLoading, error: factoryError } = useNFTFactory();
-  const { collectionCreatedEvents, loading: isEventLoading } = useNFTFactoryEvents(txHash || '');
-  const { collectionCreatedEvents: alchemyEvents, loading: isAlchemyLoading } =
-    useAlchemyNFTFactoryEvents(txHash || '');
 
-  // UI state management functions (keep useEffect)
+  // REMOVED: Hooks yang menyebabkan excessive eth_newFilter calls
+  // const { collectionCreatedEvents, loading: isEventLoading } = useNFTFactoryEvents(txHash || '');
+  // const { collectionCreatedEvents: alchemyEvents, loading: isAlchemyLoading } =
+  //   useAlchemyNFTFactoryEvents(txHash || '');
+
+  // Memoized console message handler
   const addConsoleMessage = useCallback((message: string) => {
     setConsoleMessages((prev) => [...prev, message]);
   }, []);
 
-  // React Query for creating Pinata folder
+  // Memoized refresh function that only runs once per creation
+  const refreshCollectionsData = useCallback(async () => {
+    if (hasRefreshedData.current) return;
+
+    try {
+      hasRefreshedData.current = true;
+      addConsoleMessage('> Refreshing collections data...');
+
+      const revalidateResponse = await fetch('/api/revalidate?tag=collections');
+      if (!revalidateResponse.ok) {
+        console.error('Failed to revalidate collections page');
+      } else {
+        addConsoleMessage('> Collections page revalidated');
+      }
+
+      // Invalidate and refetch tRPC queries for collections
+      if (address) {
+        await Promise.all([
+          utils.collection.getEnrichedCreatorCollections.invalidate({ creatorAddress: address }),
+          utils.collection.getCreatorCollections.invalidate({ creatorAddress: address }),
+        ]);
+      }
+    } catch (error) {
+      console.error('Error refreshing collections:', error);
+      hasRefreshedData.current = false; // Reset on error
+    }
+  }, [addConsoleMessage, utils, address]);
+
+  // React Query mutations
   const createPinataFolderMutation = useMutation({
     mutationFn: ({ collectionName, address }: { collectionName: string; address: string }) =>
       createPinataFolder(collectionName, address, createFolder),
@@ -123,7 +181,6 @@ export function CollectionForm({}: CollectionFormProps) {
     },
   });
 
-  // React Query for uploading metadata
   const uploadMetadataMutation = useMutation({
     mutationFn: ({ formData, folderId }: { formData: CollectionFormData; folderId?: string }) =>
       uploadMetadataToIPFS(formData, uploadToPinata, folderId),
@@ -143,7 +200,6 @@ export function CollectionForm({}: CollectionFormProps) {
     },
   });
 
-  // React Query for blockchain collection creation
   const createBlockchainCollectionMutation = useMutation({
     mutationFn: async ({
       name,
@@ -167,6 +223,7 @@ export function CollectionForm({}: CollectionFormProps) {
         setTxHash(result.hash);
         addConsoleMessage('> Transaction submitted successfully');
         addConsoleMessage('> This may take a few minutes. Please wait...');
+        addConsoleMessage('> Scanning blockchain for collection creation events...');
       }
     },
     onError: (error) => {
@@ -176,32 +233,100 @@ export function CollectionForm({}: CollectionFormProps) {
     },
   });
 
-  // Handle form changes (UI state - keep useState)
-  const handleChange = (e: { target: { name: any; value: any } }) => {
+  // Handle form changes
+  const handleChange = useCallback((e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
+  }, []);
 
-  const handleFileChange = (file: File | null) => {
+  const handleFileChange = useCallback((file: File | null) => {
     setFormData((prev) => ({
       ...prev,
       coverImage: file,
     }));
-  };
+  }, []);
 
-  // Add console message about blockchain monitoring
+  // Setup Alchemy websocket - hanya ketika ada txHash dan belum setup
   useEffect(() => {
-    if (txHash) {
-      addConsoleMessage('> Scanning blockchain for collection creation events...');
-    }
-  }, [txHash, addConsoleMessage]);
+    if (!NFT_FACTORY_ADDRESS || !txHash || hasSetupWebsocket.current) return;
 
-  // Add console message when events are detected
+    hasSetupWebsocket.current = true;
+    addConsoleMessage('> Setting up real-time blockchain monitoring...');
+    setIsWebsocketConnected(true);
 
-  // Listen for blockchain events and save to database (side effect - keep useEffect)
+    const unsubscribe = subscribeToContractEvents(
+      NFT_FACTORY_ADDRESS,
+      COLLECTION_CREATED_EVENT_SIGNATURE,
+      (log) => {
+        try {
+          // Hanya process jika ini adalah transaksi kita
+          if (log.transactionHash !== txHash) return;
+
+          const decodedEvent = decodeEventLog({
+            abi: [collectionCreatedEventAbi],
+            data: log.data as `0x${string}`,
+            topics: log.topics as [`0x${string}`, ...`0x${string}`[]],
+          });
+
+          if (decodedEvent.args) {
+            const event: CollectionCreatedEvent = {
+              collectionAddress: decodedEvent.args.collectionAddress as string,
+              name: decodedEvent.args.name as string,
+              symbol: decodedEvent.args.symbol as string,
+              owner: decodedEvent.args.creator as string,
+            };
+
+            // Pastikan ini adalah event kita
+            if (address && event.owner.toLowerCase() === address.toLowerCase()) {
+              addConsoleMessage('> Collection created successfully!');
+              addConsoleMessage(`> Collection address: ${event.collectionAddress}`);
+
+              setCollectionData((prevData) => {
+                if (!prevData) return null;
+                return {
+                  ...prevData,
+                  contractAddress: event.collectionAddress,
+                };
+              });
+
+              // Trigger refresh and redirect
+              refreshCollectionsData().then(() => {
+                addConsoleMessage('> Redirecting to collection page...');
+
+                // Clear any existing timeout
+                if (redirectTimeout.current) {
+                  clearTimeout(redirectTimeout.current);
+                }
+
+                redirectTimeout.current = setTimeout(() => {
+                  router.push(`/collections`);
+                }, 3000);
+              });
+
+              // Cleanup websocket setelah berhasil
+              unsubscribe();
+              setIsWebsocketConnected(false);
+              hasSetupWebsocket.current = false;
+            }
+          }
+        } catch (error) {
+          console.error('Error processing blockchain event:', error);
+        }
+      },
+    );
+
+    return () => {
+      unsubscribe();
+      setIsWebsocketConnected(false);
+      hasSetupWebsocket.current = false;
+      if (redirectTimeout.current) {
+        clearTimeout(redirectTimeout.current);
+      }
+    };
+  }, [txHash, address, addConsoleMessage, refreshCollectionsData, router]); // Hanya depend pada txHash dan address
 
   // Main form submission handler
   const handleSubmit = async (e: { preventDefault: () => void }) => {
@@ -220,25 +345,24 @@ export function CollectionForm({}: CollectionFormProps) {
     // Validate required fields
     if (!formData.name) {
       addConsoleMessage('> Error: Collection name is required.');
-      setIsSubmitting(false);
       return;
     }
 
     if (!formData.description) {
       addConsoleMessage('> Error: Collection description is required.');
-      setIsSubmitting(false);
       return;
     }
 
     if (!formData.coverImage) {
       addConsoleMessage('> Error: Collection image is required. Please upload an image.');
-      setIsSubmitting(false);
       return;
     }
 
     setIsSubmitting(true);
     setShowProgressBar(true);
     setConsoleMessages([]);
+    hasRefreshedData.current = false; // Reset refresh flag for new submission
+
     addConsoleMessage('> Processing data...');
     addConsoleMessage(`> Owner address: ${address}`);
 
@@ -274,7 +398,6 @@ export function CollectionForm({}: CollectionFormProps) {
       addConsoleMessage('> Creating collection on blockchain...');
       addConsoleMessage('> Waiting for transaction confirmation...');
 
-      // Convert totalSupply string to bigint
       const totalSupplyBigInt = BigInt(parseInt(formData.totalSupply || '100'));
 
       const blockchainResult = await createBlockchainCollectionMutation.mutateAsync({
@@ -297,7 +420,6 @@ export function CollectionForm({}: CollectionFormProps) {
         };
 
         setCollectionData(collectionToSave);
-        setNeedsDbSave(true);
       }
     } catch (error) {
       addConsoleMessage(`> Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -306,11 +428,11 @@ export function CollectionForm({}: CollectionFormProps) {
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     router.push('/collections');
-  };
+  }, [router]);
 
-  // Calculate loading state using correct properties
+  // Calculate loading state
   const isLoading =
     isSubmitting ||
     createPinataFolderMutation.isPending ||
@@ -318,10 +440,16 @@ export function CollectionForm({}: CollectionFormProps) {
     createBlockchainCollectionMutation.isPending ||
     isUploading ||
     isCreatingFolder ||
-    isFactoryLoading ||
-    isEventLoading ||
-    isAlchemyLoading ||
-    isEventLoading;
+    isFactoryLoading;
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (redirectTimeout.current) {
+        clearTimeout(redirectTimeout.current);
+      }
+    };
+  }, []);
 
   return (
     <Win98Window

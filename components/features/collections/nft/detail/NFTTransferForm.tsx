@@ -60,6 +60,7 @@ export function NFTTransferForm({ contractAddress, tokenId, ownerAddress }: NFTT
   // Watch for transfer events
   useEffect(() => {
     if (transferEvents && transferEvents.length > 0) {
+      // Get the most recent event
       const latestEvent = transferEvents[transferEvents.length - 1];
 
       if (latestEvent.tokenId === tokenId) {
@@ -92,7 +93,7 @@ export function NFTTransferForm({ contractAddress, tokenId, ownerAddress }: NFTT
         }
       }
     }
-  }, [transferEvents, tokenId, recipientAddress, router]);
+  }, [transferEvents, tokenId, recipientAddress]);
 
   const handleTransfer = async () => {
     if (!recipientAddress) {

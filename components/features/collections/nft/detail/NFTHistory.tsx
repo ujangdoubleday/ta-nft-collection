@@ -20,6 +20,14 @@ const formatAddress = (address: string): string => {
   return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
 };
 
+// Helper function to determine event type label
+const getEventTypeLabel = (type: string, from: string): string => {
+  if (from === '0x0000000000000000000000000000000000000000') {
+    return 'Mint';
+  }
+  return type;
+};
+
 export function NFTHistory({ contractAddress, tokenId, history = [] }: NFTHistoryProps) {
   // Fetch transfer history from blockchain
   const { history: blockchainHistory, isLoading, error } = useNFTHistory(contractAddress, tokenId);
@@ -53,6 +61,7 @@ export function NFTHistory({ contractAddress, tokenId, history = [] }: NFTHistor
             <tbody>
               {displayHistory.map((event, index) => {
                 const transactionLink = getEtherscanLink(event.transactionHash);
+                const eventType = getEventTypeLabel(event.type, event.from);
 
                 return (
                   <tr key={index} className={index % 2 === 0 ? 'bg-[#efefef]' : ''}>
@@ -64,10 +73,10 @@ export function NFTHistory({ contractAddress, tokenId, history = [] }: NFTHistor
                           rel="noopener noreferrer"
                           className="text-blue-600 hover:underline"
                         >
-                          {event.type}
+                          {eventType}
                         </a>
                       ) : (
-                        event.type
+                        eventType
                       )}
                     </td>
                     <td className="py-[3px] px-2 truncate max-w-[80px]">

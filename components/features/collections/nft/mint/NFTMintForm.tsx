@@ -1,7 +1,7 @@
 'use client';
 
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
-import { useState, ChangeEvent, useEffect, useCallback, useMemo } from 'react';
+import { useState, ChangeEvent, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { trpc } from '@/lib/api/trpc/client';
@@ -14,9 +14,11 @@ import {
 } from '@/components/features/collections/nft/mint';
 import { NFTPreview } from '@/components/features/collections/nft/preview';
 import { NFTFormData } from '@/components/features/collections/nft/mint/NFTFormFields';
-import { useNFTCollection, useNFTCollectionEvents } from '@/lib/blockchain/hooks';
+import { useNFTCollection } from '@/lib/blockchain/hooks';
 import { Win98Spinner } from '@/components/ui/organisms';
 import { refreshNFTMetadata } from '@/lib/blockchain/utils';
+import { subscribeToContractEvents } from '@/lib/blockchain/utils/alchemy';
+import { decodeEventLog, parseAbiItem } from 'viem';
 
 interface NFTMintFormProps {
   collectionId: string;
@@ -28,6 +30,21 @@ type UploadResult = {
   metadata: { url: string };
   error?: string;
 };
+
+// Event signature for Transfer event
+const TRANSFER_EVENT_SIGNATURE = 'Transfer(address,address,uint256)';
+
+// Parse the event ABI item for proper decoding
+const transferEventAbi = parseAbiItem(
+  'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
+);
+
+// Interface for Transfer event
+interface NFTTransferEvent {
+  from: string;
+  to: string;
+  tokenId: string;
+}
 
 const createObjectURL = (file: File): string => URL.createObjectURL(file);
 
@@ -77,6 +94,12 @@ const mintNFTOnBlockchain = async (
 export function NFTMintForm({ collectionId }: NFTMintFormProps) {
   const router = useRouter();
   const { address } = useWallet();
+  const utils = trpc.useContext();
+
+  // Refs to prevent unnecessary re-renders
+  const hasSetupWebsocket = useRef(false);
+  const hasRefreshedData = useRef(false);
+  const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Form state
   const [formData, setFormData] = useState<NFTFormData>({
@@ -95,17 +118,122 @@ export function NFTMintForm({ collectionId }: NFTMintFormProps) {
   const [showProgressBar, setShowProgressBar] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isWebsocketConnected, setIsWebsocketConnected] = useState(false);
+  const [transferEvent, setTransferEvent] = useState<NFTTransferEvent | null>(null);
 
   const { uploadToPinata, isUploading } = usePinataUpload();
   const { mintNFT, isLoading: isMintLoading } = useNFTCollection();
-  const { transferEvents, loading: isEventLoading } = useNFTCollectionEvents(
-    collectionId,
-    txHash || '',
-  );
 
   const addConsoleMessage = useCallback((message: string) => {
     setConsoleMessages((prev) => [...prev, message]);
   }, []);
+
+  // Memoized refresh function that only runs once per creation
+  const refreshNFTData = useCallback(
+    async (tokenId: string) => {
+      if (hasRefreshedData.current) return;
+
+      try {
+        hasRefreshedData.current = true;
+        addConsoleMessage('> Refreshing NFT data...');
+
+        // Refresh NFT metadata on Alchemy
+        try {
+          await refreshNFTMetadata(collectionId, tokenId);
+          addConsoleMessage('> Metadata refresh request sent to Alchemy');
+        } catch (refreshError) {
+          console.error('Error refreshing metadata:', refreshError);
+          addConsoleMessage('> Warning: Failed to refresh metadata, continuing anyway');
+        }
+
+        // Revalidate collections page
+        const revalidateResponse = await fetch('/api/revalidate?tag=collections');
+        if (!revalidateResponse.ok) {
+          console.error('Failed to revalidate collections page');
+        } else {
+          addConsoleMessage('> Collections page revalidated');
+        }
+
+        // Invalidate and refetch tRPC queries
+        if (address) {
+          await utils.collection.getEnrichedCreatorCollections.invalidate({
+            creatorAddress: address,
+          });
+        }
+      } catch (error) {
+        console.error('Error refreshing NFT data:', error);
+        hasRefreshedData.current = false; // Reset on error
+      }
+    },
+    [addConsoleMessage, utils, address, collectionId],
+  );
+
+  // Setup Alchemy websocket when transaction hash is available
+  useEffect(() => {
+    if (!collectionId || !txHash || hasSetupWebsocket.current) return;
+
+    hasSetupWebsocket.current = true;
+    addConsoleMessage('> Setting up real-time blockchain monitoring...');
+    setIsWebsocketConnected(true);
+
+    const unsubscribe = subscribeToContractEvents(collectionId, TRANSFER_EVENT_SIGNATURE, (log) => {
+      try {
+        // Only process if this is our transaction
+        if (log.transactionHash !== txHash) return;
+
+        const decodedEvent = decodeEventLog({
+          abi: [transferEventAbi],
+          data: log.data as `0x${string}`,
+          topics: log.topics as [`0x${string}`, ...`0x${string}`[]],
+        });
+
+        if (decodedEvent.args) {
+          const event: NFTTransferEvent = {
+            from: decodedEvent.args.from as string,
+            to: decodedEvent.args.to as string,
+            tokenId: decodedEvent.args.tokenId ? decodedEvent.args.tokenId.toString() : '0',
+          };
+
+          // Make sure this is our event (from zero address for minting)
+          if (event.from === '0x0000000000000000000000000000000000000000') {
+            addConsoleMessage('> NFT minted successfully!');
+            addConsoleMessage(`> Token ID: ${event.tokenId}`);
+            setTransferEvent(event);
+
+            // Refresh NFT data and redirect
+            refreshNFTData(event.tokenId).then(() => {
+              addConsoleMessage('> Redirecting to collection page...');
+
+              // Clear any existing timeout
+              if (redirectTimeout.current) {
+                clearTimeout(redirectTimeout.current);
+              }
+
+              redirectTimeout.current = setTimeout(() => {
+                router.push(`/collections/${collectionId}`);
+              }, 3000);
+            });
+
+            // Cleanup websocket after success
+            unsubscribe();
+            setIsWebsocketConnected(false);
+            hasSetupWebsocket.current = false;
+          }
+        }
+      } catch (error) {
+        console.error('Error processing blockchain event:', error);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      setIsWebsocketConnected(false);
+      hasSetupWebsocket.current = false;
+      if (redirectTimeout.current) {
+        clearTimeout(redirectTimeout.current);
+      }
+    };
+  }, [txHash, address, addConsoleMessage, refreshNFTData, router, collectionId]);
 
   const uploadToIPFSMutation = useMutation({
     mutationFn: ({ file, metadata, folderId }: { file: File; metadata: any; folderId?: string }) =>
@@ -136,6 +264,7 @@ export function NFTMintForm({ collectionId }: NFTMintFormProps) {
         setTxHash(result.hash);
         addConsoleMessage('> Transaction submitted to blockchain');
         addConsoleMessage('> This may take a few minutes. Please wait...');
+        addConsoleMessage('> Scanning blockchain for NFT minting events...');
       }
     },
     onError: (error) => {
@@ -144,41 +273,6 @@ export function NFTMintForm({ collectionId }: NFTMintFormProps) {
       );
     },
   });
-
-  // Handle blockchain confirmation and redirect
-  useEffect(() => {
-    const handleConfirmationAndRedirect = async () => {
-      if (transferEvents.length > 0 && txHash) {
-        try {
-          const event = transferEvents[transferEvents.length - 1];
-          if (event) {
-            addConsoleMessage('> Blockchain confirmation received!');
-            addConsoleMessage('> NFT created successfully');
-
-            // Refresh NFT metadata on Alchemy
-            addConsoleMessage('> Refreshing NFT metadata.');
-            try {
-              await refreshNFTMetadata(collectionId, event.tokenId);
-              addConsoleMessage('> Metadata refresh request sent to Alchemy');
-            } catch (refreshError) {
-              console.error('Error refreshing metadata:', refreshError);
-              addConsoleMessage('> Warning: Failed to refresh metadata, continuing anyway');
-            }
-
-            addConsoleMessage('> Redirecting to collection page...');
-            setTimeout(() => {
-              router.push(`/collections/${collectionId}`);
-              router.refresh();
-            }, 3000); // 3 second delay before redirect
-          }
-        } catch (error) {
-          console.error('Error in handleConfirmationAndRedirect:', error);
-        }
-      }
-    };
-
-    handleConfirmationAndRedirect();
-  }, [transferEvents, txHash, addConsoleMessage, collectionId, router]);
 
   // Cleanup object URL
   useEffect(() => {
@@ -264,6 +358,8 @@ export function NFTMintForm({ collectionId }: NFTMintFormProps) {
     setIsSubmitting(true);
     setShowProgressBar(true);
     setConsoleMessages([]);
+    hasRefreshedData.current = false; // Reset refresh flag for new submission
+
     addConsoleMessage('> Processing data...');
     addConsoleMessage(`> Owner address: ${address}`);
     addConsoleMessage(`> Collection: ${collectionId}`);
@@ -288,24 +384,19 @@ export function NFTMintForm({ collectionId }: NFTMintFormProps) {
         metadataUrl: uploadResult.metadata.url,
       });
 
-      // Add more detailed logging
-      addConsoleMessage('> Transaction submitted to blockchain');
-      addConsoleMessage('> Waiting for blockchain confirmation...');
-
       // Add a fallback timer in case event listening fails
       const fallbackTimer = setTimeout(() => {
-        if (!transferEvents.length) {
+        if (!transferEvent) {
           addConsoleMessage('> Using fallback: Event detection timed out');
           addConsoleMessage('> Redirecting to collection page...');
           router.push(`/collections/${collectionId}`);
           router.refresh();
         }
-      }, 15000); // 15 second fallback
+      }, 30000); // 30 second fallback
 
       return () => clearTimeout(fallbackTimer);
     } catch (error) {
       addConsoleMessage(`> Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
       setIsSubmitting(false);
       setShowProgressBar(false);
     }
@@ -315,14 +406,22 @@ export function NFTMintForm({ collectionId }: NFTMintFormProps) {
     router.push(`/collections/${collectionId}`);
   };
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (redirectTimeout.current) {
+        clearTimeout(redirectTimeout.current);
+      }
+    };
+  }, []);
+
   // Compute loading state
   const isLoading =
     isSubmitting ||
     uploadToIPFSMutation.isPending ||
     mintNFTMutation.isPending ||
     isUploading ||
-    isMintLoading ||
-    isEventLoading;
+    isMintLoading;
 
   return (
     <Win98Window
