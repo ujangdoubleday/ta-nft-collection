@@ -18,7 +18,6 @@ export * from './shared/hooks';
 // Feature components
 export * from './features/wallet';
 export * from './features/collections';
-export * from './features/todo';
 export * from './features/home';
 export * from './features/contact';
 export * from './features/about';

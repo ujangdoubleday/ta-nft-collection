@@ -14,24 +14,6 @@ export function useTrpc() {
  * Example hooks for common tRPC operations
  */
 
-// User hooks
-export function useUser(address: string | undefined) {
-  return trpc.user.getByAddress.useQuery(
-    { address: address! },
-    {
-      enabled: !!address,
-    },
-  );
-}
-
-export function useCreateUser() {
-  return trpc.user.create.useMutation();
-}
-
-export function useUpdateUser() {
-  return trpc.user.update.useMutation();
-}
-
 export function useNFTByTokenId(tokenId: string | undefined, contractAddress: string | undefined) {
   return trpc.nft.getByTokenId.useQuery(
     { tokenId: tokenId!, contractAddress: contractAddress! },
