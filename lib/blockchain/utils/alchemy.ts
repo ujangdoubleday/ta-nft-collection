@@ -1,8 +1,11 @@
-import { alchemy, BASE_URL_ALCHEMY_API } from '@/lib/blockchain/alchemy';
+import { alchemy } from '@/lib/blockchain/alchemy';
 import { keccak256 } from 'viem';
+import { BASE_URL_ALCHEMY_API } from '@/lib/blockchain/alchemy/config';
 
 // Type for query parameters
 type QueryParams = Record<string, string | number | boolean>;
+
+export const ALCHEMY_API_KEY = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
 
 /**
  * Make a request to the Alchemy API
@@ -11,7 +14,7 @@ type QueryParams = Record<string, string | number | boolean>;
  * @returns The API response
  */
 export async function alchemyRequest<T>(endpoint: string, queryParams?: QueryParams): Promise<T> {
-  const url = new URL(`${BASE_URL_ALCHEMY_API}/${endpoint}`);
+  const url = new URL(`https://eth-sepolia.g.alchemy.com/nft/v3/${ALCHEMY_API_KEY}/${endpoint}`);
 
   if (queryParams) {
     Object.entries(queryParams).forEach(([key, value]) =>
@@ -55,7 +58,7 @@ export function subscribeToContractEvents(
   callback?: (log: any, event: any) => void,
 ) {
   try {
-    // console.log(`Setting up subscription for contract: ${contractAddress}`);
+    console.log(`Setting up subscription for contract: ${contractAddress}`);
 
     // Create filter
     const filter: any = {
@@ -66,13 +69,13 @@ export function subscribeToContractEvents(
     if (eventSignature) {
       // Convert event signature to topic hash
       const topicHash = createTopicHash(eventSignature);
-      // console.log(`Listening for event: ${eventSignature} (${topicHash})`);
+      console.log(`Listening for event: ${eventSignature} (${topicHash})`);
       filter.topics = [topicHash];
     }
 
     // Set up the event listener
     const handleLog = (log: any, event: any) => {
-      // console.log('Alchemy event detected:', log);
+      console.log('Alchemy event detected:', log);
       if (callback) callback(log, event);
     };
 
@@ -81,7 +84,7 @@ export function subscribeToContractEvents(
 
     // Return unsubscribe function
     return () => {
-      // console.log(`Unsubscribing from contract: ${contractAddress}`);
+      console.log(`Unsubscribing from contract: ${contractAddress}`);
       alchemy.ws.removeAllListeners(filter);
     };
   } catch (error) {
@@ -384,13 +387,13 @@ export const fetchNFTByTokenId = async (
  */
 export async function getTransferHistory(contractAddress: string, tokenId: string) {
   try {
-    // console.log(`Fetching transfer history for NFT: ${contractAddress} Token ID: ${tokenId}`);
+    console.log(`Fetching transfer history for NFT: ${contractAddress} Token ID: ${tokenId}`);
 
     // Convert tokenId to numeric for comparison if not in hex format
     const numericTokenId = tokenId.startsWith('0x')
       ? tokenId
       : `0x${parseInt(tokenId).toString(16).padStart(64, '0')}`;
-    // console.log(`Looking for token ID: ${tokenId} (hex: ${numericTokenId})`);
+    console.log(`Looking for token ID: ${tokenId} (hex: ${numericTokenId})`);
 
     // Build request body
     const requestBody = {
@@ -411,13 +414,14 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
       id: 1,
     };
 
-    // console.log('Alchemy API request:', JSON.stringify(requestBody, null, 2));
+    console.log('Alchemy API request:', JSON.stringify(requestBody, null, 2));
 
-    // Using the proper Alchemy API format
-    const response = await fetch(`${BASE_URL_ALCHEMY_API}`, {
+    // Using the proper Alchemy JSON-RPC API endpoint
+    const response = await fetch(`https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Accept: 'application/json',
       },
       body: JSON.stringify(requestBody),
     });
@@ -429,7 +433,7 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
     }
 
     const data = await response.json();
-    // console.log('Alchemy API response:', JSON.stringify(data, null, 2));
+    console.log('Alchemy API response:', JSON.stringify(data, null, 2));
 
     if (data.error) {
       console.error('Alchemy API returned error:', data.error);
@@ -438,7 +442,7 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
 
     // Extract transfers from the result
     const transfers = data.result?.transfers || [];
-    // console.log(`Found ${transfers.length} total transfers for contract`);
+    console.log(`Found ${transfers.length} total transfers for contract`);
 
     // Filter for the specific token ID
     const filteredTransfers = transfers
@@ -451,9 +455,9 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
 
           // Compare with our token ID
           const isMatch = transferTokenIdLower === numericTokenIdLower;
-          // console.log(
-          //   `Comparing: Transfer tokenId: ${transferTokenIdLower}, Looking for: ${numericTokenIdLower}, Match: ${isMatch}`,
-          // );
+          console.log(
+            `Comparing: Transfer tokenId: ${transferTokenIdLower}, Looking for: ${numericTokenIdLower}, Match: ${isMatch}`,
+          );
 
           return isMatch;
         }
@@ -464,9 +468,9 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
           const numericTokenIdLower = numericTokenId.toLowerCase();
 
           const isMatch = transferTokenIdLower === numericTokenIdLower;
-          // console.log(
-          //   `Fallback - Comparing TokenId: ${transferTokenIdLower}, Looking for: ${numericTokenIdLower}, Match: ${isMatch}`,
-          // );
+          console.log(
+            `Fallback - Comparing TokenId: ${transferTokenIdLower}, Looking for: ${numericTokenIdLower}, Match: ${isMatch}`,
+          );
 
           return isMatch;
         }
@@ -483,7 +487,7 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
         };
       });
 
-    // console.log(`Found ${filteredTransfers.length} transfers for token ${tokenId}`);
+    console.log(`Found ${filteredTransfers.length} transfers for token ${tokenId}`);
     return filteredTransfers;
   } catch (error) {
     console.error('Error getting transfer history:', error);
