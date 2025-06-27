@@ -7,7 +7,8 @@ import {
 } from '@/lib/blockchain/utils/collection';
 import { ipfsToHttp } from '@/lib/blockchain/utils/collection';
 import { publicClient } from '@/lib/blockchain/viem';
-import { NFT_COLLECTION_ABI } from '@/lib/blockchain/abi';
+import { NFT_COLLECTION_ABI, NFT_FACTORY_ABI } from '@/lib/blockchain/abi';
+import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
 
 export const collectionRouter = router({
   getCreatorCollections: publicProcedure
@@ -294,4 +295,20 @@ export const collectionRouter = router({
         throw new Error('Failed to get collection data from blockchain');
       }
     }),
+
+  getCreationFee: publicProcedure.query(async () => {
+    try {
+      const creationFee = await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'creationFee',
+      });
+
+      // Ensure we return a bigint even if the fee is 0
+      return creationFee ? (creationFee as bigint) : BigInt(0);
+    } catch (error) {
+      console.error('Error fetching creation fee:', error);
+      return BigInt(0); // Return 0 wei instead of throwing error
+    }
+  }),
 });

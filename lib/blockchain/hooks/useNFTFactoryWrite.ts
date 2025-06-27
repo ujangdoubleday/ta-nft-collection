@@ -18,7 +18,13 @@ export function useCreateCollection() {
   });
 
   const createCollection = useCallback(
-    async (name: string, symbol: string, contractURI: string, totalSupply: bigint) => {
+    async (
+      name: string,
+      symbol: string,
+      contractURI: string,
+      totalSupply: bigint,
+      creationFee: bigint,
+    ) => {
       try {
         setError(null);
 
@@ -27,12 +33,14 @@ export function useCreateCollection() {
         if (!symbol) throw new Error('Collection symbol is required');
         if (!contractURI) throw new Error('Collection URI is required');
         if (totalSupply <= BigInt(0)) throw new Error('Total supply must be greater than 0');
+        if (creationFee < BigInt(0)) throw new Error('Creation fee must be non-negative');
 
         const hash = await writeContractAsync({
           address: NFT_FACTORY_ADDRESS,
           abi: NFT_FACTORY_ABI,
           functionName: 'createCollection',
           args: [name, symbol, contractURI, totalSupply],
+          value: creationFee,
           chainId: sepolia.id,
         });
 
