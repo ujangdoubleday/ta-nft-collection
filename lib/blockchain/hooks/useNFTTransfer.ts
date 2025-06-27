@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { subscribeToContractEvents } from '../utils/alchemy';
 import { decodeEventLog, parseAbiItem } from 'viem';
+import { alchemy } from '../alchemy';
 
 // Import the full ABI from the Hardhat-compiled contracts
 // @ts-ignore - This will be imported properly as JSON
@@ -51,6 +52,8 @@ export function useNFTTransfer(): UseNFTTransferReturn {
 
   // Refs to prevent unnecessary re-renders and duplicate websocket connections
   const hasSetupWebsocket = useRef(false);
+  const unsubscribeRef = useRef<(() => void) | null>(null);
+  const isUnmountedRef = useRef(false);
 
   // Track contract writes and transaction receipts
   const { writeContractAsync, isPending: isTransferLoading, isSuccess } = useWriteContract();
@@ -61,19 +64,35 @@ export function useNFTTransfer(): UseNFTTransferReturn {
 
   // Setup Alchemy websocket for transfer events
   useEffect(() => {
-    if (!currentContractAddress || !transactionHash || hasSetupWebsocket.current) return;
+    if (!currentContractAddress || hasSetupWebsocket.current) return;
+
+    // Clean up any existing subscription
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
+    }
 
     hasSetupWebsocket.current = true;
     console.log('Setting up websocket for transfer events:', currentContractAddress);
 
+    // First, set up a broader filter to catch all events from this contract
     const unsubscribe = subscribeToContractEvents(
       currentContractAddress,
       TRANSFER_EVENT_SIGNATURE,
-      (log) => {
+      (log, event) => {
         try {
-          // Only process if this is our transaction
-          if (log.transactionHash !== transactionHash) return;
+          console.log('Received transfer event log:', log);
+          console.log('Transaction hash comparison:', {
+            logTxHash: log.transactionHash,
+            ourTxHash: transactionHash,
+            matches: transactionHash
+              ? log.transactionHash === transactionHash
+              : 'No tx hash set yet',
+          });
 
+          if (isUnmountedRef.current) return;
+
+          // Process all transfer events, we'll filter by transaction hash if needed
           const decodedEvent = decodeEventLog({
             abi: [transferEventAbi],
             data: log.data as `0x${string}`,
@@ -87,7 +106,7 @@ export function useNFTTransfer(): UseNFTTransferReturn {
               tokenId: decodedEvent.args.tokenId ? decodedEvent.args.tokenId.toString() : '0',
             };
 
-            console.log('Transfer event detected:', event);
+            console.log('Decoded transfer event:', event);
 
             // Add the event to our state
             setTransferEvents((prev) => [...prev, event]);
@@ -98,58 +117,127 @@ export function useNFTTransfer(): UseNFTTransferReturn {
       },
     );
 
+    unsubscribeRef.current = unsubscribe;
+
     return () => {
       console.log('Cleaning up transfer event websocket');
-      unsubscribe();
+      if (unsubscribeRef.current) {
+        unsubscribeRef.current();
+        unsubscribeRef.current = null;
+      }
       hasSetupWebsocket.current = false;
     };
-  }, [currentContractAddress, transactionHash]);
+  }, [currentContractAddress]);
+
+  // Also watch for transaction receipt to extract events
+  useEffect(() => {
+    if (!receipt || !currentContractAddress || isUnmountedRef.current) return;
+
+    console.log('Transaction receipt received:', receipt);
+
+    // Look for Transfer events in the receipt logs
+    const transferLogs = receipt.logs.filter((log) => {
+      // Transfer event topic (keccak256 hash of Transfer(address,address,uint256))
+      return log.topics[0] === '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+    });
+
+    console.log('Found transfer logs in receipt:', transferLogs);
+
+    // Process each transfer log
+    const newEvents: NFTTransferEvent[] = [];
+
+    transferLogs.forEach((log) => {
+      try {
+        const decodedEvent = decodeEventLog({
+          abi: [transferEventAbi],
+          data: log.data,
+          topics: log.topics,
+        });
+
+        if (decodedEvent.args) {
+          const event: NFTTransferEvent = {
+            from: decodedEvent.args.from as string,
+            to: decodedEvent.args.to as string,
+            tokenId: decodedEvent.args.tokenId ? decodedEvent.args.tokenId.toString() : '0',
+          };
+
+          console.log('Decoded transfer event from receipt:', event);
+          newEvents.push(event);
+        }
+      } catch (error) {
+        console.error('Error decoding transfer event from receipt:', error);
+      }
+    });
+
+    // Only update state if we have new events and not unmounted
+    if (newEvents.length > 0 && !isUnmountedRef.current) {
+      setTransferEvents((prev) => [...prev, ...newEvents]);
+    }
+  }, [receipt]);
+
+  // Set up unmount detection
+  useEffect(() => {
+    return () => {
+      isUnmountedRef.current = true;
+    };
+  }, []);
 
   // Reset function to clear state
-  const reset = () => {
+  const reset = useCallback(() => {
+    // Prevent reset from causing state updates if component is unmounted
+    if (isUnmountedRef.current) return;
+
     setError(null);
     setTransactionHash(undefined);
     setCurrentContractAddress(undefined);
     setTransferEvents([]);
-    hasSetupWebsocket.current = false;
-  };
 
-  const transferNFT = async (
-    contractAddress: string,
-    from: string,
-    to: string,
-    tokenId: string,
-  ) => {
-    try {
-      // Convert tokenId to BigInt for the contract call
-      const tokenIdBigInt = BigInt(tokenId);
-
-      // Reset previous errors
-      setError(null);
-
-      // Update contract address to watch events
-      setCurrentContractAddress(contractAddress);
-
-      // Make the contract write call using safeTransferFrom instead of transferFrom
-      const hash = await writeContractAsync({
-        abi: NFT_COLLECTION_ABI,
-        address: contractAddress as `0x${string}`,
-        functionName: 'safeTransferFrom',
-        args: [from, to, tokenIdBigInt],
-        chainId: sepolia.id,
-      });
-
-      // Set transaction hash to track
-      setTransactionHash(hash);
-
-      return { hash };
-    } catch (err) {
-      console.error('Error transferring NFT:', err);
-      const transferError = err instanceof Error ? err : new Error('Unknown error occurred');
-      setError(transferError);
-      return { error: transferError };
+    if (unsubscribeRef.current) {
+      unsubscribeRef.current();
+      unsubscribeRef.current = null;
     }
-  };
+
+    hasSetupWebsocket.current = false;
+  }, []);
+
+  const transferNFT = useCallback(
+    async (contractAddress: string, from: string, to: string, tokenId: string) => {
+      try {
+        // Convert tokenId to BigInt for the contract call
+        const tokenIdBigInt = BigInt(tokenId);
+
+        // Reset previous errors
+        setError(null);
+
+        // Update contract address to watch events
+        setCurrentContractAddress(contractAddress);
+
+        console.log(`Initiating NFT transfer: from ${from} to ${to}, token ID ${tokenId}`);
+
+        // Make the contract write call using safeTransferFrom instead of transferFrom
+        const hash = await writeContractAsync({
+          abi: NFT_COLLECTION_ABI,
+          address: contractAddress as `0x${string}`,
+          functionName: 'safeTransferFrom',
+          args: [from, to, tokenIdBigInt],
+          chainId: sepolia.id,
+        });
+
+        console.log(`Transaction submitted with hash: ${hash}`);
+
+        // Set transaction hash to track
+        setTransactionHash(hash);
+
+        return { hash };
+      } catch (err) {
+        console.error('Error transferring NFT:', err);
+        const transferError = err instanceof Error ? err : new Error('Unknown error occurred');
+        setError(transferError);
+        return { error: transferError };
+      }
+    },
+    [writeContractAsync],
+  );
 
   return {
     transferNFT,
