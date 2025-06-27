@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
+import { useCreateCollection } from './useNFTFactoryWrite';
 
 // Import ABIs from the Hardhat-compiled contracts
 // @ts-ignore - This will be imported properly as JSON
@@ -11,8 +12,9 @@ export interface UseNFTFactoryReturn {
   createCollection: (
     name: string,
     symbol: string,
-    collectionURI: string,
-    totalSupply?: bigint,
+    contractURI: string,
+    totalSupply: bigint,
+    creationFee: bigint,
   ) => Promise<{
     hash?: `0x${string}`;
     collectionAddress?: `0x${string}`;
@@ -23,49 +25,19 @@ export interface UseNFTFactoryReturn {
 }
 
 export function useNFTFactory(): UseNFTFactoryReturn {
-  const [error, setError] = useState<Error | null>(null);
-
-  const { writeContractAsync, isPending: isCreateLoading } = useWriteContract();
-  const { isLoading: isWaitingForReceipt } = useWaitForTransactionReceipt({
-    hash: undefined,
-  });
-
-  const createCollection = useCallback(
-    async (
-      name: string,
-      symbol: string,
-      collectionURI: string,
-      totalSupply: bigint = BigInt(100),
-    ) => {
-      try {
-        setError(null);
-
-        // Validate inputs
-        if (!name) throw new Error('Collection name is required');
-        if (!symbol) throw new Error('Collection symbol is required');
-        if (!collectionURI) throw new Error('Collection URI is required');
-
-        const hash = await writeContractAsync({
-          address: NFT_FACTORY_ADDRESS,
-          abi: NFT_FACTORY_ABI,
-          functionName: 'createCollection',
-          args: [name, symbol, collectionURI, totalSupply],
-          chainId: sepolia.id,
-        });
-
-        return { hash };
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Unknown error occurred');
-        setError(error);
-        return { error };
-      }
-    },
-    [writeContractAsync],
-  );
+  const { createCollection, isLoading, error } = useCreateCollection();
 
   return {
-    createCollection,
-    isLoading: isCreateLoading || isWaitingForReceipt,
+    createCollection: async (
+      name: string,
+      symbol: string,
+      contractURI: string,
+      totalSupply: bigint,
+      creationFee: bigint,
+    ) => {
+      return await createCollection(name, symbol, contractURI, totalSupply, creationFee);
+    },
+    isLoading,
     error,
   };
 }

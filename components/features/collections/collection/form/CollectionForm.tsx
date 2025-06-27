@@ -126,6 +126,9 @@ export function CollectionForm({}: CollectionFormProps) {
   const { uploadToPinata, createFolder, isUploading, isCreatingFolder } = usePinataUpload();
   const { createCollection, isLoading: isFactoryLoading, error: factoryError } = useNFTFactory();
 
+  // Add creation fee query
+  const { data: creationFee } = trpc.collection.getCreationFee.useQuery();
+
   // REMOVED: Hooks yang menyebabkan excessive eth_newFilter calls
   // const { collectionCreatedEvents, loading: isEventLoading } = useNFTFactoryEvents(txHash || '');
   // const { collectionCreatedEvents: alchemyEvents, loading: isAlchemyLoading } =
@@ -212,7 +215,13 @@ export function CollectionForm({}: CollectionFormProps) {
       contractURI: string;
       totalSupply: bigint;
     }) => {
-      const result = await createCollection(name, symbol, contractURI, totalSupply);
+      // Ensure we have a valid creation fee (use 0 if not set)
+      const fee = creationFee ?? BigInt(0);
+
+      // Convert wei to ETH for display
+      const ethValue = Number(fee) / 1e18;
+      addConsoleMessage(`> Required creation fee: ${fee} wei (${ethValue} ETH)`);
+      const result = await createCollection(name, symbol, contractURI, totalSupply, fee);
       if (result.error) {
         throw result.error;
       }
@@ -227,9 +236,20 @@ export function CollectionForm({}: CollectionFormProps) {
       }
     },
     onError: (error) => {
-      addConsoleMessage(
-        `> Error creating collection: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
+      // Check if error is due to insufficient funds
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (
+        errorMessage.toLowerCase().includes('insufficient') ||
+        errorMessage.toLowerCase().includes('funds')
+      ) {
+        addConsoleMessage('> Error: Insufficient funds to pay creation fee');
+
+        addConsoleMessage(
+          `> Make sure you have enough ETH to cover the creation fee (${Number(creationFee ?? 0) / 1e18} ETH)`,
+        );
+      } else {
+        addConsoleMessage(`> Error creating collection: ${errorMessage}`);
+      }
     },
   });
 
@@ -329,7 +349,7 @@ export function CollectionForm({}: CollectionFormProps) {
   }, [txHash, address, addConsoleMessage, refreshCollectionsData, router]); // Hanya depend pada txHash dan address
 
   // Main form submission handler
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!showConsole) {
@@ -469,9 +489,14 @@ export function CollectionForm({}: CollectionFormProps) {
           <p className="text-sm">
             <span className="font-bold">Collection Owner:</span>{' '}
             {address ? (
-              <span className="font-mono text-xs">
-                {address.slice(0, 6)}...{address.slice(-4)} <b>{'(YOU)'}</b>{' '}
-              </span>
+              <>
+                <span className="font-mono text-xs">
+                  {address.slice(0, 6)}...{address.slice(-4)} <b>{'(YOU)'}</b>{' '}
+                </span>
+                <span className="font-mono text-xs">
+                  {creationFee} wei <b>{'(Creation Fee)'}</b>{' '}
+                </span>
+              </>
             ) : (
               <span className="text-red-600">No wallet connected. Please connect your wallet.</span>
             )}
