@@ -1,33 +1,21 @@
 'use client';
 
 import { getCsrfToken, signIn } from 'next-auth/react';
-import { SiweMessage } from 'siwe';
 
 /**
  * Creates a SIWE message for authentication
  */
 export async function createSiweMessage(address: string, statement: string) {
-  try {
-    const csrfToken = await getCsrfToken();
-    if (!csrfToken) throw new Error('CSRF token not found');
+  const csrfToken = await getCsrfToken();
+  if (!csrfToken) throw new Error('Failed to get CSRF token');
 
-    // Get the domain and origin
-    const domain = window.location.host;
-    const origin = window.location.origin;
+  const message = `${statement}
 
-    // Create a properly formatted EIP-4361 message string
-    const messageToSign = `${statement}
-
-URI: ${origin}
-Version: 1
-Chain ID: 1
+Wallet address: ${address}
 Nonce: ${csrfToken}
 Issued At: ${new Date().toISOString()}`;
 
-    return messageToSign;
-  } catch (error) {
-    throw error;
-  }
+  return message;
 }
 
 /**
@@ -35,18 +23,21 @@ Issued At: ${new Date().toISOString()}`;
  */
 export async function signInWithEthereum(message: string, signature: string) {
   try {
-    const res = await signIn('credentials', {
+    const response = await signIn('credentials', {
       message,
       signature,
       redirect: false,
-      callbackUrl: window.location.href,
     });
 
-    return { success: res?.ok ?? false, error: res?.error };
+    if (response?.error) {
+      throw new Error(response.error);
+    }
+
+    return { success: true, error: null };
   } catch (error) {
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : 'Failed to authenticate',
     };
   }
 }
