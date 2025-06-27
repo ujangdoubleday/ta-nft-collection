@@ -32,7 +32,7 @@ export function CollectionDetail({ collectionId, collection }: CollectionDetailP
       className="max-w-12xl mx-auto"
     >
       <div className="p-4">
-        <CollectionHeader description={collection.description} />
+        <CollectionHeader description={collection.description} contractAddress={collectionId} />
 
         {collection.items.length === 0 ? (
           <EmptyCollectionContent onAddNewAction={handleAddNewClick} />

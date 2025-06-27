@@ -2,7 +2,7 @@
 
 import { Button, Input } from '@/components/ui/atoms';
 import { Win98Window } from '@/components/ui/organisms/Win98Window';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTTransfer } from '@/lib/blockchain/hooks/useNFTTransfer';
 import { useRouter } from 'next/navigation';
@@ -35,65 +35,110 @@ export function NFTTransferForm({ contractAddress, tokenId, ownerAddress }: NFTT
   const [consoleMessages, setConsoleMessages] = useState<ConsoleMessage[]>([]);
 
   // Function to add a console message
-  const addConsoleMessage = (
-    message: string,
-    type: 'info' | 'success' | 'error' | 'warning' = 'info',
-  ) => {
-    setConsoleMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString() + Math.random().toString(),
-        message,
-        type,
-        timestamp: new Date(),
-      },
-    ]);
-  };
+  const addConsoleMessage = useCallback(
+    (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info') => {
+      setConsoleMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString() + Math.random().toString(),
+          message,
+          type,
+          timestamp: new Date(),
+        },
+      ]);
+    },
+    [],
+  );
 
   // Reset everything when component unmounts
   useEffect(() => {
     return () => {
-      reset();
+      // Only call reset when unmounting, not on every render
+      if (typeof window !== 'undefined') {
+        reset();
+      }
     };
-  }, [reset]);
+  }, []); // Empty dependency array means this only runs on mount/unmount
 
   // Watch for transfer events
   useEffect(() => {
-    if (transferEvents && transferEvents.length > 0) {
-      // Get the most recent event
-      const latestEvent = transferEvents[transferEvents.length - 1];
+    if (!transferEvents || transferEvents.length === 0 || transferSuccess) return;
 
-      if (latestEvent.tokenId === tokenId) {
-        addConsoleMessage(
-          `Transfer event detected: Token #${latestEvent.tokenId} transferred on blockchain!`,
-          'success',
-        );
+    // Log all events for debugging
+    console.log('All transfer events:', transferEvents);
 
-        // Add details about the transfer
-        addConsoleMessage(
-          `From: ${latestEvent.from.substring(0, 6)}...${latestEvent.from.substring(latestEvent.from.length - 4)}`,
-          'info',
-        );
-        addConsoleMessage(
-          `To: ${latestEvent.to.substring(0, 6)}...${latestEvent.to.substring(latestEvent.to.length - 4)}`,
-          'info',
-        );
+    // Get the most recent event
+    const latestEvent = transferEvents[transferEvents.length - 1];
 
-        // If transfer event is detected and matches our transaction, mark as success
-        if (recipientAddress.toLowerCase() === latestEvent.to.toLowerCase()) {
-          setTransferSuccess(true);
-          setIsSubmitting(false);
-          addConsoleMessage('NFT transfer completed successfully!', 'success');
+    console.log('Latest transfer event:', latestEvent);
+    console.log('Expected token ID:', tokenId);
+    console.log('Token ID comparison:', {
+      eventTokenId: latestEvent.tokenId,
+      ourTokenId: tokenId,
+      matches: String(latestEvent.tokenId) === String(tokenId),
+    });
 
-          // Refresh the page after a brief delay to show updated owner
-          setTimeout(() => {
-            // Force a hard refresh to update all blockchain data
-            window.location.reload();
-          }, 2000);
-        }
+    // Check if this event is for our token (compare as strings to avoid type issues)
+    if (String(latestEvent.tokenId) === String(tokenId)) {
+      addConsoleMessage(
+        `Transfer event detected: Token #${latestEvent.tokenId} transferred on blockchain!`,
+        'success',
+      );
+
+      // Add details about the transfer
+      addConsoleMessage(
+        `From: ${latestEvent.from.substring(0, 6)}...${latestEvent.from.substring(latestEvent.from.length - 4)}`,
+        'info',
+      );
+      addConsoleMessage(
+        `To: ${latestEvent.to.substring(0, 6)}...${latestEvent.to.substring(latestEvent.to.length - 4)}`,
+        'info',
+      );
+
+      // If transfer event is detected and matches our transaction, mark as success
+      if (recipientAddress.toLowerCase() === latestEvent.to.toLowerCase()) {
+        setTransferSuccess(true);
+        setIsSubmitting(false);
+        addConsoleMessage('NFT transfer completed successfully!', 'success');
+
+        // Refresh the page after a brief delay to show updated owner
+        const timeoutId = setTimeout(() => {
+          // Force a hard refresh to update all blockchain data
+          window.location.reload();
+        }, 2000);
+
+        return () => clearTimeout(timeoutId);
       }
+    } else {
+      console.log('Event token ID does not match our token ID');
     }
-  }, [transferEvents, tokenId, recipientAddress]);
+  }, [transferEvents, tokenId, recipientAddress, addConsoleMessage, transferSuccess]);
+
+  // Also watch for isSuccess to handle cases where events might not be detected
+  useEffect(() => {
+    if (!isSuccess || !transactionHash || transferSuccess) return;
+
+    console.log('Transaction successful, but no matching event detected yet');
+    addConsoleMessage('Transaction confirmed on blockchain!', 'success');
+    addConsoleMessage('Waiting for ownership update...', 'info');
+
+    // If we don't get a transfer event within a reasonable time, assume success
+    const timeoutId = setTimeout(() => {
+      if (!transferSuccess) {
+        console.log('No event detected after timeout, assuming success');
+        setTransferSuccess(true);
+        setIsSubmitting(false);
+        addConsoleMessage('NFT transfer assumed successful (timeout)', 'success');
+
+        // Refresh the page
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    }, 15000); // 15 seconds timeout
+
+    return () => clearTimeout(timeoutId);
+  }, [isSuccess, transactionHash, transferSuccess, addConsoleMessage]);
 
   const handleTransfer = async () => {
     if (!recipientAddress) {
