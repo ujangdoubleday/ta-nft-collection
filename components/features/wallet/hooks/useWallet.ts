@@ -2,17 +2,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { verifyMessage } from 'viem';
-import {
-  useAccount,
-  useChainId,
-  useConnect,
-  useDisconnect,
-  useSignMessage,
-  useWalletClient,
-} from 'wagmi';
+import { useAccount, useChainId, useConnect, useDisconnect, useSignMessage } from 'wagmi';
 import { injected } from 'wagmi/connectors';
 import { createSiweMessage, signInWithEthereum } from '@/lib/auth/siwe';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, signOut, getCsrfToken } from 'next-auth/react';
+import { sepolia } from 'wagmi/chains';
+import { trpc } from '@/lib/api/trpc/client';
 
 // Local storage keys
 const DISCONNECTED_KEY = 'wallet_disconnected';
@@ -39,7 +34,7 @@ const removeFromStorage = (key: string): void => {
 // Wallet state interface
 interface WalletState {
   address: string | null;
-  chainId: string | null;
+  chainId: number | null;
   isConnecting: boolean;
   isConnected: boolean;
   error: string | null;
@@ -72,220 +67,180 @@ export function useWalletWagmi() {
   // Wagmi hooks
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const { connectAsync, isPending: isConnectPending } = useConnect();
+  const { connectAsync } = useConnect();
   const { disconnectAsync } = useDisconnect();
-  const { data: walletClient } = useWalletClient();
-  const { signMessageAsync, isPending: isSignPending } = useSignMessage();
+  const { signMessageAsync } = useSignMessage();
 
   // Next Auth session
   const { data: session, status } = useSession();
+
+  // Add Redis mutation
+  const { mutateAsync: setUserData } = trpc.redis.set.useMutation();
+  const { data: storedUserData, refetch: refetchUserData } = trpc.redis.get.useQuery(
+    { key: address ? `user:${address.toLowerCase()}` : '' },
+    { enabled: !!address },
+  );
 
   // Update state when account or session changes
   useEffect(() => {
     setState((prev) => ({
       ...prev,
       address: address || null,
-      chainId: chainId ? chainId.toString() : null,
+      chainId: chainId || null,
       isConnected,
-      isConnecting: isConnectPending,
-      isAuthenticating: isSignPending,
-      // Set authenticated based on NextAuth session
       isAuthenticated: status === 'authenticated',
     }));
-  }, [address, isConnected, chainId, isConnectPending, isSignPending, status]);
+  }, [address, isConnected, chainId, status]);
 
-  // Update localStorage when manual disconnect changes
-  useEffect(() => {
-    if (!isBrowser) return;
-
-    if (state.manuallyDisconnected) {
-      setToStorage(DISCONNECTED_KEY, 'true');
-    } else {
-      removeFromStorage(DISCONNECTED_KEY);
-    }
-  }, [state.manuallyDisconnected]);
-
-  /**
-   * Connect to the wallet
-   */
+  // Connect to wallet
   const connect = useCallback(async () => {
-    if (!isBrowser) {
-      return false;
-    }
+    if (!isBrowser) return false;
 
     try {
       setState((prev) => ({
         ...prev,
         isConnecting: true,
         error: null,
-        manuallyDisconnected: false,
       }));
 
-      // Remove the disconnected flag from localStorage
       removeFromStorage(DISCONNECTED_KEY);
 
       const result = await connectAsync({
         connector: injected(),
       });
 
-      if (!result?.accounts || result.accounts.length === 0) {
-        throw new Error('No accounts returned from wallet');
+      if (!result?.accounts?.[0]) {
+        throw new Error('No account returned from wallet');
+      }
+
+      if (result.chainId !== sepolia.id) {
+        throw new Error('Please switch to Sepolia network');
       }
 
       setState((prev) => ({
         ...prev,
         address: result.accounts[0],
-        chainId: result.chainId.toString(),
+        chainId: result.chainId,
         isConnected: true,
         isConnecting: false,
-        isAuthenticated: false, // Always reset authentication state on connect
         error: null,
       }));
 
       return true;
     } catch (error: any) {
-      console.error('Error connecting wallet:', error);
-
-      // Check for user rejected error
       const errorMessage = error?.message || String(error);
-      const isUserRejected =
-        errorMessage.includes('rejected') ||
-        errorMessage.includes('denied') ||
-        errorMessage.includes('canceled') ||
-        errorMessage.includes('cancelled') ||
-        errorMessage.includes('User rejected');
-
       setState((prev) => ({
         ...prev,
         isConnecting: false,
-        isConnected: false,
-        error: isUserRejected
-          ? 'Connection was rejected by user'
-          : `Error connecting: ${errorMessage}`,
+        error: errorMessage,
       }));
-
       return false;
     }
   }, [connectAsync]);
 
-  /**
-   * Disconnect from the wallet
-   */
+  // Disconnect wallet
   const disconnect = useCallback(async () => {
     try {
       await disconnectAsync();
-
-      // Sign out from NextAuth
       await signOut({ redirect: false });
-    } catch (err) {
-      console.error('Error disconnecting:', err);
+
+      setState((prev) => ({
+        ...prev,
+        address: null,
+        chainId: null,
+        isConnected: false,
+        isAuthenticated: false,
+        manuallyDisconnected: true,
+        error: null,
+      }));
+
+      setToStorage(DISCONNECTED_KEY, 'true');
+    } catch (error: any) {
+      console.error('Error disconnecting:', error);
     }
-
-    setState((prev) => ({
-      ...prev,
-      address: null,
-      chainId: null,
-      isConnected: false,
-      isAuthenticated: false,
-      manuallyDisconnected: true,
-      error: null,
-    }));
-
-    // Store disconnected state to prevent auto-reconnect
-    setToStorage(DISCONNECTED_KEY, 'true');
   }, [disconnectAsync]);
 
-  /**
-   * Authenticate the connected wallet using SIWE and NextAuth
-   */
-  const authenticate = useCallback(
-    async (onSignComplete?: () => void) => {
-      if (!isBrowser) {
-        return false;
+  // Authenticate
+  const authenticate = useCallback(async () => {
+    if (!address || !isConnected) {
+      setState((prev) => ({
+        ...prev,
+        error: 'Please connect your wallet first',
+      }));
+      return false;
+    }
+
+    try {
+      setState((prev) => ({
+        ...prev,
+        isAuthenticating: true,
+        error: null,
+      }));
+
+      const csrfToken = await getCsrfToken();
+      if (!csrfToken) throw new Error('Failed to get CSRF token');
+
+      const statement = `Sign in to MyNFTs.exe with your Ethereum account.\nThis signature doesn't cost gas and securely identifies you.`;
+      const message = await createSiweMessage(address, statement);
+      const signature = await signMessageAsync({ message });
+
+      // Verify signature client-side
+      const isValid = await verifyMessage({
+        address,
+        message,
+        signature,
+      });
+
+      if (!isValid) {
+        throw new Error('Invalid signature');
       }
 
-      if (!walletClient || !address) {
-        setState((prev) => ({
-          ...prev,
-          error: 'Connect wallet before authenticating',
-          isAuthenticating: false,
-        }));
-        return false;
+      // Store user data in Redis
+      const userKey = `user:${address.toLowerCase()}`;
+      const userData = {
+        address: address.toLowerCase(),
+        nonce: csrfToken,
+        chainId: sepolia.id,
+        lastAuthenticated: new Date().toISOString(),
+      };
+
+      const redisResult = await setUserData({
+        key: userKey,
+        value: userData,
+        expireInSeconds: 24 * 60 * 60, // 24 hours
+      });
+
+      if (!redisResult) {
+        throw new Error('Failed to store user data');
       }
 
-      try {
-        setState((prev) => ({
-          ...prev,
-          isAuthenticating: true,
-          error: null,
-        }));
+      const { success, error } = await signInWithEthereum(message, signature);
 
-        // Create SIWE message with address in the statement
-        const statement = `Sign in to MyNFTs.exe with your Ethereum account ${address}.\nThis signature doesn't cost gas and securely identifies you.`;
-
-        try {
-          const message = await createSiweMessage(address, statement);
-
-          // Sign the message
-          const signature = await signMessageAsync({ message });
-
-          // Verify the signature on the client side
-          const verified = await verifyMessage({
-            address,
-            message,
-            signature,
-          });
-
-          if (!verified) {
-            throw new Error('Client-side signature verification failed');
-          }
-
-          // Call the callback to indicate signing is complete
-          // This is where we'll show the account creation modal
-          if (onSignComplete) {
-            onSignComplete();
-          }
-
-          // Call Next Auth to verify and create session
-          const { success, error } = await signInWithEthereum(message, signature);
-
-          if (!success) {
-            throw new Error(error || 'Sign-in failed');
-          }
-
-          setState((prev) => ({
-            ...prev,
-            isAuthenticated: true,
-            isAuthenticating: false,
-            error: null,
-          }));
-
-          return true;
-        } catch (innerError) {
-          throw innerError;
-        }
-      } catch (error: any) {
-        // Check for user rejected signatures
-        const errorMessage = error?.message || String(error);
-        const isUserRejected =
-          errorMessage.includes('rejected') ||
-          errorMessage.includes('denied') ||
-          errorMessage.includes('canceled') ||
-          errorMessage.includes('cancelled') ||
-          errorMessage.includes('User rejected');
-
-        setState((prev) => ({
-          ...prev,
-          isAuthenticating: false,
-          error: isUserRejected
-            ? 'Signature was rejected by user'
-            : `Error signing: ${errorMessage}`,
-        }));
-        return false;
+      if (!success) {
+        throw new Error(error || 'Authentication failed');
       }
-    },
-    [walletClient, address, signMessageAsync],
-  );
+
+      // Refresh stored user data
+      await refetchUserData();
+
+      setState((prev) => ({
+        ...prev,
+        isAuthenticated: true,
+        isAuthenticating: false,
+        error: null,
+      }));
+
+      return true;
+    } catch (error: any) {
+      const errorMessage = error?.message || String(error);
+      setState((prev) => ({
+        ...prev,
+        isAuthenticating: false,
+        error: errorMessage,
+      }));
+      return false;
+    }
+  }, [address, isConnected, signMessageAsync, setUserData, refetchUserData]);
 
   return {
     address: state.address,
@@ -299,5 +254,6 @@ export function useWalletWagmi() {
     disconnect,
     authenticate,
     session,
+    storedUserData,
   };
 }

@@ -42,9 +42,6 @@ export const WalletButton = () => {
     logMessages,
   } = useWalletModal();
 
-  // Check if error message is specifically for wallet disconnection
-  const isDisconnectionMessage = errorMessage === 'Your wallet has been disconnected.';
-
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -78,7 +75,7 @@ export const WalletButton = () => {
           <WalletModalContent
             step={walletModalStep}
             address={address}
-            chainId={chainId}
+            chainId={chainId?.toString() || null}
             isConnecting={isConnecting}
             isAuthenticating={isAuthenticating}
             copied={copied}
