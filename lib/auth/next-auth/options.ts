@@ -21,6 +21,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         try {
           if (!credentials?.message || !credentials?.signature) {
+            console.error('Missing message or signature');
             return null;
           }
 
@@ -36,14 +37,15 @@ export const authOptions: NextAuthOptions = {
             const address = addressMatch[1];
 
             return {
-              id: address, // Or a generated UUID, but address is unique
+              id: address,
               address,
-              name: `User ${address.slice(0, 6)}`,
+              name: `${address.slice(0, 6)}...${address.slice(-4)}`,
             };
           } catch (error) {
             return null;
           }
         } catch (error) {
+          console.error('Error in authorize:', error);
           return null;
         }
       },
@@ -51,7 +53,7 @@ export const authOptions: NextAuthOptions = {
   ],
   session: {
     strategy: 'jwt',
-    maxAge: 12 * 60 * 60,
+    maxAge: 12 * 60 * 60, // 12 hours
     updateAge: 0,
   },
   cookies: {
@@ -100,6 +102,10 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
+  },
+  pages: {
+    signIn: '/', // Redirect to home page for sign in
+    error: '/', // Redirect to home page on error
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',

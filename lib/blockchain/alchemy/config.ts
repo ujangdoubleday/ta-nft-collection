@@ -8,17 +8,17 @@ const settings: AlchemySettings = {
   maxRetries: 10,
 };
 
-console.log(
-  'Initializing Alchemy with API key:',
-  ALCHEMY_API_KEY ? 'Key available' : 'No API key found',
-);
+// console.log(
+//   'Initializing Alchemy with API key:',
+//   ALCHEMY_API_KEY ? 'Key available' : 'No API key found',
+// );
 
 export const alchemy = new Alchemy(settings);
 
 // Initialize WebSocket connection when imported
-alchemy.ws.on('connect', () => console.log('Alchemy WebSocket connected'));
-alchemy.ws.on('error', (error) => console.error('Alchemy WebSocket error:', error));
-alchemy.ws.on('disconnect', () => console.warn('Alchemy WebSocket disconnected'));
+alchemy.ws.on('connect', () => console.log('websocket connected'));
+alchemy.ws.on('error', (error) => console.error('websocket error:', error));
+alchemy.ws.on('disconnect', () => console.warn('websocket disconnected'));
 
 export const BASE_URL_ALCHEMY_API = `https://eth-sepolia.g.alchemy.com/nft/v3/${ALCHEMY_API_KEY}`;
 export const BASE_URL_ALCHEMY_RPC = `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;

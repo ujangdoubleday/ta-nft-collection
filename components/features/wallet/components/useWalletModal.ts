@@ -1,4 +1,4 @@
-import { useWallet } from '@/lib/hooks/wallet';
+import { useWalletWagmi as useWallet } from '../hooks/useWallet';
 import { formatAddress } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -199,11 +199,9 @@ export const useWalletModal = () => {
   // Menggunakan useMutation untuk autentikasi wallet
   const authenticateMutation = useMutation({
     mutationFn: async () => {
-      return authenticate(() => {
-        setIsCreatingAccount(true);
-        setWalletModalStep('checking');
-        // No log messages or timeouts needed anymore
-      });
+      setIsCreatingAccount(true);
+      setWalletModalStep('checking');
+      return authenticate();
     },
     onSuccess: (success) => {
       if (!success) {
