@@ -1,6 +1,5 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma } from '@/lib/db';
 
 // Get the domain for cookies
 const cookieDomain =
@@ -36,25 +35,10 @@ export const authOptions: NextAuthOptions = {
 
             const address = addressMatch[1];
 
-            let user = await prisma.user.findUnique({
-              where: {
-                address: address.toLowerCase(),
-              },
-            });
-
-            if (!user) {
-              user = await prisma.user.create({
-                data: {
-                  address: address.toLowerCase(),
-                  name: `User ${address.slice(0, 6)}`,
-                },
-              });
-            }
-
             return {
-              id: user.id,
+              id: address, // Or a generated UUID, but address is unique
               address,
-              name: user.name,
+              name: `User ${address.slice(0, 6)}`,
             };
           } catch (error) {
             return null;
