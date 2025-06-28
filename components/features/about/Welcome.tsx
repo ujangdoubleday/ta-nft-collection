@@ -18,7 +18,7 @@ export function Welcome() {
             <p className="text-xs">
               Here, the charm of classic interfaces meets cutting-edge NFT technology, creating a
               unique space for digital artists to create, showcase, and trade their work in an
-              environment that's both familiar and functional.
+              environment that&apos;s both familiar and functional.
             </p>
           </div>
         </div>
@@ -26,9 +26,9 @@ export function Welcome() {
         <div className="mt-4 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-2">
           <p className="text-xs">
             <strong>Why Classic Aesthetics?</strong> We believe that interfaces with their iconic
-            buttons and windows defined an era of digital creativity. We're bringing that charm back
-            to inspire a new generation of artists, while providing modern tools to manage digital
-            assets.
+            buttons and windows defined an era of digital creativity. We&apos;re bringing that charm
+            back to inspire a new generation of artists, while providing modern tools to manage
+            digital assets.
           </p>
         </div>
       </div>
