@@ -20,12 +20,6 @@ export function HeroSection() {
               collectibles, build your portfolio, and own exclusive digital assets with our
               retro-inspired platform.
             </p>
-            <div className="win98-shadow-inset bg-white p-2 mt-2">
-              <p className="text-xs">
-                <span className="font-bold">🔥 NEW:</span> Windows 98 Pixel Art Collection just
-                dropped! Limited availability.
-              </p>
-            </div>
           </div>
           <div className="flex-shrink-0 w-40 h-40 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] flex items-center justify-center">
             <Image
