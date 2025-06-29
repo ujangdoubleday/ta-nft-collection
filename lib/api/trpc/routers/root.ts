@@ -3,12 +3,16 @@ import { nftRouter } from '@/lib/api/trpc/routers/nft';
 import { collectionRouter } from '@/lib/api/trpc/routers/collection';
 import { uploadRouter } from '@/lib/api/trpc/routers/upload';
 import { redisRouter } from './redis';
+import { factoryConfigRouter } from './factory-config';
+import { blocklistRouter } from './blocklist';
 
 export const appRouter = router({
   nft: nftRouter,
   collection: collectionRouter,
   upload: uploadRouter,
   redis: redisRouter,
+  factoryConfig: factoryConfigRouter,
+  blocklist: blocklistRouter,
 });
 
 // Export type router type signature,
