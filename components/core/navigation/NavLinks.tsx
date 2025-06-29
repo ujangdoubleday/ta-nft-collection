@@ -9,11 +9,23 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/molecules/dropdown-menu';
 import { Menu } from 'lucide-react';
+import { useAdmin } from '@/lib/hooks/use-admin';
+import { useSession } from 'next-auth/react';
 
 // Shared links data
 const useNavLinks = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { isAdmin } = useAdmin();
+  const { data: session } = useSession();
+
+  // Debug logging
+  console.log('NavLinks Component:', {
+    pathname,
+    isAdmin,
+    session,
+    userAddress: session?.user?.address,
+  });
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -28,6 +40,11 @@ const useNavLinks = () => {
     { href: '/contact', label: 'Contact' },
     { href: '/collections', label: 'My Collections' },
   ];
+
+  // Add admin link if user is admin
+  if (isAdmin) {
+    links.push({ href: '/dashboard', label: 'Admin' });
+  }
 
   return { links, pathname, isActive, isOpen, setIsOpen };
 };

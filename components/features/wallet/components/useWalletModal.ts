@@ -207,6 +207,7 @@ export const useWalletModal = () => {
       if (!success) {
         disconnect();
         resetWalletStates();
+        setIsWalletModalOpen(false);
       } else {
         setIsWalletModalOpen(false);
       }

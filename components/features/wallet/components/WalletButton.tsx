@@ -1,3 +1,5 @@
+'use client';
+
 import { WalletModalContent } from '@/components/features/wallet/components/WalletModalContent';
 import {
   Win98ErrorNotification,
