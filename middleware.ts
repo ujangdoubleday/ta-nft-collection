@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+// List of admin addresses (should be moved to environment variables)
+const ADMIN_ADDRESSES = ['0x19191984DF6Ce7749B786b9a2BB869B4b735eC31'];
+
 export async function middleware(request: NextRequest) {
   try {
     const token = await getToken({
@@ -8,26 +11,53 @@ export async function middleware(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET,
     });
 
-    if (!token || (!token.address && !token.sub)) {
-      const intendedPath = request.nextUrl.pathname.replace('/(protected)', '');
+    // Check if the path is in admin protected route group
+    if (request.nextUrl.pathname.startsWith('/(admin)/(protected)')) {
+      if (!token || !token.address) {
+        return NextResponse.redirect(new URL('/', request.url));
+      }
 
-      const redirectUrl = new URL('/collections', request.url);
-      redirectUrl.searchParams.set('redirect', intendedPath);
+      // Check if user is admin
+      const isAdmin = ADMIN_ADDRESSES.map((addr) => addr.toLowerCase()).includes(
+        (token.address as string).toLowerCase(),
+      );
 
-      return NextResponse.redirect(redirectUrl);
+      if (!isAdmin) {
+        return NextResponse.redirect(new URL('/', request.url));
+      }
+
+      // Rewrite admin protected route
+      const url = request.nextUrl.clone();
+      url.pathname = url.pathname.replace('/(admin)/(protected)', '');
+      return NextResponse.rewrite(url);
     }
 
-    const url = request.nextUrl.clone();
-    url.pathname = url.pathname.replace('/(protected)', '');
-    return NextResponse.rewrite(url);
+    // Handle protected collection routes
+    if (request.nextUrl.pathname.includes('/(protected)')) {
+      if (!token || (!token.address && !token.sub)) {
+        const intendedPath = request.nextUrl.pathname.replace('/(protected)', '');
+        const redirectUrl = new URL('/', request.url);
+        redirectUrl.searchParams.set('redirect', intendedPath);
+        return NextResponse.redirect(redirectUrl);
+      }
+
+      const url = request.nextUrl.clone();
+      url.pathname = url.pathname.replace('/(protected)', '');
+      return NextResponse.rewrite(url);
+    }
+
+    return NextResponse.next();
   } catch (error) {
     console.error('Error in middleware:', error);
-
-    const errorUrl = new URL('/collections', request.url);
-    return NextResponse.redirect(errorUrl);
+    return NextResponse.redirect(new URL('/', request.url));
   }
 }
 
 export const config = {
-  matcher: ['/collections/(protected)/:path*'],
+  matcher: [
+    // Protected collections routes
+    '/collections/(protected)/:path*',
+    // Admin protected routes (including dashboard)
+    '/(admin)/(protected)/:path*',
+  ],
 };
