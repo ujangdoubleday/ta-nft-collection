@@ -2,128 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: "MS Sans Serif";
-  src: url(/assets/fonts/ms-sans-serif.woff) format("woff");
-  src: url(/assets/fonts/ms-sans-serif.woff2) format("woff2");
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family:"Pixelated MS Sans Serif";
-  src:url(https://unpkg.com/98.css@0.1.16/dist/ms_sans_serif_bold.woff) format("woff");
-  src:url(https://unpkg.com/98.css@0.1.16/dist/ms_sans_serif_bold.woff2) format("woff2");
-  font-weight:700;
-  font-style:normal;
-}
-
 @layer base {
   :root {
-    --background: 180 100% 25%; /* Retro teal #008080 */
-    --foreground: 0 0% 0%;
-    --card: 0 0% 83.9%;
-    --card-foreground: 0 0% 0%;
-    --popover: 0 0% 83.9%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 195 100% 33%;
+    --font-geist-sans: 'Geist Sans', system-ui, sans-serif;
+    --font-geist-mono: 'Geist Mono', monospace;
+    
+    --background: 0 0% 0%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
-    --secondary: 0 0% 75.3%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 63.9%;
-    --muted-foreground: 0 0% 0%;
-    --accent: 0 0% 75.3%;
-    --accent-foreground: 0 0% 0%;
+    
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 0 0% 45.1%;
-    --input: 0 0% 83.9%;
-    --ring: 195 100% 33%;
-    --radius: 0px;
+
+    --success: 142.1 76.2% 36.3%;
+    --success-foreground: 210 40% 98%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    
+    --radius: 0.5rem;
+
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
 
   .dark {
-    --background: 180 100% 25%; /* Retro teal #008080 for dark mode too */
-    --foreground: 0 0% 0%;
-    --card: 0 0% 83.9%;
-    --card-foreground: 0 0% 0%;
-    --popover: 0 0% 83.9%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 195 100% 50%;
+    --background: 0 0% 0%;
+    --foreground: 210 40% 98%;
+    
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 30%;
+    
+    --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 30%;
+    
+    --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 30%;
+    
+    --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
+    
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 0 0% 45.1%;
-    --input: 0 0% 25%;
-    --ring: 195 100% 50%;
+
+    --success: 142.1 70.6% 45.3%;
+    --success-foreground: 210 40% 98%;
+    
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
 @layer base {
   * {
-    @apply border-0;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'MS Sans Serif', sans-serif;
-    cursor: default;
-  }
-  strong, b, [font-weight="700"], [font-weight="bold"], .font-bold {
-    font-family: 'Pixelated MS Sans Serif', sans-serif;
-    font-weight: 700;
-  }
-  button, a, select, input[type="submit"], input[type="reset"], input[type="button"], [role="button"] {
-    cursor: default;
-  }
-}
-
-html,
-body {
-  font-family: "MS Sans Serif", Arial !important;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.win98-shadow {
-  box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px grey, inset 2px 2px #dfdfdf;
-}
-
-.win98-shadow-inset {
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  box-shadow: inset 1px 1px #000, inset -1px -1px #dfdfdf;
-}
-
-.win98-bar {
-  background: linear-gradient(90deg, #000080, #1084d0);
-}
-
-.win98-text {
-  color: #000000;
-}
-
-.win98-bg {
-  background-color: #008080; /* Windows 98 teal background */
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+    font-family: var(--font-geist-sans);
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
@@ -138,15 +109,10 @@ a {
   to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes win98StartUp {
+@keyframes scaleIn {
   0% { opacity: 0; transform: scale(0.8); }
   70% { opacity: 1; transform: scale(1.05); }
   100% { transform: scale(1); }
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }
 
 @keyframes spin {
@@ -154,13 +120,13 @@ a {
   to { transform: rotate(360deg); }
 }
 
-@keyframes spin-reverse {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-.animate-startup {
-  animation: win98StartUp 0.5s ease-out;
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out;
 }
 
 .animate-fade-in {
@@ -171,16 +137,12 @@ a {
   animation: slideInFromBottom 0.5s ease-out;
 }
 
-.animate-blink {
-  animation: blink 1s infinite;
+.animate-pulse {
+  animation: pulse 1s infinite;
 }
 
 .animate-spin {
   animation: spin 1s linear infinite;
-}
-
-.animate-spin-reverse {
-  animation: spin-reverse 1s linear infinite;
 }
 
 /* Responsive Design */
@@ -193,40 +155,32 @@ a {
   scrollbar-width: none !important;
 }
 
+/* Modern Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--secondary));
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.5);
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.7);
+}
+
 /* Mobile Optimizations */
 @media (max-width: 640px) {
   .container {
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
-  
-  .win98-bar {
-    height: 1.25rem;
-  }
-  
-  h2 {
-    font-size: 1rem;
-  }
-  
-  p {
-    font-size: 0.75rem;
-  }
-}
-
-/* Hover Effects */
-.hover-active:hover {
-  filter: brightness(110%);
-  transition: all 0.2s;
-}
-
-.press-effect:active {
-  transform: scale(0.98);
-  transition: transform 0.1s;
-}
-
-/* Startup Animation for Main Content */
-main > div {
-  animation: win98StartUp 0.6s ease-out;
 }
 
 /* Sequential Animation for Cards */
@@ -241,319 +195,97 @@ main > div {
 .grid > div:nth-child(4) { animation-delay: 0.4s; }
 .grid > div:nth-child(5) { animation-delay: 0.5s; }
 
-/* Windows 98 Scrollbar */
-.win98-scrollbar {
-  scrollbar-width: auto;
-  scrollbar-color: #c0c0c0 #d4d0c8;
+/* Transition utilities */
+.transition-all {
+  transition-property: all;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.win98-scrollbar::-webkit-scrollbar {
-  width: 16px;
-  height: 16px;
+.transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.win98-scrollbar::-webkit-scrollbar-track {
-  background: #d4d0c8;
+.transition-opacity {
+  transition-property: opacity;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.win98-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #c0c0c0;
-  border: 2px solid;
-  border-color: #dfdfdf #808080 #808080 #dfdfdf;
-  box-shadow: inset 0px 0px 0px 1px #c0c0c0;
+.transition-transform {
+  transition-property: transform;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.win98-scrollbar::-webkit-scrollbar-button {
-  display: block;
-  height: 16px;
-  width: 16px;
-  background-color: #c0c0c0;
-  border: 2px solid;
-  border-color: #dfdfdf #808080 #808080 #dfdfdf;
-  box-shadow: inset 0px 0px 0px 1px #c0c0c0;
-  background-position: center;
-  background-repeat: no-repeat;
+/* Interactive states */
+.hover-effect {
+  @apply transition-colors duration-200;
 }
 
-.win98-scrollbar::-webkit-scrollbar-button:vertical:decrement {
-  background-image: url("data:image/svg+xml,%3Csvg width='7' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.5 0L7 4H0z' fill='%23000'/%3E%3C/svg%3E");
+.hover-effect:hover {
+  @apply brightness-105;
 }
 
-.win98-scrollbar::-webkit-scrollbar-button:vertical:increment {
-  background-image: url("data:image/svg+xml,%3Csvg width='7' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3.5 4L7 0H0z' fill='%23000'/%3E%3C/svg%3E");
+.active-effect:active {
+  @apply brightness-95 scale-[0.98] transition-transform duration-100;
 }
 
-.win98-scrollbar::-webkit-scrollbar-button:horizontal:decrement {
-  background-image: url("data:image/svg+xml,%3Csvg width='4' height='7' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 3.5L4 7V0z' fill='%23000'/%3E%3C/svg%3E");
+/* Focus styles */
+.focus-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
 }
 
-.win98-scrollbar::-webkit-scrollbar-button:horizontal:increment {
-  background-image: url("data:image/svg+xml,%3Csvg width='4' height='7' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 3.5L0 7V0z' fill='%23000'/%3E%3C/svg%3E");
-}
-
-.win98-scrollbar::-webkit-scrollbar-button:active {
-  border-color: #808080 #dfdfdf #dfdfdf #808080;
-  box-shadow: inset 1px 1px 1px 1px #808080;
-}
-
-.win98-scrollbar::-webkit-scrollbar-corner {
-  background: #d4d0c8;
-}
-
-/* Scrollbar hiding utility (separate from our Windows 98 styling) */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none !important;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
-}
-
-/* Windows 98 Progress Block Animation */
-@keyframes win98Block {
-  0%, 100% { background: #000080; }
-  50% { background: #1084d0; }
-}
-
-@keyframes retro-loading {
-  0%, 100% { background-color: #000080; }
-  50% { background-color: #1084d0; }
-}
-
-@keyframes retro-scan {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(100%); }
-}
-
-@keyframes retro-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-@keyframes retro-boot {
-  0% { opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-.animate-windows98-loading {
-  animation: retro-loading 1s infinite;
-}
-
-.animate-windows98-scan {
-  animation: retro-scan 2s infinite linear;
-}
-
-.animate-windows98-blink {
-  animation: retro-blink 1s infinite;
-}
-
-.animate-windows98-boot {
-  animation: retro-boot 3s ease-in-out;
-}
-
-.win98-progress-block {
-  animation: win98Block 0.8s infinite;
-}
-
-.win98-progress-block:nth-child(1) { animation-delay: 0.1s; }
-.win98-progress-block:nth-child(2) { animation-delay: 0.2s; }
-.win98-progress-block:nth-child(3) { animation-delay: 0.3s; }
-.win98-progress-block:nth-child(4) { animation-delay: 0.4s; }
-.win98-progress-block:nth-child(5) { animation-delay: 0.5s; }
-.win98-progress-block:nth-child(6) { animation-delay: 0.6s; }
-.win98-progress-block:nth-child(7) { animation-delay: 0.7s; }
-.win98-progress-block:nth-child(8) { animation-delay: 0.8s; }
-.win98-progress-block:nth-child(9) { animation-delay: 0.9s; }
-.win98-progress-block:nth-child(10) { animation-delay: 1.0s; }
-.win98-progress-block:nth-child(11) { animation-delay: 1.1s; }
-.win98-progress-block:nth-child(12) { animation-delay: 1.2s; }
-.win98-progress-block:nth-child(13) { animation-delay: 1.3s; }
-.win98-progress-block:nth-child(14) { animation-delay: 1.4s; }
-.win98-progress-block:nth-child(15) { animation-delay: 1.5s; }
-.win98-progress-block:nth-child(16) { animation-delay: 1.6s; }
-.win98-progress-block:nth-child(17) { animation-delay: 1.7s; }
-.win98-progress-block:nth-child(18) { animation-delay: 1.8s; }
-.win98-progress-block:nth-child(19) { animation-delay: 1.9s; }
-.win98-progress-block:nth-child(20) { animation-delay: 2.0s; }
-
-@keyframes win98Dot {
-  0%, 80%, 100% { opacity: 0.3; }
-  40% { opacity: 1; }
-}
-
-.win98-dot-spinner-0 {
-  animation: win98Dot 1s infinite 0s;
-}
-.win98-dot-spinner-1 {
-  animation: win98Dot 1s infinite 0.2s;
-}
-.win98-dot-spinner-2 {
-  animation: win98Dot 1s infinite 0.4s;
-}
-
-/* Console animations and styling */
-@keyframes blink-cursor {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-@keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
-}
-
+/* Console style replacements */
 .console-text {
-  color: #33ff33;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
+  @apply font-mono text-sm text-foreground;
 }
 
-.loading-text {
-  overflow: hidden;
-  border-right: 0.15em solid #33ff33;
-  white-space: nowrap;
-  margin: 0 auto;
-  animation: 
-    typing 3s steps(40, end),
-    blink-cursor .75s step-end infinite;
-}
-
-.console-container {
-  background-color: #000000;
-  color: #33ff33;
-  font-family: 'Courier New', monospace;
-  padding: 0.5rem;
-  height: 100%;
-  overflow-y: auto;
-}
-
-.console-line {
-  margin-bottom: 0.25rem;
-}
-
-.console-cursor {
-  display: inline-block;
-  background-color: #33ff33;
-  width: 0.5rem;
-  height: 1rem;
-  animation: blink-cursor 1s infinite;
-}
-
-/* Success text in console */
 .console-success {
-  color: #33ff33;
+  @apply text-success;
 }
 
-/* Info text in console */
 .console-info {
-  color: #33ccff;
+  @apply text-primary;
 }
 
-/* Warning text in console */
 .console-warning {
-  color: #ffcc00;
+  @apply text-amber-500;
 }
 
-/* Error text in console */
 .console-error {
-  color: #ff3333;
+  @apply text-destructive;
 }
 
-/* Windows 98 Console */
-.win98-console {
-  font-family: 'Consolas', 'Courier New', monospace;
-  background-color: #000000;
-  color: #cccccc;
-  overflow: auto;
+/* Code block styling */
+pre {
+  @apply bg-muted p-4 rounded-md overflow-x-auto;
 }
 
-.win98-console-title {
-  background: linear-gradient(90deg, #000080, #1084d0);
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 2px 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+code {
+  @apply font-mono text-sm;
 }
 
-.win98-console-content {
-  padding: 8px;
-  font-size: 12px;
+/* Loading indicators */
+.loading-dots {
+  @apply inline-flex space-x-1;
 }
 
-.win98-console-prompt {
-  color: #cccccc;
-  margin-bottom: 4px;
+.loading-dots > div {
+  @apply w-2 h-2 rounded-full bg-foreground;
+  animation: pulse 1.4s infinite ease-in-out;
 }
 
-.win98-console-text {
-  font-family: 'Consolas', 'Courier New', monospace;
-  font-size: 12px;
+.loading-dots > div:nth-child(1) {
+  animation-delay: 0s;
 }
 
-.win98-console-success {
-  color: #00ff00;
+.loading-dots > div:nth-child(2) {
+  animation-delay: 0.2s;
 }
 
-.win98-console-info {
-  color: #aaaaaa;
-}
-
-.win98-console-warning {
-  color: #ffff00;
-}
-
-.win98-console-error {
-  color: #ff0000;
-}
-
-.win98-console-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 12px;
-  background-color: #cccccc;
-  animation: blink-cursor 1s step-end infinite;
-}
-
-/* Blinking cursor animation */
-@keyframes win98-cursor-blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-.win98-cursor {
-  display: inline-block;
-  width: 8px;
-  height: 14px;
-  background-color: #cccccc;
-  animation: win98-cursor-blink 1s step-end infinite;
-  vertical-align: text-bottom;
-  margin-left: 2px;
-}
-
-/* Windows 98 progress animation */
-@keyframes win98-progress {
-  0% { background-position: 0 0; }
-  100% { background-position: 30px 0; }
-}
-
-.win98-progress-bar {
-  height: 8px;
-  background-image: linear-gradient(
-    -45deg,
-    #000080 25%,
-    #1084d0 25%,
-    #1084d0 50%,
-    #000080 50%,
-    #000080 75%,
-    #1084d0 75%,
-    #1084d0
-  );
-  background-size: 30px 30px;
-  animation: win98-progress 1s linear infinite;
+.loading-dots > div:nth-child(3) {
+  animation-delay: 0.4s;
 }
