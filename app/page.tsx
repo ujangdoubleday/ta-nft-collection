@@ -1,12 +1,9 @@
-import { Container } from '@/components/core/layout/container';
-import { HeroSection } from '@/components/features/home';
+import { HeroSection } from '@/components/features/home/HeroSection';
 
 export default function Home() {
   return (
-    <main className="py-4">
-      <Container>
-        <HeroSection />
-      </Container>
+    <main className="h-screen flex flex-col overflow-hidden m-0 p-0">
+      <HeroSection />
     </main>
   );
 }
