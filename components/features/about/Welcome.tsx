@@ -1,37 +1,58 @@
-import { Win98Window } from '@/components/ui/organisms/Win98Window';
-import Image from 'next/image';
+'use client';
+
+import { motion } from 'framer-motion';
 
 export function Welcome() {
   return (
-    <Win98Window
-      title="Welcome to MyNFTs.exe"
-      icon="/assets/icons/window/welcome.png"
-      className="mb-4"
-    >
-      <div className="p-4 text-black">
-        <div className="flex flex-col md:flex-row gap-4 items-center">
-          <div className="win98-shadow-inset p-3 bg-white w-full">
-            <p className="text-sm mb-3">
-              Welcome to MyNFTs.exe! A creative platform that blends the nostalgic feel of classic
-              design aesthetics with modern blockchain functionality.
-            </p>
-            <p className="text-xs">
-              Here, the charm of classic interfaces meets cutting-edge NFT technology, creating a
-              unique space for digital artists to create, showcase, and trade their work in an
-              environment that&apos;s both familiar and functional.
-            </p>
+    <section className="w-full bg-black">
+      <div className="container px-4 md:px-6 mx-auto max-w-6xl">
+        <motion.div
+          className="bg-black rounded-lg border border-zinc-800 shadow-lg overflow-hidden mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="bg-black px-6 py-4 border-b border-zinc-800">
+            <h2 className="text-xl font-bold text-white">Welcome</h2>
           </div>
-        </div>
 
-        <div className="mt-4 bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-2">
-          <p className="text-xs">
-            <strong>Why Classic Aesthetics?</strong> We believe that interfaces with their iconic
-            buttons and windows defined an era of digital creativity. We&apos;re bringing that charm
-            back to inspire a new generation of artists, while providing modern tools to manage
-            digital assets.
-          </p>
-        </div>
+          <div className="p-8 text-gray-200">
+            <motion.div
+              className="flex flex-col gap-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                <h3 className="text-2xl font-light text-white mb-4">Digital Art. Reimagined.</h3>
+                <p className="text-lg leading-relaxed mb-6">
+                  A space where art meets blockchain in perfect harmony. Simple, elegant, powerful.
+                </p>
+                <p className="text-gray-400 text-base leading-relaxed">
+                  Designed for creators and collectors who appreciate minimalism and functionality.
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-black rounded-lg p-6 border border-gray-800 mt-4"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+              >
+                <h3 className="text-xl font-semibold text-white mb-3">Why This Platform?</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  We believe in letting the art speak for itself. Clean interfaces, intuitive
+                  navigation, and powerful technology working silently in the background.
+                </p>
+              </motion.div>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
-    </Win98Window>
+    </section>
   );
 }

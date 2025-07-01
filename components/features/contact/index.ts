@@ -1,3 +1,4 @@
-export { ContactInfo } from "./ContactInfo";
-export { ContactForm } from "./ContactForm";
-export { SocialConnect } from "./SocialConnect";
+// export { ContactInfo } from './ContactInfo';
+// export { SocialConnect } from './SocialConnect';
+export { Info } from './Info';
+export { Social } from './Social';
