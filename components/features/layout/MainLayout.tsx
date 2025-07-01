@@ -1,9 +1,6 @@
 'use client';
 
-import { Win98Taskbar } from '@/components/core/layout';
 import { Navbar, NavbarSpacer } from '@/components/core/navigation';
-import { Win98SubMenuBar } from '@/components/core/layout';
-import { Win98WelcomeNotification } from '@/components/features/layout/notifications';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -11,18 +8,11 @@ interface MainLayoutProps {
   onCloseWelcome: () => void;
 }
 
-export function MainLayout({ children, showWelcome, onCloseWelcome }: MainLayoutProps) {
+export function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="relative flex min-h-screen flex-col pb-10 animate-fade-in">
+    <div className="relative flex min-h-screen flex-col animate-fade-in font-sans">
       <Navbar />
-      <NavbarSpacer />
-      <Win98SubMenuBar />
-      <div className="flex-1 pt-2 px-2 sm:px-4 md:px-6 win98-scrollbar overflow-auto">
-        {children}
-      </div>
-      <Win98Taskbar />
-
-      {showWelcome && <Win98WelcomeNotification onClose={onCloseWelcome} />}
+      <div className="px-4 sm:px-6 md:px-8 mx-auto">{children}</div>
     </div>
   );
 }

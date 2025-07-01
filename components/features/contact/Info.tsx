@@ -3,23 +3,23 @@
 import { motion } from 'framer-motion';
 import { Mail, Phone } from 'lucide-react';
 
-export function ContactInfo() {
+export function Info() {
   return (
     <section className="w-full bg-black">
       <div className="container px-4 md:px-6 mx-auto max-w-6xl">
         <motion.div
-          className="bg-black rounded-lg border border-gray-800 shadow-lg overflow-hidden mb-8"
+          className="bg-black rounded-lg border border-zinc-800 shadow-lg overflow-hidden mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="bg-black px-6 py-4 border-b border-gray-800">
+          <div className="bg-black px-6 py-4 border-b border-zinc-800">
             <h2 className="text-xl font-bold text-white">Get in Touch</h2>
           </div>
 
-          <div className="p-8">
+          <div className="p-8 text-gray-200">
             <motion.p
-              className="text-gray-300 text-lg leading-relaxed mb-8"
+              className="text-lg leading-relaxed mb-8"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.5 }}

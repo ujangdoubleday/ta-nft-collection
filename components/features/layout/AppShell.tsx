@@ -83,13 +83,6 @@ export function AppShell({ children }: AppShellProps) {
   }, [loading]);
 
   useEffect(() => {
-    setInitialRenderComplete(true);
-
-    // Force font loading
-    document.documentElement.classList.add('font-ms-sans-serif');
-  }, []);
-
-  useEffect(() => {
     if (!loading && initialRenderComplete) {
       const hasSeenWelcomeInSession = sessionStorage.getItem('hasSeenWelcomeInSession') === 'true';
 

@@ -1,7 +1,6 @@
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Win98NavLink } from '@/components/ui/organisms/Win98NavLink';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,14 +18,6 @@ const useNavLinks = () => {
   const { isAdmin } = useAdmin();
   const { data: session } = useSession();
 
-  // Debug logging
-  console.log('NavLinks Component:', {
-    pathname,
-    isAdmin,
-    session,
-    userAddress: session?.user?.address,
-  });
-
   const isActive = (path: string) => {
     if (path === '/') {
       return pathname === path;
@@ -38,7 +29,6 @@ const useNavLinks = () => {
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
-    { href: '/collections', label: 'My Collections' },
   ];
 
   // Add admin link if user is admin
@@ -54,17 +44,24 @@ export const MobileNav = () => {
   const { links, pathname, isOpen, setIsOpen } = useNavLinks();
 
   return (
-    <div className="md:hidden flex items-center">
+    <div className="md:hidden flex items-center justify-center">
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger className="bg-[#c0c0c0] p-1 border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] hover:bg-[#d2d2d2] h-8 w-8 flex items-center justify-center">
+        <DropdownMenuTrigger className="bg-zinc-900/80 backdrop-blur-sm text-white p-2 border border-zinc-700/50 rounded-lg hover:bg-zinc-800/80 hover:border-zinc-600/70 transition-all duration-200">
           <Menu className="h-4 w-4" />
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-40">
+        <DropdownMenuContent
+          align="end"
+          className="w-48 bg-black/95 backdrop-blur-lg border border-zinc-800/60 text-white shadow-2xl rounded-xl mt-2"
+        >
           {links.map((link) => (
             <DropdownMenuItem key={link.href} asChild onClick={() => setIsOpen(false)}>
               <Link
                 href={link.href}
-                className={`w-full ${pathname === link.href ? 'font-bold' : ''}`}
+                className={`w-full px-4 py-3 text-white hover:bg-zinc-800/60 rounded-lg transition-all duration-200 ${
+                  pathname === link.href
+                    ? 'font-semibold bg-zinc-800/40 text-white'
+                    : 'text-zinc-300'
+                }`}
               >
                 {link.label}
               </Link>
@@ -76,22 +73,47 @@ export const MobileNav = () => {
   );
 };
 
-// Desktop navigation component
+// Vercel-style Desktop navigation component
 export const NavLinks = () => {
-  const { links, isActive } = useNavLinks();
+  const { links, pathname } = useNavLinks();
+  const navRef = useRef<HTMLElement | null>(null);
+  const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
 
   return (
-    <nav className="hidden md:flex items-center gap-2">
-      {links.map((link) => (
-        <Win98NavLink
-          key={link.href}
-          href={link.href}
-          isActive={isActive(link.href)}
-          className="text-sm px-2"
-        >
-          {link.label}
-        </Win98NavLink>
-      ))}
+    <nav className="hidden md:flex items-center" ref={navRef}>
+      <div className="flex items-center h-full gap-1">
+        {links.map((link) => {
+          const isActive =
+            link.href === '/' ? pathname === link.href : pathname.startsWith(link.href);
+
+          return (
+            <Link
+              key={link.href}
+              ref={(el) => {
+                linkRefs.current[link.href] = el;
+              }}
+              href={link.href}
+              className={`group relative px-3 py-3 text-base transition-all duration-200 text-white font-medium
+                ${isActive ? 'text-white' : 'text-zinc-300 hover:text-white'}
+              `}
+            >
+              {/* Hover background box (shows on hover AND when active) */}
+              <span
+                className={`absolute inset-x-0 top-1.5 bottom-1.5 -mx-1 rounded-md transition-all duration-200
+                  ${
+                    isActive
+                      ? 'group-hover:bg-zinc-700/50'
+                      : 'bg-transparent group-hover:bg-zinc-700/50'
+                  }
+                `}
+              />
+
+              {/* Text content */}
+              <span className="relative z-10">{link.label}</span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 };

@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState } from 'react';
 import { subscribeToContractEvents } from '../utils/alchemy';
 import { alchemy } from '../alchemy';

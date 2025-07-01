@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface LoadingScreenProps {
   progress: number;
@@ -9,11 +9,11 @@ interface LoadingScreenProps {
 }
 
 export function LoadingScreen({ progress, loadingText }: LoadingScreenProps) {
-  const [dots, setDots] = useState("");
+  const [dots, setDots] = useState('');
 
   useEffect(() => {
     const dotsInterval = setInterval(() => {
-      setDots((prev) => (prev.length < 3 ? prev + "." : ""));
+      setDots((prev) => (prev.length < 3 ? prev + '.' : ''));
     }, 500);
 
     return () => clearInterval(dotsInterval);
@@ -33,7 +33,7 @@ export function LoadingScreen({ progress, loadingText }: LoadingScreenProps) {
               className="invert h-full w-full"
               onError={(e) => {
                 e.currentTarget.src =
-                  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='white'/><text x='50' y='50' font-family='monospace' font-size='20' text-anchor='middle' fill='black'>NFT</text></svg>";
+                  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='white'/><text x='50' y='50' font-size='20' text-anchor='middle' fill='black'>NFT</text></svg>";
               }}
             />
           </div>
@@ -52,8 +52,8 @@ export function LoadingScreen({ progress, loadingText }: LoadingScreenProps) {
                     key={index}
                     className={`h-3 w-[10px] mx-[1px] ${
                       index < Math.ceil(progress / 5)
-                        ? "bg-[#000080] animate-windows98-loading"
-                        : "bg-[#c0c0c0]"
+                        ? 'bg-[#000080] animate-windows98-loading'
+                        : 'bg-[#c0c0c0]'
                     }`}
                   />
                 ))}
