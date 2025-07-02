@@ -1,4 +1,4 @@
-import { AppShell } from '@/components/features/layout';
+import { PublicShell } from '@/components/features/layout';
 import '@/styles/globals.css';
 import { Providers } from './Providers';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -30,9 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="description" content="A retro-styled digital art creation platform" />
       </head>
       <body className="min-h-screen bg-[#000000] antialiased font-sans">
-        <Providers>
-          <AppShell>{children}</AppShell>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
