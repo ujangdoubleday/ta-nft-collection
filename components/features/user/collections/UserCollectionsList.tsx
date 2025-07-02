@@ -63,13 +63,13 @@ export function UserCollectionsList() {
         {[...Array(3)].map((_, i) => (
           <div
             key={i}
-            className="bg-zinc-800 border border-zinc-700 rounded-lg overflow-hidden shadow-sm"
+            className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden shadow-sm"
           >
-            <div className="w-full aspect-square bg-zinc-700 animate-pulse"></div>
+            <div className="w-full aspect-square bg-[#1f1f1f] animate-pulse"></div>
             <div className="p-4 space-y-3">
-              <div className="h-5 bg-zinc-700 rounded w-3/4 animate-pulse"></div>
-              <div className="h-4 bg-zinc-700 rounded w-full animate-pulse"></div>
-              <div className="h-4 bg-zinc-700 rounded w-2/3 animate-pulse"></div>
+              <div className="h-5 bg-[#1f1f1f] rounded w-3/4 animate-pulse"></div>
+              <div className="h-4 bg-[#1f1f1f] rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-[#1f1f1f] rounded w-2/3 animate-pulse"></div>
             </div>
           </div>
         ))}
@@ -79,15 +79,15 @@ export function UserCollectionsList() {
 
   if (!collections.length) {
     return (
-      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8 text-center">
-        <div className="bg-zinc-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-          <ImagePlus className="h-8 w-8 text-zinc-600" />
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
+        <div className="bg-[#0A0A0A] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f1f1f]">
+          <ImagePlus className="h-8 w-8 text-white" />
         </div>
         <h3 className="text-xl font-bold text-white mb-2">No Collections Yet</h3>
         <p className="text-zinc-400 mb-6">You haven&apos;t created any NFT collections yet.</p>
         <Link
           href="/my/collections/new"
-          className="inline-flex items-center gap-2 bg-zinc-700 text-white hover:bg-zinc-600 py-2 px-4 rounded-md transition-colors text-sm font-medium border border-zinc-600"
+          className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
         >
           <ImagePlus className="h-4 w-4" />
           Create Your First Collection

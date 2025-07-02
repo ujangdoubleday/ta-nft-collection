@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { User, Grid3x3, Home, Menu, X, LogOut } from 'lucide-react';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function UserMobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,70 +33,64 @@ export function UserMobileMenu() {
   ];
 
   const handleLogout = async () => {
+    toast.info('Signing out...');
     await disconnect();
+    toast.success('Signed out successfully');
     router.push('/');
     setIsOpen(false);
   };
 
   return (
     <div className="md:hidden">
-      <button onClick={() => setIsOpen(!isOpen)} className="text-zinc-300 hover:text-white p-2">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="p-2 text-white hover:text-gray-300"
+        aria-label={isOpen ? 'Close menu' : 'Open menu'}
+      >
         {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
       </button>
 
       {isOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
-          onClick={() => setIsOpen(false)}
-        >
-          <div
-            className="absolute right-0 top-0 h-full w-64 bg-zinc-800 border-l border-zinc-700 shadow-xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center p-4 border-b border-zinc-700">
-              <div className="text-white font-bold">NFT Dashboard</div>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-zinc-400 hover:text-white p-1"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4">
-              <nav className="flex flex-col gap-2">
-                {links.map((link) => {
-                  const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
-
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={`flex items-center gap-3 py-3 px-4 rounded-md transition-colors ${
-                        isActive
-                          ? 'bg-zinc-700 text-white'
-                          : 'text-zinc-300 hover:bg-zinc-700/50 hover:text-white'
-                      }`}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {link.icon}
-                      <span className="font-medium">{link.label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </div>
-
-            <div className="p-4 border-t border-zinc-700">
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 py-3 px-4 w-full rounded-md text-zinc-300 hover:bg-zinc-700/50 hover:text-white transition-colors"
-              >
-                <LogOut className="h-5 w-5" />
-                <span className="font-medium">Logout</span>
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-95 flex flex-col">
+          <div className="flex justify-end p-4">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="p-2 text-white hover:text-gray-300"
+              aria-label="Close menu"
+            >
+              <X className="h-6 w-6" />
+            </button>
           </div>
+
+          <nav className="flex-1 px-4 pb-12">
+            <ul className="space-y-4">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <Link
+                    href={link.href}
+                    className={`flex items-center space-x-3 p-3 rounded-lg ${
+                      pathname === link.href
+                        ? 'bg-[#1f1f1f] text-white'
+                        : 'text-gray-400 hover:text-white hover:bg-[#1f1f1f]'
+                    }`}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {link.icon}
+                    <span>{link.label}</span>
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center space-x-3 p-3 rounded-lg text-gray-400 hover:text-white hover:bg-[#1f1f1f]"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Log Out</span>
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
       )}
     </div>
