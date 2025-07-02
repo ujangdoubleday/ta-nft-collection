@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { LoadingScreen } from '@/components/features/layout/LoadingScreen';
-import { MainLayout } from '@/components/features/layout/MainLayout';
-import { TRPCProvider } from '@/components/core/providers/trpc-provider';
+import { PublicLayoutMain } from '@/components/features/layout/PublicLayoutMain';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -13,7 +12,7 @@ export function AppShell({ children }: AppShellProps) {
   // Initialize with loading=false as default, and only set to true after checking
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [loadingText, setLoadingText] = useState('Starting MyNFTs.exe...');
+  const [loadingText, setLoadingText] = useState('Initializing application');
   const [showWelcome, setShowWelcome] = useState(false);
   const [initialRenderComplete, setInitialRenderComplete] = useState(false);
 
@@ -48,10 +47,10 @@ export function AppShell({ children }: AppShellProps) {
     if (!loading) return;
 
     const messages = [
-      'Detecting hardware components...',
-      'Initializing system interfaces...',
-      'Preparing virtual environment...',
-      'Loading MyNFTs.exe components...',
+      'Loading assets',
+      'Preparing interface',
+      'Connecting services',
+      'Almost ready',
     ];
 
     const segments = 20;
@@ -83,13 +82,6 @@ export function AppShell({ children }: AppShellProps) {
   }, [loading]);
 
   useEffect(() => {
-    setInitialRenderComplete(true);
-
-    // Force font loading
-    document.documentElement.classList.add('font-ms-sans-serif');
-  }, []);
-
-  useEffect(() => {
     if (!loading && initialRenderComplete) {
       const hasSeenWelcomeInSession = sessionStorage.getItem('hasSeenWelcomeInSession') === 'true';
 
@@ -105,14 +97,12 @@ export function AppShell({ children }: AppShellProps) {
   };
 
   return (
-    <TRPCProvider>
+    <>
       {loading ? (
         <LoadingScreen progress={progress} loadingText={loadingText} />
       ) : (
-        <MainLayout showWelcome={showWelcome} onCloseWelcome={handleCloseWelcome}>
-          {children}
-        </MainLayout>
+        <PublicLayoutMain>{children}</PublicLayoutMain>
       )}
-    </TRPCProvider>
+    </>
   );
 }

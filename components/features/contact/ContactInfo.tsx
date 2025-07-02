@@ -1,86 +1,73 @@
-import { Win98Window } from '@/components/ui/organisms/Win98Window';
-import { JSX, SVGProps } from 'react';
+'use client';
 
-const EmailIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-  </svg>
-);
-
-const PhoneIcon = (props: JSX.IntrinsicAttributes & SVGProps<SVGSVGElement>) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-  </svg>
-);
+import { motion } from 'framer-motion';
+import { Mail, Phone } from 'lucide-react';
 
 export function ContactInfo() {
   return (
-    <Win98Window title="Get in Touch" icon="/assets/icons/window/email.png" className="mb-4">
-      <div className="p-4 space-y-4 text-black">
-        <p className="text-sm">
-          I&apos;d love to hear from you! Whether you have a question about MyNFTs.exe, a feature
-          request, or just want to talk about NFTs and classic tech, feel free to reach out.
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="win98-shadow-inset p-3 bg-white">
-            <p className="text-sm mb-2 font-bold text-[#0000AA]">Contact Me Directly</p>
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <div className="w-5 h-5 flex-shrink-0 mr-2 flex items-center justify-center">
-                  {/* The SVG is now a reusable component */}
-                  <EmailIcon className="w-4 h-4" />
-                </div>
-                <p className="text-xs">Email: email@example.com</p>
-              </div>
-              <div className="flex items-center">
-                <div className="w-5 h-5 flex-shrink-0 mr-2 flex items-center justify-center">
-                  {/* The SVG is now a reusable component */}
-                  <PhoneIcon className="w-4 h-4" />
-                </div>
-                <p className="text-xs">Phone: (+62) 812-3456-7890</p>
-              </div>
-            </div>
+    <section className="w-full bg-black">
+      <div className="container px-4 md:px-6 mx-auto max-w-6xl">
+        <motion.div
+          className="bg-black rounded-lg border border-gray-800 shadow-lg overflow-hidden mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="bg-black px-6 py-4 border-b border-gray-800">
+            <h2 className="text-xl font-bold text-white">Get in Touch</h2>
           </div>
 
-          <div className="bg-[#c0c0c0] border-[2px] border-t-white border-l-white border-r-[#808080] border-b-[#808080] p-2">
-            <p className="text-xs font-bold mb-2">About the Creator</p>
-            <div className="flex gap-3">
-              <div className="win98-shadow-inset h-16 w-16 bg-white flex-shrink-0 flex items-center justify-center">
-                <div className="bg-[#c0c0c0] w-14 h-14 flex items-center justify-center text-2xl font-bold">
-                  IA
-                </div>
+          <div className="p-8">
+            <motion.p
+              className="text-gray-300 text-lg leading-relaxed mb-8"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              I&apos;d love to hear from you! Whether you have a question about my NFT platform or
+              just want to talk about digital art.
+            </motion.p>
+
+            <motion.div
+              className="bg-black rounded-lg p-6 border border-gray-800"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.5 }}
+            >
+              <h3 className="text-lg font-semibold text-white mb-6">Contact Me Directly</h3>
+              <div className="space-y-6">
+                <motion.div
+                  className="flex items-center"
+                  whileHover={{ x: 5 }}
+                  transition={{ type: 'spring', stiffness: 400 }}
+                >
+                  <div className="w-12 h-12 rounded-full border border-white flex-shrink-0 mr-5 flex items-center justify-center text-white">
+                    <Mail className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Email</p>
+                    <p className="text-white text-lg">email@example.com</p>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  className="flex items-center"
+                  whileHover={{ x: 5 }}
+                  transition={{ type: 'spring', stiffness: 400 }}
+                >
+                  <div className="w-12 h-12 rounded-full border border-white flex-shrink-0 mr-5 flex items-center justify-center text-white">
+                    <Phone className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Phone</p>
+                    <p className="text-white text-lg">(+62) 812-3456-7890</p>
+                  </div>
+                </motion.div>
               </div>
-              <div>
-                <p className="text-xs font-bold">ILHAM ALFATH</p>
-                <p className="text-xs text-[#0000AA] mb-1">Creator & Developer</p>
-                <p className="text-xs">
-                  Full-stack developer specializing in Web3 and blockchain, with a passion for
-                  classic design aesthetics.
-                </p>
-              </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </Win98Window>
+    </section>
   );
 }

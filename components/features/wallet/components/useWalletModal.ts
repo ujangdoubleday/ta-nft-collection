@@ -2,6 +2,7 @@ import { useWalletWagmi as useWallet } from '../hooks/useWallet';
 import { formatAddress } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 
 export type WalletModalStep = 'connect' | 'sign' | 'checking' | 'details';
 export type LogMessage = {
@@ -12,6 +13,7 @@ export type LogMessage = {
 };
 
 export const useWalletModal = () => {
+  const router = useRouter();
   // Initialize all state variables
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -27,6 +29,7 @@ export const useWalletModal = () => {
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [logMessages, setLogMessages] = useState<LogMessage[]>([]);
   const [_logCounter, setLogCounter] = useState(1);
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
 
   const {
     address,
@@ -70,6 +73,13 @@ export const useWalletModal = () => {
 
       setSuccessMessage('Your wallet has been connected and authenticated successfully!');
       setShowSuccessNotification(true);
+      setIsWalletModalOpen(false);
+
+      // Redirect after successful authentication if redirectPath is set
+      if (redirectPath) {
+        router.push(redirectPath);
+        setRedirectPath(null);
+      }
 
       const timer = setTimeout(() => {
         setShowSuccessNotification(false);
@@ -79,7 +89,7 @@ export const useWalletModal = () => {
     }
 
     setPreviousAuthState(isAuthenticated);
-  }, [isAuthenticated, previousAuthState, isDisconnecting]);
+  }, [isAuthenticated, previousAuthState, isDisconnecting, router, redirectPath]);
 
   // Kembali menggunakan useEffect untuk pemantauan status koneksi
   useEffect(() => {
@@ -277,6 +287,14 @@ export const useWalletModal = () => {
     }
   };
 
+  const openWalletModal = (redirectTo?: string) => {
+    if (redirectTo) {
+      setRedirectPath(redirectTo);
+    }
+
+    handleWalletButtonClick();
+  };
+
   const handleWalletButtonClick = () => {
     if (isAuthenticated) {
       setWalletModalStep('details');
@@ -346,5 +364,6 @@ export const useWalletModal = () => {
     handleCloseSuccessNotification,
     handleCloseErrorNotification,
     addLogMessage,
+    openWalletModal,
   };
 };

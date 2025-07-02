@@ -14,3 +14,16 @@ export function formatAddress(address: string): string {
 export function formatDateToString(date: Date): string {
   return date.toISOString().split('T')[0];
 }
+
+/**
+ * Shortens an Ethereum address for display
+ * @param address The Ethereum address to shorten
+ * @param charsToShow Number of characters to show at start and end
+ * @returns Shortened address string
+ */
+export function shortenAddress(address: string, charsToShow: number = 4): string {
+  if (!address) return '';
+  if (address.length <= charsToShow * 2 + 3) return address;
+
+  return `${address.substring(0, charsToShow)}...${address.substring(address.length - charsToShow)}`;
+}

@@ -1,4 +1,9 @@
-export * from "./Win98Notification";
-export * from "./Win98WelcomeNotification";
-export * from "./Win98SuccessNotification";
-export * from "./Win98ErrorNotification";
+export { Win98Notification } from './Win98Notification';
+export { Win98SuccessNotification } from './Win98SuccessNotification';
+export { Win98ErrorNotification } from './Win98ErrorNotification';
+export {
+  ModernNotification,
+  ModernSuccessNotification,
+  ModernErrorNotification,
+  ModernInfoNotification,
+} from './ModernNotification';
