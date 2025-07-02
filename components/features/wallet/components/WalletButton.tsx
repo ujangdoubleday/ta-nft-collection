@@ -2,12 +2,11 @@
 
 import { WalletModalContent } from '@/components/features/wallet/components/WalletModalContent';
 import {
-  Win98ErrorNotification,
-  Win98SuccessNotification,
-  Win98Notification,
+  ModernSuccessNotification,
+  ModernErrorNotification,
 } from '@/components/features/layout/notifications';
-import { Button } from '@/components/ui/atoms/button';
-import { Win98Dialog, Win98DialogContent, Win98DialogTrigger } from '@/components/ui/organisms';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/molecules/dialog';
 import { formatAddress } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useWalletModal } from './useWalletModal';
@@ -44,6 +43,22 @@ export const WalletButton = () => {
     logMessages,
   } = useWalletModal();
 
+  // Menentukan title berdasarkan step wallet
+  const getDialogTitle = () => {
+    switch (walletModalStep) {
+      case 'connect':
+        return 'Connect Wallet';
+      case 'sign':
+        return 'Authenticate';
+      case 'checking':
+        return 'Wallet Verification';
+      case 'details':
+        return 'Wallet Details';
+      default:
+        return 'Connect Wallet';
+    }
+  };
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -52,11 +67,12 @@ export const WalletButton = () => {
 
   return (
     <>
-      <Win98Dialog open={isWalletModalOpen} onOpenChange={handleDialogOpenChange}>
-        <Win98DialogTrigger asChild>
+      <Dialog open={isWalletModalOpen} onOpenChange={handleDialogOpenChange}>
+        <DialogTrigger asChild>
           <Button
             onClick={handleWalletButtonClick}
-            className="bg-zinc-800/50 text-white border border-zinc-700/50 rounded-md text-[15px] py-1 px-3 h-8 hover:bg-zinc-700/50 transition-colors font-sans"
+            variant="outline"
+            className="bg-white text-zinc-900 border border-zinc-200 text-[15px] hover:bg-zinc-100 hover:text-zinc-900 font-medium shadow-sm"
           >
             {isConnected && isAuthenticated ? (
               <div className="flex items-center gap-1.5">
@@ -70,8 +86,8 @@ export const WalletButton = () => {
               </div>
             )}
           </Button>
-        </Win98DialogTrigger>
-        <Win98DialogContent title="Wallet Connection" className="max-w-md sm:max-w-md">
+        </DialogTrigger>
+        <DialogContent title={getDialogTitle()}>
           <WalletModalContent
             step={walletModalStep}
             address={address}
@@ -87,18 +103,18 @@ export const WalletButton = () => {
             onCancelSignAction={handleCancelSign}
             logMessages={logMessages}
           />
-        </Win98DialogContent>
-      </Win98Dialog>
+        </DialogContent>
+      </Dialog>
 
       {showSuccessNotification && !isDisconnecting && (
-        <Win98SuccessNotification
+        <ModernSuccessNotification
           message={successMessage}
           onClose={handleCloseSuccessNotification}
         />
       )}
 
       {showErrorNotification && !isDisconnecting && (
-        <Win98ErrorNotification message={errorMessage} onClose={handleCloseErrorNotification} />
+        <ModernErrorNotification message={errorMessage} onClose={handleCloseErrorNotification} />
       )}
     </>
   );

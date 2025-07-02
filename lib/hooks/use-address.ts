@@ -7,10 +7,11 @@ import { useWallet } from '@/lib/hooks/wallet';
  * This is a simple wrapper around useWallet for components that only need the address
  */
 export function useAddress() {
-  const { address } = useWallet();
+  const { address, isConnecting } = useWallet();
 
   return {
     data: address,
     isConnected: !!address,
+    isLoading: isConnecting,
   };
 }
