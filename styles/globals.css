@@ -10,6 +10,9 @@
     --background: 0 0% 0%;
     --foreground: 222.2 84% 4.9%;
     
+    --ds-background-200-value: 0 0% 4%;
+    --ds-border-color: 0 0% 12%;
+    
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     
@@ -50,6 +53,9 @@
   .dark {
     --background: 0 0% 0%;
     --foreground: 210 40% 98%;
+    
+    --ds-background-200-value: 0 0% 4%;
+    --ds-border-color: 0 0% 12%;
     
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
@@ -288,4 +294,78 @@ code {
 
 .loading-dots > div:nth-child(3) {
   animation-delay: 0.4s;
+}
+
+/* Scroll behavior for the navbar and submenu */
+@media (min-width: 640px) {
+  .navbar {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .submenu {
+    transition: all 0.3s ease;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    
+  }
+
+  .submenu-logo, .submenu-user {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .submenu-nav {
+    transition: all 0.3s ease;
+  }
+
+  /* Styles when scrolling */
+  html.scrolled .navbar {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+
+  html.scrolled .submenu {
+    position: fixed;
+    height: 3rem;
+    padding-top: 0.3rem;
+    padding-bottom: 0.3rem;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  html.scrolled .submenu .nav-link {
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500; /* font-medium */
+    display: inline-flex; /* inline-flex */
+    align-items: center; /* items-center */
+    gap: 0.5rem; /* gap-2 */
+    transition: color 0.15s ease-in-out; /* transition-colors */
+    padding: 0.25rem 0.5rem; /* px-2 py-1 */
+    position: relative; /* relative */
+  }
+
+  html.scrolled .submenu-logo, 
+  html.scrolled .submenu-user {
+    opacity: 1;
+  }
+
+  html.scrolled .submenu-nav {
+    margin-left: 0.75rem;
+    justify-content: flex-start;
+  }
+
+  /* Add padding to the content when submenu is fixed */
+  html.scrolled .content-wrapper {
+    padding-top: 3.5rem;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 639px) {
+  .submenu-logo, .submenu-user {
+    display: none;
+  }
 }

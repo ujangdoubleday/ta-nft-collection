@@ -2,6 +2,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { WagmiProvider } from '@/lib/blockchain/wagmi';
 import { AuthProvider } from '@/lib/auth/AuthProvider';
 import { TRPCProvider } from '@/components/core/providers';
+import { Toaster } from '@/components/ui/sonner';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <WagmiProvider>
         <TRPCProvider>
           <AuthProvider>{children}</AuthProvider>
+          <Toaster />
         </TRPCProvider>
       </WagmiProvider>
     </ThemeProvider>
