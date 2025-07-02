@@ -39,22 +39,22 @@ export function UserDashboardContent() {
 
       <div className="mb-8">
         <h2 className="text-xl font-bold text-white mb-4">Recent Activity</h2>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 shadow-sm">
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6 shadow-sm">
           {isLoading ? (
             <div className="space-y-4">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="flex items-center space-x-4">
-                  <div className="h-10 w-10 rounded-full bg-zinc-700 animate-pulse"></div>
+                  <div className="h-10 w-10 rounded-full bg-[#1f1f1f] animate-pulse"></div>
                   <div className="space-y-2 flex-1">
-                    <div className="h-4 bg-zinc-700 rounded w-3/4 animate-pulse"></div>
-                    <div className="h-3 bg-zinc-700 rounded w-1/2 animate-pulse"></div>
+                    <div className="h-4 bg-[#1f1f1f] rounded w-3/4 animate-pulse"></div>
+                    <div className="h-3 bg-[#1f1f1f] rounded w-1/2 animate-pulse"></div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-zinc-400">No recent activity to display</p>
+              <p className="text-gray-400">No recent activity to display</p>
             </div>
           )}
         </div>

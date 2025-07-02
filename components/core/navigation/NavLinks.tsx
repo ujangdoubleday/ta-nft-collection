@@ -19,6 +19,7 @@ const useNavLinks = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { isAdmin } = useAdmin();
   const { data: session } = useSession();
+  const isAuthenticated = !!session?.user;
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -33,12 +34,13 @@ const useNavLinks = () => {
     { href: '/contact', label: 'Contact' },
   ];
 
-  // Add admin link if user is admin
-  if (isAdmin) {
+  // Add admin link if user is admin but not authenticated
+  // This removes the Admin link when admin is logged in
+  if (isAdmin && !isAuthenticated) {
     links.push({ href: '/dashboard', label: 'Admin' });
   }
 
-  return { links, pathname, isActive, isOpen, setIsOpen };
+  return { links, pathname, isActive, isOpen, setIsOpen, isAuthenticated, isAdmin };
 };
 
 // Mobile menu component

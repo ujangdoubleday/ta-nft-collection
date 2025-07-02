@@ -58,10 +58,10 @@ interface StatCardProps {
 
 function StatCard({ title, value, isLoading = false }: StatCardProps) {
   return (
-    <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-4 shadow-sm">
-      <h3 className="text-sm font-medium text-zinc-400">{title}</h3>
+    <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 shadow-sm">
+      <h3 className="text-sm font-medium text-gray-400">{title}</h3>
       {isLoading ? (
-        <div className="h-7 w-16 bg-zinc-700 rounded animate-pulse mt-1"></div>
+        <div className="h-7 w-16 bg-[#1f1f1f] rounded animate-pulse mt-1"></div>
       ) : (
         <p className="text-2xl font-bold text-white mt-1">{value}</p>
       )}

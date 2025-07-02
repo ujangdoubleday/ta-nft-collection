@@ -1,15 +1,14 @@
 'use client';
 
 import { WalletModalContent } from '@/components/features/wallet/components/WalletModalContent';
-import {
-  ModernSuccessNotification,
-  ModernErrorNotification,
-} from '@/components/features/layout/notifications';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/molecules/dialog';
 import { formatAddress } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useWalletModal } from './useWalletModal';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { LayoutDashboard } from 'lucide-react';
 
 export const WalletButton = () => {
   const [_showHelp, setShowHelp] = useState(false);
@@ -63,10 +62,37 @@ export const WalletButton = () => {
     setIsMounted(true);
   }, []);
 
+  // Show toast notifications when state changes
+  useEffect(() => {
+    if (isMounted && showSuccessNotification && !isDisconnecting) {
+      toast.success(successMessage);
+      handleCloseSuccessNotification();
+    }
+  }, [showSuccessNotification, successMessage, isDisconnecting, isMounted]);
+
+  useEffect(() => {
+    if (isMounted && showErrorNotification && !isDisconnecting) {
+      toast.error(errorMessage);
+      handleCloseErrorNotification();
+    }
+  }, [showErrorNotification, errorMessage, isDisconnecting, isMounted]);
+
   if (!isMounted) return null;
 
   return (
-    <>
+    <div className="flex items-center gap-2">
+      {isConnected && isAuthenticated && (
+        <Link href="/my">
+          <Button
+            variant="outline"
+            className="bg-white text-zinc-900 border border-zinc-200 text-[15px] hover:bg-zinc-100 hover:text-zinc-900 font-medium shadow-sm"
+          >
+            <LayoutDashboard className="h-4 w-4 mr-2" />
+            <span className="hidden xs:inline">Dashboard</span>
+          </Button>
+        </Link>
+      )}
+
       <Dialog open={isWalletModalOpen} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger asChild>
           <Button
@@ -105,17 +131,6 @@ export const WalletButton = () => {
           />
         </DialogContent>
       </Dialog>
-
-      {showSuccessNotification && !isDisconnecting && (
-        <ModernSuccessNotification
-          message={successMessage}
-          onClose={handleCloseSuccessNotification}
-        />
-      )}
-
-      {showErrorNotification && !isDisconnecting && (
-        <ModernErrorNotification message={errorMessage} onClose={handleCloseErrorNotification} />
-      )}
-    </>
+    </div>
   );
 };
