@@ -35,7 +35,7 @@ export function UserNavLinks() {
             key={link.href}
             href={link.href}
             className={`text-sm font-medium flex items-center gap-1 transition-colors ${
-              isActive ? 'text-white' : 'text-zinc-400 hover:text-white'
+              isActive ? 'text-white' : 'text-gray-400 hover:text-white'
             }`}
           >
             {link.icon}

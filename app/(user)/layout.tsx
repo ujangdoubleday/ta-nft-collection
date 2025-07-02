@@ -1,8 +1,10 @@
-import { UserShell } from '@/components/features/layout';
+'use client';
+
+import { UserShell } from '@/components/features/layout/UserShell';
 
 export default function UserLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-zinc-900 text-white flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#000000]">
       <UserShell>{children}</UserShell>
     </div>
   );
