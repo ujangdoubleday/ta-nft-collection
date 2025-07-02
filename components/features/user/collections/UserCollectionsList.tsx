@@ -84,7 +84,7 @@ export function UserCollectionsList() {
           <ImagePlus className="h-8 w-8 text-zinc-600" />
         </div>
         <h3 className="text-xl font-bold text-white mb-2">No Collections Yet</h3>
-        <p className="text-zinc-400 mb-6">You haven't created any NFT collections yet.</p>
+        <p className="text-zinc-400 mb-6">You haven&apos;t created any NFT collections yet.</p>
         <Link
           href="/my/collections/new"
           className="inline-flex items-center gap-2 bg-zinc-700 text-white hover:bg-zinc-600 py-2 px-4 rounded-md transition-colors text-sm font-medium border border-zinc-600"

@@ -101,8 +101,8 @@ export function ModernWalletModalContent({
               <p className="text-zinc-300">
                 <span className="block text-zinc-400 mb-1">Message:</span>
                 <span className="block">
-                  Sign in to MyNFTs with your Ethereum account. This signature doesn't cost gas and
-                  securely identifies you.
+                  Sign in to MyNFTs with your Ethereum account. This signature doesn&apos;t cost gas
+                  and securely identifies you.
                 </span>
               </p>
             </div>
