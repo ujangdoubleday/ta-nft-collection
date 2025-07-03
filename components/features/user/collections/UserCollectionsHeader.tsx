@@ -37,14 +37,14 @@ export function UserCollectionsHeader() {
 
         <Link
           href="/my/collections/new"
-          className="flex items-center gap-2 bg-zinc-800 text-white hover:bg-zinc-700 py-2 px-4 rounded-md transition-colors text-sm font-medium border border-zinc-700"
+          className="flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
         >
           <PlusCircle className="h-4 w-4" />
           Create Collection
         </Link>
       </div>
 
-      <div className="h-px w-full bg-zinc-800 mt-6"></div>
+      <div className="h-px w-full bg-[#1f1f1f] mt-6"></div>
     </div>
   );
 }

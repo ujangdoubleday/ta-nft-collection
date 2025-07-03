@@ -20,18 +20,18 @@ export function UserCollectionsContent() {
 
   if (!address && !isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
+      <div className="flex flex-col items-center justify-center py-12 bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8">
         <h2 className="text-2xl font-bold text-white mb-4">Connect Your Wallet</h2>
         <p className="text-zinc-400 text-center max-w-md mb-8">
           Please connect your wallet to view and manage your NFT collections.
         </p>
-        <div className="h-px w-full max-w-md bg-zinc-800"></div>
+        <div className="h-px w-full max-w-md bg-[#1f1f1f]"></div>
       </div>
     );
   }
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-fade-in bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
       <UserCollectionsHeader />
       <UserCollectionsList />
     </div>

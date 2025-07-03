@@ -3,6 +3,7 @@ import { formatAddress } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export type WalletModalStep = 'connect' | 'sign' | 'checking' | 'details';
 export type LogMessage = {
@@ -75,17 +76,10 @@ export const useWalletModal = () => {
       setShowSuccessNotification(true);
       setIsWalletModalOpen(false);
 
-      // Redirect after successful authentication if redirectPath is set
-      if (redirectPath) {
-        router.push(redirectPath);
-        setRedirectPath(null);
-      }
-
-      const timer = setTimeout(() => {
-        setShowSuccessNotification(false);
-      }, 5000);
-
-      return () => clearTimeout(timer);
+      // Always redirect to /my after successful authentication
+      // This ensures users are redirected to dashboard after login
+      router.push('/my');
+      setRedirectPath(null);
     }
 
     setPreviousAuthState(isAuthenticated);
@@ -122,13 +116,6 @@ export const useWalletModal = () => {
       );
       setShowErrorNotification(true);
       setIsWalletModalOpen(false);
-
-      const timer = setTimeout(() => {
-        setShowErrorNotification(false);
-        setErrorMessage('');
-      }, 5000);
-
-      return () => clearTimeout(timer);
     }
   }, [error]);
 
@@ -154,6 +141,7 @@ export const useWalletModal = () => {
     },
     onSuccess: () => {
       setCopied(true);
+      toast.success('Address copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     },
   });
@@ -174,12 +162,6 @@ export const useWalletModal = () => {
     setErrorMessage('');
     setIsCreatingAccount(false);
     clearLogMessages();
-
-    // Clear any pending notification timeouts
-    const maxTimeoutId = Number(setTimeout(() => {}, 0));
-    for (let i = 1; i < maxTimeoutId; i++) {
-      clearTimeout(i);
-    }
   };
 
   // Menggunakan useMutation untuk koneksi wallet
@@ -193,6 +175,8 @@ export const useWalletModal = () => {
     onSuccess: (success) => {
       if (!success) {
         resetWalletStates();
+      } else {
+        toast.info('Wallet connected. Please sign the message to authenticate.');
       }
     },
   });
@@ -218,6 +202,7 @@ export const useWalletModal = () => {
         disconnect();
         resetWalletStates();
         setIsWalletModalOpen(false);
+        toast.error('Authentication failed');
       } else {
         setIsWalletModalOpen(false);
       }
@@ -225,6 +210,7 @@ export const useWalletModal = () => {
     onError: () => {
       disconnect();
       resetWalletStates();
+      toast.error('Authentication error');
     },
   });
 
@@ -243,12 +229,6 @@ export const useWalletModal = () => {
     setErrorMessage('Authentication Cancelled by User');
     setShowErrorNotification(true);
     resetWalletStates();
-
-    setTimeout(() => {
-      setShowErrorNotification(false);
-      setErrorMessage('');
-    }, 5000);
-
     return Promise.resolve();
   };
 
@@ -276,12 +256,20 @@ export const useWalletModal = () => {
       setTimeout(() => {
         setIsDisconnecting(false);
       }, 1000);
+
+      // Add a slight delay before redirecting to prevent any race conditions
+      setTimeout(() => {
+        router.push('/');
+      }, 500);
     },
   });
 
   const handleDisconnect = (): Promise<void> => {
     try {
-      return disconnectMutation.mutateAsync().then(() => {});
+      toast.info('Signing out...');
+      return disconnectMutation.mutateAsync().then(() => {
+        toast.success('Signed out successfully');
+      });
     } catch (error) {
       return Promise.resolve();
     }

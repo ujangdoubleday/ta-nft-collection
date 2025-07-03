@@ -65,15 +65,15 @@ function ActionCard({ title, description, icon, onClick, primary = false }: Acti
       className={`flex flex-col items-start p-4 rounded-lg border transition-all text-left h-full
         ${
           primary
-            ? 'bg-zinc-800 text-white border-zinc-700 hover:bg-zinc-700'
-            : 'bg-zinc-900 text-white border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800'
+            ? 'bg-[#0A0A0A] text-white border-[#1f1f1f] hover:bg-zinc-900'
+            : 'bg-[#0A0A0A] text-white border-[#1f1f1f] hover:border-gray-700 hover:bg-zinc-900'
         }`}
     >
-      <div className={`p-2 rounded-full mb-3 ${primary ? 'bg-zinc-700' : 'bg-zinc-800'}`}>
+      <div className={`p-2 rounded-full mb-3 ${primary ? 'bg-[#1f1f1f]' : 'bg-[#1f1f1f]'}`}>
         {icon}
       </div>
       <h3 className="font-medium text-base mb-1 text-white">{title}</h3>
-      <p className={`text-sm ${primary ? 'text-zinc-300' : 'text-zinc-400'}`}>{description}</p>
+      <p className={`text-sm ${primary ? 'text-gray-300' : 'text-gray-400'}`}>{description}</p>
     </button>
   );
 }
