@@ -2,16 +2,28 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, Grid3x3, Home, Copy, Check, LogOut } from 'lucide-react';
+import {
+  User,
+  GalleryVertical,
+  Images,
+  ImagePlus,
+  Home,
+  Copy,
+  Check,
+  LogOut,
+  Settings,
+  LayoutGrid,
+  PenTool,
+} from 'lucide-react';
 import { Container } from '@/components/core/layout/container';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Logo } from '@/components/core/navigation/Logo';
 import { useAddress } from '@/lib/hooks/use-address';
 import { useWallet } from '@/lib/hooks/wallet';
 import { shortenAddress } from '@/lib/utils/formatting';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { useRef, useEffect } from 'react';
+import { useRef } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +39,22 @@ export function UserSubmenu() {
   const [copied, setCopied] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   const [hoverBg, setHoverBg] = useState<{ left: number; width: number } | null>(null);
+  const [collectionAddress, setCollectionAddress] = useState<string | null>(null);
+
+  // Check if we're in a specific collection page
+  useEffect(() => {
+    const pathParts = pathname.split('/');
+    if (
+      pathParts.length >= 4 &&
+      pathParts[1] === 'my' &&
+      pathParts[2] === 'collections' &&
+      pathParts[3] !== 'new'
+    ) {
+      setCollectionAddress(pathParts[3]);
+    } else {
+      setCollectionAddress(null);
+    }
+  }, [pathname]);
 
   const handleLogout = async () => {
     toast.info('Signing out...');
@@ -58,32 +86,98 @@ export function UserSubmenu() {
     setHoverBg(null);
   };
 
-  const links = [
+  // Default main navigation links
+  const mainLinks = [
     {
       href: '/my',
-      label: 'Dashboard',
+      label: 'Overview',
       icon: <Home className="h-4 w-4" />,
     },
     {
       href: '/my/collections',
       label: 'Collections',
-      icon: <Grid3x3 className="h-4 w-4" />,
+      icon: <GalleryVertical className="h-4 w-4" />,
     },
     {
-      href: '/my/profile',
-      label: 'Profile',
-      icon: <User className="h-4 w-4" />,
+      href: '/my/collections/new',
+      label: 'Create Collections',
+      icon: <ImagePlus className="h-4 w-4" />,
+    },
+    {
+      href: '/my/nfts',
+      label: 'NFTs',
+      icon: <Images className="h-4 w-4" />,
     },
   ];
 
-  // Function to check if link is active with exact matching
-  const isLinkActive = (href: any) => {
+  // Collection specific submenu links
+  const collectionLinks = collectionAddress
+    ? [
+        {
+          href: `/my/collections/${collectionAddress}`,
+          label: 'Details',
+          icon: <LayoutGrid className="h-4 w-4" />,
+        },
+        {
+          href: `/my/collections/${collectionAddress}/mint`,
+          label: 'Mint NFT',
+          icon: <PenTool className="h-4 w-4" />,
+        },
+        {
+          href: `/my/collections/${collectionAddress}/nfts`,
+          label: 'NFTs',
+          icon: <Images className="h-4 w-4" />,
+        },
+        {
+          href: `/my/collections/${collectionAddress}/settings`,
+          label: 'Settings',
+          icon: <Settings className="h-4 w-4" />,
+        },
+      ]
+    : [];
+
+  // Choose which links to display based on the current path
+  const links = collectionAddress ? collectionLinks : mainLinks;
+
+  // Function to check if link is active with proper path matching
+  const isLinkActive = (href: string) => {
+    // For dashboard, only active if pathname is exactly '/my'
     if (href === '/my') {
-      // For dashboard, only active if pathname is exactly '/my'
       return pathname === '/my';
     }
+
+    // Special case for collections/new - don't highlight collections when on new page
+    if (href === '/my/collections' && pathname === '/my/collections/new') {
+      return false;
+    }
+
+    // Special case for the Create Collections link
+    if (href === '/my/collections/new') {
+      return pathname === '/my/collections/new';
+    }
+
+    // For collection-specific pages
+    if (collectionAddress) {
+      if (href.includes('/nfts/mint')) {
+        return pathname.includes('/nfts/mint');
+      }
+
+      if (href.includes('/nfts') && !pathname.includes('/nfts/mint')) {
+        return pathname.includes('/nfts') && !pathname.includes('/nfts/mint');
+      }
+
+      if (href.includes('/settings')) {
+        return pathname.includes('/settings');
+      }
+
+      // For the main collection details page
+      if (href === `/my/collections/${collectionAddress}`) {
+        return pathname === `/my/collections/${collectionAddress}`;
+      }
+    }
+
     // For other links, check if pathname starts with the href
-    return pathname === href || pathname.startsWith(`${href}/`);
+    return pathname === href || (pathname.startsWith(`${href}/`) && href !== '/my/collections/new');
   };
 
   return (
@@ -97,7 +191,7 @@ export function UserSubmenu() {
 
             <nav
               ref={navRef}
-              className="relative flex items-center overflow-x-auto transition-all duration-300"
+              className="relative gap-2 flex items-center overflow-x-auto transition-all duration-300"
               onMouseLeave={handleMouseLeave}
             >
               {/* Hover effect background */}
@@ -120,7 +214,7 @@ export function UserSubmenu() {
                     key={link.href}
                     href={link.href}
                     onMouseEnter={handleMouseEnter}
-                    className={`relative z-10 text-sm font-medium inline-flex items-center gap-2 transition-all duration-300 px-2 ${
+                    className={`relative z-10 text-sm font-mb font-sans inline-flex items-center gap-2 transition-all duration-300 px-2 ${
                       isActive
                         ? 'text-white border-b-2 border-white mt-[0.57rem] pb-[0.57rem]'
                         : 'text-gray-400 hover:text-white hover:bg-[#1f1f1f] rounded py-1'
