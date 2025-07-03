@@ -96,13 +96,6 @@ export function NFTGallery({ collectionAddress }: NFTGalleryProps) {
     <div>
       <div className="flex justify-between items-center mb-4">
         <p className="text-zinc-400 text-sm">Showing {nfts.length} NFTs</p>
-        <Link
-          href={`/my/collections/${collectionAddress}/nfts/mint`}
-          className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
-        >
-          <ImagePlus className="h-4 w-4" />
-          Mint NFT
-        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

@@ -43,7 +43,7 @@ export function UserLayout({ children }: UserLayoutProps) {
         <UserSubmenu />
       </div>
       <div className="content-wrapper">
-        <Container className="py-6 mx-auto max-w-7xl flex-grow">
+        <Container className="py-6 px-6 md:px-3 lg:px-6 mx-auto max-w-[84rem] flex-grow">
           <UserAuthGuard>{children}</UserAuthGuard>
         </Container>
       </div>

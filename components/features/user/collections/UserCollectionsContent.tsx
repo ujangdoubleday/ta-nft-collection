@@ -1,6 +1,5 @@
 'use client';
 
-import { UserCollectionsHeader } from './UserCollectionsHeader';
 import { UserCollectionsList } from './UserCollectionsList';
 import { useState, useEffect } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
@@ -31,8 +30,7 @@ export function UserCollectionsContent() {
   }
 
   return (
-    <div className="animate-fade-in bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-      <UserCollectionsHeader />
+    <div className="animate-fade-in">
       <UserCollectionsList />
     </div>
   );
