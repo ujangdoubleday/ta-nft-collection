@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { PlusCircle, Grid3x3, Settings, User } from 'lucide-react';
+import { PlusCircle, Grid3x3, Image, User } from 'lucide-react';
 
 export function UserDashboardActions() {
   const router = useRouter();
@@ -29,19 +29,19 @@ export function UserDashboardActions() {
       primary: false,
     },
     {
-      title: 'Settings',
-      description: 'Configure your account preferences',
-      icon: <Settings className="h-5 w-5" />,
-      onClick: () => router.push('/my/settings'),
+      title: 'View NFTs',
+      description: 'Browse all your owned NFTs',
+      icon: <Image className="h-5 w-5" />,
+      onClick: () => router.push('/my/nfts'),
       primary: false,
     },
   ];
 
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
+    <div>
+      <h2 className="text-mb font-bold text-white mb-3">Quick Actions</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {actions.map((action, index) => (
           <ActionCard key={index} {...action} />
         ))}
@@ -65,7 +65,7 @@ function ActionCard({ title, description, icon, onClick, primary = false }: Acti
       className={`flex flex-col items-start p-4 rounded-lg border transition-all text-left h-full
         ${
           primary
-            ? 'bg-[#0A0A0A] text-white border-[#1f1f1f] hover:bg-zinc-900'
+            ? 'bg-[#0A0A0A] text-white border-[#1f1f1f] hover:bg-zinc-900 hover:border-zinc-600'
             : 'bg-[#0A0A0A] text-white border-[#1f1f1f] hover:border-gray-700 hover:bg-zinc-900'
         }`}
     >

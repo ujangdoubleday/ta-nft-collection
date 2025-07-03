@@ -64,33 +64,14 @@ export function CollectionNFTsContent({ address }: CollectionNFTsContentProps) {
   }
 
   return (
-    <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-      <Link
-        href={`/my/collections/${address}`}
-        className="text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-sm mb-4"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Collection Details
-      </Link>
-
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-white">{collection.name} - NFTs</h1>
-          <p className="text-zinc-400 mt-1">Browse and manage NFTs in this collection</p>
-        </div>
-
-        <Link
-          href={`/my/collections/${address}/nfts/mint`}
-          className="flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
-        >
-          <ImagePlus className="h-4 w-4" />
-          Mint New NFT
-        </Link>
+    <>
+      <div>
+        <h1 className="text-2xl font-bold text-white">{collection.name} - NFTs</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6"></div>
+        <div className="h-px w-full bg-[#1f1f1f] mb-6"></div>
       </div>
 
-      <div className="h-px w-full bg-[#1f1f1f] mb-6"></div>
-
       <NFTGallery collectionAddress={address} />
-    </div>
+    </>
   );
 }

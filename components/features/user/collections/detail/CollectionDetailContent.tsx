@@ -57,13 +57,6 @@ export function CollectionDetailContent({ address }: CollectionDetailContentProp
   if (!collection) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-        <Link
-          href="/my/collections"
-          className="text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-sm mb-4"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Collections
-        </Link>
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-white mb-2">Collection Not Found</h2>
           <p className="text-zinc-400">The collection with address {address} could not be found.</p>
@@ -73,33 +66,31 @@ export function CollectionDetailContent({ address }: CollectionDetailContentProp
   }
 
   return (
-    <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-      <Link
-        href="/my/collections"
-        className="text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-sm mb-4"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Collections
-      </Link>
-
-      <CollectionHeader collection={collection} />
-
-      <div className="h-px w-full bg-[#1f1f1f] my-6"></div>
-
-      <CollectionStats collection={collection} />
-
-      <div className="h-px w-full bg-[#1f1f1f] my-6"></div>
-
-      <CollectionActions collection={collection} />
-
-      <div className="h-px w-full bg-[#1f1f1f] my-6"></div>
-
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-white mb-2">NFTs in this Collection</h2>
-        <p className="text-zinc-400 text-sm">Browse and manage the NFTs in this collection.</p>
+    <div className="space-y-6">
+      {/* Collection Header */}
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
+        <CollectionHeader collection={collection} />
       </div>
 
-      <NFTGallery collectionAddress={collection.address} />
+      {/* Stats and Actions in Side-by-Side Layout */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Collection Stats - Left Side */}
+
+        <div className="lg:w-5/12">
+          <h2 className="text-md font-bold text-white mb-3">Recent Activity</h2>
+          <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
+            <CollectionStats collection={collection} />
+          </div>
+        </div>
+
+        {/* Collection Actions - Right Side */}
+        <div className="lg:w-7/12">
+          <h2 className="text-md font-bold text-white mb-4">Collection Actions</h2>
+          <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
+            <CollectionActions collection={collection} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

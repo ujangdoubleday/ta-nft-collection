@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, Grid3x3, Home } from 'lucide-react';
+import { User, GalleryVertical, Images, ImagePlus, Home } from 'lucide-react';
 
 export function UserNavLinks() {
   const pathname = usePathname();
@@ -16,12 +16,17 @@ export function UserNavLinks() {
     {
       href: '/my/collections',
       label: 'Collections',
-      icon: <Grid3x3 className="h-4 w-4" />,
+      icon: <GalleryVertical className="h-4 w-4" />,
     },
     {
-      href: '/my/profile',
-      label: 'Profile',
-      icon: <User className="h-4 w-4" />,
+      href: '/my/collections/new',
+      label: 'Create Collections',
+      icon: <ImagePlus className="h-4 w-4" />,
+    },
+    {
+      href: '/my/nfts',
+      label: 'NFTs',
+      icon: <Images className="h-4 w-4" />,
     },
   ];
 

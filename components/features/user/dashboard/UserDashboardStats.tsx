@@ -33,19 +33,16 @@ export function UserDashboardStats() {
   }, [address]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <StatCard
-        title="Total Collections"
-        value={stats.totalCollections.toString()}
-        isLoading={isLoading}
-      />
-      <StatCard title="Total NFTs" value={stats.totalNFTs.toString()} isLoading={isLoading} />
-      <StatCard
-        title="Recent Activity"
-        value={stats.recentActivity.toString()}
-        isLoading={isLoading}
-      />
-      <StatCard title="Member Since" value={stats.createdAt} isLoading={isLoading} />
+    <div>
+      <h2 className="text-mb font-bold text-white mb-3">Stats</h2>
+      <div className="grid grid-cols-2 gap-4">
+        <StatCard
+          title="Total Collections"
+          value={stats.totalCollections.toString()}
+          isLoading={isLoading}
+        />
+        <StatCard title="Total NFTs" value={stats.totalNFTs.toString()} isLoading={isLoading} />
+      </div>
     </div>
   );
 }

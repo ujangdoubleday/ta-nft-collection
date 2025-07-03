@@ -78,7 +78,7 @@ export const useWalletModal = () => {
 
       // Always redirect to /my after successful authentication
       // This ensures users are redirected to dashboard after login
-      router.push('/my');
+      // router.push('/my');
       setRedirectPath(null);
     }
 
@@ -205,6 +205,7 @@ export const useWalletModal = () => {
         toast.error('Authentication failed');
       } else {
         setIsWalletModalOpen(false);
+        router.push('/my');
       }
     },
     onError: () => {
