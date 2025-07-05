@@ -81,7 +81,7 @@ export default function UnauthorizedPage() {
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-white font-medium">Wallet Connected</span>
               </div>
-              <p className="text-zinc-400 text-sm">You'll be redirected shortly...</p>
+              <p className="text-zinc-400 text-sm">You&apos;ll be redirected shortly...</p>
               <div className="mt-3 flex justify-center">
                 <Spinner size="md" color="white" />
               </div>

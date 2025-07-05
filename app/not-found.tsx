@@ -7,7 +7,7 @@ export default function NotFound() {
       <p className="text-lg mb-2 italic">what are you lookin&apos; for?</p>
 
       <p className="mt-6 text-sm text-zinc-400">
-        you'll be safe in{' '}
+        you&apos;ll be safe in{' '}
         <Link
           href="/"
           className="underline underline-offset-4 hover:text-white transition font-medium"
