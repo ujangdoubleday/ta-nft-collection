@@ -3,7 +3,7 @@
 import React from 'react';
 import { Container } from '@/components/core/layout/container';
 import Link from 'next/link';
-import { LogOut, Copy, Check, User, Slash } from 'lucide-react';
+import { LogOut, Copy, Check, User, Slash, Edit } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
 import { useWallet } from '@/lib/hooks/wallet';
@@ -25,6 +25,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/molecules/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/molecules/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/atoms/input';
+import { useTrpc } from '@/lib/hooks/use-trpc';
+import { useQueryClient } from '@tanstack/react-query';
 
 // Define the breadcrumb item type
 interface BreadcrumbItem {
@@ -41,6 +53,21 @@ export function UserNavbar() {
   const [copied, setCopied] = useState(false);
   const [collectionAddress, setCollectionAddress] = useState<string | null>(null);
   const [nftId, setNftId] = useState<string | null>(null);
+  const [newUsername, setNewUsername] = useState<string>('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const trpc = useTrpc();
+  const queryClient = useQueryClient();
+
+  // Use React Query through TRPC to fetch username
+  const { data: usernameData } = trpc.user.getUsername.useQuery(
+    { address: address || '' },
+    {
+      enabled: !!address,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  );
+
+  const username = usernameData?.username || '';
 
   // Parse path to extract collection address and NFT ID
   useEffect(() => {
@@ -75,6 +102,38 @@ export function UserNavbar() {
       toast.success('Address copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  // Use React Query mutation
+  const setUsernameMutation = trpc.user.setUsername.useMutation({
+    onSuccess: () => {
+      toast.success('Username set successfully');
+      setDialogOpen(false);
+      // Invalidate username query to trigger a refetch
+      queryClient.invalidateQueries({
+        queryKey: [['user', 'getUsername'], { input: { address } }],
+      });
+    },
+    onError: () => {
+      toast.error('Failed to set username');
+    },
+  });
+
+  const handleSetUsername = async () => {
+    if (!address) {
+      toast.error('Wallet not connected');
+      return;
+    }
+
+    if (newUsername.length < 3) {
+      toast.error('Username must be at least 3 characters');
+      return;
+    }
+
+    setUsernameMutation.mutate({
+      address,
+      username: newUsername,
+    });
   };
 
   // Generate simplified breadcrumbs based on current path
@@ -132,7 +191,8 @@ export function UserNavbar() {
                   >
                     <Link href="/my">
                       <User className="h-4 w-4 mr-1" />
-                      {address ? `user-${shortenAddress(address, 4)}` : 'Connecting...'}
+                      {username ||
+                        (address ? `user-${shortenAddress(address, 4)}` : 'Connecting...')}
                     </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
@@ -172,43 +232,85 @@ export function UserNavbar() {
           </div>
 
           <div className="flex items-center">
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center justify-center p-2 rounded-full hover:bg-[#1f1f1f] transition-colors">
-                <User className="h-6 w-6 text-white" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-64 p-2 bg-[#0A0A0A] border border-[#1f1f1f] text-white"
-              >
-                <div className="px-3 py-2 mb-2">
-                  <p className="text-sm text-gray-400 mb-1">Wallet Address</p>
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-sm">
-                      {address ? shortenAddress(address) : '0x...'}
-                    </span>
-                    <button
-                      onClick={copyToClipboard}
-                      className="p-1.5 rounded hover:bg-[#1f1f1f] transition-colors"
-                      title="Copy address"
-                    >
-                      {copied ? (
-                        <Check className="h-4 w-4 text-white" />
-                      ) : (
-                        <Copy className="h-4 w-4 text-gray-400" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <hr className="my-2 border-[#1f1f1f]" />
-                <DropdownMenuItem
-                  className="flex items-center gap-2 cursor-pointer hover:bg-[#1f1f1f] transition-colors"
-                  onClick={handleLogout}
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center justify-center p-2 rounded-full hover:bg-[#1f1f1f] transition-colors">
+                  <User className="h-6 w-6 text-white" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-64 p-2 bg-[#0A0A0A] border border-[#1f1f1f] text-white"
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span>Disconnect Wallet</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <div className="px-3 py-2 mb-2">
+                    <p className="text-sm text-gray-400 mb-1">Username</p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm">{username || 'Not set'}</span>
+                      <DialogTrigger asChild>
+                        <button
+                          className="p-1.5 rounded hover:bg-[#1f1f1f] transition-colors"
+                          title="Edit username"
+                        >
+                          <Edit className="h-4 w-4 text-gray-400" />
+                        </button>
+                      </DialogTrigger>
+                    </div>
+                  </div>
+                  <div className="px-3 py-2 mb-2">
+                    <p className="text-sm text-gray-400 mb-1">Wallet Address</p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-sm">
+                        {address ? shortenAddress(address) : '0x...'}
+                      </span>
+                      <button
+                        onClick={copyToClipboard}
+                        className="p-1.5 rounded hover:bg-[#1f1f1f] transition-colors"
+                        title="Copy address"
+                      >
+                        {copied ? (
+                          <Check className="h-4 w-4 text-white" />
+                        ) : (
+                          <Copy className="h-4 w-4 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                  <hr className="my-2 border-[#1f1f1f]" />
+                  <DropdownMenuItem
+                    className="flex items-center gap-2 cursor-pointer hover:bg-[#1f1f1f] transition-colors"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Disconnect Wallet</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DialogContent title="Set Username">
+                <div className="py-4">
+                  <p className="text-sm text-gray-400 mb-4">
+                    Choose a username to display instead of your wallet address.
+                  </p>
+                  <Input
+                    placeholder="Enter username"
+                    value={newUsername}
+                    onChange={(e) => setNewUsername(e.target.value)}
+                    className="bg-[#1f1f1f] border-zinc-700"
+                  />
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setDialogOpen(false)}
+                    disabled={setUsernameMutation.isPending}
+                  >
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSetUsername} disabled={setUsernameMutation.isPending}>
+                    {setUsernameMutation.isPending ? 'Saving...' : 'Save'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </Container>
