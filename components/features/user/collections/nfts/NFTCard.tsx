@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { MoreHorizontal, ExternalLink, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { shortenAddress } from '@/lib/utils/formatting';
+import { formatIPFSUrl } from '@/lib/utils/helpers/url';
 
 interface NFTCardProps {
   nft: {
@@ -22,6 +23,12 @@ interface NFTCardProps {
 
 export function NFTCard({ nft, collectionAddress }: NFTCardProps) {
   const [showOptions, setShowOptions] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
+  // Process the image URL to ensure it's properly formatted
+  const imageUrl = imageError
+    ? '/assets/images/placeholders/image-placeholder.svg'
+    : formatIPFSUrl(nft.imageUrl);
 
   return (
     <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden hover:shadow-md transition-all">
@@ -29,16 +36,13 @@ export function NFTCard({ nft, collectionAddress }: NFTCardProps) {
       <Link href={`/my/collections/${collectionAddress}/nfts/${nft.tokenId}`}>
         <div className="relative w-full aspect-square bg-[#0A0A0A]">
           <Image
-            src={nft.imageUrl}
+            src={imageUrl}
             alt={nft.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             className="object-cover"
-            onError={(e) => {
-              // Fallback to placeholder if image fails to load
-              (e.target as HTMLImageElement).src =
-                '/assets/images/placeholders/image-placeholder.svg';
-            }}
+            onError={() => setImageError(true)}
+            unoptimized={true} // Disable Next.js image optimization for external URLs
           />
         </div>
 
@@ -50,7 +54,7 @@ export function NFTCard({ nft, collectionAddress }: NFTCardProps) {
 
           <div className="flex items-center justify-between mt-1 text-xs text-zinc-500">
             <span>Token ID: {nft.tokenId}</span>
-            <span title={nft.owner}>{shortenAddress(nft.owner, 4)}</span>
+            {nft.owner && <span title={nft.owner}>{shortenAddress(nft.owner, 4)}</span>}
           </div>
         </div>
       </Link>

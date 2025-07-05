@@ -11,10 +11,10 @@ import { useNFTFactory } from '@/lib/blockchain/hooks';
 import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
 
-export function NewCollectionContent() {
+export function NewCollectionContentWithBlockchain() {
   const router = useRouter();
   const { address, isConnected, isAuthenticated, authenticate, connect } = useWallet();
-  const { uploadToPinata, createFolder, isUploading, isCreatingFolder } = usePinataUpload();
+  const { uploadToPinata, createFolder, isUploading } = usePinataUpload();
   const { createCollection, isLoading: isFactoryLoading } = useNFTFactory();
   const utils = trpc.useContext();
 

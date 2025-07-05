@@ -6,5 +6,5 @@ export default async function Page(props: { params: Params }) {
   const params = await props.params;
   const address = params.address;
 
-  return <NFTMintContent address={address} />;
+  return <NFTMintContent contractAddress={address} />;
 }

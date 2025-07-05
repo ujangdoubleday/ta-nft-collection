@@ -2,18 +2,16 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
-  useWriteContract,
-  useWaitForTransactionReceipt,
   usePublicClient,
   useWalletClient,
+  useWriteContract,
+  useWaitForTransactionReceipt,
 } from 'wagmi';
-import { sepolia } from 'wagmi/chains';
 import { subscribeToContractEvents } from '../utils/alchemy';
 import { decodeEventLog, parseAbiItem, getContract } from 'viem';
-import { alchemy } from '../alchemy';
 import { NFT_COLLECTION_ABI } from '@/lib/blockchain/abi';
 
-// Event signature for Transfer event
+// Event signature for Transfer event (burn is a transfer to zero address)
 const TRANSFER_EVENT_SIGNATURE = 'Transfer(address,address,uint256)';
 
 // Parse the event ABI item for proper decoding
@@ -21,51 +19,41 @@ const transferEventAbi = parseAbiItem(
   'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
 );
 
-export interface NFTTransferEvent {
+// Rename interface to avoid conflict with NFTTransferEvent
+export interface NFTBurnEventData {
   from: string;
   to: string;
   tokenId: string;
+  transactionHash?: string;
 }
 
-export interface UseNFTTransferReturn {
-  transferNFT: (
-    contractAddress: string,
-    from: string, // current owner
-    to: string, // new owner
-    tokenId: string,
-  ) => Promise<{
-    hash?: `0x${string}`;
-    error?: Error;
-  }>;
-  isLoading: boolean;
-  isSuccess: boolean;
-  isWaiting: boolean;
-  error: Error | null;
-  transactionHash: `0x${string}` | undefined;
-  transferEvents: Array<NFTTransferEvent>;
-  reset: () => void;
+export interface NFTBurnResult {
+  hash?: `0x${string}`;
+  error?: Error;
 }
 
-export function useNFTTransfer(): UseNFTTransferReturn {
+export function useNFTBurn() {
   const [error, setError] = useState<Error | null>(null);
   const [transactionHash, setTransactionHash] = useState<`0x${string}` | undefined>();
   const [currentContractAddress, setCurrentContractAddress] = useState<string | undefined>();
-  const [transferEvents, setTransferEvents] = useState<NFTTransferEvent[]>([]);
+  const [burnEvents, setBurnEvents] = useState<NFTBurnEventData[]>([]);
 
-  // Refs to prevent unnecessary re-renders and duplicate websocket connections
+  const [isLoading, setIsLoading] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Refs to prevent unnecessary re-renders
   const hasSetupWebsocket = useRef(false);
   const unsubscribeRef = useRef<(() => void) | null>(null);
   const isUnmountedRef = useRef(false);
 
-  // Track contract writes and transaction receipts
-  const { writeContractAsync, isPending: isTransferLoading, isSuccess } = useWriteContract();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
 
+  // Watch for transaction receipt
   const { data: receipt, isLoading: isWaitingForReceipt } = useWaitForTransactionReceipt({
     hash: transactionHash,
   });
-
-  const publicClient = usePublicClient();
-  const { data: walletClient } = useWalletClient();
 
   // Setup Alchemy websocket for transfer events
   useEffect(() => {
@@ -78,26 +66,19 @@ export function useNFTTransfer(): UseNFTTransferReturn {
     }
 
     hasSetupWebsocket.current = true;
-    console.log('Setting up websocket for transfer events:', currentContractAddress);
+    console.log('Setting up websocket for burn events:', currentContractAddress);
 
-    // First, set up a broader filter to catch all events from this contract
+    // Set up a filter for Transfer events
     const unsubscribe = subscribeToContractEvents(
       currentContractAddress,
       TRANSFER_EVENT_SIGNATURE,
-      (log, event) => {
+      (log) => {
         try {
           console.log('Received transfer event log:', log);
-          console.log('Transaction hash comparison:', {
-            logTxHash: log.transactionHash,
-            ourTxHash: transactionHash,
-            matches: transactionHash
-              ? log.transactionHash === transactionHash
-              : 'No tx hash set yet',
-          });
 
           if (isUnmountedRef.current) return;
 
-          // Process all transfer events, we'll filter by transaction hash if needed
+          // Process all transfer events to look for burns (transfers to zero address)
           const decodedEvent = decodeEventLog({
             abi: [transferEventAbi],
             data: log.data as `0x${string}`,
@@ -105,19 +86,21 @@ export function useNFTTransfer(): UseNFTTransferReturn {
           });
 
           if (decodedEvent.args) {
-            const event: NFTTransferEvent = {
+            const event: NFTBurnEventData = {
               from: decodedEvent.args.from as string,
               to: decodedEvent.args.to as string,
               tokenId: decodedEvent.args.tokenId ? decodedEvent.args.tokenId.toString() : '0',
+              transactionHash: log.transactionHash,
             };
 
-            console.log('Decoded transfer event:', event);
-
-            // Add the event to our state
-            setTransferEvents((prev) => [...prev, event]);
+            // Only track burns (transfers to zero address)
+            if (event.to.toLowerCase() === '0x0000000000000000000000000000000000000000') {
+              console.log('Decoded burn event:', event);
+              setBurnEvents((prev) => [...prev, event]);
+            }
           }
         } catch (error) {
-          console.error('Error processing transfer event:', error);
+          console.error('Error processing burn event:', error);
         }
       },
     );
@@ -125,7 +108,7 @@ export function useNFTTransfer(): UseNFTTransferReturn {
     unsubscribeRef.current = unsubscribe;
 
     return () => {
-      console.log('Cleaning up transfer event websocket');
+      console.log('Cleaning up burn event websocket');
       if (unsubscribeRef.current) {
         unsubscribeRef.current();
         unsubscribeRef.current = null;
@@ -139,6 +122,8 @@ export function useNFTTransfer(): UseNFTTransferReturn {
     if (!receipt || !currentContractAddress || isUnmountedRef.current) return;
 
     console.log('Transaction receipt received:', receipt);
+    setIsWaiting(false);
+    setIsSuccess(true);
 
     // Look for Transfer events in the receipt logs
     const transferLogs = receipt.logs.filter((log) => {
@@ -149,7 +134,7 @@ export function useNFTTransfer(): UseNFTTransferReturn {
     console.log('Found transfer logs in receipt:', transferLogs);
 
     // Process each transfer log
-    const newEvents: NFTTransferEvent[] = [];
+    const newEvents: NFTBurnEventData[] = [];
 
     transferLogs.forEach((log) => {
       try {
@@ -160,23 +145,27 @@ export function useNFTTransfer(): UseNFTTransferReturn {
         });
 
         if (decodedEvent.args) {
-          const event: NFTTransferEvent = {
+          const event: NFTBurnEventData = {
             from: decodedEvent.args.from as string,
             to: decodedEvent.args.to as string,
             tokenId: decodedEvent.args.tokenId ? decodedEvent.args.tokenId.toString() : '0',
+            transactionHash: receipt.transactionHash,
           };
 
-          console.log('Decoded transfer event from receipt:', event);
-          newEvents.push(event);
+          // Only add burn events (transfers to zero address)
+          if (event.to.toLowerCase() === '0x0000000000000000000000000000000000000000') {
+            console.log('Decoded burn event from receipt:', event);
+            newEvents.push(event);
+          }
         }
       } catch (error) {
-        console.error('Error decoding transfer event from receipt:', error);
+        console.error('Error decoding burn event from receipt:', error);
       }
     });
 
     // Only update state if we have new events and not unmounted
     if (newEvents.length > 0 && !isUnmountedRef.current) {
-      setTransferEvents((prev) => [...prev, ...newEvents]);
+      setBurnEvents((prev) => [...prev, ...newEvents]);
     }
   }, [receipt]);
 
@@ -195,7 +184,10 @@ export function useNFTTransfer(): UseNFTTransferReturn {
     setError(null);
     setTransactionHash(undefined);
     setCurrentContractAddress(undefined);
-    setTransferEvents([]);
+    setBurnEvents([]);
+    setIsLoading(false);
+    setIsWaiting(false);
+    setIsSuccess(false);
 
     if (unsubscribeRef.current) {
       unsubscribeRef.current();
@@ -205,8 +197,8 @@ export function useNFTTransfer(): UseNFTTransferReturn {
     hasSetupWebsocket.current = false;
   }, []);
 
-  const transferNFT = useCallback(
-    async (contractAddress: string, from: string, to: string, tokenId: string) => {
+  const burnNFT = useCallback(
+    async (contractAddress: string, tokenId: string): Promise<NFTBurnResult> => {
       if (!walletClient) {
         const walletError = new Error('Wallet not connected');
         setError(walletError);
@@ -216,47 +208,62 @@ export function useNFTTransfer(): UseNFTTransferReturn {
       setError(null);
       setTransactionHash(undefined);
       setCurrentContractAddress(contractAddress);
-      setTransferEvents([]);
+      setBurnEvents([]);
+      setIsLoading(true);
+      setIsWaiting(false);
+      setIsSuccess(false);
 
       try {
-        console.log('Transferring NFT:', {
+        // Create contract instance
+        const contract = getContract({
+          address: contractAddress as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          client: { public: publicClient, wallet: walletClient },
+        });
+
+        console.log('Burning NFT:', {
           contractAddress,
-          from,
-          to,
           tokenId,
         });
 
-        // Call safeTransferFrom using writeContractAsync
-        const hash = await writeContractAsync({
+        // Call transferFrom instead of safeTransferFrom
+        const hash = await walletClient.writeContract({
           address: contractAddress as `0x${string}`,
           abi: NFT_COLLECTION_ABI,
-          functionName: 'safeTransferFrom',
-          args: [from as `0x${string}`, to as `0x${string}`, BigInt(tokenId)],
+          functionName: 'transferFrom',
+          args: [
+            walletClient.account.address,
+            '0x0000000000000000000000000000000000000000' as `0x${string}`,
+            BigInt(tokenId),
+          ],
         });
 
         console.log('Transaction submitted:', hash);
         setTransactionHash(hash);
+        setIsLoading(false);
+        setIsWaiting(true);
 
-        // The transaction receipt will be handled by the useWaitForTransactionReceipt hook
         return { hash };
       } catch (err) {
-        console.error('Transfer failed:', err);
-        const error = err instanceof Error ? err : new Error('Unknown error during transfer');
+        console.error('Burn failed:', err);
+        setIsLoading(false);
+        setIsWaiting(false);
+        const error = err instanceof Error ? err : new Error('Unknown error during burn');
         setError(error);
         return { error };
       }
     },
-    [writeContractAsync, walletClient],
+    [publicClient, walletClient],
   );
 
   return {
-    transferNFT,
-    isLoading: isTransferLoading,
-    isWaiting: isWaitingForReceipt,
+    burnNFT,
+    isLoading,
+    isWaiting,
     isSuccess,
-    error,
     transactionHash,
-    transferEvents,
+    burnEvents,
+    error,
     reset,
   };
 }

@@ -22,8 +22,24 @@ export function useNFTHistory(contractAddress: string | undefined, tokenId: stri
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
+  // Add debug logs at the start of the hook
   useEffect(() => {
-    if (!contractAddress || !tokenId) return;
+    console.log('useNFTHistory hook called with:', {
+      contractAddress,
+      tokenId,
+      validContractAddress: !!(contractAddress && contractAddress.startsWith('0x')),
+      validTokenId: !!(tokenId && tokenId !== ''),
+    });
+  }, [contractAddress, tokenId]);
+
+  useEffect(() => {
+    if (!contractAddress || !tokenId) {
+      console.log('useNFTHistory: Missing contractAddress or tokenId', {
+        contractAddress,
+        tokenId,
+      });
+      return;
+    }
 
     const fetchHistory = async () => {
       setIsLoading(true);

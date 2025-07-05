@@ -6,60 +6,138 @@ import { ArrowLeft } from 'lucide-react';
 import { CollectionHeader } from './CollectionHeader';
 import { CollectionStats } from './CollectionStats';
 import { CollectionActions } from './CollectionActions';
-import { NFTGallery } from '../nfts/NFTGallery';
-
-// Sample data for a collection - in a real app, this would come from an API
-const SAMPLE_COLLECTION = {
-  id: '1',
-  address: '0x1234567890abcdef1234567890abcdef12345678',
-  name: 'Pixel Art Collection',
-  description: 'A collection of unique pixel art NFTs inspired by retro gaming aesthetics.',
-  imageUrl: '/assets/images/nfts/pixel-art/pixel-1.svg',
-  itemCount: 8,
-  createdAt: '2023-10-15',
-  symbol: 'PIXEL',
-  creator: '0x7890abcdef1234567890abcdef1234567890abcd',
-};
+import { Skeleton } from '@/components/ui/skeleton';
+import { trpc } from '@/lib/api/trpc/client';
+import { EnrichedCollectionInfo } from '@/lib/blockchain/utils/collection';
 
 interface CollectionDetailContentProps {
   address: string;
 }
 
+// Define our own interface for the collection data based on the API response
+interface CollectionData {
+  collectionAddress: string;
+  name: string;
+  symbol: string;
+  totalSupply: bigint;
+  createdAt: bigint;
+  contractURI: string;
+  metadata: {
+    name?: string;
+    description?: string;
+    image?: string;
+    banner_image?: string;
+    featured_image?: string;
+    external_link?: string;
+    collaborators?: string[];
+  };
+  imageUrl: string;
+}
+
 export function CollectionDetailContent({ address }: CollectionDetailContentProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [collection, setCollection] = useState<typeof SAMPLE_COLLECTION | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  // Simulate loading collection data
+  // Handle client-side rendering
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setCollection(SAMPLE_COLLECTION);
-      setIsLoading(false);
-    }, 1000);
+    setMounted(true);
+  }, []);
 
-    return () => clearTimeout(timer);
-  }, [address]);
+  const {
+    data: contractData,
+    isLoading: isLoadingContract,
+    error: contractError,
+  } = trpc.collection.getContractURI.useQuery(
+    { contractAddress: address as `0x${string}` },
+    { enabled: !!address },
+  );
 
-  if (isLoading) {
+  // Extract contractURI and collectionInfo from the combined response
+  const contractURI = contractData?.contractURI;
+  const collectionInfo = contractData?.collectionInfo;
+  const isLoadingURI = isLoadingContract;
+  const isLoadingInfo = isLoadingContract;
+  const uriError = contractError;
+  const infoError = contractError;
+
+  // Fetch collection metadata from IPFS using tRPC
+  const {
+    data: metadataResult,
+    isLoading: isLoadingMetadata,
+    error: metadataError,
+  } = trpc.collection.fetchProcessedMetadata.useQuery(
+    { uri: contractURI as string },
+    {
+      enabled: !!contractURI,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 2,
+    },
+  );
+
+  // Extract metadata from the response
+  const metadata = metadataResult?.metadata;
+  const imageUrl = metadataResult?.imageUrl;
+
+  // Prepare the collection data object to pass to child components
+  const collectionData: CollectionData = {
+    collectionAddress: address,
+    name:
+      Array.isArray(collectionInfo) && collectionInfo[0]
+        ? String(collectionInfo[0])
+        : metadata?.name || 'Unnamed Collection',
+    symbol: Array.isArray(collectionInfo) && collectionInfo[1] ? String(collectionInfo[1]) : 'NFT',
+    totalSupply:
+      Array.isArray(collectionInfo) && collectionInfo[3]
+        ? BigInt(String(collectionInfo[3]))
+        : BigInt(0),
+    createdAt: BigInt(Math.floor(Date.now() / 1000)),
+    contractURI: typeof contractURI === 'string' ? contractURI : '',
+    metadata: metadata || {},
+    imageUrl: imageUrl || '/assets/images/placeholders/image-placeholder.svg',
+  };
+
+  // Show loading state during SSR or while fetching data
+  if (!mounted || isLoadingContract || (contractURI && isLoadingMetadata)) {
     return (
-      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6 animate-pulse">
-        <div className="h-8 bg-[#1f1f1f] rounded w-1/4 mb-4"></div>
-        <div className="h-12 bg-[#1f1f1f] rounded w-3/4 mb-6"></div>
-        <div className="h-32 bg-[#1f1f1f] rounded w-full mb-8"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="h-24 bg-[#1f1f1f] rounded"></div>
-          <div className="h-24 bg-[#1f1f1f] rounded"></div>
-          <div className="h-24 bg-[#1f1f1f] rounded"></div>
+      <div className="space-y-6">
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
+          <Skeleton className="h-8 w-1/4 mb-4" />
+          <Skeleton className="h-12 w-3/4 mb-6" />
+          <div className="flex gap-4">
+            <Skeleton className="h-32 w-32" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col lg:flex-row gap-6">
+          <div className="lg:w-5/12">
+            <Skeleton className="h-6 w-32 mb-3" />
+            <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
+              <Skeleton className="h-24 w-full" />
+            </div>
+          </div>
+          <div className="lg:w-7/12">
+            <Skeleton className="h-6 w-40 mb-3" />
+            <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
+              <Skeleton className="h-24 w-full" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!collection) {
+  // Show error state only after loading is complete
+  if (infoError || (!isLoadingMetadata && !metadata)) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold text-white mb-2">Collection Not Found</h2>
-          <p className="text-zinc-400">The collection with address {address} could not be found.</p>
+          <p className="text-zinc-400">
+            {infoError?.message || `The collection with address ${address} could not be found.`}
+          </p>
         </div>
       </div>
     );
@@ -69,17 +147,16 @@ export function CollectionDetailContent({ address }: CollectionDetailContentProp
     <div className="space-y-6">
       {/* Collection Header */}
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-        <CollectionHeader collection={collection} />
+        <CollectionHeader collection={collectionData as unknown as EnrichedCollectionInfo} />
       </div>
 
       {/* Stats and Actions in Side-by-Side Layout */}
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Collection Stats - Left Side */}
-
         <div className="lg:w-5/12">
           <h2 className="text-md font-bold text-white mb-3">Recent Activity</h2>
           <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-            <CollectionStats collection={collection} />
+            <CollectionStats collection={collectionData as unknown as EnrichedCollectionInfo} />
           </div>
         </div>
 
@@ -87,7 +164,7 @@ export function CollectionDetailContent({ address }: CollectionDetailContentProp
         <div className="lg:w-7/12">
           <h2 className="text-md font-bold text-white mb-4">Collection Actions</h2>
           <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-            <CollectionActions collection={collection} />
+            <CollectionActions collection={collectionData as unknown as EnrichedCollectionInfo} />
           </div>
         </div>
       </div>
