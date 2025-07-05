@@ -8,6 +8,9 @@ const withAnalyzer = withBundleAnalyzer({
 /** @type {import('next').NextConfig} */
 const baseConfig = {
   reactStrictMode: true,
+  experimental: {
+    authInterrupts: true,
+  },
   // Add headers configuration for cookie handling
   async headers() {
     return [

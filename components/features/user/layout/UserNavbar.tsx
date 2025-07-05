@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
 import { useWallet } from '@/lib/hooks/wallet';
 import { shortenAddress } from '@/lib/utils/formatting';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { toast } from 'sonner';
 import { Logo } from '@/components/core/navigation/Logo';
 import {
@@ -28,15 +28,14 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogFooter,
-  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/molecules/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/atoms/input';
 import { useTrpc } from '@/lib/hooks/use-trpc';
 import { useQueryClient } from '@tanstack/react-query';
+import { signOut } from 'next-auth/react';
 
 // Define the breadcrumb item type
 interface BreadcrumbItem {
@@ -48,7 +47,6 @@ interface BreadcrumbItem {
 export function UserNavbar() {
   const { data: address } = useAddress();
   const { disconnect } = useWallet();
-  const router = useRouter();
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
   const [collectionAddress, setCollectionAddress] = useState<string | null>(null);
@@ -89,10 +87,8 @@ export function UserNavbar() {
   }, [pathname]);
 
   const handleLogout = async () => {
-    toast.info('Signing out...');
+    signOut({ callbackUrl: '/' });
     await disconnect();
-    toast.success('Signed out successfully');
-    router.push('/');
   };
 
   const copyToClipboard = async () => {
