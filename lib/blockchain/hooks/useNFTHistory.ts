@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getTransferHistory } from '../utils/alchemy';
 import { formatDateToString } from '@/lib/utils/formatting';
+import { useTrpc } from '@/lib/hooks/use-trpc';
 
 export type NFTHistoryItem = {
   type: string;
@@ -19,8 +19,29 @@ export type NFTHistoryItem = {
  */
 export function useNFTHistory(contractAddress: string | undefined, tokenId: string | undefined) {
   const [history, setHistory] = useState<NFTHistoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const { nft } = useTrpc();
+
+  // Use tRPC query for fetching transfer history
+  const {
+    data: transferEvents,
+    isLoading,
+    error: trpcError,
+  } = nft.getTransferHistory.useQuery(
+    { contractAddress: contractAddress || '', tokenId: tokenId || '' },
+    {
+      enabled: !!(contractAddress && tokenId && contractAddress.startsWith('0x') && tokenId !== ''),
+      retry: 1,
+    },
+  );
+
+  // Handle tRPC error
+  useEffect(() => {
+    if (trpcError) {
+      console.error('tRPC error fetching NFT history:', trpcError);
+      setError(new Error(trpcError.message));
+    }
+  }, [trpcError]);
 
   // Add debug logs at the start of the hook
   useEffect(() => {
@@ -32,70 +53,42 @@ export function useNFTHistory(contractAddress: string | undefined, tokenId: stri
     });
   }, [contractAddress, tokenId]);
 
+  // Process the transfer events when they arrive
   useEffect(() => {
-    if (!contractAddress || !tokenId) {
-      console.log('useNFTHistory: Missing contractAddress or tokenId', {
-        contractAddress,
-        tokenId,
-      });
+    if (!transferEvents || transferEvents.length === 0) {
+      console.log('No transfer events found');
+      setHistory([]);
       return;
     }
 
-    const fetchHistory = async () => {
-      setIsLoading(true);
-      setError(null);
+    console.log('Raw transfer events from tRPC:', transferEvents);
 
-      try {
-        console.log(
-          `Fetching transfer history for contract: ${contractAddress}, token: ${tokenId}`,
-        );
+    // Convert to history items - ensure we keep all events in the history
+    const historyItems = transferEvents.map(
+      (event: { from: string; to: string; timestamp: number; transactionHash: string }) => {
+        const isZeroAddress = event.from === '0x0000000000000000000000000000000000000000';
 
-        // Fetch transfer history from Alchemy
-        const transferEvents = await getTransferHistory(contractAddress, tokenId);
+        return {
+          type: isZeroAddress ? 'Mint' : 'Transfer',
+          from: event.from,
+          to: event.to,
+          date: formatDateToString(new Date(event.timestamp * 1000)),
+          transactionHash: event.transactionHash,
+          // If it's a mint, add a default price (could be fetched from transaction in the future)
+          price: isZeroAddress ? '0.05 ETH' : undefined,
+        };
+      },
+    );
 
-        console.log('Raw transfer events:', transferEvents);
+    console.log('Processed history items:', historyItems);
 
-        if (transferEvents.length === 0) {
-          console.log('No transfer events found');
-          setHistory([]);
-          return;
-        }
+    // Sort by date (oldest first) for chronological display
+    // This ensures mint event is first, followed by transfers
+    const sortedHistory = [...historyItems];
+    console.log('Final sorted history:', sortedHistory);
 
-        // Convert to history items - ensure we keep all events in the history
-        const historyItems = transferEvents.map(
-          (event: { from: string; to: string; timestamp: number; transactionHash: string }) => {
-            const isZeroAddress = event.from === '0x0000000000000000000000000000000000000000';
-
-            return {
-              type: isZeroAddress ? 'Mint' : 'Transfer',
-              from: event.from,
-              to: event.to,
-              date: formatDateToString(new Date(event.timestamp * 1000)),
-              transactionHash: event.transactionHash,
-              // If it's a mint, add a default price (could be fetched from transaction in the future)
-              price: isZeroAddress ? '0.05 ETH' : undefined,
-            };
-          },
-        );
-
-        console.log('Processed history items:', historyItems);
-
-        // Sort by date (oldest first) for chronological display
-        // This ensures mint event is first, followed by transfers
-        const sortedHistory = [...historyItems];
-        console.log('Final sorted history:', sortedHistory);
-
-        setHistory(sortedHistory);
-      } catch (err) {
-        console.error('Error fetching NFT history:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch transfer history'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchHistory();
-  }, [contractAddress, tokenId]);
+    setHistory(sortedHistory);
+  }, [transferEvents]);
 
   return { history, isLoading, error };
 }

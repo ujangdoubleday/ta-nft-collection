@@ -5,9 +5,9 @@ import { useRouter } from 'next/navigation';
 import { usePinataUpload, METADATA_TYPE } from '@/lib/hooks/usePinataUpload';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTCollection } from '@/lib/blockchain/hooks';
-import { refreshNFTMetadata } from '@/lib/blockchain/utils';
 import { subscribeToContractEvents } from '@/lib/blockchain/utils/alchemy';
 import { decodeEventLog, parseAbiItem } from 'viem';
+import { useTrpc } from '@/lib/hooks/use-trpc';
 
 // Event signature for Transfer event
 const TRANSFER_EVENT_SIGNATURE = 'Transfer(address,address,uint256)';
@@ -49,6 +49,10 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
   const { address } = useWallet();
   const { uploadToPinata, isUploading } = usePinataUpload();
   const { mintNFT, isLoading: isMintLoading } = useNFTCollection();
+  const { nft } = useTrpc();
+
+  // Create the mutation hook
+  const refreshMetadataMutation = nft.refreshNFTMetadata.useMutation();
 
   // Memoized refresh function that only runs once per creation
   const refreshNFTData = useCallback(
@@ -60,10 +64,14 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
         console.log('Refreshing NFT data...');
 
         try {
-          await refreshNFTMetadata(contractAddress, tokenId);
-          console.log('Metadata refresh request sent to Alchemy');
+          // Use tRPC procedure instead of direct function call
+          await refreshMetadataMutation.mutateAsync({
+            contractAddress,
+            tokenId,
+          });
+          console.log('Metadata refresh request sent via tRPC');
         } catch (refreshError) {
-          console.error('Error refreshing metadata:', refreshError);
+          console.error('Error refreshing metadata via tRPC:', refreshError);
         }
 
         const revalidateResponse = await fetch('/api/revalidate?tag=collections');
@@ -81,7 +89,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
         hasRefreshedData.current = false;
       }
     },
-    [utils, address, contractAddress],
+    [utils, address, contractAddress, refreshMetadataMutation],
   );
 
   // Setup Alchemy websocket when transaction hash is available

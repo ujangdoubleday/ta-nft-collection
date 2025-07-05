@@ -6,6 +6,8 @@ import {
   fetchNFTsForContract,
   fetchNFTByTokenId,
   getNFTOwner,
+  getTransferHistory,
+  refreshNFTMetadata,
 } from '@/lib/blockchain/utils/alchemy';
 
 export const nftRouter = router({
@@ -155,6 +157,46 @@ export const nftRouter = router({
           error,
         );
         return { owner: null, error: 'Failed to get NFT owner' };
+      }
+    }),
+
+  // New procedure to get NFT transfer history
+  getTransferHistory: publicProcedure
+    .input(z.object({ contractAddress: z.string(), tokenId: z.string() }))
+    .query(async ({ input }) => {
+      const { contractAddress, tokenId } = input;
+
+      try {
+        console.log(
+          `tRPC - Fetching transfer history for NFT: ${contractAddress} Token ID: ${tokenId}`,
+        );
+        const history = await getTransferHistory(contractAddress, tokenId);
+        return history;
+      } catch (error) {
+        console.error(
+          `Error fetching transfer history: ${contractAddress} - Token ID: ${tokenId}`,
+          error,
+        );
+        return [];
+      }
+    }),
+
+  // New procedure to refresh NFT metadata
+  refreshNFTMetadata: publicProcedure
+    .input(z.object({ contractAddress: z.string(), tokenId: z.string() }))
+    .mutation(async ({ input }) => {
+      const { contractAddress, tokenId } = input;
+
+      try {
+        console.log(`tRPC - Refreshing metadata for NFT: ${contractAddress} Token ID: ${tokenId}`);
+        const result = await refreshNFTMetadata(contractAddress, tokenId);
+        return result;
+      } catch (error) {
+        console.error(
+          `Error refreshing NFT metadata: ${contractAddress} - Token ID: ${tokenId}`,
+          error,
+        );
+        return { success: false, error };
       }
     }),
 });
