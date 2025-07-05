@@ -5,59 +5,47 @@ import { useAddress } from '@/lib/hooks/use-address';
 import { UserCollectionCard } from './UserCollectionCard';
 import { ImagePlus } from 'lucide-react';
 import Link from 'next/link';
-
-// Sample data for collections - in a real app, this would come from an API
-const SAMPLE_COLLECTIONS = [
-  {
-    id: '1',
-    address: '0x1234567890abcdef1234567890abcdef12345678',
-    name: 'Pixel Art Collection',
-    description: 'A collection of unique pixel art NFTs inspired by retro gaming aesthetics.',
-    imageUrl: '/assets/images/nfts/pixel-art/pixel-1.svg',
-    itemCount: 8,
-    createdAt: '2023-10-15',
-    symbol: 'PIXEL',
-  },
-  {
-    id: '2',
-    address: '0xabcdef1234567890abcdef1234567890abcdef12',
-    name: 'Retro Computing',
-    description: 'NFTs celebrating the history of computing and vintage technology.',
-    imageUrl: '/assets/images/nfts/retro-computing/retro-1.svg',
-    itemCount: 3,
-    createdAt: '2023-11-20',
-    symbol: 'RETRO',
-  },
-  {
-    id: '3',
-    address: '0x7890abcdef1234567890abcdef1234567890abcd',
-    name: 'Windows 98 Icons',
-    description: 'Nostalgic collection featuring iconic elements from the Windows 98 era.',
-    imageUrl: '/assets/images/nfts/windows-98-icons/win98-1.svg',
-    itemCount: 5,
-    createdAt: '2023-12-05',
-    symbol: 'WIN98',
-  },
-];
+import { trpc } from '@/lib/api/trpc/client';
 
 export function UserCollectionsList() {
   const { data: address } = useAddress();
   const [isLoading, setIsLoading] = useState(true);
-  const [collections, setCollections] = useState<typeof SAMPLE_COLLECTIONS>([]);
 
-  // Simulate loading collections
+  // Fetch collections from blockchain using trpc
+  const {
+    data: collections,
+    isLoading: isLoadingCollections,
+    error,
+    refetch,
+  } = trpc.collection.getEnrichedCreatorCollections.useQuery(
+    { creatorAddress: address || '' },
+    {
+      enabled: !!address,
+      // Refresh collections data every 30 seconds
+      refetchInterval: 30000,
+    },
+  );
+
+  // Handle query state changes
   useEffect(() => {
+    if (!isLoadingCollections) {
+      setIsLoading(false);
+    }
+  }, [isLoadingCollections]);
+
+  useEffect(() => {
+    // Set loading to false after a timeout even if query is still loading
+    // to prevent infinite loading state in case of errors
     if (address) {
       const timer = setTimeout(() => {
-        setCollections(SAMPLE_COLLECTIONS);
         setIsLoading(false);
-      }, 1200);
+      }, 5000);
 
       return () => clearTimeout(timer);
     }
   }, [address]);
 
-  if (isLoading) {
+  if (isLoading || isLoadingCollections) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(3)].map((_, i) => (
@@ -77,7 +65,31 @@ export function UserCollectionsList() {
     );
   }
 
-  if (!collections.length) {
+  if (error) {
+    return (
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
+        <h3 className="text-xl font-bold text-white mb-2">Error Loading Collections</h3>
+        <p className="text-zinc-400 mb-6">{error.message || 'Failed to fetch your collections'}</p>
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => refetch()}
+            className="inline-flex items-center gap-2 bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] text-white py-2 px-4 rounded-md transition-colors text-sm font-medium"
+          >
+            Try Again
+          </button>
+          <Link
+            href="/my/collections/new"
+            className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
+          >
+            <ImagePlus className="h-4 w-4" />
+            Create New Collection
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!collections || collections.length === 0) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
         <div className="bg-[#0A0A0A] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f1f1f]">
@@ -99,7 +111,19 @@ export function UserCollectionsList() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {collections.map((collection) => (
-        <UserCollectionCard key={collection.id} collection={collection} />
+        <UserCollectionCard
+          key={collection.collectionAddress}
+          collection={{
+            id: collection.collectionAddress,
+            address: collection.collectionAddress,
+            name: collection.name || 'Unnamed Collection',
+            description: collection.metadata?.description || 'No description available',
+            imageUrl: collection.imageUrl || '/assets/images/placeholders/image-placeholder.svg',
+            itemCount: Number(collection.totalSupply) || 0,
+            createdAt: new Date(Number(collection.createdAt) * 1000).toISOString(),
+            symbol: collection.symbol || 'NFT',
+          }}
+        />
       ))}
     </div>
   );

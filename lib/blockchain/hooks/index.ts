@@ -18,4 +18,5 @@ export * from './useAlchemyNFTs';
 // New hook
 export * from './useNFTHistory';
 // export * from './useNFTTransfer';
+export * from './useNFTBurn';
 export * from './useBlocklist';

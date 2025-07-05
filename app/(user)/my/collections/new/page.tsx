@@ -1,5 +1,5 @@
-import { NewCollectionContent } from '@/components/features/user/collections/new';
+import { NewCollectionContentWithBlockchain } from '@/components/features/user/collections/new';
 
 export default function NewCollectionPage() {
-  return <NewCollectionContent />;
+  return <NewCollectionContentWithBlockchain />;
 }

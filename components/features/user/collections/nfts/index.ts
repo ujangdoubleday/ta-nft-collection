@@ -1,3 +1,3 @@
 export * from './CollectionNFTsContent';
-export * from './NFTGallery';
 export * from './NFTCard';
+export * from './NFTGallery';

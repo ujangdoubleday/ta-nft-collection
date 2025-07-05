@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  usePublicClient,
+  useWalletClient,
+} from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { subscribeToContractEvents } from '../utils/alchemy';
-import { decodeEventLog, parseAbiItem } from 'viem';
+import { decodeEventLog, parseAbiItem, getContract } from 'viem';
 import { alchemy } from '../alchemy';
-
-// Import the full ABI from the Hardhat-compiled contracts
-// @ts-ignore - This will be imported properly as JSON
-import NFT_COLLECTION_ABI from '../abi/NFTCollection.json';
+import { NFT_COLLECTION_ABI } from '@/lib/blockchain/abi';
 
 // Event signature for Transfer event
 const TRANSFER_EVENT_SIGNATURE = 'Transfer(address,address,uint256)';
@@ -61,6 +63,9 @@ export function useNFTTransfer(): UseNFTTransferReturn {
   const { data: receipt, isLoading: isWaitingForReceipt } = useWaitForTransactionReceipt({
     hash: transactionHash,
   });
+
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
 
   // Setup Alchemy websocket for transfer events
   useEffect(() => {
@@ -202,41 +207,46 @@ export function useNFTTransfer(): UseNFTTransferReturn {
 
   const transferNFT = useCallback(
     async (contractAddress: string, from: string, to: string, tokenId: string) => {
+      if (!walletClient) {
+        const walletError = new Error('Wallet not connected');
+        setError(walletError);
+        return { error: walletError };
+      }
+
+      setError(null);
+      setTransactionHash(undefined);
+      setCurrentContractAddress(contractAddress);
+      setTransferEvents([]);
+
       try {
-        // Convert tokenId to BigInt for the contract call
-        const tokenIdBigInt = BigInt(tokenId);
-
-        // Reset previous errors
-        setError(null);
-
-        // Update contract address to watch events
-        setCurrentContractAddress(contractAddress);
-
-        console.log(`Initiating NFT transfer: from ${from} to ${to}, token ID ${tokenId}`);
-
-        // Make the contract write call using safeTransferFrom instead of transferFrom
-        const hash = await writeContractAsync({
-          abi: NFT_COLLECTION_ABI,
-          address: contractAddress as `0x${string}`,
-          functionName: 'safeTransferFrom',
-          args: [from, to, tokenIdBigInt],
-          chainId: sepolia.id,
+        console.log('Transferring NFT:', {
+          contractAddress,
+          from,
+          to,
+          tokenId,
         });
 
-        console.log(`Transaction submitted with hash: ${hash}`);
+        // Call safeTransferFrom using writeContractAsync
+        const hash = await writeContractAsync({
+          address: contractAddress as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          functionName: 'safeTransferFrom',
+          args: [from as `0x${string}`, to as `0x${string}`, BigInt(tokenId)],
+        });
 
-        // Set transaction hash to track
+        console.log('Transaction submitted:', hash);
         setTransactionHash(hash);
 
+        // The transaction receipt will be handled by the useWaitForTransactionReceipt hook
         return { hash };
       } catch (err) {
-        console.error('Error transferring NFT:', err);
-        const transferError = err instanceof Error ? err : new Error('Unknown error occurred');
-        setError(transferError);
-        return { error: transferError };
+        console.error('Transfer failed:', err);
+        const error = err instanceof Error ? err : new Error('Unknown error during transfer');
+        setError(error);
+        return { error };
       }
     },
-    [writeContractAsync],
+    [writeContractAsync, walletClient],
   );
 
   return {

@@ -1,39 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Trash2, Clock, User, Tag, FileText, Send } from 'lucide-react';
-import { shortenAddress } from '@/lib/utils/formatting';
+import { ArrowLeft } from 'lucide-react';
+import { formatIPFSUrl } from '@/lib/utils/helpers/url';
+import { trpc } from '@/lib/api/trpc/client';
 
-// Add dialog imports
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/molecules/dialog';
+// Import modular components
+import { NFTImageSection } from './NFTImageSection';
+import { TokenDetailsSection } from './TokenDetailsSection';
+import { OwnershipSection } from './OwnershipSection';
+import { HistorySection } from './HistorySection';
+import { AttributesSection } from './AttributesSection';
+import { TransferDialog } from './TransferDialog';
+import { BurnDialog } from './BurnDialog';
 
-// Sample NFT data - in a real app, this would come from an API or blockchain
-const SAMPLE_NFT = {
-  id: '1',
-  tokenId: '1',
-  name: 'Pixel Art #1',
-  description:
-    'A unique pixel art NFT inspired by retro gaming aesthetics. This piece showcases vibrant colors and intricate pixel details that pay homage to the golden era of 8-bit gaming.',
-  imageUrl: '/assets/images/nfts/pixel-art/pixel-1.svg',
-  owner: '0x1234567890abcdef1234567890abcdef12345678',
-  creator: '0x7890abcdef1234567890abcdef1234567890abcd',
-  mintedAt: '2023-10-20',
-  attributes: [
-    { trait_type: 'Background', value: 'Black' },
-    { trait_type: 'Style', value: 'Pixel Art' },
-    { trait_type: 'Colors', value: '16-bit' },
-    { trait_type: 'Theme', value: 'Retro Gaming' },
-  ],
-};
+// Import types and utils
+import { NFTItem, HistoryItem } from './types';
+import { formatDate, copyToClipboard } from './utils';
 
 interface NFTDetailContentProps {
   address: string;
@@ -41,63 +25,180 @@ interface NFTDetailContentProps {
 }
 
 export function NFTDetailContent({ address, id }: NFTDetailContentProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [nft, setNft] = useState<typeof SAMPLE_NFT | null>(null);
-
-  // Add state for dialogs
+  // State for dialogs
   const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [isBurnDialogOpen, setIsBurnDialogOpen] = useState(false);
   const [recipientAddress, setRecipientAddress] = useState('');
-  const [isTransferring, setIsTransferring] = useState(false);
-  const [isBurning, setIsBurning] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
 
-  // Simulate loading NFT data
+  // Function to handle copying address with feedback
+  const handleCopyAddress = (address: string) => {
+    copyToClipboard(address);
+    setCopiedAddress(address);
+    setTimeout(() => setCopiedAddress(null), 2000);
+  };
+
+  // Fetch collection metadata URI and collection info from the server using tRPC
+  const {
+    data: contractData,
+    isLoading: isLoadingContract,
+    error: contractError,
+  } = trpc.collection.getContractURI.useQuery(
+    { contractAddress: address as `0x${string}` },
+    { enabled: !!address },
+  );
+
+  // Extract contractURI and collectionInfo from the combined response
+  const contractURI = contractData?.contractURI;
+  const collectionInfo = contractData?.collectionInfo;
+
+  // Fetch collection owner using tRPC
+  const {
+    data: ownerData,
+    isLoading: isLoadingCollectionOwner,
+    error: ownerError,
+  } = trpc.nft.getCollectionOwner.useQuery(
+    { collectionAddress: address as `0x${string}` },
+    { enabled: !!address },
+  );
+
+  const collectionOwner = ownerData?.owner;
+
+  // Fetch collection metadata from IPFS using tRPC
+  const {
+    data: metadataResult,
+    isLoading: isLoadingMetadata,
+    error: metadataError,
+  } = trpc.collection.fetchProcessedMetadata.useQuery(
+    { uri: contractURI as string },
+    {
+      enabled: !!contractURI,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 2,
+    },
+  );
+
+  // Extract metadata from the response
+  const metadata = metadataResult?.metadata;
+
+  // Fetch NFT data using tRPC from blockchain
+  const {
+    data: alchemyNft,
+    isLoading: isLoadingNft,
+    error: nftError,
+  } = trpc.nft.getRawNFTByTokenId.useQuery(
+    { contractAddress: address, tokenId: id },
+    {
+      enabled: !!address && !!id,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 2,
+    },
+  );
+
+  // Fetch NFT owner from blockchain
+  const { data: nftOwnerData, isLoading: isLoadingOwner } = trpc.nft.getNFTOwner.useQuery(
+    { contractAddress: address, tokenId: id },
+    {
+      enabled: !!address && !!id,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  );
+
+  const nftOwner = nftOwnerData?.owner;
+
+  // Get image URL with fallbacks (derived state)
+  const imageUrl = useMemo((): string => {
+    if (!alchemyNft) return '';
+
+    if (alchemyNft.raw?.metadata?.image) {
+      return formatIPFSUrl(alchemyNft.raw.metadata.image);
+    }
+    if (alchemyNft.image?.originalUrl) {
+      return alchemyNft.image.originalUrl;
+    }
+    return '';
+  }, [alchemyNft]);
+
+  // Process attributes (derived state)
+  const processedAttributes = useMemo((): { trait_type: string; value: string }[] => {
+    const attributes: { trait_type: string; value: string }[] = [];
+
+    if (alchemyNft?.raw?.metadata?.attributes && alchemyNft.raw.metadata.attributes.length > 0) {
+      alchemyNft.raw.metadata.attributes.forEach((attr: any) => {
+        if (attr.trait_type && attr.value) {
+          attributes.push({
+            trait_type: attr.trait_type,
+            value: String(attr.value),
+          });
+        }
+      });
+    }
+
+    return attributes;
+  }, [alchemyNft]);
+
+  // Create NFT history (derived state)
+  const nftHistory = useMemo((): HistoryItem[] => {
+    if (!alchemyNft || !nftOwner) return [];
+
+    return [
+      {
+        type: 'Mint',
+        from: '0x0000000000000000000000000000000000000000',
+        to: nftOwner,
+        date: alchemyNft.timeLastUpdated
+          ? formatDate(alchemyNft.timeLastUpdated)
+          : formatDate(new Date()),
+        // Example transaction hash - would come from blockchain data
+        txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+      },
+    ];
+  }, [alchemyNft, nftOwner]);
+
+  // Cast collectionInfo to an array type to access numeric indices
+  const collectionInfoArray = collectionInfo as unknown as string[];
+  const collectionName = metadata?.name || collectionInfoArray?.[2] || 'Unnamed Collection';
+
+  // Convert Alchemy NFT to the expected format (derived state)
+  const nft = useMemo((): NFTItem | null => {
+    if (!alchemyNft) return null;
+
+    return {
+      id: id,
+      tokenType: alchemyNft.tokenType,
+      tokenId: alchemyNft.tokenId,
+      name: alchemyNft.name || `NFT #${alchemyNft.tokenId}`,
+      description: alchemyNft.description || `An NFT from the ${collectionName} collection.`,
+      imageUrl: imageUrl,
+      owner: nftOwner || '0x0000000000000000000000000000000000000000',
+      creator: (collectionOwner as string) || '0x0000000000000000000000000000000000000000',
+      mintedAt: alchemyNft.timeLastUpdated
+        ? new Date(alchemyNft.timeLastUpdated).toISOString()
+        : new Date().toISOString(),
+      attributes: processedAttributes,
+    };
+  }, [alchemyNft, collectionName, collectionOwner, imageUrl, processedAttributes, nftOwner, id]);
+
+  // Calculate loading state
+  const isLoading =
+    isLoadingContract ||
+    isLoadingMetadata ||
+    isLoadingCollectionOwner ||
+    isLoadingNft ||
+    isLoadingOwner;
+
+  // Add debug logging for address and token ID
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setNft(SAMPLE_NFT);
-      setIsLoading(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [address, id]);
-
-  // Add transfer function
-  const handleTransfer = async () => {
-    if (!recipientAddress || !recipientAddress.startsWith('0x')) {
-      alert('Please enter a valid Ethereum address');
-      return;
+    if (nft) {
+      console.log('NFT data available:', {
+        address,
+        tokenId: nft.tokenId,
+        formattedAddress: address as `0x${string}`,
+        isAddressValid: typeof address === 'string' && address.startsWith('0x'),
+        isTokenIdValid: typeof nft.tokenId === 'string' && nft.tokenId.length > 0,
+      });
     }
-
-    setIsTransferring(true);
-    try {
-      // Here you would call your transfer function
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      alert(`NFT transferred to ${recipientAddress}`);
-      setIsTransferDialogOpen(false);
-      setRecipientAddress('');
-    } catch (error) {
-      console.error('Transfer failed:', error);
-      alert('Transfer failed. Please try again.');
-    } finally {
-      setIsTransferring(false);
-    }
-  };
-
-  // Add burn function
-  const handleBurn = async () => {
-    setIsBurning(true);
-    try {
-      // Here you would call your burn function
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      alert('NFT burned successfully');
-      setIsBurnDialogOpen(false);
-    } catch (error) {
-      console.error('Burn failed:', error);
-      alert('Burn failed. Please try again.');
-    } finally {
-      setIsBurning(false);
-    }
-  };
+  }, [address, nft]);
 
   if (isLoading) {
     return (
@@ -139,38 +240,11 @@ export function NFTDetailContent({ address, id }: NFTDetailContentProps) {
     <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
       <div className="flex flex-col md:flex-row gap-8">
         {/* NFT Image */}
-        <div className="w-full md:w-1/2">
-          <div className="relative aspect-square bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden">
-            <Image
-              src={nft.imageUrl}
-              alt={nft.name}
-              fill
-              className="object-contain"
-              onError={(e) => {
-                // Fallback to placeholder if image fails to load
-                (e.target as HTMLImageElement).src =
-                  '/assets/images/placeholders/image-placeholder.svg';
-              }}
-            />
-          </div>
-
-          <div className="flex justify-center mt-4 gap-2">
-            <button
-              className="flex items-center gap-2 bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] hover:border-zinc-600 text-white py-2 px-4 rounded-md transition-colors text-sm"
-              onClick={() => setIsTransferDialogOpen(true)}
-            >
-              <Send className="h-4 w-4" />
-              Transfer
-            </button>
-            <button
-              className="flex items-center gap-2 bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] hover:border-zinc-600 text-white py-2 px-4 rounded-md transition-colors text-sm"
-              onClick={() => setIsBurnDialogOpen(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-              Burn
-            </button>
-          </div>
-        </div>
+        <NFTImageSection
+          nft={nft}
+          onTransfer={() => setIsTransferDialogOpen(true)}
+          onBurn={() => setIsBurnDialogOpen(true)}
+        />
 
         {/* NFT Details */}
         <div className="w-full md:w-1/2">
@@ -178,157 +252,42 @@ export function NFTDetailContent({ address, id }: NFTDetailContentProps) {
           <p className="text-zinc-400 mb-6">{nft.description}</p>
 
           <div className="space-y-4">
-            <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Tag className="h-4 w-4 text-white" />
-                <h3 className="text-white font-medium">Token Details</h3>
-              </div>
-              <div className="grid grid-cols-1 gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Token ID</span>
-                  <span className="text-white">{nft.tokenId}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Contract</span>
-                  <span className="text-white font-mono">{shortenAddress(address, 6)}</span>
-                </div>
-              </div>
-            </div>
+            <TokenDetailsSection
+              tokenId={nft.tokenId}
+              address={address}
+              tokenType={nft.tokenType}
+            />
 
-            <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <User className="h-4 w-4 text-white" />
-                <h3 className="text-white font-medium">Ownership</h3>
-              </div>
-              <div className="grid grid-cols-1 gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Creator</span>
-                  <span className="text-white font-mono">{shortenAddress(nft.creator, 6)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Owner</span>
-                  <span className="text-white font-mono">{shortenAddress(nft.owner, 6)}</span>
-                </div>
-              </div>
-            </div>
+            <OwnershipSection
+              creator={nft.creator}
+              owner={nft.owner}
+              copiedAddress={copiedAddress}
+              onCopyAddressAction={handleCopyAddress}
+            />
 
-            <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
-              <div className="flex items-center gap-2 mb-1">
-                <Clock className="h-4 w-4 text-white" />
-                <h3 className="text-white font-medium">History</h3>
-              </div>
-              <div className="grid grid-cols-1 gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Minted</span>
-                  <span className="text-white">{new Date(nft.mintedAt).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </div>
+            <HistorySection
+              contractAddress={address as string}
+              tokenId={nft.tokenId as string}
+              history={nftHistory}
+            />
 
-            {nft.attributes && nft.attributes.length > 0 && (
-              <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <FileText className="h-4 w-4 text-white" />
-                  <h3 className="text-white font-medium">Attributes</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {nft.attributes.map((attr, index) => (
-                    <div key={index} className="bg-[#1f1f1f] rounded-md p-2 text-center">
-                      <p className="text-zinc-400 text-xs">{attr.trait_type}</p>
-                      <p className="text-white text-sm font-medium">{attr.value}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            <AttributesSection attributes={nft.attributes} />
           </div>
         </div>
       </div>
 
-      {/* Transfer Dialog */}
-      <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
-        <DialogContent title="Transfer NFT">
-          <DialogHeader>
-            <DialogDescription>
-              Enter the wallet address of the recipient to transfer this NFT.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <label htmlFor="recipient" className="block text-sm font-medium text-zinc-400 mb-2">
-              Recipient Address
-            </label>
-            <input
-              id="recipient"
-              type="text"
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-zinc-600"
-              placeholder="0x..."
-              value={recipientAddress}
-              onChange={(e) => setRecipientAddress(e.target.value)}
-            />
-          </div>
-          <DialogFooter>
-            <button
-              onClick={() => setIsTransferDialogOpen(false)}
-              className="flex items-center justify-center px-4 py-2 border border-zinc-600 text-zinc-200 rounded-md hover:bg-zinc-800 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleTransfer}
-              disabled={isTransferring || !recipientAddress}
-              className={`flex items-center font-semibold justify-center px-4 py-2 bg-white text-black rounded-md hover:bg-zinc-300 transition-colors ${
-                isTransferring || !recipientAddress ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isTransferring ? 'Transferring...' : 'Transfer'}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Dialogs */}
+      <TransferDialog
+        isOpen={isTransferDialogOpen}
+        onClose={() => setIsTransferDialogOpen(false)}
+        recipientAddress={recipientAddress}
+        onAddressChange={setRecipientAddress}
+        contractAddress={address}
+        tokenId={nft.tokenId}
+        ownerAddress={nft.owner}
+      />
 
-      {/* Burn Dialog */}
-      <Dialog open={isBurnDialogOpen} onOpenChange={setIsBurnDialogOpen}>
-        <DialogContent title="Burn NFT">
-          <DialogHeader>
-            <DialogDescription>
-              Are you sure you want to burn this NFT? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="bg-zinc-800 border border-zinc-700 rounded-md p-4 mb-4">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-zinc-700 rounded-md overflow-hidden relative">
-                  <Image src={nft.imageUrl} alt={nft.name} fill className="object-cover" />
-                </div>
-                <div>
-                  <h4 className="text-white font-medium">{nft.name}</h4>
-                  <p className="text-zinc-400 text-sm">Token ID: {nft.tokenId}</p>
-                </div>
-              </div>
-              <p className="text-red-400 text-sm">
-                Burning this NFT will permanently remove it from your wallet and the blockchain.
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <button
-              onClick={() => setIsBurnDialogOpen(false)}
-              className="flex items-center justify-center px-4 py-2 border border-zinc-600 text-zinc-200 rounded-md hover:bg-zinc-800 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleBurn}
-              disabled={isBurning}
-              className={`flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors ${
-                isBurning ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isBurning ? 'Burning...' : 'Burn NFT'}
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BurnDialog isOpen={isBurnDialogOpen} onClose={() => setIsBurnDialogOpen(false)} nft={nft} />
     </div>
   );
 }

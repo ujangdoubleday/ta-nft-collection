@@ -1,43 +1,38 @@
 'use client';
 
-import { BarChart3, Users, Zap } from 'lucide-react';
+import { EnrichedCollectionInfo } from '@/lib/blockchain/utils/collection';
 
 interface CollectionStatsProps {
-  collection: {
-    id: string;
-    address: string;
-    name: string;
-    itemCount: number;
-    // Additional fields that would be used in a real app
-  };
+  collection: EnrichedCollectionInfo;
 }
 
 export function CollectionStats({ collection }: CollectionStatsProps) {
-  // In a real app, these would come from API calls or blockchain data
-  const totalOwners = 12;
-  return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="bg-[#1f1f1f] p-2 rounded-full">
-              <BarChart3 className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-zinc-400 text-sm">NFTs</span>
-          </div>
-          <p className="text-2xl font-bold text-white">{collection.itemCount}</p>
-        </div>
+  // Format total supply
+  const totalSupply = collection?.totalSupply ? collection.totalSupply.toString() : '0';
 
-        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="bg-[#1f1f1f] p-2 rounded-full">
-              <Users className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-zinc-400 text-sm">Owners</span>
-          </div>
-          <p className="text-2xl font-bold text-white">{totalOwners}</p>
+  // Calculate minted NFTs - assuming this would be tracked elsewhere
+  // For now, we'll just use 0 as a placeholder
+  const mintedCount = '0';
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-md p-3">
+          <p className="text-gray-400 text-sm">Total Supply</p>
+          <p className="text-white text-xl font-medium">{totalSupply}</p>
+        </div>
+        <div className="bg-[#111111] border border-[#1f1f1f] rounded-md p-3">
+          <p className="text-gray-400 text-sm">Minted</p>
+          <p className="text-white text-xl font-medium">{mintedCount}</p>
         </div>
       </div>
-    </>
+
+      <div className="bg-[#111111] border border-[#1f1f1f] rounded-md p-4">
+        <p className="text-gray-400 text-sm mb-2">Recent Activity</p>
+        <div className="text-center py-4">
+          <p className="text-gray-400">No recent activity</p>
+        </div>
+      </div>
+    </div>
   );
 }

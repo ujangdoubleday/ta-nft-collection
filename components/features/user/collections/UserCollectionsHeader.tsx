@@ -1,12 +1,58 @@
 'use client';
 
+import { RefreshCw } from 'lucide-react';
+import { trpc } from '@/lib/api/trpc/client';
+import { useAddress } from '@/lib/hooks/use-address';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
 export function UserCollectionsHeader() {
+  const utils = trpc.useContext();
+  const { data: address } = useAddress();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    if (!address || isRefreshing) return;
+
+    setIsRefreshing(true);
+    toast.info('Refreshing collections...');
+
+    try {
+      // Invalidate and refetch collections data
+      await Promise.all([
+        utils.collection.getEnrichedCreatorCollections.invalidate({ creatorAddress: address }),
+        utils.collection.getCreatorCollections.invalidate({ creatorAddress: address }),
+        // Call revalidate API to update cached data
+        fetch('/api/revalidate?tag=collections'),
+      ]);
+      toast.success('Collections refreshed successfully!');
+    } catch (error) {
+      console.error('Error refreshing collections:', error);
+      toast.error('Failed to refresh collections. Please try again.');
+    } finally {
+      setTimeout(() => {
+        setIsRefreshing(false);
+      }, 1000); // Add slight delay to show the refresh animation
+    }
+  };
+
   return (
     <div className="mb-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white">My Collections</h1>
         </div>
+        <button
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
+            isRefreshing ? 'opacity-70' : ''
+          }`}
+          aria-label="Refresh collections"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
       <div className="h-px w-full bg-[#1f1f1f] mt-6"></div>
