@@ -46,6 +46,16 @@ export async function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
 
+    // Handle user routes that require authentication
+    if (request.nextUrl.pathname.startsWith('/my')) {
+      if (!token || !token.address) {
+        // Redirect to unauthorized page with callback parameter
+        const redirectUrl = new URL('/unauthorized', request.url);
+        redirectUrl.searchParams.set('callback', request.nextUrl.pathname);
+        return NextResponse.redirect(redirectUrl);
+      }
+    }
+
     return NextResponse.next();
   } catch (error) {
     console.error('Error in middleware:', error);
@@ -59,5 +69,7 @@ export const config = {
     '/collections/(protected)/:path*',
     // Admin protected routes (including dashboard)
     '/(admin)/(protected)/:path*',
+    // User routes requiring authentication
+    '/my/:path*',
   ],
 };
