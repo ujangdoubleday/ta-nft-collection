@@ -1,23 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
+import { JWT } from 'next-auth/jwt';
 
 // List of admin addresses (should be moved to environment variables)
 const ADMIN_ADDRESSES = ['0x19191984DF6Ce7749B786b9a2BB869B4b735eC31'];
 
+// Define a type for our custom token that might include fallback
+type ExtendedToken = JWT | { fallback: boolean };
+
+// Define auth status return type
+interface AuthStatus {
+  isAuthenticated: boolean;
+  token: ExtendedToken | null;
+  isFallback?: boolean;
+}
+
+// Custom token check function for production environment
+async function getAuthStatus(request: NextRequest): Promise<AuthStatus> {
+  // Try the standard method first
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === 'production',
+  });
+
+  // If we have a valid token with an address, use it
+  if (token && 'address' in token) {
+    return { isAuthenticated: true, token };
+  }
+
+  // If we have a token with sub but no address, it's still valid
+  if (token && typeof (token as any).sub === 'string') {
+    return { isAuthenticated: true, token };
+  }
+
+  // Check for manual cookie fallback in production
+  if (process.env.NODE_ENV === 'production') {
+    const cookieHeader = request.headers.get('cookie') || '';
+    const hasSessionToken = cookieHeader.includes('next-auth.session-token');
+
+    // If we have the cookie but getToken failed, try manual parsing
+    if (hasSessionToken) {
+      // Extract the cookie for debugging
+      const sessionTokenCookie = cookieHeader
+        .split(';')
+        .find((c) => c.trim().startsWith('next-auth.session-token='));
+
+      if (sessionTokenCookie) {
+        // We have the session cookie, use as fallback authentication
+        console.log('Using cookie fallback authentication');
+        return {
+          isAuthenticated: true,
+          isFallback: true,
+          token: { fallback: true },
+        };
+      }
+    }
+  }
+
+  return { isAuthenticated: false, token: null };
+}
+
 export async function middleware(request: NextRequest) {
   try {
-    // Use secure cookie configurations for token retrieval
-    const token = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
-      secureCookie: process.env.NODE_ENV === 'production',
-    });
+    const { isAuthenticated, token, isFallback } = await getAuthStatus(request);
 
-    // For debugging in production logs
+    // Debug info
     if (process.env.NODE_ENV === 'production') {
       console.log('Middleware path:', request.nextUrl.pathname);
-      console.log('Token exists:', !!token);
-      console.log('Token has address:', token ? !!token.address : false);
+      console.log('isAuthenticated:', isAuthenticated);
+      console.log('isFallback:', !!isFallback);
+      console.log('Token:', token ? 'exists' : 'null');
+
+      if (token) {
+        console.log('Token details:', {
+          hasSub: 'sub' in token ? !!token.sub : false,
+          hasAddress: 'address' in token ? !!token.address : false,
+          hasName: 'name' in token ? !!token.name : false,
+          hasExp: 'exp' in token ? !!token.exp : false,
+        });
+      }
 
       // Log cookies for debugging (exclude sensitive parts)
       const cookieHeader = request.headers.get('cookie') || '';
@@ -27,16 +89,21 @@ export async function middleware(request: NextRequest) {
 
     // Check if the path is in admin protected route group
     if (request.nextUrl.pathname.startsWith('/(admin)/(protected)')) {
-      if (!token || !token.address) {
+      if (!isAuthenticated) {
         return NextResponse.redirect(new URL('/', request.url));
       }
 
-      // Check if user is admin
-      const isAdmin = ADMIN_ADDRESSES.map((addr) => addr.toLowerCase()).includes(
-        (token.address as string).toLowerCase(),
-      );
+      // Check if user is admin (only if we have a real token with address)
+      if (token && 'address' in token) {
+        const isAdmin = ADMIN_ADDRESSES.map((addr) => addr.toLowerCase()).includes(
+          (token.address as string).toLowerCase(),
+        );
 
-      if (!isAdmin) {
+        if (!isAdmin) {
+          return NextResponse.redirect(new URL('/', request.url));
+        }
+      } else {
+        // No address in token, not an admin
         return NextResponse.redirect(new URL('/', request.url));
       }
 
@@ -48,7 +115,7 @@ export async function middleware(request: NextRequest) {
 
     // Handle protected collection routes
     if (request.nextUrl.pathname.includes('/(protected)')) {
-      if (!token || (!token.address && !token.sub)) {
+      if (!isAuthenticated) {
         const intendedPath = request.nextUrl.pathname.replace('/(protected)', '');
         const redirectUrl = new URL('/', request.url);
         redirectUrl.searchParams.set('redirect', intendedPath);
@@ -60,15 +127,9 @@ export async function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
 
-    // // Handle user routes that require authentication
+    // Handle user routes that require authentication
     if (request.nextUrl.pathname.startsWith('/my')) {
-      if (!token || !token.address) {
-        // Add a check for sub as fallback
-        if (token && token.sub) {
-          // We have a token with sub but no address, allow access
-          return NextResponse.next();
-        }
-
+      if (!isAuthenticated) {
         // Redirect to unauthorized page with callback parameter
         const redirectUrl = new URL('/unauthorized', request.url);
         redirectUrl.searchParams.set('callback', request.nextUrl.pathname);

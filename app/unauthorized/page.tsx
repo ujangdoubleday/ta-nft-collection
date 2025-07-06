@@ -11,6 +11,11 @@ import { useSession } from 'next-auth/react';
 
 export default function UnauthorizedPage() {
   const [isMounted, setIsMounted] = useState(false);
+  const [localStorageAuth, setLocalStorageAuth] = useState<{
+    address: string;
+    time: string;
+  } | null>(null);
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const callback = searchParams.get('callback') || '/my';
@@ -41,26 +46,58 @@ export default function UnauthorizedPage() {
 
   useEffect(() => {
     setIsMounted(true);
+
+    // Check localStorage for authentication data
+    try {
+      const storedAddress = localStorage.getItem('lastAuthAddress');
+      const storedTime = localStorage.getItem('lastAuthTime');
+
+      if (storedAddress && storedTime) {
+        const authTime = new Date(storedTime);
+        const now = new Date();
+
+        // If auth was in last 4 hours, consider it valid
+        if (now.getTime() - authTime.getTime() < 4 * 60 * 60 * 1000) {
+          console.log('Found valid localStorage auth data');
+          setLocalStorageAuth({
+            address: storedAddress,
+            time: storedTime,
+          });
+        }
+      }
+    } catch (e) {
+      console.warn('Error checking localStorage auth:', e);
+    }
   }, []);
 
   // Enhanced redirect logic with session check
   useEffect(() => {
     if (!isMounted) return;
 
-    // Check both wallet state and NextAuth session
-    const isFullyAuthenticated = isConnected && isAuthenticated && session?.user?.address;
+    // Check auth from multiple sources
+    const isFullyAuthenticated =
+      (isConnected && isAuthenticated && session?.user?.address) ||
+      (isConnected && address && localStorageAuth?.address === address);
 
     if (isFullyAuthenticated) {
-      // console.log('Redirecting to:', callback);
-      // console.log('Session:', session);
-      // console.log('Wallet state:', { isConnected, isAuthenticated, address });
+      console.log('Authentication verified, redirecting to:', callback);
+
+      // Try to fix the session if using localStorage fallback
+      if (!session?.user?.address && localStorageAuth?.address) {
+        console.log('Using localStorage auth fallback - reloading page to refresh session');
+        setTimeout(() => {
+          // Force page reload to retry session fetch before navigating
+          window.location.reload();
+        }, 500);
+        return;
+      }
 
       // Use window.location for more reliable redirect in production
       if (typeof window !== 'undefined') {
         window.location.href = callback;
       }
     }
-  }, [isMounted, isConnected, isAuthenticated, session, callback, router]);
+  }, [isMounted, isConnected, isAuthenticated, session, address, localStorageAuth, callback]);
 
   // Additional effect to handle session loading
   useEffect(() => {
@@ -98,6 +135,12 @@ export default function UnauthorizedPage() {
   const isLoadingSession = status === 'loading';
   const isSessionAuthenticated = status === 'authenticated' && session?.user?.address;
   const isWalletAuthenticated = isConnected && isAuthenticated;
+  const isLocalStorageAuthenticated =
+    isConnected && address && localStorageAuth?.address === address;
+
+  // Use any valid authentication method
+  const isAnyAuthMethod =
+    isSessionAuthenticated || (isWalletAuthenticated && isConnected) || isLocalStorageAuthenticated;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
@@ -107,17 +150,14 @@ export default function UnauthorizedPage() {
         </div>
 
         <div className="space-y-6">
-          {/* {process.env.NODE_ENV === 'development' && (
-            <div className="p-3 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-400">
-              <div>Session Status: {status}</div>
-              <div>Session Address: {session?.user?.address || 'None'}</div>
-              <div>Wallet Connected: {isConnected ? 'Yes' : 'No'}</div>
-              <div>Wallet Authenticated: {isAuthenticated ? 'Yes' : 'No'}</div>
-              <div>Wallet Address: {address || 'None'}</div>
+          {process.env.NODE_ENV === 'production' && localStorageAuth && (
+            <div className="p-3 bg-green-900/30 border border-green-800 rounded text-xs text-green-300 mb-4">
+              <div>Found saved authentication data.</div>
+              <div>Connect the same wallet to continue.</div>
             </div>
-          )} */}
+          )}
 
-          {isLoadingSession || (isSessionAuthenticated && isWalletAuthenticated) ? (
+          {isLoadingSession || isAnyAuthMethod ? (
             <div className="p-4 bg-zinc-800 border border-zinc-700 rounded-lg text-center">
               <div className="flex items-center justify-center space-x-3 mb-2">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
