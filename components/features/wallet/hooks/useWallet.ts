@@ -214,7 +214,8 @@ export function useWalletWagmi() {
         throw new Error('Failed to store user data');
       }
 
-      const { success, error } = await signInWithEthereum(message, signature);
+      const callbackUrl = '/my';
+      const { success, error } = await signInWithEthereum(message, signature, callbackUrl);
 
       if (!success) {
         throw new Error(error || 'Authentication failed');

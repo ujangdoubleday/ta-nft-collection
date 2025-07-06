@@ -7,12 +7,16 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Dialog, DialogContent } from '@/components/ui/molecules/dialog';
 import { WalletModalContent } from '@/components/features/wallet/components/WalletModalContent';
 import Spinner from '@/components/ui/spinner';
+import { useSession } from 'next-auth/react';
 
 export default function UnauthorizedPage() {
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const callback = searchParams.get('callback') || '/my';
+
+  // Add NextAuth session hook
+  const { data: session, status } = useSession();
 
   const {
     isWalletModalOpen,
@@ -39,12 +43,38 @@ export default function UnauthorizedPage() {
     setIsMounted(true);
   }, []);
 
-  // When the wallet is connected and authenticated, redirect
+  // Enhanced redirect logic with session check
   useEffect(() => {
-    if (isMounted && isConnected && isAuthenticated) {
-      router.replace(callback);
+    if (!isMounted) return;
+
+    // Check both wallet state and NextAuth session
+    const isFullyAuthenticated = isConnected && isAuthenticated && session?.user?.address;
+
+    if (isFullyAuthenticated) {
+      // console.log('Redirecting to:', callback);
+      // console.log('Session:', session);
+      // console.log('Wallet state:', { isConnected, isAuthenticated, address });
+
+      // Use window.location for more reliable redirect in production
+      if (typeof window !== 'undefined') {
+        window.location.href = callback;
+      }
     }
-  }, [isMounted, isConnected, isAuthenticated, callback, router]);
+  }, [isMounted, isConnected, isAuthenticated, session, callback, router]);
+
+  // Additional effect to handle session loading
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    if (status === 'authenticated' && session?.user?.address) {
+      console.log('Session authenticated, redirecting...');
+      if (typeof window !== 'undefined') {
+        window.location.href = callback;
+      } else {
+        router.replace(callback);
+      }
+    }
+  }, [status, session, callback, router]);
 
   // Get dialog title based on wallet step
   const getDialogTitle = () => {
@@ -64,6 +94,11 @@ export default function UnauthorizedPage() {
 
   if (!isMounted) return null;
 
+  // Show different states based on session and wallet status
+  const isLoadingSession = status === 'loading';
+  const isSessionAuthenticated = status === 'authenticated' && session?.user?.address;
+  const isWalletAuthenticated = isConnected && isAuthenticated;
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
       <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-xl p-8 shadow-lg animate-fade-in">
@@ -72,13 +107,27 @@ export default function UnauthorizedPage() {
         </div>
 
         <div className="space-y-6">
-          {isConnected && isAuthenticated ? (
+          {/* {process.env.NODE_ENV === 'development' && (
+            <div className="p-3 bg-zinc-800 border border-zinc-700 rounded text-xs text-zinc-400">
+              <div>Session Status: {status}</div>
+              <div>Session Address: {session?.user?.address || 'None'}</div>
+              <div>Wallet Connected: {isConnected ? 'Yes' : 'No'}</div>
+              <div>Wallet Authenticated: {isAuthenticated ? 'Yes' : 'No'}</div>
+              <div>Wallet Address: {address || 'None'}</div>
+            </div>
+          )} */}
+
+          {isLoadingSession || (isSessionAuthenticated && isWalletAuthenticated) ? (
             <div className="p-4 bg-zinc-800 border border-zinc-700 rounded-lg text-center">
               <div className="flex items-center justify-center space-x-3 mb-2">
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                <span className="text-white font-medium">Wallet Connected</span>
+                <span className="text-white font-medium">
+                  {isLoadingSession ? 'Loading...' : 'Wallet Connected'}
+                </span>
               </div>
-              <p className="text-zinc-400 text-sm">Redirecting you...</p>
+              <p className="text-zinc-400 text-sm">
+                {isLoadingSession ? 'Checking authentication...' : 'Redirecting you...'}
+              </p>
               <div className="mt-3 flex justify-center">
                 <Spinner size="md" color="white" />
               </div>
