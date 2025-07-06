@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
 
-    // Handle user routes that require authentication
+    // // Handle user routes that require authentication
     if (request.nextUrl.pathname.startsWith('/my')) {
       if (!token || !token.address) {
         // Redirect to unauthorized page with callback parameter

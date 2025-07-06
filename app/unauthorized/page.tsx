@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { MetaMaskIcon } from '@/components/shared/media';
 import { useWalletModal } from '@/components/features/wallet/components/useWalletModal';
-// import { redirect } from 'next/navigation';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Dialog, DialogContent } from '@/components/ui/molecules/dialog';
 import { WalletModalContent } from '@/components/features/wallet/components/WalletModalContent';
@@ -21,8 +20,8 @@ export default function UnauthorizedPage() {
     walletModalStep,
     address,
     isConnected,
-    isConnecting,
     isAuthenticated,
+    isConnecting,
     isAuthenticating,
     chainId,
     getNetworkName,
@@ -43,12 +42,7 @@ export default function UnauthorizedPage() {
   // When the wallet is connected and authenticated, redirect
   useEffect(() => {
     if (isMounted && isConnected && isAuthenticated) {
-      // Add a small delay before redirecting
-      setTimeout(() => {
-        router.replace(callback);
-        // router.push(callback);
-        // redirect(callback);
-      }, 1500); // 1.5 seconds delay
+      router.replace(callback);
     }
   }, [isMounted, isConnected, isAuthenticated, callback, router]);
 
@@ -84,7 +78,7 @@ export default function UnauthorizedPage() {
                 <div className="w-2 h-2 rounded-full bg-green-500"></div>
                 <span className="text-white font-medium">Wallet Connected</span>
               </div>
-              <p className="text-zinc-400 text-sm">You&apos;ll be redirected shortly...</p>
+              <p className="text-zinc-400 text-sm">Redirecting you...</p>
               <div className="mt-3 flex justify-center">
                 <Spinner size="md" color="white" />
               </div>
@@ -93,6 +87,7 @@ export default function UnauthorizedPage() {
             <button
               onClick={handleWalletButtonClick}
               className="w-full py-3 px-4 bg-white text-black hover:bg-zinc-200 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-3"
+              aria-label="Connect wallet"
             >
               <MetaMaskIcon className="w-5 h-5" />
               <span>Connect Wallet</span>
@@ -102,6 +97,7 @@ export default function UnauthorizedPage() {
           <button
             onClick={() => router.push('/')}
             className="w-full py-3 px-4 bg-zinc-800 hover:bg-zinc-700 rounded-lg font-medium border border-zinc-700 transition-all duration-300"
+            aria-label="Back to homepage"
           >
             Back to Homepage
           </button>
