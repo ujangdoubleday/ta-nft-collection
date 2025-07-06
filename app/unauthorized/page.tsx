@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { MetaMaskIcon } from '@/components/shared/media';
 import { useWalletModal } from '@/components/features/wallet/components/useWalletModal';
+// import { redirect } from 'next/navigation';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Dialog, DialogContent } from '@/components/ui/molecules/dialog';
 import { WalletModalContent } from '@/components/features/wallet/components/WalletModalContent';
@@ -44,7 +45,9 @@ export default function UnauthorizedPage() {
     if (isMounted && isConnected && isAuthenticated) {
       // Add a small delay before redirecting
       setTimeout(() => {
-        router.push(callback);
+        router.replace(callback);
+        // router.push(callback);
+        // redirect(callback);
       }, 1500); // 1.5 seconds delay
     }
   }, [isMounted, isConnected, isAuthenticated, callback, router]);

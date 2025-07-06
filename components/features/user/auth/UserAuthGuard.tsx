@@ -1,6 +1,6 @@
 'use client';
 
-import { useAddress } from '@/lib/hooks/use-address';
+import { useWallet } from '@/lib/hooks/wallet';
 import Spinner from '@/components/ui/spinner';
 
 interface UserAuthGuardProps {
@@ -8,20 +8,12 @@ interface UserAuthGuardProps {
 }
 
 export function UserAuthGuard({ children }: UserAuthGuardProps) {
-  const { data: address, isLoading } = useAddress();
+  const { isConnected, isAuthenticated } = useWallet();
 
-  if (isLoading) {
+  if (!isAuthenticated || !isConnected) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <Spinner size="lg" color="white" text="Checking wallet..." />
-      </div>
-    );
-  }
-
-  if (!address) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Spinner size="lg" color="white" text="Redirecting..." />
+        <Spinner size="lg" color="white" />
       </div>
     );
   }
