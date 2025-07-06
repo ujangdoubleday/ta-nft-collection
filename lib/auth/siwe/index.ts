@@ -26,7 +26,8 @@ export async function signInWithEthereum(message: string, signature: string) {
     const response = await signIn('credentials', {
       message,
       signature,
-      redirect: false,
+      redirect: true,
+      callbackUrl: '/my',
     });
 
     if (response?.error) {

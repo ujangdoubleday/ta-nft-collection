@@ -1,5 +1,6 @@
 import { useWalletWagmi as useWallet } from '../hooks/useWallet';
 import { formatAddress } from '@/lib/utils';
+import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
@@ -12,6 +13,7 @@ export type LogMessage = {
   type: 'info' | 'success' | 'error' | 'warning';
   timestamp: Date;
 };
+import { signIn } from 'next-auth/react';
 
 export const useWalletModal = () => {
   const router = useRouter();
@@ -205,7 +207,6 @@ export const useWalletModal = () => {
         toast.error('Authentication failed');
       } else {
         setIsWalletModalOpen(false);
-        router.push('/my');
       }
     },
     onError: () => {
