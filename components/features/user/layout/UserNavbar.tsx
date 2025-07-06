@@ -36,6 +36,7 @@ import { Input } from '@/components/ui/atoms/input';
 import { useTrpc } from '@/lib/hooks/use-trpc';
 import { useQueryClient } from '@tanstack/react-query';
 import { signOut } from 'next-auth/react';
+import Spinner from '@/components/ui/spinner';
 
 // Define the breadcrumb item type
 interface BreadcrumbItem {
@@ -187,8 +188,7 @@ export function UserNavbar() {
                   >
                     <Link href="/my">
                       <User className="h-4 w-4 mr-1" />
-                      {username ||
-                        (address ? `user-${shortenAddress(address, 4)}` : 'Connecting...')}
+                      {username || (address ? `user-${shortenAddress(address, 4)}` : '')}
                     </Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
