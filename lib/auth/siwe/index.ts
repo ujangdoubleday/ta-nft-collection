@@ -1,6 +1,6 @@
 'use client';
 
-import { getCsrfToken, signIn } from 'next-auth/react';
+import { getCsrfToken, signIn, getSession } from 'next-auth/react';
 
 /**
  * Creates a SIWE message for authentication
@@ -27,7 +27,7 @@ export async function signInWithEthereum(
   callbackUrl: string = '/my',
 ) {
   try {
-    // console.log('Signing in with Ethereum...', { message, signature, callbackUrl });
+    console.log('Signing in with Ethereum...', { callbackUrl });
 
     const response = await signIn('credentials', {
       message,
@@ -35,21 +35,45 @@ export async function signInWithEthereum(
       redirect: false,
     });
 
-    // console.log('Sign in response:', response);
+    console.log('Sign in response:', response);
 
     if (response?.error) {
       throw new Error(response.error);
     }
 
     if (response?.ok) {
-      // Force a longer delay in production to ensure session is set properly
-      const delayTime = process.env.NODE_ENV === 'production' ? 1000 : 100;
-      await new Promise((resolve) => setTimeout(resolve, delayTime));
-
-      // In production, force a page reload to ensure session is properly loaded
+      // In production, try to ensure session is fully established
       if (process.env.NODE_ENV === 'production') {
+        console.log('Verifying session after sign-in...');
+
+        // Force a longer delay in production to ensure session is set properly
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+
+        // Verify session was properly set
+        const session = await getSession();
+        console.log(
+          'Session after auth:',
+          !!session,
+          session?.user?.address ? 'has address' : 'no address',
+        );
+
+        if (session?.user) {
+          // Add session token to localStorage as backup
+          try {
+            localStorage.setItem('lastAuthAddress', session.user.address as string);
+            localStorage.setItem('lastAuthTime', new Date().toISOString());
+          } catch (e) {
+            console.warn('Could not set localStorage auth data', e);
+          }
+        }
+
+        // Force a page reload to ensure session is properly loaded
         window.location.href = callbackUrl;
+        return { success: true, error: null, response };
       }
+
+      // For development, use a shorter delay
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
 
     return { success: true, error: null, response };

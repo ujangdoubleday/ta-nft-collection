@@ -6,13 +6,24 @@ const ADMIN_ADDRESSES = ['0x19191984DF6Ce7749B786b9a2BB869B4b735eC31'];
 
 export async function middleware(request: NextRequest) {
   try {
+    // Use secure cookie configurations for token retrieval
     const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: process.env.NODE_ENV === 'production',
     });
 
-    // console.log('Token in middleware:', token);
-    // console.log('Request headers:', request.headers);
+    // For debugging in production logs
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Middleware path:', request.nextUrl.pathname);
+      console.log('Token exists:', !!token);
+      console.log('Token has address:', token ? !!token.address : false);
+
+      // Log cookies for debugging (exclude sensitive parts)
+      const cookieHeader = request.headers.get('cookie') || '';
+      console.log('Cookie header exists:', !!cookieHeader);
+      console.log('Has session token:', cookieHeader.includes('next-auth.session-token'));
+    }
 
     // Check if the path is in admin protected route group
     if (request.nextUrl.pathname.startsWith('/(admin)/(protected)')) {
@@ -52,6 +63,12 @@ export async function middleware(request: NextRequest) {
     // // Handle user routes that require authentication
     if (request.nextUrl.pathname.startsWith('/my')) {
       if (!token || !token.address) {
+        // Add a check for sub as fallback
+        if (token && token.sub) {
+          // We have a token with sub but no address, allow access
+          return NextResponse.next();
+        }
+
         // Redirect to unauthorized page with callback parameter
         const redirectUrl = new URL('/unauthorized', request.url);
         redirectUrl.searchParams.set('callback', request.nextUrl.pathname);
