@@ -7,7 +7,10 @@ const getProductionDomain = () => {
     if (process.env.NEXTAUTH_URL) {
       try {
         const url = new URL(process.env.NEXTAUTH_URL);
-        return url.hostname;
+        // Only return domain if not localhost
+        if (!url.hostname.includes('localhost')) {
+          return url.hostname;
+        }
       } catch (error) {
         console.error('Invalid NEXTAUTH_URL:', error);
         return undefined;
@@ -20,6 +23,7 @@ const getProductionDomain = () => {
 };
 
 const cookieDomain = getProductionDomain();
+const isProduction = process.env.NODE_ENV === 'production';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -78,9 +82,9 @@ export const authOptions: NextAuthOptions = {
       name: `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProduction,
         domain: cookieDomain,
       },
     },
@@ -88,9 +92,9 @@ export const authOptions: NextAuthOptions = {
       name: `next-auth.callback-url`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProduction,
         domain: cookieDomain,
       },
     },
@@ -98,9 +102,9 @@ export const authOptions: NextAuthOptions = {
       name: `next-auth.csrf-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
         path: '/',
-        secure: process.env.NODE_ENV === 'production',
+        secure: isProduction,
         domain: cookieDomain,
       },
     },

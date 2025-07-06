@@ -42,8 +42,9 @@ export async function signInWithEthereum(
     }
 
     if (response?.ok) {
-      // Force a small delay to ensure session is set
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Force a longer delay in production to ensure session is set properly
+      const delayTime = process.env.NODE_ENV === 'production' ? 1000 : 100;
+      await new Promise((resolve) => setTimeout(resolve, delayTime));
 
       // In production, force a page reload to ensure session is properly loaded
       if (process.env.NODE_ENV === 'production') {
