@@ -10,6 +10,7 @@ const baseConfig = {
   reactStrictMode: true,
   experimental: {
     authInterrupts: true,
+    ppr: 'incremental',
   },
   // Add headers configuration for cookie handling
   async headers() {
