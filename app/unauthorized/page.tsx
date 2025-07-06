@@ -58,7 +58,6 @@ export default function UnauthorizedPage() {
 
         // If auth was in last 4 hours, consider it valid
         if (now.getTime() - authTime.getTime() < 4 * 60 * 60 * 1000) {
-          console.log('Found valid localStorage auth data');
           setLocalStorageAuth({
             address: storedAddress,
             time: storedTime,
@@ -66,7 +65,7 @@ export default function UnauthorizedPage() {
         }
       }
     } catch (e) {
-      console.warn('Error checking localStorage auth:', e);
+      // Silent error handling for localStorage
     }
   }, []);
 
@@ -80,11 +79,8 @@ export default function UnauthorizedPage() {
       (isConnected && address && localStorageAuth?.address === address);
 
     if (isFullyAuthenticated) {
-      console.log('Authentication verified, redirecting to:', callback);
-
       // Try to fix the session if using localStorage fallback
       if (!session?.user?.address && localStorageAuth?.address) {
-        console.log('Using localStorage auth fallback - reloading page to refresh session');
         setTimeout(() => {
           // Force page reload to retry session fetch before navigating
           window.location.reload();
@@ -104,7 +100,6 @@ export default function UnauthorizedPage() {
     if (status === 'loading') return;
 
     if (status === 'authenticated' && session?.user?.address) {
-      console.log('Session authenticated, redirecting...');
       if (typeof window !== 'undefined') {
         window.location.href = callback;
       } else {

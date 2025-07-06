@@ -214,7 +214,6 @@ export function useWalletWagmi() {
         console.warn('Failed to store user data in Redis, but continuing authentication');
       }
 
-      console.log('Attempting to sign in with Ethereum...');
       const callbackUrl = '/my';
       const { success, error, response } = await signInWithEthereum(
         message,
@@ -222,15 +221,12 @@ export function useWalletWagmi() {
         callbackUrl,
       );
 
-      console.log('Sign-in response:', { success, error, response });
-
       if (!success) {
         throw new Error(error || 'Authentication failed');
       }
 
       // In production, don't return immediately - the page will reload via window.location
       if (process.env.NODE_ENV === 'production') {
-        console.log('Authentication successful, page will reload.');
         return true;
       }
 

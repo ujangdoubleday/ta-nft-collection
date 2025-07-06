@@ -207,7 +207,7 @@ export const useWalletModal = () => {
         toast.error('Authentication failed');
       } else {
         setIsWalletModalOpen(false);
-        router.replace('/my');
+        // router.replace('/my');
       }
     },
     onError: () => {

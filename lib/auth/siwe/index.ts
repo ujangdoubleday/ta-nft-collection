@@ -27,15 +27,11 @@ export async function signInWithEthereum(
   callbackUrl: string = '/my',
 ) {
   try {
-    console.log('Signing in with Ethereum...', { callbackUrl });
-
     const response = await signIn('credentials', {
       message,
       signature,
       redirect: false,
     });
-
-    console.log('Sign in response:', response);
 
     if (response?.error) {
       throw new Error(response.error);
@@ -44,18 +40,11 @@ export async function signInWithEthereum(
     if (response?.ok) {
       // In production, try to ensure session is fully established
       if (process.env.NODE_ENV === 'production') {
-        console.log('Verifying session after sign-in...');
-
         // Force a longer delay in production to ensure session is set properly
         await new Promise((resolve) => setTimeout(resolve, 1500));
 
         // Verify session was properly set
         const session = await getSession();
-        console.log(
-          'Session after auth:',
-          !!session,
-          session?.user?.address ? 'has address' : 'no address',
-        );
 
         if (session?.user) {
           // Add session token to localStorage as backup
@@ -63,7 +52,7 @@ export async function signInWithEthereum(
             localStorage.setItem('lastAuthAddress', session.user.address as string);
             localStorage.setItem('lastAuthTime', new Date().toISOString());
           } catch (e) {
-            console.warn('Could not set localStorage auth data', e);
+            // Silently handle localStorage errors
           }
         }
 

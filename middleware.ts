@@ -48,7 +48,6 @@ async function getAuthStatus(request: NextRequest): Promise<AuthStatus> {
 
       if (sessionTokenCookie) {
         // We have the session cookie, use as fallback authentication
-        console.log('Using cookie fallback authentication');
         return {
           isAuthenticated: true,
           isFallback: true,
@@ -63,29 +62,7 @@ async function getAuthStatus(request: NextRequest): Promise<AuthStatus> {
 
 export async function middleware(request: NextRequest) {
   try {
-    const { isAuthenticated, token, isFallback } = await getAuthStatus(request);
-
-    // Debug info
-    if (process.env.NODE_ENV === 'production') {
-      console.log('Middleware path:', request.nextUrl.pathname);
-      console.log('isAuthenticated:', isAuthenticated);
-      console.log('isFallback:', !!isFallback);
-      console.log('Token:', token ? 'exists' : 'null');
-
-      if (token) {
-        console.log('Token details:', {
-          hasSub: 'sub' in token ? !!token.sub : false,
-          hasAddress: 'address' in token ? !!token.address : false,
-          hasName: 'name' in token ? !!token.name : false,
-          hasExp: 'exp' in token ? !!token.exp : false,
-        });
-      }
-
-      // Log cookies for debugging (exclude sensitive parts)
-      const cookieHeader = request.headers.get('cookie') || '';
-      console.log('Cookie header exists:', !!cookieHeader);
-      console.log('Has session token:', cookieHeader.includes('next-auth.session-token'));
-    }
+    const { isAuthenticated, token } = await getAuthStatus(request);
 
     // Check if the path is in admin protected route group
     if (request.nextUrl.pathname.startsWith('/(admin)/(protected)')) {
