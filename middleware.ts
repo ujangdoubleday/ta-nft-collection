@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
     const { isAuthenticated, token } = await getAuthStatus(request);
 
     // Check if the path is in admin protected route group
-    if (request.nextUrl.pathname.startsWith('/(admin)/(protected)')) {
+    if (request.nextUrl.pathname.startsWith('/(admin)')) {
       if (!isAuthenticated) {
         return NextResponse.redirect(new URL('/', request.url));
       }
@@ -86,7 +86,7 @@ export async function middleware(request: NextRequest) {
 
       // Rewrite admin protected route
       const url = request.nextUrl.clone();
-      url.pathname = url.pathname.replace('/(admin)/(protected)', '');
+      url.pathname = url.pathname.replace('/(admin)/', '');
       return NextResponse.rewrite(url);
     }
 
@@ -124,9 +124,9 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Protected collections routes
-    '/collections/(protected)/:path*',
+    // '/collections/(protected)/:path*',
     // Admin protected routes (including dashboard)
-    '/(admin)/(protected)/:path*',
+    '/(admin)/:path*',
     // User routes requiring authentication
     '/my',
     '/my/:path*',
