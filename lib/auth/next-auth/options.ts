@@ -104,7 +104,7 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/my', // Redirect to home page for sign in
+    signIn: '/', // Redirect to home page for sign in
     error: '/', // Redirect to home page on error
   },
   secret: process.env.NEXTAUTH_SECRET,

@@ -11,6 +11,9 @@ export async function middleware(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET,
     });
 
+    // console.log('Token in middleware:', token);
+    // console.log('Request headers:', request.headers);
+
     // Check if the path is in admin protected route group
     if (request.nextUrl.pathname.startsWith('/(admin)/(protected)')) {
       if (!token || !token.address) {
@@ -70,6 +73,7 @@ export const config = {
     // Admin protected routes (including dashboard)
     '/(admin)/(protected)/:path*',
     // User routes requiring authentication
+    '/my',
     '/my/:path*',
   ],
 };
