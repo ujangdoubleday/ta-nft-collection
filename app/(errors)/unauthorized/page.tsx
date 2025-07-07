@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MetaMaskIcon } from '@/components/shared/media';
+import { MetaMaskIcon } from '@/components/shared/MetaMaskIcon';
 import { useWalletModal } from '@/components/features/wallet/components/useWalletModal';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Dialog, DialogContent } from '@/components/ui/molecules/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { WalletModalContent } from '@/components/features/wallet/components/WalletModalContent';
 import Spinner from '@/components/ui/spinner';
 import { useSession } from 'next-auth/react';
