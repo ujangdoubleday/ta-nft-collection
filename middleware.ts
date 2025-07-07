@@ -65,7 +65,7 @@ export async function middleware(request: NextRequest) {
     const { isAuthenticated, token } = await getAuthStatus(request);
 
     // Check if the path is in admin protected route group
-    if (request.nextUrl.pathname.startsWith('/(admin)')) {
+    if (request.nextUrl.pathname.startsWith('/admin')) {
       if (!isAuthenticated) {
         return NextResponse.redirect(new URL('/', request.url));
       }
@@ -86,21 +86,7 @@ export async function middleware(request: NextRequest) {
 
       // Rewrite admin protected route
       const url = request.nextUrl.clone();
-      url.pathname = url.pathname.replace('/(admin)/', '');
-      return NextResponse.rewrite(url);
-    }
-
-    // Handle protected collection routes
-    if (request.nextUrl.pathname.includes('/(protected)')) {
-      if (!isAuthenticated) {
-        const intendedPath = request.nextUrl.pathname.replace('/(protected)', '');
-        const redirectUrl = new URL('/', request.url);
-        redirectUrl.searchParams.set('redirect', intendedPath);
-        return NextResponse.redirect(redirectUrl);
-      }
-
-      const url = request.nextUrl.clone();
-      url.pathname = url.pathname.replace('/(protected)', '');
+      url.pathname = url.pathname.replace('/admin', '');
       return NextResponse.rewrite(url);
     }
 
@@ -117,9 +103,6 @@ export async function middleware(request: NextRequest) {
     // Handle API auth login route
     if (request.nextUrl.pathname === '/api/auth/login') {
       if (!isAuthenticated) {
-        // Redirect to unauthorized page with callback parameter
-        const redirectUrl = new URL('/unauthorized', request.url);
-        redirectUrl.searchParams.set('callback', request.nextUrl.pathname);
         return NextResponse.json(
           {
             error: 'Authentication required',
@@ -138,15 +121,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    // Protected collections routes
-    // '/collections/(protected)/:path*',
-    // Admin protected routes (including dashboard)
-    '/(admin)/:path*',
-    // User routes requiring authentication
-    '/my',
-    '/my/:path*',
-    // API auth login route
-    '/api/auth/login',
-  ],
+  matcher: ['/admin/:path*', '/admin', '/my', '/my/:path*', '/api/auth/login'],
 };

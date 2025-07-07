@@ -1,9 +1,9 @@
-import { UserShell } from '@/components/features/layout';
+import { UserLayout } from '@/components/features/layout/user';
 
-export default async function UserLayout({ children }: { children: React.ReactNode }) {
+export default async function UserRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-[#000000]">
-      <UserShell>{children}</UserShell>
+      <UserLayout>{children}</UserLayout>
     </div>
   );
 }
