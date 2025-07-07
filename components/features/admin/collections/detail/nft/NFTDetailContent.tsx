@@ -279,15 +279,19 @@ export function NFTDetailContent({ address, id }: NFTDetailContentProps) {
       {/* Dialogs */}
       <TransferDialog
         isOpen={isTransferDialogOpen}
-        onClose={() => setIsTransferDialogOpen(false)}
+        onCloseAction={() => setIsTransferDialogOpen(false)}
         recipientAddress={recipientAddress}
-        onAddressChange={setRecipientAddress}
+        onAddressChangeAction={setRecipientAddress}
         contractAddress={address}
         tokenId={nft.tokenId}
         ownerAddress={nft.owner}
       />
 
-      <BurnDialog isOpen={isBurnDialogOpen} onClose={() => setIsBurnDialogOpen(false)} nft={nft} />
+      <BurnDialog
+        isOpen={isBurnDialogOpen}
+        onCloseAction={() => setIsBurnDialogOpen(false)}
+        nft={nft}
+      />
     </div>
   );
 }

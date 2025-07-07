@@ -7,16 +7,16 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-} from '@/components/ui/molecules/dialog';
+} from '@/components/ui/dialog';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTTransfer } from '@/lib/blockchain/hooks/useNFTTransfer';
 import { Loader2 } from 'lucide-react';
 
 interface TransferDialogProps {
   isOpen: boolean;
-  onClose: () => void;
+  onCloseAction: () => void;
   recipientAddress: string;
-  onAddressChange: (address: string) => void;
+  onAddressChangeAction: (address: string) => void;
   contractAddress: string;
   tokenId: string;
   ownerAddress: string;
@@ -24,9 +24,9 @@ interface TransferDialogProps {
 
 export function TransferDialog({
   isOpen,
-  onClose,
+  onCloseAction,
   recipientAddress,
-  onAddressChange,
+  onAddressChangeAction,
   contractAddress,
   tokenId,
   ownerAddress,
@@ -93,7 +93,7 @@ export function TransferDialog({
       : 'Transfer';
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onCloseAction}>
       <DialogContent title="Transfer NFT">
         <DialogHeader>
           <DialogDescription>
@@ -110,7 +110,7 @@ export function TransferDialog({
             className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-zinc-600"
             placeholder="0x..."
             value={recipientAddress}
-            onChange={(e) => onAddressChange(e.target.value)}
+            onChange={(e) => onAddressChangeAction(e.target.value)}
             disabled={buttonDisabled}
           />
 
@@ -135,7 +135,7 @@ export function TransferDialog({
         </div>
         <DialogFooter>
           <button
-            onClick={onClose}
+            onClick={onCloseAction}
             className="flex items-center justify-center px-4 py-2 border border-zinc-600 text-zinc-200 rounded-md hover:bg-zinc-800 transition-colors"
             disabled={buttonDisabled && transferSuccess}
           >

@@ -2,13 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { useNFTFactoryConfig } from '@/lib/blockchain/hooks/useNFTFactoryConfig';
-import { LoadingSpinner } from '@/components/shared/loading/LoadingSpinner';
+import Spinner from '@/components/ui/spinner';
 import { formatEther } from 'viem';
-import { Button } from '@/components/ui/atoms/button';
+import { Button } from '@/components/ui/button';
 import { trpc } from '@/lib/api/trpc/client';
 import { useAccount } from 'wagmi';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
-export function CreationFeeSettings() {
+interface CreationFeeSettingsProps {
+  isLoading: boolean;
+}
+
+export function CreationFeeSettings({ isLoading: pageLoading }: CreationFeeSettingsProps) {
   const {
     creationFee,
     isLoadingFee,
@@ -28,6 +42,7 @@ export function CreationFeeSettings() {
   const [newFee, setNewFee] = useState('0');
   const [error, setError] = useState('');
   const [showEvents, setShowEvents] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Update newFee when creationFee changes
   useEffect(() => {
@@ -47,6 +62,7 @@ export function CreationFeeSettings() {
 
     try {
       await updateCreationFee(newFee);
+      setDialogOpen(false);
     } catch (err) {
       setError('Failed to update creation fee. Please try again.');
       console.error('Error setting fee:', err);
@@ -56,78 +72,94 @@ export function CreationFeeSettings() {
   return (
     <div>
       <h2 className="text-base font-bold text-white mb-3">NFT Creation Fee</h2>
-      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6 h-full">
         <div className="space-y-6">
           {/* Current Fee Display */}
           <div className="bg-black/40 p-4 rounded-md border border-zinc-800">
             <p className="text-sm text-zinc-400 mb-1">Current Fee</p>
-            {isLoadingFee ? (
-              <div className="flex items-center gap-2">
-                <LoadingSpinner />
-                <span className="text-zinc-400">Loading...</span>
-              </div>
+            {pageLoading || isLoadingFee ? (
+              <div className="h-7 bg-[#1f1f1f] rounded w-1/3 animate-pulse"></div>
             ) : (
-              <p className="text-xl font-medium text-white">{creationFee} ETH</p>
+              <div className="flex justify-between items-center">
+                <p className="text-xl font-medium text-white">{creationFee} ETH</p>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={!isOwner}>
+                      Edit Fee
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-[#0A0A0A] border border-[#1f1f1f] text-white">
+                    <DialogHeader>
+                      <DialogTitle>Update Creation Fee</DialogTitle>
+                      <DialogDescription className="text-zinc-400">
+                        Set a new fee for NFT collection creation.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleSubmit}>
+                      <div className="py-4">
+                        <label className="block text-sm text-zinc-400 mb-2">
+                          New Creation Fee (ETH)
+                        </label>
+                        <Input
+                          type="number"
+                          step="0.000000000000000001"
+                          value={newFee}
+                          onChange={(e) => setNewFee(e.target.value)}
+                          className="bg-black border border-zinc-800 text-white"
+                          placeholder="Enter new fee in ETH"
+                          disabled={isUpdating}
+                        />
+                      </div>
+
+                      {error && (
+                        <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
+                          {error}
+                        </div>
+                      )}
+
+                      {updateError && (
+                        <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
+                          {updateError.message}
+                        </div>
+                      )}
+
+                      <DialogFooter>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => setDialogOpen(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button type="submit" disabled={isUpdating}>
+                          {isUpdating ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <Spinner size="md" color="black" />
+                              <span>Updating...</span>
+                            </div>
+                          ) : (
+                            'Update Fee'
+                          )}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
             )}
           </div>
 
           {/* Owner Status */}
           <div className="bg-black/40 p-4 rounded-md border border-zinc-800">
             <p className="text-sm text-zinc-400 mb-1">Owner Status</p>
-            {isCheckingOwner ? (
-              <div className="flex items-center gap-2">
-                <LoadingSpinner />
-                <span className="text-zinc-400">Checking...</span>
-              </div>
+            {pageLoading || isCheckingOwner ? (
+              <div className="h-5 bg-[#1f1f1f] rounded w-2/3 animate-pulse"></div>
             ) : (
               <p className={`font-medium ${isOwner ? 'text-green-400' : 'text-red-400'}`}>
                 {isOwner ? 'You are the contract owner' : 'You are not the contract owner'}
               </p>
             )}
           </div>
-
-          {/* Fee Update Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1">New Creation Fee (ETH)</label>
-              <input
-                type="number"
-                step="0.000000000000000001"
-                value={newFee}
-                onChange={(e) => setNewFee(e.target.value)}
-                className="w-full p-3 bg-black border border-zinc-800 rounded-md text-white"
-                placeholder="Enter new fee in ETH"
-                disabled={isUpdating || !isOwner}
-              />
-            </div>
-
-            {error && (
-              <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded">
-                {error}
-              </div>
-            )}
-
-            {updateError && (
-              <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded">
-                {updateError.message}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              disabled={isUpdating || isLoadingFee || !isOwner}
-              className="w-full"
-            >
-              {isUpdating ? (
-                <div className="flex items-center justify-center gap-2">
-                  <LoadingSpinner className="w-4 h-4" />
-                  <span>Updating Fee...</span>
-                </div>
-              ) : (
-                'Update Fee'
-              )}
-            </Button>
-          </form>
 
           {/* Transaction Status */}
           {transactionHash && (
@@ -150,7 +182,13 @@ export function CreationFeeSettings() {
             {showEvents && (
               <div className="mt-4 border border-zinc-800 rounded-md p-4 bg-black/40">
                 <h3 className="font-medium text-white mb-3">Fee Update History</h3>
-                {feeEvents.length > 0 ? (
+                {pageLoading ? (
+                  <div className="space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="h-4 bg-[#1f1f1f] rounded w-full animate-pulse"></div>
+                    ))}
+                  </div>
+                ) : feeEvents.length > 0 ? (
                   <ul className="space-y-2 divide-y divide-zinc-800">
                     {feeEvents.map((event, index) => (
                       <li key={index} className="text-sm pt-2 first:pt-0">
