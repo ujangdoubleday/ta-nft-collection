@@ -3,7 +3,7 @@
 import { useAddress } from '@/lib/hooks/use-address';
 import { shortenAddress } from '@/lib/utils/formatting';
 
-export function UserDashboardHeader() {
+export function OverviewHeader() {
   const { data: address } = useAddress();
 
   return (

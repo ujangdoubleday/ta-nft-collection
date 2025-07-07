@@ -1,5 +1,5 @@
-import { UserDashboardContent } from '@/components/features/user/dashboard';
+import { OverviewContent } from '@/components/features/user/overview';
 
 export default async function Page() {
-  return <UserDashboardContent />;
+  return <OverviewContent />;
 }

@@ -1,4 +1,4 @@
-import { UserShell } from '@/components/features/layout/UserShell';
+import { UserShell } from '@/components/features/layout';
 
 export default async function UserLayout({ children }: { children: React.ReactNode }) {
   return (

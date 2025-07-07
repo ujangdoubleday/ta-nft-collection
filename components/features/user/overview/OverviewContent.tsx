@@ -1,16 +1,15 @@
 'use client';
 
-import { UserDashboardHeader } from './UserDashboardHeader';
-import { UserDashboardStats } from './UserDashboardStats';
-import { UserDashboardActions } from './UserDashboardActions';
+import { OverviewHeader } from './OverviewHeader';
+import { OverviewStats } from './OverviewStats';
+import { OverviewActions } from './OverviewActions';
 import { useState, useEffect } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
 
-export function UserDashboardContent() {
+export function OverviewContent() {
   const { data: address } = useAddress();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate loading
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -33,10 +32,9 @@ export function UserDashboardContent() {
 
   return (
     <div className="animate-fade-in">
-      <UserDashboardHeader />
+      <OverviewHeader />
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Recent Activity - Left Side */}
         <div className="lg:w-[40%] order-2 lg:order-1 flex flex-col">
           <h2 className="text-base font-bold text-white mb-3">Recent Activity</h2>
           <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-5 shadow-sm flex-grow">
@@ -60,13 +58,9 @@ export function UserDashboardContent() {
           </div>
         </div>
 
-        {/* Stats and Quick Actions - Right Side */}
         <div className="lg:w-[60%] order-1 lg:order-2 flex flex-col gap-6">
-          {/* Stats Section */}
-          <UserDashboardStats />
-
-          {/* Quick Actions Section */}
-          <UserDashboardActions />
+          <OverviewStats />
+          <OverviewActions />
         </div>
       </div>
     </div>

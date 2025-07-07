@@ -1,4 +1,4 @@
-import { Welcome, Creator } from '@/components/features/about';
+import { Welcome, Creator } from '@/components/features/public/about';
 
 export default function AboutPage() {
   return (

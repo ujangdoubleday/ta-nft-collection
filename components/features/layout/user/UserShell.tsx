@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { LoadingScreen } from '@/components/features/layout/LoadingScreen';
-import { PublicLayoutMain } from '@/components/features/layout/PublicLayoutMain';
+import { UserLayout } from './UserLayout';
 
-interface PublicShellProps {
+interface UserShellProps {
   children: React.ReactNode;
 }
 
-export function PublicShell({ children }: PublicShellProps) {
+export function UserShell({ children }: UserShellProps) {
   // Initialize with loading=false as default, and only set to true after checking
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -101,7 +101,7 @@ export function PublicShell({ children }: PublicShellProps) {
       {loading ? (
         <LoadingScreen progress={progress} loadingText={loadingText} />
       ) : (
-        <PublicLayoutMain>{children}</PublicLayoutMain>
+        <UserLayout>{children}</UserLayout>
       )}
     </>
   );

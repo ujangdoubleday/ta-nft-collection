@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { PlusCircle, Grid3x3, Image, User } from 'lucide-react';
 
-export function UserDashboardActions() {
+export function OverviewActions() {
   const router = useRouter();
 
   const actions = [

@@ -1,4 +1,4 @@
-import { Info, Social } from '@/components/features/contact';
+import { Info, Social } from '@/components/features/public/contact';
 
 export default function ContactPage() {
   return (
