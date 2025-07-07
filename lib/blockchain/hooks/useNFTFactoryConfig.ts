@@ -7,6 +7,7 @@ import { parseEther, decodeEventLog, parseAbiItem } from 'viem';
 import { trpc } from '@/lib/api/trpc/client';
 import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
 import { subscribeToContractEvents } from '../utils/alchemy';
+import { disconnectWebSocket } from '../alchemy/config';
 
 // Event signature for CreationFeeUpdated event
 const FEE_UPDATED_EVENT_SIGNATURE = 'CreationFeeUpdated(uint256,uint256)';
@@ -99,6 +100,8 @@ export const useNFTFactoryConfig = () => {
         unsubscribeRef.current = null;
       }
       hasSetupWebsocket.current = false;
+      isUnmountedRef.current = true;
+      disconnectWebSocket();
     };
   }, [refetchFee]);
 

@@ -9,6 +9,7 @@ import {
 } from 'wagmi';
 import { subscribeToContractEvents } from '../utils/alchemy';
 import { decodeEventLog, parseAbiItem, getContract } from 'viem';
+import { disconnectWebSocket } from '../alchemy/config';
 import { NFT_COLLECTION_ABI } from '@/lib/blockchain/abi';
 
 // Event signature for Transfer event (burn is a transfer to zero address)
@@ -107,13 +108,15 @@ export function useNFTBurn() {
 
     unsubscribeRef.current = unsubscribe;
 
+    // Cleanup function
     return () => {
-      console.log('Cleaning up burn event websocket');
       if (unsubscribeRef.current) {
         unsubscribeRef.current();
         unsubscribeRef.current = null;
       }
       hasSetupWebsocket.current = false;
+      isUnmountedRef.current = true;
+      disconnectWebSocket();
     };
   }, [currentContractAddress]);
 

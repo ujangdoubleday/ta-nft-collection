@@ -11,6 +11,7 @@ import { sepolia } from 'wagmi/chains';
 import { subscribeToContractEvents } from '../utils/alchemy';
 import { decodeEventLog, parseAbiItem, getContract } from 'viem';
 import { alchemy } from '../alchemy';
+import { disconnectWebSocket } from '../alchemy/config';
 import { NFT_COLLECTION_ABI } from '@/lib/blockchain/abi';
 
 // Event signature for Transfer event
@@ -124,15 +125,17 @@ export function useNFTTransfer(): UseNFTTransferReturn {
 
     unsubscribeRef.current = unsubscribe;
 
+    // Cleanup function
     return () => {
-      console.log('Cleaning up transfer event websocket');
       if (unsubscribeRef.current) {
         unsubscribeRef.current();
         unsubscribeRef.current = null;
       }
       hasSetupWebsocket.current = false;
+      isUnmountedRef.current = true;
+      disconnectWebSocket();
     };
-  }, [currentContractAddress]);
+  }, [currentContractAddress, transactionHash]);
 
   // Also watch for transaction receipt to extract events
   useEffect(() => {

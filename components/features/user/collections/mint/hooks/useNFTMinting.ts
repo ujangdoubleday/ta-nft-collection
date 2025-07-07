@@ -7,6 +7,7 @@ import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTCollection } from '@/lib/blockchain/hooks';
 import { subscribeToContractEvents } from '@/lib/blockchain/utils/alchemy';
 import { decodeEventLog, parseAbiItem } from 'viem';
+import { disconnectWebSocket } from '@/lib/blockchain/alchemy/config';
 import { useTrpc } from '@/lib/hooks/use-trpc';
 
 // Event signature for Transfer event
@@ -148,6 +149,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
       if (redirectTimeout.current) {
         clearTimeout(redirectTimeout.current);
       }
+      disconnectWebSocket();
     };
   }, [txHash, address, refreshNFTData, contractAddress]);
 

@@ -1,6 +1,7 @@
 import { alchemy } from '@/lib/blockchain/alchemy';
-import { keccak256 } from 'viem';
+import { keccak256, toBytes } from 'viem';
 import { BASE_URL_ALCHEMY_API } from '@/lib/blockchain/alchemy/config';
+import { connectWebSocket, disconnectWebSocket } from '@/lib/blockchain/alchemy/config';
 
 // Type for query parameters
 type QueryParams = Record<string, string | number | boolean>;
@@ -59,6 +60,9 @@ export function subscribeToContractEvents(
 ) {
   try {
     console.log(`Setting up subscription for contract: ${contractAddress}`);
+
+    // Ensure WebSocket is connected before setting up listeners
+    connectWebSocket();
 
     // Create filter
     const filter: any = {
