@@ -3,3 +3,5 @@ export * from './next-auth';
 
 // Export SIWE
 export * from './siwe';
+
+export * from './role';

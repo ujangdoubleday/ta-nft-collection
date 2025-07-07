@@ -3,14 +3,29 @@
 import React, { useState } from 'react';
 import { useBlocklist } from '@/lib/blockchain/hooks';
 import { useAdmin } from '@/lib/hooks';
-import { Button } from '@/components/ui/atoms';
-import { LoadingSpinner } from '@/components/shared/loading';
+import { Button } from '@/components/ui/button';
+import Spinner from '@/components/ui/spinner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
-export function BlocklistContent() {
+interface BlocklistContentProps {
+  isLoading: boolean;
+}
+
+export function BlocklistContent({ isLoading: pageLoading }: BlocklistContentProps) {
   const [newAddress, setNewAddress] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const { isAdmin, isContractOwner, contractOwner, isLoading: isLoadingAdmin } = useAdmin();
   const { blocklist, isLoadingBlocklist, isUpdating, addToBlocklist, removeFromBlocklist } =
@@ -19,7 +34,9 @@ export function BlocklistContent() {
   // Only contract owner can manage blocklist
   const hasPermission = isContractOwner;
 
-  const handleAddToBlocklist = async () => {
+  const handleAddToBlocklist = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (!newAddress) {
       setError('Please enter a valid Ethereum address');
       return;
@@ -39,6 +56,7 @@ export function BlocklistContent() {
 
       setSuccess(`Address ${newAddress} has been added to blocklist`);
       setNewAddress('');
+      setDialogOpen(false);
     } catch (err) {
       console.error('Error adding to blocklist:', err);
       setError('Failed to add address to blocklist. Please try again.');
@@ -64,20 +82,21 @@ export function BlocklistContent() {
     }
   };
 
-  const isLoading = isLoadingBlocklist || isLoadingAdmin || isUpdating || isProcessing;
+  const isLoading =
+    pageLoading || isLoadingBlocklist || isLoadingAdmin || isUpdating || isProcessing;
 
-  if (isLoadingAdmin) {
+  if (isLoadingAdmin && !pageLoading) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
         <div className="flex justify-center items-center py-8">
-          <LoadingSpinner />
+          <Spinner />
           <span className="ml-2 text-zinc-400">Loading admin status...</span>
         </div>
       </div>
     );
   }
 
-  if (!isAdmin) {
+  if (!isAdmin && !pageLoading) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
         <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded">
@@ -93,7 +112,7 @@ export function BlocklistContent() {
     <div>
       <h2 className="text-base font-bold text-white mb-3">Blocklisted Users</h2>
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-        {readOnly && (
+        {!pageLoading && readOnly && (
           <div className="bg-yellow-900/20 border border-yellow-900/30 text-yellow-400 px-4 py-3 rounded mb-6">
             <p className="font-medium">Read-only mode</p>
             <p className="text-sm mt-1">
@@ -119,36 +138,73 @@ export function BlocklistContent() {
           </div>
         )}
 
-        <div className="mb-8">
-          <h3 className="text-md font-medium text-white mb-3">Add Address to Blocklist</h3>
-          <div className="flex items-center gap-3">
-            <input
-              type="text"
-              value={newAddress}
-              onChange={(e) => setNewAddress(e.target.value)}
-              placeholder="Enter Ethereum address (0x...)"
-              className="flex-grow p-3 bg-black border border-zinc-800 rounded-md text-white"
-              disabled={isLoading || readOnly}
-            />
-            <Button onClick={handleAddToBlocklist} disabled={isLoading || !newAddress || readOnly}>
-              {isLoading ? (
-                <>
-                  <LoadingSpinner className="w-4 h-4 mr-2" />
-                  Adding...
-                </>
-              ) : (
-                'Block Address'
-              )}
-            </Button>
-          </div>
+        <div className="mb-8 flex justify-between items-center">
+          <h3 className="text-md font-medium text-white">Manage Blocklist</h3>
+
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button disabled={readOnly || pageLoading}>Add to Blocklist</Button>
+            </DialogTrigger>
+            <DialogContent className="bg-[#0A0A0A] border border-[#1f1f1f] text-white">
+              <DialogHeader>
+                <DialogTitle>Add Address to Blocklist</DialogTitle>
+                <DialogDescription className="text-zinc-400">
+                  Enter the Ethereum address you want to blocklist. This will prevent the address
+                  from using the platform.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddToBlocklist}>
+                <div className="py-4">
+                  <label className="block text-sm text-zinc-400 mb-2">Ethereum Address</label>
+                  <Input
+                    type="text"
+                    value={newAddress}
+                    onChange={(e) => setNewAddress(e.target.value)}
+                    placeholder="Enter Ethereum address (0x...)"
+                    className="bg-black border border-zinc-800 text-white"
+                    disabled={isProcessing}
+                  />
+                </div>
+
+                {error && (
+                  <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
+                    {error}
+                  </div>
+                )}
+
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setDialogOpen(false)}
+                    disabled={isProcessing}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isProcessing || !newAddress}>
+                    {isProcessing ? (
+                      <div className="flex items-center justify-center gap-2">
+                        <Spinner size="md" color="black" />
+                        <span>Adding...</span>
+                      </div>
+                    ) : (
+                      'Add to Blocklist'
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div>
-          <h3 className="text-md font-medium text-white mb-3">Current Blocklist</h3>
-          {isLoadingBlocklist ? (
-            <div className="flex items-center justify-center py-12">
-              <LoadingSpinner />
-              <span className="ml-2 text-zinc-400">Loading blocklist...</span>
+          {pageLoading || isLoadingBlocklist ? (
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="border border-zinc-800 rounded-md p-4">
+                  <div className="h-5 bg-[#1f1f1f] rounded w-2/3 animate-pulse"></div>
+                </div>
+              ))}
             </div>
           ) : blocklist && blocklist.length > 0 ? (
             <div className="border border-zinc-800 rounded-md overflow-hidden">

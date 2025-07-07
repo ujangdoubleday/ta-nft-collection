@@ -10,16 +10,16 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-} from '@/components/ui/molecules/dialog';
+} from '@/components/ui/dialog';
 import { NFTItem } from './types';
 
 interface BurnDialogProps {
   isOpen: boolean;
-  onClose: () => void;
+  onCloseAction: () => void;
   nft: NFTItem;
 }
 
-export function BurnDialog({ isOpen, onClose, nft }: BurnDialogProps) {
+export function BurnDialog({ isOpen, onCloseAction, nft }: BurnDialogProps) {
   const { address } = useWallet();
   const { burnNFT, isLoading, isWaiting, isSuccess, transactionHash, error } = useNFTBurn();
 
@@ -78,7 +78,7 @@ export function BurnDialog({ isOpen, onClose, nft }: BurnDialogProps) {
       : 'Burn NFT';
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onCloseAction}>
       <DialogContent title="Burn NFT">
         <DialogHeader>
           <DialogDescription>
@@ -116,7 +116,7 @@ export function BurnDialog({ isOpen, onClose, nft }: BurnDialogProps) {
         </div>
         <DialogFooter>
           <button
-            onClick={onClose}
+            onClick={onCloseAction}
             className="flex items-center justify-center px-4 py-2 border border-zinc-600 text-zinc-200 rounded-md hover:bg-zinc-800 transition-colors"
             disabled={buttonDisabled && burnSuccess}
           >

@@ -2,7 +2,7 @@
 
 import { WalletModalContent } from '@/components/features/wallet/components/WalletModalContent';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/molecules/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { formatAddress } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useWalletModal } from './useWalletModal';

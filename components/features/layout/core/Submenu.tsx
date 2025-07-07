@@ -16,7 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/molecules/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 
 // Types for better type safety
 export interface NavigationLink {

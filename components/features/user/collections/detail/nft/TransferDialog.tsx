@@ -7,7 +7,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-} from '@/components/ui/molecules/dialog';
+} from '@/components/ui/dialog';
 import { useWallet } from '@/lib/hooks/wallet';
 import { useNFTTransfer } from '@/lib/blockchain/hooks/useNFTTransfer';
 import { Loader2 } from 'lucide-react';

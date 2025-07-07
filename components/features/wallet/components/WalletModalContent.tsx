@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { DialogHeader, DialogDescription } from '@/components/ui/molecules';
-import { MetaMaskIcon } from '@/components/shared/media';
+import { DialogHeader, DialogDescription } from '@/components/ui/dialog';
+import { MetaMaskIcon } from '@/components/shared/MetaMaskIcon';
 import { Copy, Check, LogOut } from 'lucide-react';
 import { formatAddress } from '@/lib/utils';
 import { LogMessage } from './useWalletModal';

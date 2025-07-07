@@ -10,7 +10,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-} from '@/components/ui/molecules/dialog';
+} from '@/components/ui/dialog';
 import { NFTItem } from './types';
 
 interface BurnDialogProps {
