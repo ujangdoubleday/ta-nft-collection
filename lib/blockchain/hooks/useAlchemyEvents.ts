@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { subscribeToContractEvents } from '../utils/alchemy';
 import { alchemy } from '../alchemy';
+import { disconnectWebSocket } from '../alchemy/config';
 import { parseAbiItem, decodeEventLog } from 'viem';
 
 // Get the factory address from environment variable
@@ -71,6 +72,7 @@ export function useAlchemyNFTFactoryEvents(transactionHash?: string) {
 
     return () => {
       unsubscribe();
+      disconnectWebSocket();
     };
   }, []);
 
