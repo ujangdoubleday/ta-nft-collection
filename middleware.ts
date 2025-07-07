@@ -114,6 +114,22 @@ export async function middleware(request: NextRequest) {
       }
     }
 
+    // Handle API auth login route
+    if (request.nextUrl.pathname === '/api/auth/login') {
+      if (!isAuthenticated) {
+        // Redirect to unauthorized page with callback parameter
+        const redirectUrl = new URL('/unauthorized', request.url);
+        redirectUrl.searchParams.set('callback', request.nextUrl.pathname);
+        return NextResponse.json(
+          {
+            error: 'Authentication required',
+            success: false,
+          },
+          { status: 401 },
+        );
+      }
+    }
+
     return NextResponse.next();
   } catch (error) {
     console.error('Error in middleware:', error);
@@ -130,5 +146,7 @@ export const config = {
     // User routes requiring authentication
     '/my',
     '/my/:path*',
+    // API auth login route
+    '/api/auth/login',
   ],
 };
