@@ -327,8 +327,8 @@ code {
 
   html.scrolled .submenu {
     position: fixed;
-    height: 3rem;
-    padding-top: 0.3rem;
+    height: 3.4rem;
+    padding-top: 0.8rem;
     padding-bottom: 0.3rem;
     top: 0;
     left: 0;
@@ -368,4 +368,18 @@ code {
   .submenu-logo, .submenu-user {
     display: none;
   }
+}
+
+/* Navigation container styling */
+.navigation-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.navigation-container .navbar {
+  margin-bottom: -10px;
+}
+
+.navigation-container .submenu {
+  margin-top: -8px;
 }

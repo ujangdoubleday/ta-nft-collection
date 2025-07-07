@@ -1,6 +1,6 @@
 'use client';
 
-import { Navbar } from '@/components/core/navigation';
+import { Navbar } from './navigation';
 
 interface PublicLayoutMainProps {
   children: React.ReactNode;

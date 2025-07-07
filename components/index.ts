@@ -1,7 +1,5 @@
 ﻿// Core components
-export * from './core/layout';
-export * from './core/navigation';
-export * from './core/providers';
+export * from './features/layout/public/navigation';
 
 // UI components
 export * from './ui/atoms';
