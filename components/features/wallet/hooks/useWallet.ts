@@ -211,13 +211,23 @@ export function useWalletWagmi() {
       });
 
       if (!redisResult) {
-        throw new Error('Failed to store user data');
+        console.warn('Failed to store user data in Redis, but continuing authentication');
       }
 
-      const { success, error } = await signInWithEthereum(message, signature);
+      const callbackUrl = '/my';
+      const { success, error, response } = await signInWithEthereum(
+        message,
+        signature,
+        callbackUrl,
+      );
 
       if (!success) {
         throw new Error(error || 'Authentication failed');
+      }
+
+      // In production, don't return immediately - the page will reload via window.location
+      if (process.env.NODE_ENV === 'production') {
+        return true;
       }
 
       // Refresh stored user data
@@ -233,6 +243,7 @@ export function useWalletWagmi() {
       return true;
     } catch (error: any) {
       const errorMessage = error?.message || String(error);
+      console.error('Authentication error:', errorMessage);
       setState((prev) => ({
         ...prev,
         isAuthenticating: false,

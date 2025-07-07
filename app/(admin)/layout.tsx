@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth/next-auth/options';
 
 const ADMIN_ADDRESSES = ['0x19191984DF6Ce7749B786b9a2BB869B4b735eC31'];
 
+// export const experimental_ppr = true;
+
 export default async function AdminProtectedLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
 

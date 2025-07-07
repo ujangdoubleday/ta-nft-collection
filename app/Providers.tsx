@@ -7,12 +7,14 @@ import { Toaster } from '@/components/ui/sonner';
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
-      <WagmiProvider>
-        <TRPCProvider>
-          <AuthProvider>{children}</AuthProvider>
-          <Toaster />
-        </TRPCProvider>
-      </WagmiProvider>
+      <AuthProvider>
+        <WagmiProvider>
+          <TRPCProvider>
+            {children}
+            <Toaster />
+          </TRPCProvider>
+        </WagmiProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
