@@ -8,7 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuItem,
-} from '@/components/ui/molecules/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import { Menu } from 'lucide-react';
 import { useAdmin } from '@/lib/hooks/use-admin';
 import { useSession } from 'next-auth/react';

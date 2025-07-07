@@ -24,15 +24,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/molecules/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogTrigger,
-} from '@/components/ui/molecules/dialog';
+} from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/atoms/input';
+import { Input } from '@/components/ui/input';
 import { useTrpc } from '@/lib/hooks/use-trpc';
 import { useQueryClient } from '@tanstack/react-query';
 import { signOut } from 'next-auth/react';
@@ -493,7 +488,10 @@ export function Navbar({ config, className = '' }: NavbarProps) {
               </DropdownMenu>
 
               {mergedConfig.user?.enableUsernameEdit && (
-                <DialogContent title="Set Username">
+                <DialogContent
+                  title="Set Username"
+                  className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-md"
+                >
                   <div className="py-4">
                     <p className="text-sm opacity-60 mb-4">
                       Choose a username to display instead of your wallet address.
@@ -502,10 +500,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
                       placeholder="Enter username"
                       value={newUsername}
                       onChange={(e) => setNewUsername(e.target.value)}
-                      style={{
-                        backgroundColor: mergedConfig.style?.hoverColor,
-                        borderColor: mergedConfig.style?.borderColor,
-                      }}
+                      className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-2 px-3 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
                     />
                   </div>
                   <DialogFooter>
@@ -513,6 +508,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
                       variant="outline"
                       onClick={() => setDialogOpen(false)}
                       disabled={setUsernameMutation.isPending}
+                      className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-2 px-3 text-white placeholder:text-zinc-500 focus:outline-none hover:bg-[#1f1f1f] hover:border-zinc-600 focus:ring-1 focus:ring-white"
                     >
                       Cancel
                     </Button>
