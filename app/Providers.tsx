@@ -1,7 +1,4 @@
-import { ThemeProvider } from '@/components/theme-provider';
-import { WagmiProvider } from '@/lib/blockchain/wagmi';
-import { AuthProvider } from '@/lib/auth/AuthProvider';
-import { TRPCProvider } from '@/components/core/providers';
+import { WagmiProvider, TRPCProvider, AuthProvider, ThemeProvider } from '@/components/providers';
 import { Toaster } from '@/components/ui/sonner';
 
 export function Providers({ children }: { children: React.ReactNode }) {
