@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { forbidden } from 'next/navigation';
 import { authOptions } from '@/lib/auth/next-auth/options';
-import { AdminShell } from '@/components/features/layout';
+import { AdminLayout } from '@/components/features/layout/admin';
 
 const ADMIN_ADDRESSES = ['0x19191984DF6Ce7749B786b9a2BB869B4b735eC31'];
 
@@ -22,7 +22,7 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
 
   return (
     <div className="min-h-screen flex flex-col bg-[#000000]">
-      <AdminShell>{children}</AdminShell>
+      <AdminLayout>{children}</AdminLayout>
     </div>
   );
 }

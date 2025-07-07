@@ -1,9 +1,9 @@
-import { PublicShell } from '@/components/features/layout';
+import { PublicLayout } from '@/components/features/layout/public';
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default function PublicRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-zinc-900 text-white flex flex-col">
-      <PublicShell>{children}</PublicShell>
+      <PublicLayout>{children}</PublicLayout>
     </div>
   );
 }
