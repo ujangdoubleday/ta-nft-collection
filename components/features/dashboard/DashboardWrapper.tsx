@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useWallet } from '@/lib/hooks/wallet';
-import { Container } from '@/components/core/layout/container';
+import { Container } from '@/components/features/layout/core/Container';
 import { LoadingWindow } from '@/components/shared/loading';
 import { DashboardLayout } from './DashboardLayout';
 import { DashboardWelcome } from './DashboardWelcome';

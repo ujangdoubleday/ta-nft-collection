@@ -1,17 +1,21 @@
 'use client';
 
-import { Container } from '@/components/core/layout/container';
-import UserNavbar from '@/components/features/user/layout/UserNavbar';
-import { UserFooter } from '@/components/features/user/layout/UserFooter';
-import { UserAuthGuard } from '@/components/features/user/auth';
-import UserSubmenu from '@/components/features/user/layout/UserSubmenu';
+import { Container } from '@/components/features/layout/core/Container';
+import { Footer } from '@/components/features/layout/core/Footer';
+import { AuthGuard } from '@/components/features/layout/auth';
 import { useEffect } from 'react';
+import { Navbar } from '@/components/features/layout/core/Navbar';
+import { Submenu } from '@/components/features/layout/core/Submenu';
+import { useNavigation } from '@/lib/navigation/useNavigation';
 
 interface UserLayoutProps {
   children: React.ReactNode;
 }
 
 export function UserLayout({ children }: UserLayoutProps) {
+  // Get navigation links from the custom hook
+  const { links } = useNavigation();
+
   // Add scroll detection
   useEffect(() => {
     const handleScroll = () => {
@@ -36,18 +40,34 @@ export function UserLayout({ children }: UserLayoutProps) {
     };
   }, []);
 
+  // Navbar configuration
+  const navbarConfig = {
+    logo: {
+      showDefault: true,
+      href: '/my',
+    },
+    user: {
+      showUsername: true,
+      showAddress: true,
+      enableUsernameEdit: true,
+    },
+    breadcrumbs: {
+      enabled: true,
+    },
+  };
+
   return (
     <>
-      <div className="bg-[#0A0A0A]">
-        <UserNavbar />
-        <UserSubmenu />
+      <div className="bg-[#0A0A0A] navigation-container">
+        <Navbar config={navbarConfig} className="mb-0 pb-0" />
+        <Submenu links={links} className="mt-0 pt-0" />
       </div>
       <div className="content-wrapper">
         <Container className="py-6 px-6 md:px-3 lg:px-6 mx-auto max-w-[84rem] flex-grow">
-          <UserAuthGuard>{children}</UserAuthGuard>
+          <AuthGuard>{children}</AuthGuard>
         </Container>
       </div>
-      <UserFooter />
+      <Footer />
     </>
   );
 }
