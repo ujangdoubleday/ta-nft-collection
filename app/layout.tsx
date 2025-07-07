@@ -1,4 +1,3 @@
-import { PublicShell } from '@/components/features/layout';
 import '@/styles/globals.css';
 import { Providers } from './Providers';
 import { Geist, Geist_Mono } from 'next/font/google';
