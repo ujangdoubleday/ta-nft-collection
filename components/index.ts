@@ -1,6 +1,6 @@
 ﻿// Core components
 export * from './core/layout';
-export * from './core/navigation';
+export * from './features/layout/public/navigation';
 export * from './core/providers';
 
 // UI components

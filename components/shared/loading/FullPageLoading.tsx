@@ -1,4 +1,4 @@
-import { Container } from '@/components/core/layout/container';
+import { Container } from '@/components/features/layout/core/Container';
 import { LoadingWindow } from './LoadingWindow';
 import { cn } from '@/lib/utils';
 
