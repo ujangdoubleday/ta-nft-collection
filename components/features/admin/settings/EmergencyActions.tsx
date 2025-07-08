@@ -221,15 +221,6 @@ export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
               <p className="text-xs text-zinc-300 font-mono break-all">{txHash}</p>
             </div>
           )}
-
-          {/* Warning */}
-          <div className="text-sm text-red-500 pt-4 border-t border-zinc-800">
-            <p className="font-medium">Warning:</p>
-            <p className="mt-1">
-              These are emergency actions that should only be used in critical situations. Only the
-              contract owner can perform these actions.
-            </p>
-          </div>
         </div>
       </div>
     </div>
