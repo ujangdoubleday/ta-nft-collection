@@ -89,9 +89,15 @@ export async function middleware(request: NextRequest) {
     if (request.nextUrl.pathname.startsWith('/my')) {
       if (!isAuthenticated) {
         // Redirect to unauthorized page with callback parameter
-        const redirectUrl = new URL('/unauthorized', request.url);
+        const redirectUrl = new URL('/login', request.url);
         redirectUrl.searchParams.set('callback', request.nextUrl.pathname);
         return NextResponse.redirect(redirectUrl);
+      }
+    }
+
+    if (request.nextUrl.pathname.startsWith('/login')) {
+      if (isAuthenticated) {
+        return NextResponse.redirect('/api/auth/login');
       }
     }
 
