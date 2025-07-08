@@ -214,7 +214,7 @@ export function useWalletWagmi() {
         console.warn('Failed to store user data in Redis, but continuing authentication');
       }
 
-      const callbackUrl = '/my';
+      const callbackUrl = '/api/auth/login';
       const { success, error, response } = await signInWithEthereum(
         message,
         signature,
