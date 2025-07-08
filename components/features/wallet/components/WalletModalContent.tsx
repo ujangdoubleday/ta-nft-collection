@@ -59,16 +59,6 @@ export function WalletModalContent({
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col mt-4 space-y-4">
-            <div className="p-3 bg-amber-900/20 border border-amber-700/30 rounded-md mb-2">
-              <div className="flex items-start">
-                <AlertTriangle className="w-5 h-5 text-amber-500 mr-2 flex-shrink-0 mt-0.5" />
-                <p className="text-amber-200 text-sm">
-                  This application requires the <strong>Sepolia Testnet</strong>. Clicking connect
-                  will automatically prompt you to switch networks if needed.
-                </p>
-              </div>
-            </div>
-
             <Button
               onClick={onConnectAction}
               disabled={isConnecting}
