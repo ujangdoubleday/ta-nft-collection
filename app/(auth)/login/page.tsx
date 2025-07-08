@@ -11,10 +11,6 @@ import { useSession } from 'next-auth/react';
 
 export default function LoginPage() {
   const [isMounted, setIsMounted] = useState(false);
-  const [localStorageAuth, setLocalStorageAuth] = useState<{
-    address: string;
-    time: string;
-  } | null>(null);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,54 +42,22 @@ export default function LoginPage() {
 
   useEffect(() => {
     setIsMounted(true);
-
-    // Check localStorage for authentication data
-    try {
-      const storedAddress = localStorage.getItem('lastAuthAddress');
-      const storedTime = localStorage.getItem('lastAuthTime');
-
-      if (storedAddress && storedTime) {
-        const authTime = new Date(storedTime);
-        const now = new Date();
-
-        // If auth was in last 4 hours, consider it valid
-        if (now.getTime() - authTime.getTime() < 4 * 60 * 60 * 1000) {
-          setLocalStorageAuth({
-            address: storedAddress,
-            time: storedTime,
-          });
-        }
-      }
-    } catch (e) {
-      // Silent error handling for localStorage
-    }
   }, []);
 
   // Enhanced redirect logic with session check
   useEffect(() => {
     if (!isMounted) return;
 
-    // Check auth from multiple sources
-    const isFullyAuthenticated =
-      (isConnected && isAuthenticated && session?.user?.address) ||
-      (isConnected && address && localStorageAuth?.address === address);
+    // Check auth from session only
+    const isFullyAuthenticated = isConnected && isAuthenticated && session?.user?.address;
 
     if (isFullyAuthenticated) {
-      // Try to fix the session if using localStorage fallback
-      if (!session?.user?.address && localStorageAuth?.address) {
-        setTimeout(() => {
-          // Force page reload to retry session fetch before navigating
-          window.location.reload();
-        }, 500);
-        return;
-      }
-
       // Use window.location for more reliable redirect in production
       if (typeof window !== 'undefined') {
         window.location.href = callback;
       }
     }
-  }, [isMounted, isConnected, isAuthenticated, session, address, localStorageAuth, callback]);
+  }, [isMounted, isConnected, isAuthenticated, session, address, callback]);
 
   // Additional effect to handle session loading
   useEffect(() => {
@@ -130,12 +94,9 @@ export default function LoginPage() {
   const isLoadingSession = status === 'loading';
   const isSessionAuthenticated = status === 'authenticated' && session?.user?.address;
   const isWalletAuthenticated = isConnected && isAuthenticated;
-  const isLocalStorageAuthenticated =
-    isConnected && address && localStorageAuth?.address === address;
 
-  // Use any valid authentication method
-  const isAnyAuthMethod =
-    isSessionAuthenticated || (isWalletAuthenticated && isConnected) || isLocalStorageAuthenticated;
+  // Use session authentication method only
+  const isAnyAuthMethod = isSessionAuthenticated || (isWalletAuthenticated && isConnected);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
@@ -144,13 +105,6 @@ export default function LoginPage() {
       </div>
       <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-xl p-8 shadow-lg animate-fade-in">
         <div className="space-y-6">
-          {process.env.NODE_ENV === 'production' && localStorageAuth && (
-            <div className="p-3 bg-green-900/30 border border-green-800 rounded text-xs text-green-300 mb-4">
-              <div>Found saved authentication data.</div>
-              <div>Connect the same wallet to continue.</div>
-            </div>
-          )}
-
           {isLoadingSession || isAnyAuthMethod ? (
             <div className="p-4 bg-zinc-800 border border-zinc-700 rounded-lg text-center">
               <div className="flex items-center justify-center space-x-3 mb-2">
