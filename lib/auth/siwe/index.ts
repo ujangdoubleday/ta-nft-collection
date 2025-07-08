@@ -24,7 +24,7 @@ Issued At: ${new Date().toISOString()}`;
 export async function signInWithEthereum(
   message: string,
   signature: string,
-  callbackUrl: string = '/my',
+  callbackUrl: string = '/api/auth/login',
 ) {
   try {
     const response = await signIn('credentials', {
@@ -61,6 +61,8 @@ export async function signInWithEthereum(
         return { success: true, error: null, response };
       }
 
+      //dev
+      window.location.href = callbackUrl;
       // For development, use a shorter delay
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
