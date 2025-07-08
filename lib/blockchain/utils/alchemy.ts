@@ -2,6 +2,10 @@ import { alchemy } from '@/lib/blockchain/alchemy';
 import { keccak256, toBytes } from 'viem';
 import { BASE_URL_ALCHEMY_API } from '@/lib/blockchain/alchemy/config';
 import { connectWebSocket, disconnectWebSocket } from '@/lib/blockchain/alchemy/config';
+import { BASE_URL_ALCHEMY_RPC } from '../alchemy/config';
+import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
+import { NFT_FACTORY_ABI } from '@/lib/blockchain/abi';
+import { ethers } from 'ethers';
 
 // Type for query parameters
 type QueryParams = Record<string, string | number | boolean>;
@@ -496,5 +500,48 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
   } catch (error) {
     console.error('Error getting transfer history:', error);
     return [];
+  }
+}
+
+/**
+ * Check if the NFT Factory contract is paused
+ * @returns Promise resolving to boolean indicating if contract is paused
+ */
+export async function checkContractPaused(): Promise<boolean> {
+  try {
+    // Create a provider using Alchemy
+    const provider = new ethers.JsonRpcProvider(BASE_URL_ALCHEMY_RPC);
+
+    // Create contract instance
+    const contract = new ethers.Contract(NFT_FACTORY_ADDRESS, NFT_FACTORY_ABI, provider);
+
+    // Call the paused function
+    const isPaused = await contract.paused();
+    return isPaused;
+  } catch (error) {
+    console.error('Error checking if contract is paused:', error);
+    return false; // Default to false if there's an error
+  }
+}
+
+/**
+ * Get the contract balance
+ * @returns Promise resolving to contract balance in ETH
+ */
+export async function getContractBalance(): Promise<number> {
+  try {
+    // Create a provider using Alchemy
+    const provider = new ethers.JsonRpcProvider(BASE_URL_ALCHEMY_RPC);
+
+    // Get balance
+    const balanceWei = await provider.getBalance(NFT_FACTORY_ADDRESS);
+
+    // Convert from wei to ETH
+    const balanceEth = parseFloat(ethers.formatEther(balanceWei));
+
+    return balanceEth;
+  } catch (error) {
+    console.error('Error getting contract balance:', error);
+    return 0; // Default to 0 if there's an error
   }
 }
