@@ -2,7 +2,7 @@ import { AdminLayout } from '@/components/features/layout/admin';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { forbidden } from 'next/navigation';
-import { isAdminWallet } from '@/lib/auth/role';
+import { getUserRole } from '@/lib/auth/role';
 
 export default async function AdminProtectedLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -13,7 +13,8 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
   }
 
   // Check if the authenticated wallet is admin
-  if (!isAdminWallet(session.user.address)) {
+  const role = await getUserRole(session.user.address);
+  if (role !== 'admin') {
     return forbidden();
   }
 

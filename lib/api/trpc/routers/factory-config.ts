@@ -4,6 +4,7 @@ import { NFT_FACTORY_ABI } from '@/lib/blockchain/abi';
 import { publicClient } from '@/lib/blockchain/viem';
 import { formatEther } from 'viem';
 import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
+import { checkContractPaused, getContractBalance } from '@/lib/blockchain/utils/alchemy';
 
 export const factoryConfigRouter = router({
   // Get creation fee
@@ -25,6 +26,22 @@ export const factoryConfigRouter = router({
         fee: '0',
         rawFee: BigInt(0),
       };
+    }
+  }),
+
+  // Get factory owner address
+  getFactoryOwner: publicProcedure.query(async () => {
+    try {
+      const owner = await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'owner',
+      });
+
+      return owner as string;
+    } catch (error) {
+      console.error('Error getting factory owner:', error);
+      return null;
     }
   }),
 
@@ -63,6 +80,28 @@ export const factoryConfigRouter = router({
     } catch (error) {
       console.error('Error checking owner status:', error);
       return false;
+    }
+  }),
+
+  // Check if contract is paused
+  isPaused: publicProcedure.query(async () => {
+    try {
+      const isPaused = await checkContractPaused();
+      return isPaused;
+    } catch (error) {
+      console.error('Error checking if contract is paused:', error);
+      return false;
+    }
+  }),
+
+  // Get contract balance
+  getContractBalance: publicProcedure.query(async () => {
+    try {
+      const balance = await getContractBalance();
+      return balance;
+    } catch (error) {
+      console.error('Error getting contract balance:', error);
+      return 0;
     }
   }),
 });
