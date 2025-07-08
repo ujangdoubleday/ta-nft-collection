@@ -108,14 +108,24 @@ export const useWalletModal = () => {
       setIsCreatingAccount(false);
       addLogMessage(`Error: ${error}`, 'error');
 
-      setErrorMessage(
+      // Format error message for better user experience
+      let formattedError = error;
+
+      if (
         error.includes('rejected') ||
-          error.includes('denied') ||
-          error.includes('canceled') ||
-          error.includes('cancelled')
-          ? 'Connection Cancelled'
-          : error,
-      );
+        error.includes('denied') ||
+        error.includes('canceled') ||
+        error.includes('cancelled')
+      ) {
+        formattedError = 'Connection Cancelled';
+      } else if (
+        error.includes('switch to Sepolia') ||
+        error.includes('Failed to switch to Sepolia')
+      ) {
+        formattedError = 'Please switch to Sepolia Testnet to continue';
+      }
+
+      setErrorMessage(formattedError);
       setShowErrorNotification(true);
       setIsWalletModalOpen(false);
     }
