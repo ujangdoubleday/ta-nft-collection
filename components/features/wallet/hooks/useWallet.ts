@@ -92,6 +92,49 @@ export function useWalletWagmi() {
     }));
   }, [address, isConnected, chainId, status]);
 
+  // Switch to Sepolia network
+  const switchToSepolia = useCallback(async () => {
+    if (!isBrowser || !window.ethereum) return false;
+
+    try {
+      // Request network switch
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: `0x${sepolia.id.toString(16)}` }],
+      });
+      return true;
+    } catch (error: any) {
+      // If the network is not added to MetaMask, add it
+      if (error.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: `0x${sepolia.id.toString(16)}`,
+                chainName: 'Sepolia Testnet',
+                nativeCurrency: {
+                  name: 'Sepolia ETH',
+                  symbol: 'ETH',
+                  decimals: 18,
+                },
+                rpcUrls: ['https://sepolia.infura.io/v3/'],
+                blockExplorerUrls: ['https://sepolia.etherscan.io'],
+              },
+            ],
+          });
+          return true;
+        } catch (addError) {
+          console.error('Error adding Sepolia network:', addError);
+          throw new Error('Failed to add Sepolia network. Please add it manually.');
+        }
+      } else {
+        console.error('Error switching network:', error);
+        throw new Error('Failed to switch to Sepolia network. Please switch manually.');
+      }
+    }
+  }, []);
+
   // Connect to wallet
   const connect = useCallback(async () => {
     if (!isBrowser) return false;
@@ -105,6 +148,14 @@ export function useWalletWagmi() {
 
       removeFromStorage(DISCONNECTED_KEY);
 
+      // First try to switch to Sepolia network
+      try {
+        await switchToSepolia();
+      } catch (switchError: any) {
+        throw new Error(switchError.message || 'Failed to switch to Sepolia network');
+      }
+
+      // Then connect to wallet
       const result = await connectAsync({
         connector: injected(),
       });
@@ -136,7 +187,7 @@ export function useWalletWagmi() {
       }));
       return false;
     }
-  }, [connectAsync]);
+  }, [connectAsync, switchToSepolia]);
 
   // Disconnect wallet
   const disconnect = useCallback(async () => {
@@ -254,17 +305,9 @@ export function useWalletWagmi() {
   }, [address, isConnected, signMessageAsync, setUserData, refetchUserData]);
 
   return {
-    address: state.address,
-    chainId: state.chainId,
-    isConnecting: state.isConnecting,
-    isConnected: state.isConnected,
-    isAuthenticated: state.isAuthenticated,
-    isAuthenticating: state.isAuthenticating,
-    error: state.error,
+    ...state,
     connect,
     disconnect,
     authenticate,
-    session,
-    storedUserData,
   };
 }
