@@ -9,7 +9,7 @@ import { WalletModalContent } from '@/components/features/wallet/components/Wall
 import Spinner from '@/components/ui/spinner';
 import { useSession } from 'next-auth/react';
 
-export default function UnauthorizedPage() {
+export default function LoginPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [localStorageAuth, setLocalStorageAuth] = useState<{
     address: string;
@@ -18,7 +18,7 @@ export default function UnauthorizedPage() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callback = searchParams.get('callback') || '/my';
+  const callback = searchParams.get('callback') || '/api/auth/login';
 
   // Add NextAuth session hook
   const { data: session, status } = useSession();
@@ -139,11 +139,10 @@ export default function UnauthorizedPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-bold mb-2 text-white">Sign to App</h1>
+      </div>
       <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-xl p-8 shadow-lg animate-fade-in">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold mb-2 text-white">Authentication Required</h1>
-        </div>
-
         <div className="space-y-6">
           {process.env.NODE_ENV === 'production' && localStorageAuth && (
             <div className="p-3 bg-green-900/30 border border-green-800 rounded text-xs text-green-300 mb-4">

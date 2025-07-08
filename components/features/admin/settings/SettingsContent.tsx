@@ -2,8 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SettingsHeader } from './SettingsHeader';
-import { CreationFeeSettings } from './CreationFeeSettings';
-import { EmergencyActions } from './EmergencyActions';
+import { OwnershipManagement } from './OwnershipManagement';
 
 export function SettingsContent() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,14 +19,8 @@ export function SettingsContent() {
     <div className="animate-fade-in">
       <SettingsHeader />
 
-      <div className="flex flex-col lg:flex-row gap-6 mt-8">
-        <div className="lg:w-[50%] order-1">
-          <CreationFeeSettings isLoading={isLoading} />
-        </div>
-
-        <div className="lg:w-[50%] order-2">
-          <EmergencyActions isLoading={isLoading} />
-        </div>
+      <div className="flex flex-col gap-6 mt-8">
+        <OwnershipManagement isLoading={isLoading} />
       </div>
     </div>
   );

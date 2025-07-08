@@ -14,8 +14,8 @@ export function Footer() {
             <span>by ilham alfath.</span>
           </div>
 
-          <div className="flex items-center gap-2 text-gray-500 text-sm">
-            <CheckCircle2 className="w-4 h-4 fill-white text-white" />
+          <div className="flex items-center gap-2 text-white text-sm">
+            <CheckCircle2 className="w-4 h-4 fill-[#50e3c2] text-[#50e3c2]" />
             <span>All systems normal</span>
           </div>
         </div>

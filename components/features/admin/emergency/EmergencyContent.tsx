@@ -1,17 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { EmergencyHeader } from './EmergencyHeader';
 import { Button } from '@/components/ui/button';
 import Spinner from '@/components/ui/spinner';
 import { useNFTFactoryConfig } from '@/lib/blockchain/hooks/useNFTFactoryConfig';
 import { trpc } from '@/lib/api/trpc/client';
 import { useAccount } from 'wagmi';
+import {
+  useEmergencyWithdraw,
+  usePauseContract,
+  useUnpauseContract,
+} from '@/lib/blockchain/hooks/useNFTFactoryWrite';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ExternalLink } from 'lucide-react';
 
-interface EmergencyActionsProps {
-  isLoading: boolean;
-}
-
-export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
+export function EmergencyContent() {
+  const [isLoading, setIsLoading] = useState(true);
   const { address } = useAccount();
   const { data: isOwner, isLoading: isCheckingOwner } = trpc.factoryConfig.isOwner.useQuery(
     { address: address || '' },
@@ -25,9 +30,22 @@ export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
   const [txHash, setTxHash] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  // Get contract functions
+  const { emergencyWithdraw, isLoading: isEmergencyWithdrawLoading } = useEmergencyWithdraw();
+  const { pauseContract, isLoading: isPauseLoading } = usePauseContract();
+  const { unpauseContract, isLoading: isUnpauseLoading } = useUnpauseContract();
+
   // Mock data for demonstration - replace with actual contract calls
   const isPaused = false; // This should come from your contract
   const contractBalance: number = 0.5; // This should come from your contract
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleEmergencyWithdraw = async () => {
     if (!isOwner) {
@@ -39,15 +57,17 @@ export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
       setIsWithdrawing(true);
       setError('');
       setSuccessMessage('');
+      setTxHash('');
 
-      // Replace with actual contract call
-      // const tx = await yourContractInstance.emergencyWithdraw();
-      // await tx.wait();
+      // Call the actual contract function
+      const result = await emergencyWithdraw(address as `0x${string}`);
 
-      // Mock success for demonstration
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setTxHash('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
-      setSuccessMessage('Funds withdrawn successfully');
+      if (result.hash) {
+        setTxHash(result.hash);
+        setSuccessMessage('Funds withdrawn successfully');
+      } else if (result.error) {
+        setError(result.error.message);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to withdraw funds');
     } finally {
@@ -65,15 +85,17 @@ export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
       setIsPausing(true);
       setError('');
       setSuccessMessage('');
+      setTxHash('');
 
-      // Replace with actual contract call
-      // const tx = await yourContractInstance.pause();
-      // await tx.wait();
+      // Call the actual contract function
+      const result = await pauseContract();
 
-      // Mock success for demonstration
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setTxHash('0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890');
-      setSuccessMessage('Contract paused successfully');
+      if (result.hash) {
+        setTxHash(result.hash);
+        setSuccessMessage('Contract paused successfully');
+      } else if (result.error) {
+        setError(result.error.message);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to pause contract');
     } finally {
@@ -91,15 +113,17 @@ export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
       setIsUnpausing(true);
       setError('');
       setSuccessMessage('');
+      setTxHash('');
 
-      // Replace with actual contract call
-      // const tx = await yourContractInstance.unpause();
-      // await tx.wait();
+      // Call the actual contract function
+      const result = await unpauseContract();
 
-      // Mock success for demonstration
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setTxHash('0x7890abcdef1234567890abcdef1234567890abcdef1234567890abcdef123456');
-      setSuccessMessage('Contract unpaused successfully');
+      if (result.hash) {
+        setTxHash(result.hash);
+        setSuccessMessage('Contract unpaused successfully');
+      } else if (result.error) {
+        setError(result.error.message);
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to unpause contract');
     } finally {
@@ -108,19 +132,20 @@ export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
   };
 
   return (
-    <div>
-      <h2 className="text-base font-bold text-white mb-3">Emergency Actions</h2>
-      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6 h-full">
-        <div className="space-y-6">
+    <div className="animate-fade-in">
+      <EmergencyHeader />
+
+      <div className="flex flex-col gap-6 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Emergency Withdraw Section */}
-          <div>
-            <h3 className="text-sm font-medium text-white mb-3">Emergency Withdraw</h3>
-            <div className="bg-black/40 p-4 rounded-md border border-zinc-800 mb-4">
-              <p className="text-sm text-zinc-400 mb-1">Contract Balance</p>
+          <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
+            <h2 className="text-sm font-bold text-white mb-2">Emergency Withdraw</h2>
+            <div className="bg-black/40 p-3 rounded-md border border-zinc-800 mb-3">
+              <p className="text-xs text-zinc-400 mb-1">Contract Balance</p>
               {isLoading ? (
-                <div className="h-7 bg-[#1f1f1f] rounded w-1/3 animate-pulse"></div>
+                <div className="h-6 bg-[#1f1f1f] rounded w-1/3 animate-pulse"></div>
               ) : (
-                <p className="text-xl font-medium text-white">{contractBalance} ETH</p>
+                <p className="text-base font-medium text-white">{contractBalance} ETH</p>
               )}
             </div>
 
@@ -144,14 +169,11 @@ export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
             </p>
           </div>
 
-          {/* Divider */}
-          <div className="h-px w-full bg-zinc-800"></div>
-
           {/* Emergency Pause Section */}
-          <div>
-            <h3 className="text-sm font-medium text-white mb-3">Emergency Pause</h3>
-            <div className="bg-black/40 p-4 rounded-md border border-zinc-800 mb-4">
-              <p className="text-sm text-zinc-400 mb-1">Contract Status</p>
+          <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
+            <h2 className="text-sm font-bold text-white mb-2">Emergency Pause</h2>
+            <div className="bg-black/40 p-3 rounded-md border border-zinc-800 mb-3">
+              <p className="text-xs text-zinc-400 mb-1">Contract Status</p>
               {isLoading ? (
                 <div className="h-5 bg-[#1f1f1f] rounded w-2/3 animate-pulse"></div>
               ) : (
@@ -200,26 +222,39 @@ export function EmergencyActions({ isLoading }: EmergencyActionsProps) {
                 : 'Pausing will temporarily disable all contract functionality except withdrawals.'}
             </p>
           </div>
+        </div>
 
-          {/* Status Messages */}
+        {/* Status Messages */}
+        <div>
           {error && (
-            <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded">
+            <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
 
           {successMessage && (
-            <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded">
+            <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded mb-4">
               {successMessage}
             </div>
           )}
 
           {/* Transaction Hash */}
           {txHash && (
-            <div className="bg-black/40 p-4 rounded-md border border-zinc-800">
-              <p className="text-sm text-zinc-400 mb-1">Transaction</p>
-              <p className="text-xs text-zinc-300 font-mono break-all">{txHash}</p>
-            </div>
+            <Alert className="bg-black/40 border border-zinc-800">
+              <AlertDescription className="flex items-center justify-between">
+                <span className="text-xs text-zinc-300 truncate">
+                  Transaction: {txHash.slice(0, 10)}...{txHash.slice(-8)}
+                </span>
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 flex items-center"
+                >
+                  View on Sepolia <ExternalLink size={12} className="ml-1" />
+                </a>
+              </AlertDescription>
+            </Alert>
           )}
         </div>
       </div>

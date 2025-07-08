@@ -81,18 +81,6 @@ export const WalletButton = () => {
 
   return (
     <div className="flex items-center gap-2">
-      {isConnected && isAuthenticated && (
-        <Link href="/my">
-          <Button
-            variant="outline"
-            className="bg-white text-zinc-900 border border-zinc-200 text-[15px] hover:bg-zinc-100 hover:text-zinc-900 font-medium shadow-sm"
-          >
-            <LayoutDashboard className="h-4 w-4 mr-2" />
-            <span className="hidden xs:inline">Dashboard</span>
-          </Button>
-        </Link>
-      )}
-
       <Dialog open={isWalletModalOpen} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger asChild>
           <Button

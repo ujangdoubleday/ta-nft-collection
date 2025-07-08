@@ -88,9 +88,11 @@ export function CreationFeeSettings({ isLoading: pageLoading }: CreationFeeSetti
                       Edit Fee
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="bg-[#0A0A0A] border border-[#1f1f1f] text-white">
+                  <DialogContent
+                    title="Update Creation Fee"
+                    className="bg-[#0A0A0A] border border-[#1f1f1f] text-white"
+                  >
                     <DialogHeader>
-                      <DialogTitle>Update Creation Fee</DialogTitle>
                       <DialogDescription className="text-zinc-400">
                         Set a new fee for NFT collection creation.
                       </DialogDescription>
@@ -168,52 +170,6 @@ export function CreationFeeSettings({ isLoading: pageLoading }: CreationFeeSetti
               <p className="text-xs text-zinc-300 font-mono break-all">{transactionHash}</p>
             </div>
           )}
-
-          {/* Fee Update Events */}
-          <div>
-            <Button
-              variant="link"
-              onClick={() => setShowEvents(!showEvents)}
-              className="p-0 h-auto text-sm text-blue-400"
-            >
-              {showEvents ? 'Hide Fee Update History' : 'Show Fee Update History'}
-            </Button>
-
-            {showEvents && (
-              <div className="mt-4 border border-zinc-800 rounded-md p-4 bg-black/40">
-                <h3 className="font-medium text-white mb-3">Fee Update History</h3>
-                {pageLoading ? (
-                  <div className="space-y-3">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="h-4 bg-[#1f1f1f] rounded w-full animate-pulse"></div>
-                    ))}
-                  </div>
-                ) : feeEvents.length > 0 ? (
-                  <ul className="space-y-2 divide-y divide-zinc-800">
-                    {feeEvents.map((event, index) => (
-                      <li key={index} className="text-sm pt-2 first:pt-0">
-                        <span className="text-zinc-400">Old Fee:</span>{' '}
-                        <span className="text-white">{formatEther(BigInt(event.oldFee))} ETH</span>{' '}
-                        <span className="text-zinc-500">→</span>{' '}
-                        <span className="text-zinc-400">New Fee:</span>{' '}
-                        <span className="text-white">{formatEther(BigInt(event.newFee))} ETH</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-zinc-400">No fee update events detected yet.</p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Help Text */}
-          <div className="text-sm text-zinc-500 pt-4 border-t border-zinc-800">
-            <p>This fee will be charged for creating new NFT collections.</p>
-            <p className="mt-2 text-red-400">
-              Note: Only the contract owner can update the creation fee.
-            </p>
-          </div>
         </div>
       </div>
     </div>

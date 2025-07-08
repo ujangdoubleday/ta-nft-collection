@@ -9,6 +9,8 @@ import {
   PenTool,
   Settings,
   Users,
+  ShieldAlert,
+  Banknote,
 } from 'lucide-react';
 import { NavigationLink } from '@/components/features/layout/core/Submenu';
 
@@ -60,6 +62,18 @@ export const adminNavigationLinks: NavigationLink[] = [
     },
   },
   {
+    href: '/admin/users',
+    label: 'Users',
+    icon: React.createElement(Users, { className: 'h-4 w-4' }),
+    isActive: (pathname) => pathname === '/admin/users' || pathname.startsWith('/admin/users/'),
+  },
+  {
+    href: '/admin/fees',
+    label: 'Fees',
+    icon: React.createElement(Banknote, { className: 'h-4 w-4' }),
+    isActive: (pathname) => pathname === '/admin/fees' || pathname.startsWith('/admin/fees/'),
+  },
+  {
     href: '/admin/settings',
     label: 'Settings',
     icon: React.createElement(Settings, { className: 'h-4 w-4' }),
@@ -67,10 +81,11 @@ export const adminNavigationLinks: NavigationLink[] = [
       pathname === '/admin/settings' || pathname.startsWith('/admin/settings/'),
   },
   {
-    href: '/admin/users',
-    label: 'Users',
-    icon: React.createElement(Users, { className: 'h-4 w-4' }),
-    isActive: (pathname) => pathname === '/admin/users' || pathname.startsWith('/admin/users/'),
+    href: '/admin/emergency',
+    label: 'Emergency Actions',
+    icon: React.createElement(ShieldAlert, { className: 'h-4 w-4' }),
+    isActive: (pathname) =>
+      pathname === '/admin/emergency' || pathname.startsWith('/admin/emergency/'),
   },
 ];
 
