@@ -122,7 +122,7 @@ export function RenounceOwnership({ isLoading }: RenounceOwnershipProps) {
 
               <div className="mt-4">
                 <label className="block text-sm text-zinc-400 mb-2">
-                  Type "{CONFIRMATION_TEXT}" to confirm
+                  Type &quot;{CONFIRMATION_TEXT}&quot; to confirm
                 </label>
                 <Input
                   value={confirmationText}
