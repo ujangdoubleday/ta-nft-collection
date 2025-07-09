@@ -1,0 +1,137 @@
+'use client';
+
+import { CollectionsList } from './CollectionsList';
+import { useState, useEffect } from 'react';
+import { useAddress } from '@/lib/hooks/use-address';
+import { useWallet } from '@/lib/hooks/wallet';
+import { CollectionsHeader } from './CollectionsHeader';
+
+interface CollectionsContentProps {
+  role?: 'admin' | 'user';
+}
+
+export function CollectionsContent({ role = 'user' }: CollectionsContentProps) {
+  const { data: address } = useAddress();
+  const { isConnected, isAuthenticated, authenticate, connect } = useWallet();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Determine the base path based on role
+  const basePath = role === 'admin' ? '/admin/collections' : '/my/collections';
+
+  // Simulate loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
+    }
+  };
+
+  const handleAuthenticate = async () => {
+    try {
+      await authenticate();
+    } catch (error) {
+      console.error('Failed to authenticate:', error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div>
+        {/* Skeleton for header */}
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div className="h-8 bg-[#1f1f1f] rounded w-48 animate-pulse"></div>
+            <div className="flex items-center gap-2">
+              <div className="h-9 bg-[#1f1f1f] rounded w-36 animate-pulse"></div>
+              <div className="h-9 bg-[#1f1f1f] rounded w-24 animate-pulse"></div>
+            </div>
+          </div>
+          <div className="h-px w-full bg-[#1f1f1f] mt-6"></div>
+        </div>
+
+        {/* Skeleton for collection cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={i}
+              className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden shadow-sm p-4"
+            >
+              <div className="flex gap-4">
+                {/* Collection Image Skeleton - Left Side */}
+                <div className="flex-shrink-0">
+                  <div className="w-20 h-20 bg-[#1f1f1f] rounded-lg animate-pulse"></div>
+                </div>
+
+                {/* Collection Info Skeleton - Right Side */}
+                <div className="flex-grow">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="h-5 bg-[#1f1f1f] rounded w-3/5 animate-pulse"></div>
+                    <div className="h-5 bg-[#1f1f1f] rounded w-1/5 animate-pulse"></div>
+                  </div>
+                  <div className="h-4 bg-[#1f1f1f] rounded w-full animate-pulse mb-2"></div>
+                  <div className="h-4 bg-[#1f1f1f] rounded w-4/5 animate-pulse mb-2"></div>
+                  <div className="flex items-center justify-between">
+                    <div className="h-3 bg-[#1f1f1f] rounded w-1/4 animate-pulse"></div>
+                    <div className="h-3 bg-[#1f1f1f] rounded w-1/4 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!isConnected) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8">
+        <h2 className="text-2xl font-bold text-white mb-4">Connect Your Wallet</h2>
+        <p className="text-zinc-400 text-center max-w-md mb-8">
+          Please connect your wallet to view and manage your NFT collections.
+        </p>
+        <button
+          onClick={handleConnect}
+          className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-6 rounded-md transition-colors font-medium"
+        >
+          Connect Wallet
+        </button>
+        <div className="h-px w-full max-w-md bg-[#1f1f1f] mt-8"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8">
+        <h2 className="text-2xl font-bold text-white mb-4">Authenticate Your Wallet</h2>
+        <p className="text-zinc-400 text-center max-w-md mb-8">
+          Please sign a message to verify you are the owner of this wallet to view your collections.
+        </p>
+        <button
+          onClick={handleAuthenticate}
+          className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-6 rounded-md transition-colors font-medium"
+        >
+          Sign Message
+        </button>
+        <div className="h-px w-full max-w-md bg-[#1f1f1f] mt-8"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="animate-fade-in">
+      <CollectionsHeader role={role} />
+      <CollectionsList role={role} />
+    </div>
+  );
+}

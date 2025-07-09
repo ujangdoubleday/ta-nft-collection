@@ -6,7 +6,7 @@ import { Edit, MoreHorizontal, ExternalLink, ImagePlus, Trash2 } from 'lucide-re
 import { useState } from 'react';
 import { shortenAddress } from '@/lib/utils/formatting';
 
-interface UserCollectionCardProps {
+interface CollectionCardProps {
   collection: {
     id: string;
     address: string;
@@ -17,9 +17,10 @@ interface UserCollectionCardProps {
     createdAt: string;
     symbol: string;
   };
+  role?: 'admin' | 'user'; // Add role prop to determine link paths
 }
 
-export function UserCollectionCard({ collection }: UserCollectionCardProps) {
+export function CollectionCard({ collection, role = 'user' }: CollectionCardProps) {
   // Format creation date
   const formattedDate = (() => {
     try {
@@ -29,9 +30,12 @@ export function UserCollectionCard({ collection }: UserCollectionCardProps) {
     }
   })();
 
+  // Determine the base path based on role
+  const basePath = role === 'admin' ? '/admin/collections' : '/my/collections';
+
   return (
     <>
-      <Link href={`/my/collections/${collection.address}`} className="">
+      <Link href={`${basePath}/${collection.address}`} className="">
         <div className="group bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden hover:bg-zinc-900 hover:border-zinc-600  duration-300 shadow-sm hover:shadow-md transition-all p-4">
           <div className="flex gap-4">
             {/* Collection Image - Left Side */}

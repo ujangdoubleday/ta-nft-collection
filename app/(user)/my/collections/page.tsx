@@ -1,11 +1,5 @@
-import { UserCollectionsContent } from '@/components/features/user/collections';
-import { UserCollectionsHeader } from '@/components/features/user/collections';
+import { CollectionsContent } from '@/components/features/collections';
 
 export default async function UserCollectionsPage() {
-  return (
-    <div className="animate-fade-in">
-      <UserCollectionsHeader />
-      <UserCollectionsContent />
-    </div>
-  );
+  return <CollectionsContent role="user" />;
 }
