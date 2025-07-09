@@ -131,69 +131,75 @@ export function EmergencyPause({
   };
 
   return (
-    <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
-      <h2 className="text-sm font-bold text-white mb-2">Emergency Pause</h2>
-      <div className="bg-black/40 p-3 rounded-md border border-zinc-800 mb-3">
-        <p className="text-xs text-zinc-400 mb-1">Contract Status</p>
-        {isLoading ? (
-          <div className="flex flex-col gap-1">
-            <div className="h-5 bg-[#1f1f1f] rounded w-2/3 animate-pulse"></div>
-            <div className="h-2 bg-transparent"></div>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2">
+        <h2 className="text-sm font-bold text-white mb-2">Emergency Pause</h2>
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4">
+          <p className="text-xs text-zinc-400 mb-1">Contract Status</p>
+          <div className="p-3 rounded-md border border-zinc-800 mb-3">
+            {isLoading ? (
+              <div className="flex flex-col gap-1">
+                <div className="h-5 bg-[#1f1f1f] rounded w-2/3 animate-pulse"></div>
+                <div className="h-2 bg-transparent"></div>
+              </div>
+            ) : (
+              <p className={`font-medium ${isPaused ? 'text-red-400' : 'text-green-400'}`}>
+                {isPaused ? 'PAUSED' : 'ACTIVE'}
+              </p>
+            )}
           </div>
-        ) : (
-          <p className={`font-medium ${isPaused ? 'text-red-400' : 'text-green-400'}`}>
-            {isPaused ? 'PAUSED' : 'ACTIVE'}
-          </p>
-        )}
-      </div>
 
-      {isLoading ? (
-        <div className="flex flex-col gap-2">
-          <div className="h-10 bg-[#1f1f1f] rounded w-full animate-pulse"></div>
-          <div className="h-4 bg-[#1f1f1f] rounded w-3/4 mt-2 animate-pulse opacity-50"></div>
-        </div>
-      ) : (
-        <>
-          {isPaused ? (
-            <Button
-              variant="outline"
-              disabled={isLoading || isUnpauseLoading || isUnpausing || !isOwner}
-              className="w-full"
-              onClick={handleEmergencyUnpause}
-            >
-              {isUnpausing ? (
-                <div className="flex items-center justify-center gap-2">
-                  <Spinner size="md" />
-                  <span>Unpausing...</span>
-                </div>
-              ) : (
-                'Unpause Contract'
-              )}
-            </Button>
+          {isLoading ? (
+            <div className="flex flex-col gap-2">
+              <div className="h-10 bg-[#1f1f1f] rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-[#1f1f1f] rounded w-3/4 mt-2 animate-pulse opacity-50"></div>
+            </div>
           ) : (
-            <Button
-              variant="destructive"
-              disabled={isLoading || isPauseLoading || isPausing || !isOwner}
-              className="w-full"
-              onClick={handleEmergencyPause}
-            >
-              {isPausing ? (
-                <div className="flex items-center justify-center gap-2">
-                  <Spinner size="md" color="white" />
-                  <span>Pausing...</span>
-                </div>
+            <>
+              {isPaused ? (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  disabled={isLoading || isUnpauseLoading || isUnpausing || !isOwner}
+                  className="w-full"
+                  onClick={handleEmergencyUnpause}
+                >
+                  {isUnpausing ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Spinner size="md" />
+                      <span>Unpausing...</span>
+                    </div>
+                  ) : (
+                    'Unpause Contract'
+                  )}
+                </Button>
               ) : (
-                'Emergency Pause Contract'
+                <Button
+                  variant="destructive"
+                  size="lg"
+                  disabled={isLoading || isPauseLoading || isPausing || !isOwner}
+                  className="w-full"
+                  onClick={handleEmergencyPause}
+                >
+                  {isPausing ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <Spinner size="md" color="white" />
+                      <span>Pausing...</span>
+                    </div>
+                  ) : (
+                    'Emergency Pause Contract'
+                  )}
+                </Button>
               )}
-            </Button>
+              <p className="text-xs text-zinc-500 mt-2">
+                {isPaused
+                  ? 'Unpausing will re-enable all contract functionality.'
+                  : 'Pausing will temporarily disable all contract functionality except withdrawals.'}
+              </p>
+            </>
           )}
-          <p className="text-xs text-zinc-500 mt-2">
-            {isPaused
-              ? 'Unpausing will re-enable all contract functionality.'
-              : 'Pausing will temporarily disable all contract functionality except withdrawals.'}
-          </p>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

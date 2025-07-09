@@ -104,4 +104,26 @@ export const factoryConfigRouter = router({
       return 0;
     }
   }),
+
+  // Get total fees collected
+  getTotalFeesCollected: publicProcedure.query(async () => {
+    try {
+      const totalFeesCollected = await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'totalFeesCollected',
+      });
+
+      return {
+        total: formatEther(totalFeesCollected as bigint),
+        rawTotal: totalFeesCollected as bigint,
+      };
+    } catch (error) {
+      console.error('Error getting total fees collected:', error);
+      return {
+        total: '0',
+        rawTotal: BigInt(0),
+      };
+    }
+  }),
 });
