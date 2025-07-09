@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useContractWrite } from 'wagmi';
 import { NFT_FACTORY_ABI } from '../abi';
-import { parseEther, decodeEventLog, parseAbiItem } from 'viem';
+import { parseEther, decodeEventLog, parseAbiItem, formatEther } from 'viem';
 import { trpc } from '@/lib/api/trpc/client';
 import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
 import { subscribeToContractEvents } from '../utils/alchemy';
 import { disconnectWebSocket } from '../alchemy/config';
+import { publicClient } from '@/lib/blockchain/viem';
 
 // Event signature for CreationFeeUpdated event
 const FEE_UPDATED_EVENT_SIGNATURE = 'CreationFeeUpdated(uint256,uint256)';
@@ -153,5 +154,48 @@ export const useNFTFactoryConfig = () => {
     error,
     feeEvents,
     transactionHash,
+  };
+};
+
+/**
+ * Hook to get total fees collected from the factory contract
+ */
+export const useTotalFeesCollected = () => {
+  const [totalFees, setTotalFees] = useState<string>('0');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchTotalFees = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const totalFeesCollected = await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'totalFeesCollected',
+      });
+
+      setTotalFees(formatEther(totalFeesCollected as bigint));
+      return formatEther(totalFeesCollected as bigint);
+    } catch (err) {
+      console.error('Error getting total fees collected:', err);
+      setError(err instanceof Error ? err : new Error('Failed to get total fees collected'));
+      return '0';
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Fetch total fees on mount
+  useEffect(() => {
+    fetchTotalFees();
+  }, [fetchTotalFees]);
+
+  return {
+    totalFees,
+    isLoading,
+    error,
+    refetch: fetchTotalFees,
   };
 };
