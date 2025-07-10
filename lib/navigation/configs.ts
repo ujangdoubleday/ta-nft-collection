@@ -41,6 +41,7 @@ export const mainNavigationLinks: NavigationLink[] = [
     href: '/user/nfts',
     label: 'NFTs',
     icon: React.createElement(Images, { className: 'h-4 w-4' }),
+    isActive: (pathname) => pathname === '/user/nfts' || pathname.startsWith('/user/nfts/'),
   },
 ];
 

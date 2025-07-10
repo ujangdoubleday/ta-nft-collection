@@ -37,7 +37,7 @@ export function useNavigation(): UseNavigationReturn {
     const pathParts = pathname.split('/');
     if (
       pathParts.length >= 4 &&
-      pathParts[1] === 'my' &&
+      pathParts[1] === 'user' &&
       pathParts[2] === 'collections' &&
       pathParts[3] !== 'new'
     ) {

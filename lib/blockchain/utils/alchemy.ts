@@ -545,3 +545,45 @@ export async function getContractBalance(): Promise<number> {
     return 0; // Default to 0 if there's an error
   }
 }
+
+/**
+ * Fetch NFTs for an owner across multiple collections
+ * @param owner The owner's address
+ * @param contractAddresses Array of contract addresses to filter by
+ * @returns Object containing NFTs owned by the address
+ */
+export const fetchNFTsForOwner = async (
+  owner: string,
+  contractAddresses: string[] = [],
+): Promise<{ nfts: AlchemyNFT[] }> => {
+  try {
+    const queryParams: Record<string, any> = {
+      owner,
+      withMetadata: true,
+      pageSize: 100,
+    };
+
+    // Add contract addresses to query parameters if provided
+    if (contractAddresses && contractAddresses.length > 0) {
+      contractAddresses.forEach((address, index) => {
+        queryParams[`contractAddresses[${index}]`] = address;
+      });
+    }
+
+    const response = await fetch(
+      `${BASE_URL_ALCHEMY_API}/getNFTsForOwner?${new URLSearchParams(queryParams)}`,
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error fetching NFTs: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+      nfts: data.ownedNfts || [],
+    };
+  } catch (error) {
+    console.error('Error fetching NFTs for owner:', error);
+    return { nfts: [] };
+  }
+};

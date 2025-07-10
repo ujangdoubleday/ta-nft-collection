@@ -8,6 +8,7 @@ import {
   getNFTOwner,
   getTransferHistory,
   refreshNFTMetadata,
+  fetchNFTsForOwner,
 } from '@/lib/blockchain/utils/alchemy';
 
 export const nftRouter = router({
@@ -197,6 +198,38 @@ export const nftRouter = router({
           error,
         );
         return { success: false, error };
+      }
+    }),
+
+  // Get NFTs by owner and collection addresses
+  getByOwner: publicProcedure
+    .input(
+      z.object({
+        ownerAddress: z.string(),
+        contractAddresses: z.array(z.string()).optional(),
+      }),
+    )
+    .query(async ({ input }) => {
+      try {
+        const { ownerAddress, contractAddresses } = input;
+        const { nfts } = await fetchNFTsForOwner(ownerAddress, contractAddresses || []);
+
+        // Map NFTs to a more convenient structure
+        return nfts.map((nft) => ({
+          id: nft.tokenId,
+          tokenId: nft.tokenId,
+          name: nft.name || `NFT #${nft.tokenId}`,
+          description: nft.description || '',
+          imageUrl: nft.image?.originalUrl || nft.image?.cachedUrl || '',
+          contractAddress: nft.contract.address,
+          symbol: nft.contract.symbol,
+          tokenType: nft.tokenType,
+          metadata: nft.raw.metadata,
+          timeLastUpdated: nft.timeLastUpdated,
+        }));
+      } catch (error) {
+        console.error('Error fetching NFTs by owner:', error);
+        throw new Error('Failed to fetch NFTs by owner');
       }
     }),
 });
