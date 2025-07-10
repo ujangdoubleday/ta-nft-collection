@@ -5,6 +5,7 @@ import {
   mainNavigationLinks,
   adminNavigationLinks,
   createCollectionNavigationLinks,
+  createAdminCollectionNavigationLinks,
 } from './configs';
 import {
   User,
@@ -22,6 +23,10 @@ export interface UseNavigationReturn {
   links: NavigationLink[];
   isCollectionPage: boolean;
   collectionAddress: string | null;
+}
+
+export interface UseNavigationProps {
+  isOwner?: boolean;
 }
 
 export function useNavigation(): UseNavigationReturn {
@@ -42,6 +47,7 @@ export function useNavigation(): UseNavigationReturn {
     }
   }, [pathname]);
 
+  // We always show all links, isOwner doesn't matter anymore
   const links = collectionAddress
     ? createCollectionNavigationLinks(collectionAddress)
     : mainNavigationLinks;
@@ -53,16 +59,37 @@ export function useNavigation(): UseNavigationReturn {
   };
 }
 
-// Admin navigation hook
+// Updated admin navigation hook
 export function useAdminNavigation(): UseNavigationReturn {
   const pathname = usePathname();
-  // Admin doesn't need collection address handling for now
-  // We can add it later if needed for admin collection detail pages
+  const [collectionAddress, setCollectionAddress] = useState<string | null>(null);
+
+  useEffect(() => {
+    const pathParts = pathname.split('/');
+
+    if (
+      pathParts.length >= 4 &&
+      pathParts[1] === 'admin' &&
+      pathParts[2] === 'collections' &&
+      pathParts[3] !== 'new' &&
+      pathParts[3] !== ''
+    ) {
+      const addressToUse = pathParts[3];
+      setCollectionAddress(addressToUse);
+    } else {
+      setCollectionAddress(null);
+    }
+  }, [pathname]);
+
+  // We always show all links, isOwner doesn't matter anymore
+  const links = collectionAddress
+    ? createAdminCollectionNavigationLinks(collectionAddress)
+    : adminNavigationLinks;
 
   return {
-    links: adminNavigationLinks,
-    isCollectionPage: false,
-    collectionAddress: null,
+    links,
+    isCollectionPage: !!collectionAddress,
+    collectionAddress,
   };
 }
 
@@ -103,3 +130,17 @@ export const safeMainNavigationLinks: NavigationLink[] = [
   ),
   createNavLink('/my/nfts', 'NFTs', Images),
 ];
+
+// Helper function untuk debugging
+export const debugNavigation = (pathname: string, isOwner: boolean) => {
+  const pathParts = pathname.split('/');
+  console.log('Debug Navigation:', {
+    pathname,
+    pathParts,
+    isOwner,
+    isAdmin: pathParts[1] === 'admin',
+    isCollections: pathParts[2] === 'collections',
+    address: pathParts[3],
+    isValidAddress: pathParts[3] !== 'new' && pathParts[3] !== '',
+  });
+};

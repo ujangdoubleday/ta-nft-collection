@@ -7,13 +7,16 @@ import { useEffect } from 'react';
 import { Navbar } from '@/components/features/layout/core/Navbar';
 import { Submenu } from '@/components/features/layout/core/Submenu';
 import { useNavigation } from '@/lib/navigation/useNavigation';
+import { usePathname } from 'next/navigation';
 
 interface UserLayoutProps {
   children: React.ReactNode;
 }
 
 export function UserLayout({ children }: UserLayoutProps) {
-  // Get navigation links from the custom hook
+  const pathname = usePathname();
+
+  // Get navigation links from the custom hook - we no longer need to pass isOwner
   const { links } = useNavigation();
 
   // Add scroll detection

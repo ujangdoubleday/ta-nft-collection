@@ -42,6 +42,10 @@ const defaultIsActive = (pathname: string, href: string): boolean => {
     return pathname === '/my';
   }
 
+  if (href === '/admin') {
+    return pathname === '/admin';
+  }
+
   return pathname === href || pathname.startsWith(`${href}/`);
 };
 
