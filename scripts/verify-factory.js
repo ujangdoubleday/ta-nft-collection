@@ -3,7 +3,6 @@ require("dotenv").config();
 const { ethers } = require("hardhat");
 
 async function main() {
-  // Mengambil alamat dari environment variable
   const factoryAddress = process.env.CONTRACT_ADDRESS;
   
   if (!factoryAddress) {
@@ -15,7 +14,6 @@ async function main() {
   console.log(`Preparing to verify NFTFactory at address: ${factoryAddress}`);
   
   try {
-    // Mendapatkan parameter konstruktor dari .env atau default
     const factoryOwner = process.env.FACTORY_OWNER || (await ethers.getSigners())[0].address;
     const creationFee = process.env.CREATION_FEE || ethers.parseEther("0.001");
     
@@ -23,11 +21,10 @@ async function main() {
     console.log(`- Factory Owner: ${factoryOwner}`);
     console.log(`- Creation Fee: ${creationFee}`);
     
-    // Verifikasi kontrak NFTFactory
     console.log("\nVerifying contract with parameters...");
     await hre.run("verify:verify", {
       address: factoryAddress,
-      contract: "contracts/NFTFactory.sol:NFTFactory",
+      contract: "hardhat/contracts/NFTFactory.sol:NFTFactory",
       constructorArguments: [
         factoryOwner,
         creationFee

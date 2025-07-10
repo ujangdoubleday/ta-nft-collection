@@ -34,7 +34,7 @@ module.exports = {
   },
   etherscan: {
     apiKey: {
-      apiKey: process.env.ETHERSCAN_API_KEY,
+      sepolia: process.env.ETHERSCAN_API_KEY,
       routescan: "routescan",
     },
     customChains: [
@@ -49,9 +49,9 @@ module.exports = {
     ]
   },
   paths: {
-    artifacts: "./artifacts",
-    cache: "./cache",
-    sources: "./contracts",
-    tests: "./test",
+    artifacts: "./hardhat/artifacts",
+    cache: "./hardhat/cache",
+    sources: "./hardhat/contracts",
+    tests: "./hardhat/test",
   },
 };
