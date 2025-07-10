@@ -126,4 +126,20 @@ export const factoryConfigRouter = router({
       };
     }
   }),
+
+  // Get all collections
+  getAllCollections: publicProcedure.query(async () => {
+    try {
+      const collections = await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'getAllCollections',
+      });
+
+      return collections as string[];
+    } catch (error) {
+      console.error('Error getting all collections:', error);
+      return [];
+    }
+  }),
 });

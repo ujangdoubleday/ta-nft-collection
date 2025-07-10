@@ -4,6 +4,7 @@ import {
   AlchemyNFTResponse,
   getNFTOwner,
   fetchNFTByTokenId,
+  fetchNFTsForOwner,
 } from '../utils/alchemy';
 import { useQuery } from '@tanstack/react-query';
 
@@ -76,4 +77,30 @@ export function useAlchemyNFT(contractAddress: string | undefined, tokenId: stri
   });
 
   return { nft, isLoading, error, refetch };
+}
+
+/**
+ * Hook to fetch all NFTs for an owner across multiple collections
+ * @param ownerAddress The owner's wallet address
+ * @param contractAddresses Optional array of contract addresses to filter by
+ * @returns Object containing the NFTs data, loading state, and error state
+ */
+export function useNFTsForOwner(ownerAddress: string | null, contractAddresses: string[] = []) {
+  const { data, isLoading, error, refetch } = useQuery<{ nfts: AlchemyNFT[] }, Error>({
+    queryKey: ['nfts-for-owner', ownerAddress, contractAddresses],
+    queryFn: async () => {
+      if (!ownerAddress) return { nfts: [] };
+      return fetchNFTsForOwner(ownerAddress, contractAddresses);
+    },
+    enabled: !!ownerAddress,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 2,
+  });
+
+  return {
+    nfts: data?.nfts || [],
+    isLoading,
+    error,
+    refetch,
+  };
 }
