@@ -33,7 +33,7 @@ export function NFTCard({ nft, collectionAddress }: NFTCardProps) {
   return (
     <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden hover:shadow-md transition-all">
       {/* NFT Image */}
-      <Link href={`/my/collections/${collectionAddress}/nfts/${nft.tokenId}`}>
+      <Link href={`/user/collections/${collectionAddress}/nfts/${nft.tokenId}`}>
         <div className="relative w-full aspect-square bg-[#0A0A0A]">
           <Image
             src={imageUrl}

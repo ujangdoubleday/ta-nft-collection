@@ -31,7 +31,7 @@ export function CollectionCard({ collection, role = 'user' }: CollectionCardProp
   })();
 
   // Determine the base path based on role
-  const basePath = role === 'admin' ? '/admin/collections' : '/my/collections';
+  const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
 
   return (
     <>

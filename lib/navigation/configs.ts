@@ -17,28 +17,28 @@ import { NavigationLink } from '@/components/features/layout/core/Submenu';
 // Main navigation links
 export const mainNavigationLinks: NavigationLink[] = [
   {
-    href: '/my',
+    href: '/user',
     label: 'Overview',
     icon: React.createElement(Home, { className: 'h-4 w-4' }),
-    isActive: (pathname) => pathname === '/my',
+    isActive: (pathname) => pathname === '/user',
   },
   {
-    href: '/my/collections',
+    href: '/user/collections',
     label: 'Collections',
     icon: React.createElement(GalleryVertical, { className: 'h-4 w-4' }),
     isActive: (pathname) => {
-      if (pathname === '/my/collections/new') return false;
-      return pathname === '/my/collections' || pathname.startsWith('/my/collections/');
+      if (pathname === '/user/collections/new') return false;
+      return pathname === '/user/collections' || pathname.startsWith('/user/collections/');
     },
   },
   {
-    href: '/my/collections/new',
+    href: '/user/collections/new',
     label: 'Create Collections',
     icon: React.createElement(ImagePlus, { className: 'h-4 w-4' }),
-    isActive: (pathname) => pathname === '/my/collections/new',
+    isActive: (pathname) => pathname === '/user/collections/new',
   },
   {
-    href: '/my/nfts',
+    href: '/user/nfts',
     label: 'NFTs',
     icon: React.createElement(Images, { className: 'h-4 w-4' }),
   },
@@ -94,25 +94,25 @@ export const createCollectionNavigationLinks = (collectionAddress: string): Navi
   // Semua link ditampilkan tanpa memperhatikan apakah user adalah owner atau tidak
   return [
     {
-      href: `/my/collections/${collectionAddress}`,
+      href: `/user/collections/${collectionAddress}`,
       label: 'Details',
       icon: React.createElement(LayoutGrid, { className: 'h-4 w-4' }),
-      isActive: (pathname) => pathname === `/my/collections/${collectionAddress}`,
+      isActive: (pathname) => pathname === `/user/collections/${collectionAddress}`,
     },
     {
-      href: `/my/collections/${collectionAddress}/nfts`,
+      href: `/user/collections/${collectionAddress}/nfts`,
       label: 'NFTs',
       icon: React.createElement(Images, { className: 'h-4 w-4' }),
       isActive: (pathname) => pathname.includes('/nfts') && !pathname.includes('/mint'),
     },
     {
-      href: `/my/collections/${collectionAddress}/mint`,
+      href: `/user/collections/${collectionAddress}/mint`,
       label: 'Mint NFT',
       icon: React.createElement(PenTool, { className: 'h-4 w-4' }),
       isActive: (pathname) => pathname.includes('/mint'),
     },
     {
-      href: `/my/collections/${collectionAddress}/settings`,
+      href: `/user/collections/${collectionAddress}/settings`,
       label: 'Settings',
       icon: React.createElement(Settings, { className: 'h-4 w-4' }),
       isActive: (pathname) => pathname.includes('/settings'),

@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: 'MyNFTs.exe: Digital Art Creator',
-  description: 'A retro-styled digital art creation platform',
+  title: 'XYZ: Digital Art Creator',
+  description: 'Create, Mint & Own Digital Masterpieces',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -25,8 +25,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
       <head>
-        <title>MyNFTs.exe: Digital Art Creator</title>
-        <meta name="description" content="A retro-styled digital art creation platform" />
+        <title>XYZ: Digital Art Creator</title>
+        <meta name="description" content="Create, Mint & Own Digital Masterpieces" />
       </head>
       <body className="min-h-screen bg-[#000000] antialiased font-sans">
         <Providers>{children}</Providers>

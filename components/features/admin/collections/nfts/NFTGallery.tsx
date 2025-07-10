@@ -98,7 +98,7 @@ export function NFTGallery({ collectionAddress, nfts: propNfts, onRefresh }: NFT
             Try Again
           </button>
           <Link
-            href={`/my/collections/${collectionAddress}/mint`}
+            href={`/user/collections/${collectionAddress}/mint`}
             className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
           >
             <ImagePlus className="h-4 w-4" />
@@ -119,7 +119,7 @@ export function NFTGallery({ collectionAddress, nfts: propNfts, onRefresh }: NFT
         <h3 className="text-xl font-bold text-white mb-2">No NFTs Yet</h3>
         <p className="text-zinc-400 mb-6">This collection doesn&apos;t have any NFTs yet.</p>
         <Link
-          href={`/my/collections/${collectionAddress}/mint`}
+          href={`/user/collections/${collectionAddress}/mint`}
           className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
         >
           <ImagePlus className="h-4 w-4" />

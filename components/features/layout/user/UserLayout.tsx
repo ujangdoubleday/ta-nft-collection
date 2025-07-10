@@ -47,7 +47,7 @@ export function UserLayout({ children }: UserLayoutProps) {
   const navbarConfig = {
     logo: {
       showDefault: true,
-      href: '/my',
+      href: '/user',
     },
     user: {
       showUsername: true,

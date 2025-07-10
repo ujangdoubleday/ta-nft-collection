@@ -4,11 +4,10 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/next-auth/options';
 import { redirect } from 'next/navigation';
 
-type Params = {
-  address: string;
-};
+type Params = Promise<{ address: string }>;
 
-export default async function Page({ params }: { params: Params }) {
+export default async function Page(props: { params: Params }) {
+  const params = await props.params;
   const address = params.address;
 
   // Get the user session

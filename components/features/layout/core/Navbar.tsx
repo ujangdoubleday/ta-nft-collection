@@ -98,7 +98,7 @@ export interface NavbarConfig {
 const DEFAULT_CONFIG: NavbarConfig = {
   logo: {
     showDefault: true,
-    href: '/my',
+    href: '/user',
   },
   user: {
     showUsername: true,
@@ -181,16 +181,16 @@ export function Navbar({ config, className = '' }: NavbarProps) {
     console.log('Path parts:', pathParts);
 
     // For user collections
-    if (pathname.startsWith('/my')) {
+    if (pathname.startsWith('/user')) {
       if (
         pathParts.length >= 3 &&
-        pathParts[0] === 'my' &&
+        pathParts[0] === 'user' &&
         pathParts[1] === 'collections' &&
         pathParts[2] !== 'new'
       ) {
         const collectionAddress = pathParts[2];
         breadcrumbs.push({
-          href: `/my/collections/${collectionAddress}`,
+          href: `/user/collections/${collectionAddress}`,
           label: collectionAddress,
           isCurrentPage: pathParts.length === 3,
         });
@@ -198,7 +198,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
         // Add mint page breadcrumb
         if (pathParts.length >= 4 && pathParts[3] === 'mint') {
           breadcrumbs.push({
-            href: `/my/collections/${collectionAddress}/mint`,
+            href: `/user/collections/${collectionAddress}/mint`,
             label: 'Mint',
             isCurrentPage: true,
           });
@@ -206,7 +206,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
         // Add settings page breadcrumb
         else if (pathParts.length >= 4 && pathParts[3] === 'settings') {
           breadcrumbs.push({
-            href: `/my/collections/${collectionAddress}/settings`,
+            href: `/user/collections/${collectionAddress}/settings`,
             label: 'Settings',
             isCurrentPage: true,
           });
@@ -215,7 +215,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
         else if (pathParts.length >= 5 && pathParts[3] === 'nfts' && pathParts[4]) {
           const nftId = pathParts[4];
           breadcrumbs.push({
-            href: `/my/collections/${collectionAddress}/nfts/${nftId}`,
+            href: `/user/collections/${collectionAddress}/nfts/${nftId}`,
             label: `NFT #${nftId}`,
             isCurrentPage: true,
           });
@@ -370,7 +370,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
                           className="flex items-center"
                           style={{ color: mergedConfig.style?.textColor }}
                         >
-                          <Link href={mergedConfig.logo?.href || '/my'}>
+                          <Link href={mergedConfig.logo?.href || '/user'}>
                             {mergedConfig.logo?.component || <Logo />}
                           </Link>
                         </BreadcrumbLink>
@@ -390,7 +390,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
                           className="font-medium flex items-center gap-1.5"
                           style={{ color: mergedConfig.style?.textColor }}
                         >
-                          <Link href="/my">
+                          <Link href="/user">
                             <User className="h-4 w-4 mr-1" />
                             {displayUsername}
                           </Link>

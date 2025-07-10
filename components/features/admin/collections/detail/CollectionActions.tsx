@@ -18,7 +18,7 @@ export function CollectionActions({ collection }: CollectionActionsProps) {
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
-          href={`/my/collections/${collection.collectionAddress}/mint`}
+          href={`/user/collections/${collection.collectionAddress}/mint`}
           className="flex items-center gap-3 bg-[#111111] border border-[#1f1f1f] rounded-md p-4 hover:border-indigo-500 transition-colors"
         >
           <div className="bg-[#1f1f1f] p-2 rounded-full">
@@ -31,7 +31,7 @@ export function CollectionActions({ collection }: CollectionActionsProps) {
         </Link>
 
         <Link
-          href={`/my/collections/${collection.collectionAddress}/nfts`}
+          href={`/user/collections/${collection.collectionAddress}/nfts`}
           className="flex items-center gap-3 bg-[#111111] border border-[#1f1f1f] rounded-md p-4 hover:border-indigo-500 transition-colors"
         >
           <div className="bg-[#1f1f1f] p-2 rounded-full">
