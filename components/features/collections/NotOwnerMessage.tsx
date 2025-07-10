@@ -24,8 +24,8 @@ export const NotOwnerMessage: React.FC<NotOwnerMessageProps> = ({
         </div>
         <h2 className="text-2xl font-bold mb-3 text-red-700 dark:text-red-400">Access Denied</h2>
         <p className="mb-6 text-gray-700 dark:text-gray-300">
-          You don't have permission to access this page. Only the collection owner can perform this
-          action.
+          You don&apos;t have permission to access this page. Only the collection owner can perform
+          this action.
         </p>
         <div className="flex justify-center">
           <Button asChild variant="outline">
