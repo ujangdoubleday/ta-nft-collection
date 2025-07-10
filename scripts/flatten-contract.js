@@ -3,25 +3,21 @@ const path = require('path');
 const hre = require("hardhat");
 
 async function main() {
-  // Target contract to flatten
   const contractName = process.argv[2] || "NFTCollection";
   
   console.log(`Flattening ${contractName}.sol...`);
   
   try {
-    // Flatten the contract
     const outputFile = path.join(__dirname, '..', `${contractName}.flattened.sol`);
     const flattenedCode = await hre.run("flatten:get-flattened-sources", {
-      files: [`contracts/${contractName}.sol`],
+      files: [`hardhat/contracts/${contractName}.sol`],
     });
     
-    // Fix SPDX license identifiers (remove all except the first one)
     const fixedCode = flattenedCode.replace(
       /\/\/ SPDX-License-Identifier: .+\n/g,
       (match, index) => (index === 0 ? match : "")
     );
     
-    // Write the flattened contract to file
     fs.writeFileSync(outputFile, fixedCode);
     console.log(`Flattened contract written to ${outputFile}`);
     

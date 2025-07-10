@@ -37,8 +37,8 @@ yarn-error.log*
 .vercel
 
 #hardhat
-/artifacts
-/cache
+/hardhat/artifacts
+/hardhat/cache
 
 # typescript
 *.tsbuildinfo

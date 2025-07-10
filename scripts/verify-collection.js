@@ -3,7 +3,6 @@ require("dotenv").config();
 const { ethers } = require("hardhat");
 
 async function main() {
-  // Mengambil alamat dari environment variable
   const collectionAddress = process.env.CONTRACT_ADDRESS;
   
   if (!collectionAddress) {
@@ -15,10 +14,8 @@ async function main() {
   console.log(`Preparing to verify NFTCollection at address: ${collectionAddress}`);
   
   try {
-    // Mendapatkan instance kontrak NFTCollection
     const nftCollection = await ethers.getContractAt("NFTCollection", collectionAddress);
     
-    // Mendapatkan parameter konstruktor dari kontrak
     console.log("Retrieving contract parameters...");
     const name = await nftCollection.name();
     const symbol = await nftCollection.symbol();
@@ -33,11 +30,10 @@ async function main() {
     console.log(`- Contract URI: ${contractURI}`);
     console.log(`- Max Supply: ${maxSupply}`);
     
-    // Verifikasi kontrak dengan parameter yang ditemukan
     console.log("\nVerifying contract with retrieved parameters...");
     await hre.run("verify:verify", {
       address: collectionAddress,
-      contract: "contracts/NFTCollection.sol:NFTCollection",
+      contract: "hardhat/contracts/NFTCollection.sol:NFTCollection",
       constructorArguments: [
         name,
         symbol,
@@ -58,7 +54,7 @@ async function main() {
       try {
         await hre.run("verify:verify", {
           address: collectionAddress,
-          contract: "contracts/NFTCollection.sol:NFTCollection",
+          contract: "hardhat/contracts/NFTCollection.sol:NFTCollection",
         });
         console.log("NFTCollection contract successfully verified without arguments!");
       } catch (fallbackError) {

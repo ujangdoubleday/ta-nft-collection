@@ -16,8 +16,8 @@
     "verify:collection": "npx hardhat run scripts/verify-collection.js --network sepolia",
     "verify:contract": "npx hardhat run scripts/verify-child-contract.js --network sepolia",
     "verify:factory": "npx hardhat run scripts/verify-factory.js --network sepolia",
-    "flatten": "npx hardhat run scripts/flatten-contract.js",
-    "extract-abis": "npx hardhat compile && node scripts/extract-abis.js"
+    "hardhat:flatten": "npx hardhat run scripts/flatten-contract.js",
+    "hardhat:extract-abis": "npx hardhat compile && node scripts/extract-abis.js"
   },
   "dependencies": {
     "@next/bundle-analyzer": "^15.4.0-canary.51",
