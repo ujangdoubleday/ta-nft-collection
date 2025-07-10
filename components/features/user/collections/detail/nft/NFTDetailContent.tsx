@@ -220,7 +220,7 @@ export function NFTDetailContent({ address, id }: NFTDetailContentProps) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
         <Link
-          href={`/my/collections/${address}/nfts`}
+          href={`/user/collections/${address}/nfts`}
           className="text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-sm mb-4"
         >
           <ArrowLeft className="h-4 w-4" />

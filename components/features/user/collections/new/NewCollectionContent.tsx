@@ -191,13 +191,13 @@ export function NewCollectionContent() {
           </p>
           <div className="flex justify-center gap-4">
             <Link
-              href={`/my/collections/${createdAddress}`}
+              href={`/user/collections/${createdAddress}`}
               className="bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
             >
               View Collection
             </Link>
             <Link
-              href={`/my/collections/${createdAddress}/mint`}
+              href={`/user/collections/${createdAddress}/mint`}
               className="bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] text-white py-2 px-4 rounded-md transition-colors text-sm font-medium"
             >
               Mint First NFT

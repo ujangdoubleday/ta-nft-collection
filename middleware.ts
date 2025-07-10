@@ -86,7 +86,7 @@ export async function middleware(request: NextRequest) {
     // }
 
     // Handle user routes that require authentication
-    if (request.nextUrl.pathname.startsWith('/my')) {
+    if (request.nextUrl.pathname.startsWith('/user')) {
       if (!isAuthenticated) {
         // Redirect to unauthorized page with callback parameter
         const redirectUrl = new URL('/login', request.url);
@@ -109,5 +109,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/admin', '/my', '/my/:path*', '/api/auth/login'],
+  matcher: ['/admin/:path*', '/admin', '/user', '/user/:path*', '/api/auth/login'],
 };

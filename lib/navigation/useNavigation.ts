@@ -117,18 +117,18 @@ export const createNavLink = (
 
 // Example usage with helper function
 export const safeMainNavigationLinks: NavigationLink[] = [
-  createNavLink('/my', 'Overview', Home, (pathname) => pathname === '/my'),
-  createNavLink('/my/collections', 'Collections', GalleryVertical, (pathname) => {
-    if (pathname === '/my/collections/new') return false;
-    return pathname === '/my/collections' || pathname.startsWith('/my/collections/');
+  createNavLink('/user', 'Overview', Home, (pathname) => pathname === '/user'),
+  createNavLink('/user/collections', 'Collections', GalleryVertical, (pathname) => {
+    if (pathname === '/user/collections/new') return false;
+    return pathname === '/user/collections' || pathname.startsWith('/user/collections/');
   }),
   createNavLink(
-    '/my/collections/new',
+    '/user/collections/new',
     'Create Collections',
     ImagePlus,
-    (pathname) => pathname === '/my/collections/new',
+    (pathname) => pathname === '/user/collections/new',
   ),
-  createNavLink('/my/nfts', 'NFTs', Images),
+  createNavLink('/user/nfts', 'NFTs', Images),
 ];
 
 // Helper function untuk debugging

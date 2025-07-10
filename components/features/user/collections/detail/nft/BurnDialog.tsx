@@ -35,7 +35,7 @@ export function BurnDialog({ isOpen, onClose, nft }: BurnDialogProps) {
       // Extract collection address from URL and redirect
       const pathParts = window.location.pathname.split('/');
       const collectionAddress = pathParts[pathParts.indexOf('collections') + 1];
-      window.location.href = `/my/collections/${collectionAddress}/nfts`;
+      window.location.href = `/user/collections/${collectionAddress}/nfts`;
     }, 2000);
   }
 

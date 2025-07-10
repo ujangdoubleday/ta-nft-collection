@@ -14,7 +14,7 @@ export const NotOwnerMessage: React.FC<NotOwnerMessageProps> = ({
 }) => {
   const backUrl = isAdmin
     ? `/admin/collections/${collectionAddress}`
-    : `/my/collections/${collectionAddress}`;
+    : `/user/collections/${collectionAddress}`;
 
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4">

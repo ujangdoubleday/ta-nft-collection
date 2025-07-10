@@ -18,7 +18,7 @@ export function CollectionsHeader({ role = 'user' }: CollectionsHeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Determine the base path based on role
-  const basePath = role === 'admin' ? '/admin/collections' : '/my/collections';
+  const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
 
   // Set the title based on role
   const title = role === 'admin' ? 'All Collections' : 'My Collections';

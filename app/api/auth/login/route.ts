@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     const walletAddress = session.user.address;
     const role = await getUserRole(walletAddress);
-    const redirectPath = role === 'admin' ? '/admin' : '/my';
+    const redirectPath = role === 'admin' ? '/admin' : '/user';
 
     return NextResponse.redirect(new URL(redirectPath, request.nextUrl.origin));
   } catch (error) {

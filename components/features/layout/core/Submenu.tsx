@@ -38,8 +38,8 @@ export interface SubmenuProps {
 
 // Default active link checker
 const defaultIsActive = (pathname: string, href: string): boolean => {
-  if (href === '/my') {
-    return pathname === '/my';
+  if (href === '/user') {
+    return pathname === '/user';
   }
 
   if (href === '/admin') {

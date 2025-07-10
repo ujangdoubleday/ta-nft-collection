@@ -16,7 +16,7 @@ export function NFTMintHeader({
   return (
     <div className="mb-6">
       <Link
-        href={`/my/collections/${contractAddress}`}
+        href={`/user/collections/${contractAddress}`}
         className="text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-sm mb-4"
       >
         <ArrowLeft className="h-4 w-4" />
