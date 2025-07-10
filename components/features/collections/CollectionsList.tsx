@@ -1,11 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
 import { CollectionCard } from './CollectionCard';
 import { ImagePlus } from 'lucide-react';
 import Link from 'next/link';
 import { trpc } from '@/lib/api/trpc/client';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+import { useSearchParams, usePathname, useRouter } from 'next/navigation';
 
 interface CollectionsListProps {
   role?: 'admin' | 'user';
@@ -14,6 +23,13 @@ interface CollectionsListProps {
 export function CollectionsList({ role = 'user' }: CollectionsListProps) {
   const { data: address } = useAddress();
   const [isLoading, setIsLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // Parse page number from URL or default to 1
+  const page = Number(searchParams.get('page') || '1');
+  const ITEMS_PER_PAGE = 9;
 
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
@@ -52,10 +68,31 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
     }
   }, [address]);
 
+  // Calculate pagination info
+  const totalCollections = collections?.length || 0;
+  const totalPages = Math.ceil(totalCollections / ITEMS_PER_PAGE);
+
+  // Get paginated collections
+  const paginatedCollections = useMemo(() => {
+    if (!collections) return [];
+
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+
+    return collections.slice(startIndex, endIndex);
+  }, [collections, page]);
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', newPage.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   if (isLoading || isLoadingCollections) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(3)].map((_, i) => (
+        {[...Array(6)].map((_, i) => (
           <div
             key={i}
             className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden shadow-sm p-4"
@@ -130,23 +167,70 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {collections.map((collection) => (
-        <CollectionCard
-          key={collection.collectionAddress}
-          role={role}
-          collection={{
-            id: collection.collectionAddress,
-            address: collection.collectionAddress,
-            name: collection.name || 'Unnamed Collection',
-            description: collection.metadata?.description || 'No description available',
-            imageUrl: collection.imageUrl || '/assets/images/placeholders/image-placeholder.svg',
-            itemCount: Number(collection.totalSupply) || 0,
-            createdAt: new Date(Number(collection.createdAt) * 1000).toISOString(),
-            symbol: collection.symbol || 'NFT',
-          }}
-        />
-      ))}
+    <div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {paginatedCollections.map((collection) => (
+          <CollectionCard
+            key={collection.collectionAddress}
+            role={role}
+            collection={{
+              id: collection.collectionAddress,
+              address: collection.collectionAddress,
+              name: collection.name || 'Unnamed Collection',
+              description: collection.metadata?.description || 'No description available',
+              imageUrl: collection.imageUrl || '/assets/images/placeholders/image-placeholder.svg',
+              itemCount: Number(collection.totalSupply) || 0,
+              createdAt: new Date(Number(collection.createdAt) * 1000).toISOString(),
+              symbol: collection.symbol || 'NFT',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Pagination component */}
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page > 1) handlePageChange(page - 1);
+                }}
+                className={page <= 1 ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+
+            {/* Generate page links */}
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+              <PaginationItem key={pageNum}>
+                <PaginationLink
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(pageNum);
+                  }}
+                  isActive={pageNum === page}
+                >
+                  {pageNum}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page < totalPages) handlePageChange(page + 1);
+                }}
+                className={page >= totalPages ? 'pointer-events-none opacity-50' : ''}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }
