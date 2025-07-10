@@ -176,20 +176,99 @@ export function Navbar({ config, className = '' }: NavbarProps) {
     const breadcrumbs: BreadcrumbItem[] = [];
     const pathParts = pathname.split('/').filter((path) => path);
 
-    if (pathParts.length >= 3 && pathParts[1] === 'collections' && pathParts[2] !== 'new') {
-      const collectionAddress = pathParts[2];
+    // For debugging
+    console.log('Current pathname:', pathname);
+    console.log('Path parts:', pathParts);
+
+    // For user collections
+    if (pathname.startsWith('/my')) {
+      if (
+        pathParts.length >= 3 &&
+        pathParts[0] === 'my' &&
+        pathParts[1] === 'collections' &&
+        pathParts[2] !== 'new'
+      ) {
+        const collectionAddress = pathParts[2];
+        breadcrumbs.push({
+          href: `/my/collections/${collectionAddress}`,
+          label: collectionAddress,
+          isCurrentPage: pathParts.length === 3,
+        });
+
+        // Add mint page breadcrumb
+        if (pathParts.length >= 4 && pathParts[3] === 'mint') {
+          breadcrumbs.push({
+            href: `/my/collections/${collectionAddress}/mint`,
+            label: 'Mint',
+            isCurrentPage: true,
+          });
+        }
+        // Add settings page breadcrumb
+        else if (pathParts.length >= 4 && pathParts[3] === 'settings') {
+          breadcrumbs.push({
+            href: `/my/collections/${collectionAddress}/settings`,
+            label: 'Settings',
+            isCurrentPage: true,
+          });
+        }
+        // Add NFT detail page breadcrumb
+        else if (pathParts.length >= 5 && pathParts[3] === 'nfts' && pathParts[4]) {
+          const nftId = pathParts[4];
+          breadcrumbs.push({
+            href: `/my/collections/${collectionAddress}/nfts/${nftId}`,
+            label: `NFT #${nftId}`,
+            isCurrentPage: true,
+          });
+        }
+      }
+    }
+
+    // For admin collections
+    if (pathname.startsWith('/admin')) {
+      // Add Admin breadcrumb first
       breadcrumbs.push({
-        href: `/my/collections/${collectionAddress}`,
-        label: collectionAddress,
+        href: '/admin',
+        label: 'Admin',
+        isCurrentPage: pathParts.length === 1,
       });
 
-      if (pathParts.length >= 5 && pathParts[3] === 'nfts' && pathParts[4] !== 'mint') {
-        const nftId = pathParts[4];
-        breadcrumbs.push({
-          href: `/my/collections/${collectionAddress}/nfts/${nftId}`,
-          label: `NFT #${nftId}`,
-          isCurrentPage: true,
-        });
+      // Directly check for admin collection pattern
+      if (pathParts.length >= 3 && pathParts[0] === 'admin' && pathParts[1] === 'collections') {
+        // Skip if it's the "new" collection page
+        if (pathParts[2] !== 'new') {
+          const collectionAddress = pathParts[2];
+          breadcrumbs.push({
+            href: `/admin/collections/${collectionAddress}`,
+            label: collectionAddress,
+            isCurrentPage: pathParts.length === 3,
+          });
+
+          // Add mint page breadcrumb
+          if (pathParts.length >= 4 && pathParts[3] === 'mint') {
+            breadcrumbs.push({
+              href: `/admin/collections/${collectionAddress}/mint`,
+              label: 'Mint',
+              isCurrentPage: true,
+            });
+          }
+          // Add settings page breadcrumb
+          else if (pathParts.length >= 4 && pathParts[3] === 'settings') {
+            breadcrumbs.push({
+              href: `/admin/collections/${collectionAddress}/settings`,
+              label: 'Settings',
+              isCurrentPage: true,
+            });
+          }
+          // Add NFT detail page breadcrumb
+          else if (pathParts.length >= 5 && pathParts[3] === 'nfts' && pathParts[4]) {
+            const nftId = pathParts[4];
+            breadcrumbs.push({
+              href: `/admin/collections/${collectionAddress}/nfts/${nftId}`,
+              label: `NFT #${nftId}`,
+              isCurrentPage: true,
+            });
+          }
+        }
       }
     }
 

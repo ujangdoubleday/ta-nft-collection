@@ -90,29 +90,71 @@ export const adminNavigationLinks: NavigationLink[] = [
 ];
 
 // Collection specific navigation links generator
-export const createCollectionNavigationLinks = (collectionAddress: string): NavigationLink[] => [
-  {
-    href: `/my/collections/${collectionAddress}`,
-    label: 'Details',
-    icon: React.createElement(LayoutGrid, { className: 'h-4 w-4' }),
-    isActive: (pathname) => pathname === `/my/collections/${collectionAddress}`,
-  },
-  {
-    href: `/my/collections/${collectionAddress}/mint`,
-    label: 'Mint NFT',
-    icon: React.createElement(PenTool, { className: 'h-4 w-4' }),
-    isActive: (pathname) => pathname.includes('/mint'),
-  },
-  {
-    href: `/my/collections/${collectionAddress}/nfts`,
-    label: 'NFTs',
-    icon: React.createElement(Images, { className: 'h-4 w-4' }),
-    isActive: (pathname) => pathname.includes('/nfts') && !pathname.includes('/mint'),
-  },
-  {
-    href: `/my/collections/${collectionAddress}/settings`,
-    label: 'Settings',
-    icon: React.createElement(Settings, { className: 'h-4 w-4' }),
-    isActive: (pathname) => pathname.includes('/settings'),
-  },
-];
+export const createCollectionNavigationLinks = (collectionAddress: string): NavigationLink[] => {
+  // Semua link ditampilkan tanpa memperhatikan apakah user adalah owner atau tidak
+  return [
+    {
+      href: `/my/collections/${collectionAddress}`,
+      label: 'Details',
+      icon: React.createElement(LayoutGrid, { className: 'h-4 w-4' }),
+      isActive: (pathname) => pathname === `/my/collections/${collectionAddress}`,
+    },
+    {
+      href: `/my/collections/${collectionAddress}/nfts`,
+      label: 'NFTs',
+      icon: React.createElement(Images, { className: 'h-4 w-4' }),
+      isActive: (pathname) => pathname.includes('/nfts') && !pathname.includes('/mint'),
+    },
+    {
+      href: `/my/collections/${collectionAddress}/mint`,
+      label: 'Mint NFT',
+      icon: React.createElement(PenTool, { className: 'h-4 w-4' }),
+      isActive: (pathname) => pathname.includes('/mint'),
+    },
+    {
+      href: `/my/collections/${collectionAddress}/settings`,
+      label: 'Settings',
+      icon: React.createElement(Settings, { className: 'h-4 w-4' }),
+      isActive: (pathname) => pathname.includes('/settings'),
+    },
+  ];
+};
+
+// Admin collection specific navigation links generator
+export const createAdminCollectionNavigationLinks = (
+  collectionAddress: string,
+): NavigationLink[] => {
+  // Semua link ditampilkan tanpa memperhatikan apakah admin adalah owner atau tidak
+  return [
+    {
+      href: `/admin/collections/${collectionAddress}`,
+      label: 'Details',
+      icon: React.createElement(LayoutGrid, { className: 'h-4 w-4' }),
+      isActive: (pathname) => pathname === `/admin/collections/${collectionAddress}`,
+    },
+    {
+      href: `/admin/collections/${collectionAddress}/nfts`,
+      label: 'NFTs',
+      icon: React.createElement(Images, { className: 'h-4 w-4' }),
+      isActive: (pathname) => pathname.includes('/nfts') && !pathname.includes('/mint'),
+    },
+    {
+      href: `/admin/collections/${collectionAddress}/mint`,
+      label: 'Mint NFT',
+      icon: React.createElement(PenTool, { className: 'h-4 w-4' }),
+      isActive: (pathname) => pathname.includes('/mint'),
+    },
+    {
+      href: `/admin/collections/${collectionAddress}/settings`,
+      label: 'Settings',
+      icon: React.createElement(Settings, { className: 'h-4 w-4' }),
+      isActive: (pathname) => pathname.includes('/settings'),
+    },
+  ];
+};
+
+// Test function untuk debugging - minimal logging
+export const testAdminCollectionLinks = (address: string) => {
+  const links = createAdminCollectionNavigationLinks(address);
+  return links;
+};

@@ -1,21 +1,21 @@
 'use client';
 
+import React from 'react';
 import { Container } from '@/components/features/layout/core';
 import { Footer } from '@/components/features/layout/core';
 import { AuthGuard } from '@/components/features/layout/auth';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navbar } from '@/components/features/layout/core';
 import { Submenu } from '@/components/features/layout/core';
 import { useAdminNavigation } from '@/lib/navigation/useNavigation';
-import { User } from 'lucide-react';
-import React from 'react';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  // Get admin navigation links
+  // Call useAdminNavigation directly at the top level
+  // We no longer need to pass isOwner since we now show all links
   const { links } = useAdminNavigation();
 
   // Add scroll detection
@@ -56,13 +56,6 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     },
     breadcrumbs: {
       enabled: true,
-      customBreadcrumbs: [
-        {
-          href: '/admin',
-          label: 'Admin',
-          icon: React.createElement(User, { className: 'h-4 w-4 mr-1' }),
-        },
-      ],
     },
   };
 

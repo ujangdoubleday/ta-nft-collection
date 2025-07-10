@@ -18,6 +18,7 @@ export default async function AdminProtectedLayout({ children }: { children: Rea
     return forbidden();
   }
 
+  // Add AdminLayout back here at the top level so it only renders once
   return (
     <div className="min-h-screen flex flex-col bg-[#000000]">
       <AdminLayout>{children}</AdminLayout>

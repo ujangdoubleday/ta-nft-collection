@@ -1,4 +1,3 @@
-import { NFTMintContent } from '@/components/features/collections/mint';
 import { NotOwnerMessage } from '@/components/features/collections';
 import { serverClient } from '@/lib/api/trpc/server-client';
 import { getServerSession } from 'next-auth';
@@ -20,14 +19,6 @@ export default async function Page({ params }: { params: Params }) {
 
   const userAddress = session.user.address;
 
-  // Validate the collection
-  try {
-    await serverClient.collection.isCollectionValid({ collectionAddress: address });
-  } catch (error) {
-    console.error('Invalid collection:', error);
-    // We'll let the client component handle the error display
-  }
-
   // Check if the user is the owner of the collection
   const owner = await serverClient.collection.getCollectionOwner({ collectionAddress: address });
   const isOwner = !!owner && userAddress.toLowerCase() === owner.toLowerCase();
@@ -37,6 +28,11 @@ export default async function Page({ params }: { params: Params }) {
     return <NotOwnerMessage collectionAddress={address} isAdmin={true} />;
   }
 
-  // Only show the mint form if user is the owner
-  return <NFTMintContent contractAddress={address} role="admin" isOwner={isOwner} />;
+  // TODO: Replace with actual settings component when available
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Collection Settings</h1>
+      <p>Settings for collection: {address}</p>
+    </div>
+  );
 }
