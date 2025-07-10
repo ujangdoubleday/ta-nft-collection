@@ -21,6 +21,10 @@ module.exports = {
       gasPrice: "auto",
       timeout: 1000000
     },
+    routescan: {
+      url: 'https://ethereum-sepolia-rpc.publicnode.com',
+      accounts: [process.env.PRIVATE_KEY]
+    },
     localhost: {
       url: "http://127.0.0.1:8545",
     },
@@ -29,7 +33,20 @@ module.exports = {
     enabled: true,
   },
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY
+    apiKey: {
+      apiKey: process.env.ETHERSCAN_API_KEY,
+      routescan: "routescan",
+    },
+    customChains: [
+      {
+        network: "routescan",
+        chainId: 11155111,
+        urls: {
+          apiURL: "https://api.routescan.io/v2/network/testnet/evm/11155111/etherscan",
+          browserURL: "https://testnet.routescan.io/"
+        }
+      }
+    ]
   },
   paths: {
     artifacts: "./artifacts",

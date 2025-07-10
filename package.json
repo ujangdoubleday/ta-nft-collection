@@ -11,6 +11,7 @@
     "find:unused": "next-unused",
     "prepare": "husky",
     "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "deploy:routescan": "npx hardhat run scripts/deploy.js --network routescan",
     "deploy:local": "npx hardhat run scripts/deploy.js --network localhost",
     "verify:collection": "npx hardhat run scripts/verify-collection.js --network sepolia",
     "verify:contract": "npx hardhat run scripts/verify-child-contract.js --network sepolia",
