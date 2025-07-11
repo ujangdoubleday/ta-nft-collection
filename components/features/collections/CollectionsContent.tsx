@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
 import { useWallet } from '@/lib/hooks/wallet';
 import { CollectionsHeader } from './CollectionsHeader';
+import { FilterPanel, CollectionFilters } from './FilterPanel';
 
 interface CollectionsContentProps {
   role?: 'admin' | 'user';
@@ -14,6 +15,9 @@ export function CollectionsContent({ role = 'user' }: CollectionsContentProps) {
   const { data: address } = useAddress();
   const { isConnected, isAuthenticated, authenticate, connect } = useWallet();
   const [isLoading, setIsLoading] = useState(true);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  // No need to maintain state for filters as we use URL params now
+  // Just keep filter panel visibility state
 
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
@@ -41,6 +45,16 @@ export function CollectionsContent({ role = 'user' }: CollectionsContentProps) {
     } catch (error) {
       console.error('Failed to authenticate:', error);
     }
+  };
+
+  const handleFilterToggle = (isOpen: boolean) => {
+    setIsFilterPanelOpen(isOpen);
+  };
+
+  // We keep this for backward compatibility, but it's not doing much
+  const handleFilterChange = (newFilters: CollectionFilters) => {
+    console.log('User filter changed via callback:', newFilters);
+    // No need to update state as we use URL params
   };
 
   if (isLoading) {
@@ -128,9 +142,21 @@ export function CollectionsContent({ role = 'user' }: CollectionsContentProps) {
     );
   }
 
+  // Default empty filters object for backward compatibility
+  const emptyFilters: CollectionFilters = {
+    search: '',
+    ownerFilter: 'all',
+  };
+
   return (
     <div className="animate-fade-in">
-      <CollectionsHeader role={role} />
+      <CollectionsHeader role={role} onFilterToggle={handleFilterToggle} />
+      <FilterPanel
+        isOpen={isFilterPanelOpen}
+        role={role}
+        onFilterChange={handleFilterChange}
+        initialFilters={emptyFilters}
+      />
       <CollectionsList role={role} />
     </div>
   );

@@ -9,18 +9,20 @@ import { useRouter } from 'next/navigation';
 
 interface CollectionsHeaderProps {
   role?: 'admin' | 'user';
+  onFilterToggle?: (isOpen: boolean) => void;
 }
 
-export function CollectionsHeader({ role = 'user' }: CollectionsHeaderProps) {
+export function CollectionsHeader({ role = 'user', onFilterToggle }: CollectionsHeaderProps) {
   const router = useRouter();
   const utils = trpc.useContext();
   const { data: address } = useAddress();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
 
-  // Set the title based on role
+  // Set the title based on role - admin sees all collections, user sees their own
   const title = role === 'admin' ? 'All Collections' : 'My Collections';
 
   const handleRefresh = async () => {
@@ -52,6 +54,14 @@ export function CollectionsHeader({ role = 'user' }: CollectionsHeaderProps) {
     router.push(`${basePath}/new`);
   };
 
+  const handleFilterClick = () => {
+    const newState = !isFilterOpen;
+    setIsFilterOpen(newState);
+    if (onFilterToggle) {
+      onFilterToggle(newState);
+    }
+  };
+
   return (
     <div className="mb-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -60,25 +70,26 @@ export function CollectionsHeader({ role = 'user' }: CollectionsHeaderProps) {
         </div>
         <div className="flex items-center gap-2">
           {role === 'admin' && (
-            <>
-              <button
-                onClick={handleCreateClick}
-                className="bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2"
-                aria-label="Create new collection"
-              >
-                <Plus className="h-4 w-4" />
-                Create Collection
-              </button>
-
-              <button
-                className="bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2"
-                aria-label="Filter collections"
-              >
-                <FilterIcon className="h-4 w-4" />
-                Filter
-              </button>
-            </>
+            <button
+              onClick={handleCreateClick}
+              className="bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2"
+              aria-label="Create new collection"
+            >
+              <Plus className="h-4 w-4" />
+              Create Collection
+            </button>
           )}
+
+          <button
+            onClick={handleFilterClick}
+            className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
+              isFilterOpen ? 'bg-zinc-200' : ''
+            }`}
+            aria-label="Filter collections"
+          >
+            <FilterIcon className="h-4 w-4" />
+            Filter
+          </button>
 
           <button
             onClick={handleRefresh}
