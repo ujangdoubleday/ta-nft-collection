@@ -20,6 +20,7 @@
     "hardhat:extract-abis": "npx hardhat compile && node scripts/extract-abis.js"
   },
   "dependencies": {
+    "@heroui/tabs": "^2.2.19",
     "@next/bundle-analyzer": "^15.4.0-canary.51",
     "@openzeppelin/contracts": "5.0.1",
     "@pinata/sdk": "^2.1.0",

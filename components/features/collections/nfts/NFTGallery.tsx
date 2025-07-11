@@ -11,19 +11,31 @@ import { CollectionItem } from '@/lib/blockchain/utils/nft';
 // Define interface for the NFT from API
 interface ApiNFT {
   tokenId: string;
-  name: string;
-  description: string;
-  metadataUrl: string;
-  imageUrl: string;
+  name?: string;
+  description?: string;
+  metadataUrl?: string;
+  imageUrl?: string;
   contractAddress: string;
-  ownerAddress: string;
-  createdAt: Date;
-  updatedAt: Date;
+  ownerAddress?: string;
+  metadata?: any;
+  image?: {
+    cachedUrl?: string | null;
+    thumbnailUrl?: string | null;
+    pngUrl?: string | null;
+    originalUrl?: string | null;
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Type guard function to check if NFT is from API or CollectionItem
 function isApiNFT(nft: ApiNFT | CollectionItem): nft is ApiNFT {
-  return 'imageUrl' in nft && 'ownerAddress' in nft;
+  // Check if it has metadata or image object properties that are specific to API NFTs
+  return (
+    ('metadata' in nft ||
+      (typeof nft.image === 'object' && nft.image !== null && 'originalUrl' in nft.image)) &&
+    'contractAddress' in nft
+  );
 }
 
 interface NFTGalleryProps {
@@ -147,12 +159,39 @@ export function NFTGallery({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {nfts.map((nft) => {
           // Get appropriate properties based on NFT type
-          const tokenId = isApiNFT(nft) ? nft.tokenId : nft.tokenId || nft.id || '';
-          const name = isApiNFT(nft) ? nft.name : nft.name || '';
-          const description = isApiNFT(nft) ? nft.description : '';
-          const imageUrl = isApiNFT(nft) ? nft.imageUrl : nft.image || '';
-          const owner = isApiNFT(nft) ? nft.ownerAddress : '';
-          const createdAt = isApiNFT(nft) ? nft.createdAt : new Date();
+          const tokenId = nft.tokenId || ('id' in nft ? nft.id : '') || '';
+
+          // Handle name based on NFT type
+          let name = '';
+          if (isApiNFT(nft) && nft.name) {
+            name = nft.name;
+          } else if ('name' in nft) {
+            name = nft.name || '';
+          }
+
+          // Handle description
+          let description = '';
+          if (isApiNFT(nft) && nft.description) {
+            description = nft.description;
+          }
+
+          // Handle image URL
+          let imageUrl = '';
+          if (isApiNFT(nft)) {
+            if (nft.imageUrl) {
+              imageUrl = nft.imageUrl;
+            } else if (nft.image && typeof nft.image === 'object' && nft.image.originalUrl) {
+              imageUrl = nft.image.originalUrl;
+            }
+          } else if (typeof nft.image === 'string') {
+            imageUrl = nft.image;
+          }
+
+          // Handle owner
+          const owner = isApiNFT(nft) && nft.ownerAddress ? nft.ownerAddress : '';
+
+          // Handle creation date
+          const createdAt = isApiNFT(nft) && nft.createdAt ? nft.createdAt : new Date();
 
           return (
             <NFTCard

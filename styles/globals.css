@@ -131,6 +131,13 @@
   50% { opacity: 0.5; }
 }
 
+@keyframes logoTransition {
+  0% { transform: translateY(0); opacity: 1; }
+  40% { transform: translateY(20px); opacity: 0; }
+  60% { transform: translateY(-20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 .animate-scale-in {
   animation: scaleIn 0.5s ease-out;
 }
@@ -302,12 +309,17 @@ code {
     transition: transform 0.3s ease, opacity 0.3s ease;
   }
 
+  .navbar .logo-container {
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 60;
+  }
+
   .submenu {
     transition: all 0.3s ease;
     position: sticky;
     top: 0;
     z-index: 50;
-    
   }
 
   .submenu-logo, .submenu-user {
@@ -327,7 +339,7 @@ code {
 
   html.scrolled .submenu {
     position: fixed;
-    height: 3.4rem;
+    height: 3.1rem;
     padding-top: 0.8rem;
     padding-bottom: 0.3rem;
     top: 0;
@@ -350,6 +362,7 @@ code {
   html.scrolled .submenu-logo, 
   html.scrolled .submenu-user {
     opacity: 1;
+    animation: fadeIn 0.3s ease-out;
   }
 
   html.scrolled .submenu-nav {
@@ -360,6 +373,35 @@ code {
   /* Add padding to the content when submenu is fixed */
   html.scrolled .content-wrapper {
     padding-top: 3.5rem;
+  }
+
+  /* Logo Animation */
+  .logo-wrapper {
+    position: relative;
+  }
+
+  .navbar .logo-wrapper .logo-main {
+    transition: all 0.3s ease;
+  }
+
+  .submenu .logo-wrapper .logo-clone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    z-index: 60;
+  }
+
+  html.scrolled .navbar .logo-wrapper .logo-main {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  html.scrolled .submenu .logo-wrapper .logo-clone {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -382,4 +424,13 @@ code {
 
 .navigation-container .submenu {
   margin-top: -8px;
+}
+
+/* Logo animation class */
+.logo-animating .logo-main {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.logo-animating .logo-clone {
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }

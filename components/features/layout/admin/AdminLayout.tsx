@@ -1,32 +1,49 @@
 'use client';
 
-import React from 'react';
-import { Container } from '@/components/features/layout/core';
-import { Footer } from '@/components/features/layout/core';
+import { Container } from '@/components/features/layout/core/Container';
+import { Footer } from '@/components/features/layout/core/Footer';
 import { AuthGuard } from '@/components/features/layout/auth';
-import { useEffect, useState } from 'react';
-import { Navbar } from '@/components/features/layout/core';
-import { Submenu } from '@/components/features/layout/core';
+import { useEffect } from 'react';
+import { Navbar } from '@/components/features/layout/core/Navbar';
+import { Submenu } from '@/components/features/layout/core/Submenu';
 import { useAdminNavigation } from '@/lib/navigation/useNavigation';
+import { usePathname } from 'next/navigation';
+import { useAdmin } from '@/lib/hooks/use-admin';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
 export function AdminLayout({ children }: AdminLayoutProps) {
-  // Call useAdminNavigation directly at the top level
-  // We no longer need to pass isOwner since we now show all links
+  const pathname = usePathname();
+  const { isAdmin } = useAdmin();
   const { links } = useAdminNavigation();
 
-  // Add scroll detection
+  // Add scroll detection with improved logo animation
   useEffect(() => {
     const handleScroll = () => {
       // Add or remove .scrolled class based on scroll position
       if (window.scrollY > 64) {
         // Height of the navbar
         document.documentElement.classList.add('scrolled');
+
+        // Ensure logo animations are smooth
+        const logoElements = document.querySelectorAll('.logo-wrapper');
+        logoElements.forEach((logo) => {
+          logo.classList.add('logo-animating');
+        });
       } else {
         document.documentElement.classList.remove('scrolled');
+
+        // Remove animation class after transition completes
+        setTimeout(() => {
+          const logoElements = document.querySelectorAll('.logo-wrapper');
+          logoElements.forEach((logo) => {
+            if (!document.documentElement.classList.contains('scrolled')) {
+              logo.classList.remove('logo-animating');
+            }
+          });
+        }, 300);
       }
     };
 
@@ -46,7 +63,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   const navbarConfig = {
     logo: {
       showDefault: true,
-      href: '/admin',
+      href: '/',
     },
     user: {
       showUsername: false,
