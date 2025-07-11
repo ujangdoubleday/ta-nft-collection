@@ -42,7 +42,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-[201] w-full max-w-md translate-x-[-50%] translate-y-[-50%] bg-zinc-900 p-6 text-white border border-zinc-800 shadow-xl rounded-xl',
+        'fixed left-[50%] top-[50%] z-[201] w-full max-w-md translate-x-[-50%] translate-y-[-50%] bg-zinc-900 p-6 text-white border border-zinc-700 shadow-xl rounded-xl',
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
         'data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
         className,
@@ -56,8 +56,8 @@ const DialogContent = React.forwardRef<
           </DialogPrimitive.Title>
         )}
         {!title && <div></div>}
-        <DialogPrimitive.Close className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors">
-          <X className="h-4 w-4 text-zinc-400" />
+        <DialogPrimitive.Close className="w-8 h-8 flex items-center justify-center rounded-full bg-transparent hover:bg-zinc-900 transition-colors">
+          <X className="h-5 w-5 text-zinc-100" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </div>
