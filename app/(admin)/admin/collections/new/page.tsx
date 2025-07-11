@@ -1,5 +1,5 @@
-import { NewCollectionContentWithBlockchain } from '@/components/features/user/collections/new';
+import { NewCollectionContent } from '@/components/features/collections/new';
 
 export default async function NewCollectionPage() {
-  return <NewCollectionContentWithBlockchain />;
+  return <NewCollectionContent routePrefix="admin" />;
 }
