@@ -1,22 +1,21 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { User, Copy, Check, LogOut } from 'lucide-react';
 import { Container } from './Container';
-import { useState, useRef, ReactNode } from 'react';
+import { useState, ReactNode, useCallback, useRef, useEffect } from 'react';
 import { Logo } from '@/components/features/layout/public/navigation/Logo';
 import { useAddress } from '@/lib/hooks/use-address';
 import { useWallet } from '@/lib/hooks/wallet';
 import { shortenAddress } from '@/lib/utils/formatting';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Tabs, Tab } from '@heroui/tabs';
 
 // Types for better type safety
 export interface NavigationLink {
@@ -61,12 +60,96 @@ export function Submenu(props: SubmenuProps) {
   } = props;
 
   const pathname = usePathname();
+  const router = useRouter();
   const { data: address } = useAddress();
   const { disconnect } = useWallet();
-  const router = useRouter();
   const [copied, setCopied] = useState(false);
-  const navRef = useRef<HTMLDivElement>(null);
-  const [hoverBg, setHoverBg] = useState<{ left: number; width: number } | null>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [hoverPosition, setHoverPosition] = useState<{
+    left: number;
+    width: number;
+    opacity: number;
+  } | null>(null);
+
+  // Find the active tab index based on the current pathname
+  const getActiveTabIndex = useCallback(() => {
+    const activeIndex = links.findIndex((link) => {
+      if (link.isActive) {
+        return link.isActive(pathname);
+      }
+      return defaultIsActive(pathname, link.href);
+    });
+    return activeIndex >= 0 ? activeIndex : 0;
+  }, [links, pathname]);
+
+  const handleTabChange = (index: number) => {
+    if (links[index]) {
+      router.push(links[index].href);
+    }
+  };
+
+  // Handle hover effect
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!tabsRef.current) return;
+
+      const tabsElement = tabsRef.current;
+      const tabElements = Array.from(tabsElement.querySelectorAll('[role="tab"]'));
+
+      // Find which tab is being hovered
+      let foundHover = false;
+      for (const tab of tabElements) {
+        const rect = tab.getBoundingClientRect();
+        if (
+          e.clientX >= rect.left &&
+          e.clientX <= rect.right &&
+          e.clientY >= rect.top &&
+          e.clientY <= rect.bottom
+        ) {
+          setHoverPosition({
+            left: rect.left - tabsElement.getBoundingClientRect().left,
+            width: rect.width,
+            opacity: 1,
+          });
+          foundHover = true;
+          break;
+        }
+      }
+
+      // If not hovering any tab, fade out the hover indicator
+      if (!foundHover && hoverPosition) {
+        setHoverPosition({
+          ...hoverPosition,
+          opacity: 0,
+        });
+      }
+    },
+    [hoverPosition],
+  );
+
+  const handleMouseLeave = useCallback(() => {
+    if (hoverPosition) {
+      setHoverPosition({
+        ...hoverPosition,
+        opacity: 0,
+      });
+    }
+  }, [hoverPosition]);
+
+  useEffect(() => {
+    const currentTabsRef = tabsRef.current;
+    if (currentTabsRef) {
+      currentTabsRef.addEventListener('mousemove', handleMouseMove);
+      currentTabsRef.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    return () => {
+      if (currentTabsRef) {
+        currentTabsRef.removeEventListener('mousemove', handleMouseMove);
+        currentTabsRef.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, [handleMouseMove, handleMouseLeave]);
 
   const handleLogout = async () => {
     if (onLogout) {
@@ -88,29 +171,7 @@ export function Submenu(props: SubmenuProps) {
     }
   };
 
-  const handleMouseEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const linkEl = e.currentTarget;
-    const parentEl = navRef.current;
-    if (!linkEl || !parentEl) return;
-
-    const { left: parentLeft } = parentEl.getBoundingClientRect();
-    const { left, width } = linkEl.getBoundingClientRect();
-    setHoverBg({ left: left - parentLeft, width });
-  };
-
-  const handleMouseLeave = () => {
-    setHoverBg(null);
-  };
-
-  // Function to check if link is active
-  const isLinkActive = (link: NavigationLink) => {
-    if (link.isActive) {
-      return link.isActive(pathname);
-    }
-    return defaultIsActive(pathname, link.href);
-  };
-
-  const submenuClasses = `submenu bg-[#0A0A0A] border-b border-[#1f1f1f] w-full px-4 h-10 transition-all duration-300 ${className}`;
+  const submenuClasses = `submenu bg-[#0A0A0A] border-b border-[#1f1f1f] w-full px-4 transition-all h-[2.27rem] duration-300 ${className}`;
 
   return (
     <div className={submenuClasses}>
@@ -119,48 +180,55 @@ export function Submenu(props: SubmenuProps) {
           <div className="flex items-center gap-4">
             {showLogo && (
               <div className="submenu-logo flex-shrink-0 flex items-center opacity-0 transition-opacity duration-300">
-                {logoComponent || <Logo linkDisabled={false} />}
+                {logoComponent || <Logo linkDisabled={false} isClone={true} />}
               </div>
             )}
 
-            <nav
-              ref={navRef}
-              className="relative gap-2 flex items-center overflow-x-auto transition-all duration-300"
-              onMouseLeave={handleMouseLeave}
-            >
-              {/* Hover effect background */}
-              {hoverBg && (
-                <span
-                  className="absolute top-0 h-full bg-[#1f1f1f] rounded transition-all duration-200 ease-in-out z-0"
+            <div ref={tabsRef} className="relative w-full">
+              {/* Custom hover background that follows the mouse */}
+              {hoverPosition && (
+                <div
+                  className="absolute rounded-md bg-[#1f1f1f] transition-all duration-300 ease-out"
                   style={{
-                    left: hoverBg.left,
-                    width: hoverBg.width,
+                    left: `${hoverPosition.left}px`,
+                    width: `${hoverPosition.width}px`,
+                    height: '28px',
+                    top: '2px',
+                    opacity: hoverPosition.opacity,
+                    pointerEvents: 'none',
+                    zIndex: 0,
                   }}
                 />
               )}
 
-              {/* Links */}
-              {links.map((link) => {
-                const isActive = isLinkActive(link);
-                const linkClasses = `relative z-10 text-sm font-mb font-sans inline-flex items-center gap-2 transition-all duration-300 px-2 ${
-                  isActive
-                    ? 'text-white border-b-2 border-white mt-[0.57rem] pb-[0.57rem]'
-                    : 'text-gray-400 hover:text-white hover:bg-[#1f1f1f] rounded py-1'
-                }`;
-
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onMouseEnter={handleMouseEnter}
-                    className={linkClasses}
-                  >
-                    <span className="flex-shrink-0">{link.icon}</span>
-                    <span className="whitespace-nowrap">{link.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
+              <Tabs
+                selectedKey={getActiveTabIndex().toString()}
+                onSelectionChange={(key) => handleTabChange(parseInt(key as string))}
+                aria-label="Navigation"
+                variant="underlined"
+                classNames={{
+                  tabList:
+                    'gap-1 w-full relative rounded-none p-0 border-none transition-all duration-300',
+                  cursor: 'w-full h-[2px] bg-white bottom-[-5px]',
+                  tab: 'max-w-fit px-2 py-2 transition-all duration-300 ease-out mb-2 z-10 relative',
+                  tabContent:
+                    'group-data-[selected=true]:text-white text-gray-400 transition-all duration-300 hover:text-white',
+                }}
+              >
+                {links.map((link, index) => (
+                  <Tab
+                    key={index.toString()}
+                    title={
+                      <div className="flex items-center gap-2 text-sm font-sans">
+                        <span className="flex-shrink-0">{link.icon}</span>
+                        <span className="whitespace-nowrap">{link.label}</span>
+                      </div>
+                    }
+                    className="hover-effect active-effect"
+                  />
+                ))}
+              </Tabs>
+            </div>
           </div>
 
           {showUserDropdown && (
