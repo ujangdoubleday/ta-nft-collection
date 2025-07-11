@@ -1,11 +1,11 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { MoreHorizontal, ExternalLink, Share2 } from 'lucide-react';
 import { useState } from 'react';
 import { shortenAddress } from '@/lib/utils/formatting';
 import { formatIPFSUrl } from '@/lib/utils/helpers/url';
+import { NextImage } from '@/components/shared/NextImage';
 
 interface NFTCardProps {
   nft: {
@@ -34,19 +34,24 @@ export function NFTCard({ nft, collectionAddress, role = 'user' }: NFTCardProps)
     ? '/assets/images/placeholders/image-placeholder.svg'
     : formatIPFSUrl(nft.imageUrl);
 
+  // Generate placeholder URL for the API
+  const placeholderUrl = `/api/placeholder?url=${encodeURIComponent(imageUrl)}&id=${collectionAddress}-${nft.tokenId}`;
+
   return (
     <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden hover:shadow-md transition-all">
       {/* NFT Image */}
       <Link href={`${basePath}/${collectionAddress}/nfts/${nft.tokenId}`}>
         <div className="relative w-full aspect-square bg-[#0A0A0A]">
-          <Image
+          <NextImage
             src={imageUrl}
             alt={nft.name}
             fill
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             className="object-cover"
             onError={() => setImageError(true)}
-            unoptimized={true} // Disable Next.js image optimization for external URLs
+            fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+            blurDataURL={placeholderUrl}
+            placeholderType="blur"
           />
         </div>
 

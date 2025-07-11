@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { Upload, X } from 'lucide-react';
+import { NextImage } from '@/components/shared/NextImage';
 
 interface ImageUploaderProps {
   imagePreview: string | null;
@@ -33,7 +33,13 @@ export const ImageUploader = ({
       <div className="relative aspect-square bg-[#0A0A0A] border border-[#1f1f1f] border-dashed rounded-lg overflow-hidden flex flex-col items-center justify-center">
         {imagePreview ? (
           <>
-            <Image src={imagePreview} alt="NFT Preview" fill className="object-contain" />
+            <NextImage
+              src={imagePreview}
+              alt="NFT Preview"
+              fill
+              className="object-contain"
+              placeholderType="empty"
+            />
             <button
               type="button"
               onClick={() => {

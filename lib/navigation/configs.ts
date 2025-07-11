@@ -56,11 +56,17 @@ export const adminNavigationLinks: NavigationLink[] = [
   {
     href: '/admin/collections',
     label: 'All Collections',
-    icon: React.createElement(Images, { className: 'h-4 w-4' }),
+    icon: React.createElement(GalleryVertical, { className: 'h-4 w-4' }),
     isActive: (pathname) => {
       if (pathname === '/admin/collections/new') return false;
       return pathname === '/admin/collections' || pathname.startsWith('/admin/collections/');
     },
+  },
+  {
+    href: '/admin/nfts',
+    label: 'All NFTs',
+    icon: React.createElement(Images, { className: 'h-4 w-4' }),
+    isActive: (pathname) => pathname === '/admin/nfts' || pathname.startsWith('/admin/nfts/'),
   },
   {
     href: '/admin/users',

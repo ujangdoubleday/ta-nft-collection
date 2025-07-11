@@ -73,52 +73,54 @@ export const nftRouter = router({
     .input(z.object({ contractAddress: z.string() }))
     .query(async ({ input }) => {
       const { contractAddress } = input;
+      // console.log(`TRPC - Getting NFTs for collection ${contractAddress}`);
 
       try {
-        // Fetch NFTs directly from blockchain using Alchemy API
+        // Fetch NFTs for the collection
         const alchemyResponse = await fetchNFTsForContract(contractAddress);
 
-        if (alchemyResponse.nfts.length === 0) {
-          // If no NFTs found, check if the collection exists on-chain
-          try {
-            const totalSupply = await publicClient.readContract({
-              address: contractAddress as `0x${string}`,
-              abi: NFT_COLLECTION_ABI,
-              functionName: 'totalSupply',
-            });
-
-            if (Number(totalSupply) > 0) {
-              console.log(
-                `Collection ${contractAddress} has ${Number(totalSupply)} NFTs on-chain but none returned from Alchemy`,
-              );
-            }
-          } catch (error) {
-            console.error(`Error checking totalSupply for collection ${contractAddress}:`, error);
-          }
+        // Check if we have NFTs to process
+        if (!alchemyResponse || !alchemyResponse.nfts || alchemyResponse.nfts.length === 0) {
+          // console.log(`TRPC - No NFTs found for collection ${contractAddress}`);
+          return [];
         }
 
-        // Map Alchemy NFTs to our application's format
-        return alchemyResponse.nfts.map((nft) => {
-          // Extract metadata from Alchemy response
-          const metadata = nft.raw?.metadata || {};
+        // console.log(
+        //   `TRPC - Processing ${alchemyResponse.nfts.length} NFTs for collection ${contractAddress}`,
+        // );
 
+        // Map to consistent format
+        const processedNfts = alchemyResponse.nfts.map((nft) => {
+          // Make sure we have a valid NFT object
+          if (!nft || !nft.tokenId) {
+            console.warn(`TRPC - Invalid NFT object found in collection ${contractAddress}`, nft);
+            return null;
+          }
+
+          // Format the NFT data consistently
           return {
             tokenId: nft.tokenId,
             name: nft.name || `NFT #${nft.tokenId}`,
-            description: nft.description || metadata.description || '',
+            description: nft.description || nft.raw?.metadata?.description || '',
             metadataUrl: nft.tokenUri || nft.raw?.tokenUri || '',
-            imageUrl: nft.raw?.metadata.image || metadata.image || '',
-            contractAddress: nft.contract.address,
-            ownerAddress: '', // Note: Alchemy doesn't provide owner in this endpoint
-            createdAt: new Date(nft.timeLastUpdated || Date.now()),
-            updatedAt: new Date(nft.timeLastUpdated || Date.now()),
+            imageUrl: nft.raw?.metadata?.image || nft.image?.originalUrl || '',
+            contractAddress: contractAddress, // Always include the contract address
+            metadata: nft.raw?.metadata || {},
+            image: nft.image || {},
+            createdAt: nft.timeLastUpdated ? new Date(nft.timeLastUpdated) : new Date(),
+            updatedAt: nft.timeLastUpdated ? new Date(nft.timeLastUpdated) : new Date(),
           };
         });
+
+        // Filter out any null values
+        const validNfts = processedNfts.filter((nft) => nft !== null);
+        // console.log(
+        //   `TRPC - Returning ${validNfts.length} valid NFTs for collection ${contractAddress}`,
+        // );
+
+        return validNfts;
       } catch (error) {
-        console.error(
-          `Error fetching NFTs from blockchain for collection ${contractAddress}:`,
-          error,
-        );
+        console.error(`Error getting NFTs for collection ${contractAddress}:`, error);
         return [];
       }
     }),
@@ -168,9 +170,9 @@ export const nftRouter = router({
       const { contractAddress, tokenId } = input;
 
       try {
-        console.log(
-          `tRPC - Fetching transfer history for NFT: ${contractAddress} Token ID: ${tokenId}`,
-        );
+        // console.log(
+        //   `tRPC - Fetching transfer history for NFT: ${contractAddress} Token ID: ${tokenId}`,
+        // );
         const history = await getTransferHistory(contractAddress, tokenId);
         return history;
       } catch (error) {
@@ -189,7 +191,7 @@ export const nftRouter = router({
       const { contractAddress, tokenId } = input;
 
       try {
-        console.log(`tRPC - Refreshing metadata for NFT: ${contractAddress} Token ID: ${tokenId}`);
+        // console.log(`tRPC - Refreshing metadata for NFT: ${contractAddress} Token ID: ${tokenId}`);
         const result = await refreshNFTMetadata(contractAddress, tokenId);
         return result;
       } catch (error) {
@@ -230,6 +232,88 @@ export const nftRouter = router({
       } catch (error) {
         console.error('Error fetching NFTs by owner:', error);
         throw new Error('Failed to fetch NFTs by owner');
+      }
+    }),
+
+  // Tambahkan procedure baru untuk admin
+  getAllNFTs: publicProcedure
+    .input(
+      z.object({
+        contractAddresses: z.array(z.string()).optional(),
+        limit: z.number().optional().default(100),
+      }),
+    )
+    .query(async ({ input }) => {
+      const { contractAddresses, limit } = input;
+
+      // console.log(`TRPC - Getting all NFTs, contractAddresses:`, contractAddresses?.length);
+
+      try {
+        // Jika tidak ada alamat kontrak, ambil dari semua koleksi
+        let addresses = contractAddresses || [];
+
+        // Batasi jumlah alamat yang akan diproses
+        const addressesToProcess = addresses.slice(0, 10); // Process max 10 collections at once
+
+        // console.log(
+        //   `TRPC - Processing ${addressesToProcess.length} contract addresses for getAllNFTs`,
+        // );
+
+        // Ambil NFT dari semua koleksi secara paralel
+        const nftsByCollection = await Promise.all(
+          addressesToProcess.map(async (address) => {
+            try {
+              // console.log(`TRPC - Fetching NFTs for collection ${address}`);
+              const alchemyResponse = await fetchNFTsForContract(address);
+
+              if (!alchemyResponse || !alchemyResponse.nfts || alchemyResponse.nfts.length === 0) {
+                // console.log(`TRPC - No NFTs found for collection ${address}`);
+                return [];
+              }
+
+              // Map each NFT to include its collection address with consistent format
+              return alchemyResponse.nfts
+                .filter((nft) => nft && nft.tokenId) // Filter out invalid NFTs
+                .map((nft) => ({
+                  tokenId: nft.tokenId,
+                  name: nft.name || `NFT #${nft.tokenId}`,
+                  description: nft.description || nft.raw?.metadata?.description || '',
+                  metadataUrl: nft.tokenUri || nft.raw?.tokenUri || '',
+                  imageUrl: nft.raw?.metadata?.image || nft.image?.originalUrl || '',
+                  contractAddress: address, // Always use the correct address
+                  metadata: nft.raw?.metadata || {},
+                  image: nft.image || {},
+                  createdAt: nft.timeLastUpdated ? new Date(nft.timeLastUpdated) : new Date(),
+                  updatedAt: nft.timeLastUpdated ? new Date(nft.timeLastUpdated) : new Date(),
+                }));
+            } catch (error) {
+              console.error(`Error fetching NFTs from collection ${address}:`, error);
+              return []; // Return empty array on error
+            }
+          }),
+        );
+
+        // Gabungkan semua NFT
+        const allNfts = nftsByCollection.flat();
+
+        // Batasi jumlah NFT yang dikembalikan
+        const limitedNfts = allNfts.slice(0, limit);
+
+        // console.log(`TRPC - Returning ${limitedNfts.length} NFTs out of ${allNfts.length} total`);
+
+        // Validate before returning
+        const validNfts = limitedNfts.filter(
+          (nft) => nft && typeof nft === 'object' && nft.tokenId && nft.contractAddress,
+        );
+
+        if (validNfts.length !== limitedNfts.length) {
+          // console.warn(`TRPC - Filtered out ${limitedNfts.length - validNfts.length} invalid NFTs`);
+        }
+
+        return validNfts;
+      } catch (error) {
+        console.error('Error in getAllNFTs:', error);
+        return [];
       }
     }),
 });

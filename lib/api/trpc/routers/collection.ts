@@ -45,7 +45,7 @@ export const collectionRouter = router({
 
     try {
       const httpUrl = ipfsToHttp(uri);
-      console.log(`Fetching metadata from: ${httpUrl}`);
+      // console.log(`Fetching metadata from: ${httpUrl}`);
 
       const response = await fetch(httpUrl);
 
@@ -74,7 +74,7 @@ export const collectionRouter = router({
 
           try {
             const httpUrl = ipfsToHttp(uri);
-            console.log(`Fetching metadata from: ${httpUrl}`);
+            // console.log(`Fetching metadata from: ${httpUrl}`);
 
             const response = await fetch(httpUrl);
 
@@ -202,7 +202,7 @@ export const collectionRouter = router({
 
       try {
         const httpUrl = ipfsToHttp(uri);
-        console.log(`Fetching metadata from: ${httpUrl}`);
+        // console.log(`Fetching metadata from: ${httpUrl}`);
 
         const response = await fetch(httpUrl);
 
@@ -435,4 +435,74 @@ export const collectionRouter = router({
       return BigInt(0); // Return 0 wei instead of throwing error
     }
   }),
+
+  // New procedure to get info for multiple collections at once
+  getAllCollectionsInfo: publicProcedure
+    .input(z.object({ contractAddresses: z.array(z.string()) }))
+    .query(async ({ input }) => {
+      const { contractAddresses } = input;
+
+      if (!contractAddresses || contractAddresses.length === 0) {
+        // console.log('No contract addresses provided to getAllCollectionsInfo');
+        return [];
+      }
+
+      try {
+        // console.log(`Fetching info for ${contractAddresses.length} collections`);
+
+        // Fetch basic info for each collection in parallel
+        const collectionsInfo = await Promise.all(
+          contractAddresses.map(async (address) => {
+            try {
+              // console.log(`Fetching info for collection: ${address}`);
+
+              // Read collection name
+              const name = await publicClient.readContract({
+                address: address as `0x${string}`,
+                abi: NFT_COLLECTION_ABI,
+                functionName: 'name',
+              });
+
+              // Read collection symbol
+              const symbol = await publicClient.readContract({
+                address: address as `0x${string}`,
+                abi: NFT_COLLECTION_ABI,
+                functionName: 'symbol',
+              });
+
+              // Get contract URI for metadata
+              const contractURI = await publicClient.readContract({
+                address: address as `0x${string}`,
+                abi: NFT_COLLECTION_ABI,
+                functionName: 'contractURI',
+              });
+
+              const result = {
+                contractAddress: address,
+                name: name as string,
+                symbol: symbol as string,
+                contractURI: contractURI as string,
+              };
+
+              // console.log(`Successfully fetched collection info for ${address}: ${name}`);
+              return result;
+            } catch (error) {
+              console.error(`Error fetching info for collection ${address}:`, error);
+              return {
+                contractAddress: address,
+                name: 'Unknown Collection',
+                symbol: 'UNK',
+                contractURI: '',
+              };
+            }
+          }),
+        );
+
+        // console.log(`Successfully fetched info for ${collectionsInfo.length} collections`);
+        return collectionsInfo;
+      } catch (error) {
+        console.error('Error fetching collections info:', error);
+        return [];
+      }
+    }),
 });

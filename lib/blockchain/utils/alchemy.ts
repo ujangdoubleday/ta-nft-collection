@@ -7,6 +7,32 @@ import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
 import { NFT_FACTORY_ABI } from '@/lib/blockchain/abi';
 import { ethers } from 'ethers';
 
+// Add this debugging function near the top of the file
+/**
+ * Debug utility to simplify NFT data for logging
+ */
+export function simplifyNFTForLogging(nft: any): any {
+  if (!nft) return null;
+
+  try {
+    return {
+      tokenId: nft.tokenId || nft.id,
+      name: nft.name || `NFT #${nft.tokenId || nft.id || 'Unknown'}`,
+      contractAddress: nft.contract?.address || nft.contractAddress,
+      hasMetadata: !!nft.metadata || !!nft.raw?.metadata,
+      imageUrl:
+        nft.image?.originalUrl ||
+        nft.imageUrl ||
+        nft.raw?.metadata?.image ||
+        nft.metadata?.image ||
+        'No Image',
+    };
+  } catch (error) {
+    console.error('Error simplifying NFT:', error);
+    return { error: 'Failed to simplify NFT data' };
+  }
+}
+
 // Type for query parameters
 type QueryParams = Record<string, string | number | boolean>;
 
@@ -259,26 +285,87 @@ export const fetchNFTsForContract = async (
   contractAddress: string,
 ): Promise<AlchemyNFTResponse> => {
   try {
+    // console.log(`Alchemy - Fetching NFTs for contract: ${contractAddress}`);
+
     const apiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY;
     if (!apiKey) {
       throw new Error('Alchemy API key not found');
     }
 
     const url = `https://eth-sepolia.g.alchemy.com/nft/v3/${apiKey}/getNFTsForContract?contractAddress=${contractAddress}&withMetadata=true`;
+    // console.log(`Alchemy - API URL: ${url}`);
 
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        Accept: 'application/json',
-      },
-      next: { tags: ['collections'] },
-    });
+    // Implement retry logic for reliability
+    const maxRetries = 2;
+    let attempt = 0;
+    let response;
 
-    if (!response.ok) {
-      throw new Error(`Alchemy API error: ${response.status} ${response.statusText}`);
+    while (attempt <= maxRetries) {
+      try {
+        response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+          },
+          next: { tags: ['collections'] },
+        });
+
+        if (response.ok) break;
+
+        // console.log(
+        //   `Alchemy - Attempt ${attempt + 1} failed with status ${response.status}, retrying...`,
+        // );
+        attempt++;
+
+        // Add increasing delay between retries
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+      } catch (fetchError) {
+        console.error(`Alchemy - Network error on attempt ${attempt + 1}:`, fetchError);
+        attempt++;
+
+        if (attempt > maxRetries) throw fetchError;
+
+        // Add increasing delay between retries
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+      }
+    }
+
+    if (!response || !response.ok) {
+      const errorText = (await response?.text()) || 'No response';
+      console.error(`Alchemy API error: ${response?.status} ${response?.statusText}`, errorText);
+      throw new Error(`Alchemy API error: ${response?.status} ${response?.statusText}`);
     }
 
     const data: AlchemyNFTResponse = await response.json();
+    // console.log(`Alchemy - Fetched ${data.nfts.length} NFTs for contract ${contractAddress}`);
+
+    // Log simplified NFTs for better debugging
+    if (data.nfts.length > 0) {
+      const simplified = data.nfts.map((nft) => simplifyNFTForLogging(nft));
+      // console.log(`Alchemy - NFTs from ${contractAddress} (simplified):`, simplified);
+    }
+
+    // Validate the data structure
+    const validNfts = data.nfts.filter((nft) => nft && nft.tokenId);
+    if (validNfts.length !== data.nfts.length) {
+      // console.warn(
+      //   `Alchemy - Found ${data.nfts.length - validNfts.length} invalid NFTs in response`,
+      // );
+      data.nfts = validNfts; // Keep only valid NFTs
+    }
+
+    // Log a sample of the first NFT for debugging
+    // if (data.nfts.length > 0) {
+    //   const sampleNFT = data.nfts[0];
+    //   console.log('Alchemy - Sample NFT data:', {
+    //     tokenId: sampleNFT.tokenId,
+    //     name: sampleNFT.name,
+    //     image: sampleNFT.image?.originalUrl,
+    //     hasRawMetadata: !!sampleNFT.raw?.metadata,
+    //     hasImageInMetadata: !!sampleNFT.raw?.metadata?.image,
+    //   });
+    // }
+
     return data;
   } catch (error) {
     console.error('Error fetching NFTs from Alchemy:', error);
@@ -557,30 +644,56 @@ export const fetchNFTsForOwner = async (
   contractAddresses: string[] = [],
 ): Promise<{ nfts: AlchemyNFT[] }> => {
   try {
-    const queryParams: Record<string, any> = {
-      owner,
-      withMetadata: true,
-      pageSize: 100,
-    };
+    // console.log(`Alchemy - Fetching NFTs for owner: ${owner}`);
+    // console.log(`Alchemy - Contract addresses filter:`, contractAddresses);
+
+    // Prepare the URL search params
+    const searchParams = new URLSearchParams();
+
+    // Add basic parameters
+    searchParams.append('owner', owner);
+    searchParams.append('withMetadata', 'true');
+    searchParams.append('pageSize', '100');
 
     // Add contract addresses to query parameters if provided
     if (contractAddresses && contractAddresses.length > 0) {
-      contractAddresses.forEach((address, index) => {
-        queryParams[`contractAddresses[${index}]`] = address;
+      // Add each address as a separate parameter with the same name
+      contractAddresses.forEach((address) => {
+        searchParams.append('contractAddresses[]', address);
       });
     }
 
-    const response = await fetch(
-      `${BASE_URL_ALCHEMY_API}/getNFTsForOwner?${new URLSearchParams(queryParams)}`,
-    );
+    const url = `${BASE_URL_ALCHEMY_API}/getNFTsForOwner?${searchParams.toString()}`;
+    // console.log(`Alchemy - API URL: ${url}`);
+
+    const response = await fetch(url);
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Alchemy API error: ${response.status} ${response.statusText}`, errorText);
       throw new Error(`Error fetching NFTs: ${response.statusText}`);
     }
 
     const data = await response.json();
+    const nfts = data.ownedNfts || [];
+
+    // console.log(`Alchemy - Fetched ${nfts.length} NFTs for owner ${owner}`);
+
+    // Log a sample of the first NFT for debugging
+    // if (nfts.length > 0) {
+    //   const sampleNFT = nfts[0];
+    //   console.log('Alchemy - Sample owner NFT data:', {
+    //     tokenId: sampleNFT.tokenId,
+    //     name: sampleNFT.name,
+    //     contractAddress: sampleNFT.contract?.address,
+    //     image: sampleNFT.image?.originalUrl,
+    //     hasRawMetadata: !!sampleNFT.raw?.metadata,
+    //     hasImageInMetadata: !!sampleNFT.raw?.metadata?.image,
+    //   });
+    // }
+
     return {
-      nfts: data.ownedNfts || [],
+      nfts: nfts,
     };
   } catch (error) {
     console.error('Error fetching NFTs for owner:', error);

@@ -1,10 +1,10 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 import { EnrichedCollectionInfo } from '@/lib/blockchain/utils/collection';
 import { shortenAddress } from '@/lib/utils/formatting';
+import { NextImage } from '@/components/shared/NextImage';
 
 interface CollectionHeaderProps {
   collection: EnrichedCollectionInfo;
@@ -36,21 +36,25 @@ export function CollectionHeader({ collection }: CollectionHeaderProps) {
     ? `https://sepolia.etherscan.io/address/${collection.collectionAddress}`
     : '#';
 
+  // Generate placeholder URL for the API
+  const placeholderUrl = collection?.collectionAddress
+    ? `/api/placeholder?id=${collection.collectionAddress}`
+    : `/api/placeholder?id=collection-header`;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-6">
         {/* Collection Image */}
         <div className="relative w-full md:w-48 h-48 bg-[#111111] rounded-lg overflow-hidden flex-shrink-0">
-          <Image
+          <NextImage
             src={collection?.imageUrl || '/assets/images/placeholders/image-placeholder.svg'}
             alt={name}
             fill
             sizes="(max-width: 768px) 100vw, 192px"
             className="object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src =
-                '/assets/images/placeholders/image-placeholder.svg';
-            }}
+            fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+            blurDataURL={placeholderUrl}
+            placeholderType="blur"
           />
         </div>
 

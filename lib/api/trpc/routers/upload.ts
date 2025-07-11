@@ -37,10 +37,10 @@ export const uploadRouter = router({
     .mutation(async ({ input }) => {
       try {
         const { name } = input;
-        console.log(`Creating IPFS folder: ${name}`);
+        // console.log(`Creating IPFS folder: ${name}`);
 
         const folder = await createFolder(name);
-        console.log(`Folder created: ${folder.name} (${folder.id})`);
+        // console.log(`Folder created: ${folder.name} (${folder.id})`);
 
         return folder;
       } catch (error) {
@@ -96,15 +96,15 @@ export const uploadRouter = router({
         // Convert the array back to Buffer
         const fileBuffer = Buffer.from(file);
 
-        console.log(`Processing file: ${fileName}, size: ${fileBuffer.length} bytes`);
+        // console.log(`Processing file: ${fileName}, size: ${fileBuffer.length} bytes`);
         if (folderId) {
-          console.log(`Using IPFS folder ID: ${folderId}`);
+          // console.log(`Using IPFS folder ID: ${folderId}`);
         }
 
         // Upload file to Pinata
         const result = await uploadFile(fileBuffer, fileName, folderId);
 
-        console.log(`File uploaded successfully to IPFS. CID: ${result.cid}`);
+        // console.log(`File uploaded successfully to IPFS. CID: ${result.cid}`);
 
         // Create and upload metadata based on type
         let metadata;
@@ -120,7 +120,7 @@ export const uploadRouter = router({
             external_link: external_link || '',
             collaborators: collaborators || [],
           };
-          console.log('Creating collection (contract-level) metadata');
+          // console.log('Creating collection (contract-level) metadata');
         } else {
           // NFT metadata (token standard)
           metadata = {
@@ -130,15 +130,15 @@ export const uploadRouter = router({
             external_url: external_url || external_link || '',
             attributes: attributes || [],
           };
-          console.log('Creating NFT (token-standard) metadata');
+          // console.log('Creating NFT (token-standard) metadata');
         }
 
-        console.log(`Creating metadata for: ${name || fileName}`);
+        // console.log(`Creating metadata for: ${name || fileName}`);
 
         // Upload metadata to Pinata
         const metadataResult = await uploadMetadata(metadata, `metadata`, folderId);
 
-        console.log(`Metadata uploaded successfully to IPFS. CID: ${metadataResult.cid}`);
+        // console.log(`Metadata uploaded successfully to IPFS. CID: ${metadataResult.cid}`);
 
         return {
           success: true,

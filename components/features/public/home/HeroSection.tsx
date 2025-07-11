@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { NextImage } from '@/components/shared/NextImage';
 
 export function HeroSection() {
   return (
@@ -41,12 +42,14 @@ export function HeroSection() {
           >
             <div className="relative h-[350px] w-[350px] md:h-[400px] md:w-[400px] overflow-hidden rounded-xl bg-gradient-to-br p-1">
               <div className="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-lg"></div>
-              <Image
+              <NextImage
                 src="/assets/images/example/cat.jpg"
                 alt="NFT Art Showcase"
                 width={500}
                 height={500}
                 className="h-full w-full object-cover rounded-lg"
+                placeholderType="blur"
+                blurDataURL="/api/placeholder?id=hero-cat-image"
               />
             </div>
           </motion.div>

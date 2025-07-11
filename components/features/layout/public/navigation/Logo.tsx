@@ -1,18 +1,31 @@
 import Link from 'next/link';
-import Image from 'next/image';
+import { NextImage } from '@/components/shared/NextImage';
 
-export const Logo = () => {
+interface LogoProps {
+  linkDisabled?: boolean;
+}
+
+export const Logo = ({ linkDisabled = false }: LogoProps) => {
+  const LogoImage = (
+    <NextImage
+      src="/assets/logo/white_full.png"
+      alt="MyNFTs Logo"
+      width={32}
+      height={32}
+      className="h-8 w-auto"
+      priority
+      quality={90}
+      placeholderType="empty"
+    />
+  );
+
+  if (linkDisabled) {
+    return <div className="flex items-center focus:bg-zinc-800/50 rounded-md p-1">{LogoImage}</div>;
+  }
+
   return (
     <Link href="/" className="flex items-center focus:bg-zinc-800/50 rounded-md p-1">
-      <Image
-        src="/assets/logo/white_full.png"
-        alt="MyNFTs Logo"
-        width={120}
-        height={32}
-        className="h-8 w-auto"
-        priority
-        quality={90}
-      />
+      {LogoImage}
     </Link>
   );
 };

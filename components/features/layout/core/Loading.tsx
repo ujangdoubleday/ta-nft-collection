@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { NextImage } from '@/components/shared/NextImage';
 
 interface LoadingScreenProps {
   progress: number;
@@ -24,12 +24,13 @@ export function Loading({ progress, loadingText }: LoadingScreenProps) {
       <div className="w-full max-w-md px-4 flex flex-col items-center">
         {/* Logo */}
         <div className="mb-12 relative h-24 w-24">
-          <Image
+          <NextImage
             src="/assets/logo/white_full.png"
             alt="MyNFTs Logo"
             fill={true}
             className="animate-pulse"
             priority
+            placeholderType="empty"
           />
         </div>
 
