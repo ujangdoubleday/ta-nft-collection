@@ -6,25 +6,50 @@
 export function formatIPFSUrl(url: string): string {
   if (!url) return '';
 
+  // Trim the URL
+  url = url.trim();
+
+  // Add debugging
+  const isDev = process.env.NODE_ENV !== 'production';
+  if (isDev) {
+    console.log('Formatting URL:', url);
+  }
+
   // If it's already an HTTP URL, return it as is
-  if (url.startsWith('http')) {
+  if (url.startsWith('http://') || url.startsWith('https://')) {
     return url;
   }
 
   // Get the gateway URL from environment variable
-  const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL;
+  const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'cyan-dead-reptile-256.mypinata.cloud';
 
-  // Convert IPFS URL to HTTP gateway URL
-  if (url.startsWith('ipfs://')) {
+  // Handle different IPFS URL formats
+  if (url.startsWith('ipfs://ipfs/')) {
+    // Format: ipfs://ipfs/QmXxxx...
+    const ipfsHash = url.replace('ipfs://ipfs/', '');
+    return `https://${gatewayUrl}/ipfs/${ipfsHash}`;
+  } else if (url.startsWith('ipfs://')) {
+    // Format: ipfs://QmXxxx...
     const ipfsHash = url.replace('ipfs://', '');
     return `https://${gatewayUrl}/ipfs/${ipfsHash}`;
+  } else if (url.startsWith('/ipfs/')) {
+    // Format: /ipfs/QmXxxx...
+    const ipfsHash = url.replace('/ipfs/', '');
+    return `https://${gatewayUrl}/ipfs/${ipfsHash}`;
+  } else if (url.startsWith('Qm') || url.startsWith('bafy')) {
+    // If it's just an IPFS hash (Qm... or bafy...)
+    return `https://${gatewayUrl}/ipfs/${url}`;
+  } else if (url.startsWith('data:')) {
+    // Handle data URLs (e.g., data:image/png;base64,...)
+    return url;
   }
 
-  // If it's just an IPFS hash
-  if (url.startsWith('Qm') || url.startsWith('bafy')) {
+  // If it doesn't match any known format, but might be an IPFS CID
+  if (/^[a-zA-Z0-9]{40,}$/.test(url)) {
     return `https://${gatewayUrl}/ipfs/${url}`;
   }
 
+  // If no matches, return the original URL
   return url;
 }
 
