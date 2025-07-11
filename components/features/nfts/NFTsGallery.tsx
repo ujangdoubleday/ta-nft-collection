@@ -12,18 +12,19 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 
-// Updated interface to match what comes from the tRPC endpoint
+// Updated interface to match what comes from the tRPC endpoint - made more flexible
 interface NFT {
-  id: string;
+  id?: string;
   tokenId: string;
-  name: string;
-  description: string;
-  imageUrl: string;
+  name?: string;
+  description?: string;
+  imageUrl?: string;
   contractAddress: string;
   symbol?: string | null;
   tokenType?: string;
   metadata?: any;
   timeLastUpdated?: string;
+  image?: { originalUrl?: string; cachedUrl?: string };
 }
 
 interface NFTsGalleryProps {
@@ -33,6 +34,8 @@ interface NFTsGalleryProps {
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
+  role?: 'admin' | 'user';
+  totalCount?: number;
 }
 
 export function NFTsGallery({
@@ -42,7 +45,18 @@ export function NFTsGallery({
   currentPage = 1,
   totalPages = 1,
   onPageChange,
+  role = 'user',
+  totalCount,
 }: NFTsGalleryProps) {
+  // Determine the base path based on role
+  const basePath = role === 'admin' ? '/admin' : '/user';
+
+  // Log NFT data for debugging
+  // console.log(`NFTsGallery - Role: ${role}, NFTs count: ${nfts?.length || 0}`);
+  // if (nfts && nfts.length > 0 && process.env.NODE_ENV !== 'production') {
+  //   console.log('NFTsGallery - First NFT example:', nfts[0]);
+  // }
+
   // Show error state
   if (error) {
     return (
@@ -70,10 +84,12 @@ export function NFTsGallery({
         </div>
         <h3 className="text-xl font-bold text-white mb-2">No NFTs Found</h3>
         <p className="text-zinc-400 mb-6">
-          You don&apos;t own any NFTs yet. Create or buy NFTs to see them here.
+          {role === 'admin'
+            ? 'No NFTs found in any collection.'
+            : "You don't own any NFTs yet. Create or buy NFTs to see them here."}
         </p>
         <Link
-          href="/user/collections"
+          href={`${basePath}/collections`}
           className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
         >
           Browse Collections
@@ -85,12 +101,16 @@ export function NFTsGallery({
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <p className="text-zinc-400 text-sm">Showing {nfts.length} NFTs</p>
+        <p className="text-zinc-400 text-sm">
+          {totalCount !== undefined
+            ? `Showing ${nfts.length} of ${totalCount} NFTs`
+            : `Showing ${nfts.length} NFTs`}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-        {nfts.map((nft) => (
-          <NFTCard key={`${nft.contractAddress}-${nft.tokenId}`} nft={nft} />
+        {nfts.map((nft, index) => (
+          <NFTCard key={`${nft.contractAddress}-${nft.tokenId || index}`} nft={nft} role={role} />
         ))}
       </div>
 
