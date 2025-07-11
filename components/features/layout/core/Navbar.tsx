@@ -98,7 +98,7 @@ export interface NavbarConfig {
 const DEFAULT_CONFIG: NavbarConfig = {
   logo: {
     showDefault: true,
-    href: '/user',
+    href: '/',
   },
   user: {
     showUsername: true,
@@ -370,8 +370,8 @@ export function Navbar({ config, className = '' }: NavbarProps) {
                           className="flex items-center"
                           style={{ color: mergedConfig.style?.textColor }}
                         >
-                          <Link href={mergedConfig.logo?.href || '/user'}>
-                            {mergedConfig.logo?.component || <Logo />}
+                          <Link href={mergedConfig.logo?.href || '/'}>
+                            {mergedConfig.logo?.component || <Logo linkDisabled={true} />}
                           </Link>
                         </BreadcrumbLink>
                       </BreadcrumbItem>
