@@ -1,29 +1,41 @@
 'use client';
 
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CollectionsContent } from '@/components/features/collections/CollectionsContent';
-import { AllCollectionsList } from './AllCollectionsList';
+import { CollectionsList } from '@/components/features/collections/CollectionsList';
+import { CollectionsHeader } from '@/components/features/collections/CollectionsHeader';
+import { FilterPanel, CollectionFilters } from '@/components/features/collections/FilterPanel';
 
 export function AdminCollectionsContent() {
-  const [activeTab, setActiveTab] = useState('all');
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  // No need to maintain state for filters as we use URL params
+
+  const handleFilterToggle = (isOpen: boolean) => {
+    setIsFilterPanelOpen(isOpen);
+  };
+
+  // For backward compatibility
+  const handleFilterChange = (newFilters: CollectionFilters) => {
+    console.log('Admin filter changed via callback:', newFilters);
+    // We don't update state as we use URL params
+  };
+
+  // Default empty filters object for backward compatibility
+  const emptyFilters: CollectionFilters = {
+    search: '',
+    ownerFilter: 'all',
+  };
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="all">All Collections</TabsTrigger>
-          <TabsTrigger value="mine">My Collections</TabsTrigger>
-        </TabsList>
+      <CollectionsHeader role="admin" onFilterToggle={handleFilterToggle} />
+      <FilterPanel
+        isOpen={isFilterPanelOpen}
+        role="admin"
+        onFilterChange={handleFilterChange}
+        initialFilters={emptyFilters}
+      />
 
-        <TabsContent value="all" className="mt-0">
-          <AllCollectionsList />
-        </TabsContent>
-
-        <TabsContent value="mine" className="mt-0">
-          <CollectionsContent role="admin" />
-        </TabsContent>
-      </Tabs>
+      <CollectionsList role="admin" />
     </div>
   );
 }

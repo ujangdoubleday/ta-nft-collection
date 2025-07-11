@@ -249,6 +249,41 @@ export const collectionRouter = router({
       }
     }),
 
+  getMultipleCollectionOwners: publicProcedure
+    .input(z.object({ collectionAddresses: z.array(z.string()) }))
+    .query(async ({ input }) => {
+      const { collectionAddresses } = input;
+
+      if (!collectionAddresses || collectionAddresses.length === 0) {
+        return [];
+      }
+
+      try {
+        // Fetch owners for multiple collections in parallel
+        const ownerPromises = collectionAddresses.map(async (address) => {
+          try {
+            const owner = await fetchCollectionOwner(address);
+            return {
+              collectionAddress: address,
+              owner: owner,
+            };
+          } catch (error) {
+            console.error(`Error fetching owner for collection ${address}:`, error);
+            return {
+              collectionAddress: address,
+              owner: null,
+            };
+          }
+        });
+
+        const results = await Promise.all(ownerPromises);
+        return results;
+      } catch (error) {
+        console.error('Error fetching multiple collection owners:', error);
+        return collectionAddresses.map((address) => ({ collectionAddress: address, owner: null }));
+      }
+    }),
+
   isCollectionValid: publicProcedure
     .input(z.object({ collectionAddress: z.string() }))
     .query(async ({ input }) => {

@@ -15,12 +15,16 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { CollectionFilters } from './FilterPanel';
+import { useAllCollections } from './hooks/useAllCollections';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface CollectionsListProps {
   role?: 'admin' | 'user';
+  filters?: CollectionFilters; // Now optional as we'll use URL params
 }
 
-export function CollectionsList({ role = 'user' }: CollectionsListProps) {
+export function CollectionsList({ role = 'user', filters }: CollectionsListProps) {
   const { data: address } = useAddress();
   const [isLoading, setIsLoading] = useState(true);
   const searchParams = useSearchParams();
@@ -31,15 +35,31 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
   const page = Number(searchParams.get('page') || '1');
   const ITEMS_PER_PAGE = 9;
 
+  // Get filters directly from URL for real-time updates
+  const searchQuery = searchParams.get('search') || '';
+  const ownerFilter = (searchParams.get('filter') as 'all' | 'owned' | 'not-owned') || 'all';
+
+  // Create a filters object from URL params (overrides props for real-time updates)
+  const urlFilters = useMemo(
+    () => ({
+      search: searchQuery,
+      ownerFilter: ownerFilter as 'all' | 'owned' | 'not-owned',
+    }),
+    [searchQuery, ownerFilter],
+  );
+
+  // Use URL filters but fall back to props if needed
+  const activeFilters = Object.keys(urlFilters).length > 0 ? urlFilters : filters;
+
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
 
-  // Fetch collections from blockchain using trpc
+  // Fetch user collections using trpc
   const {
-    data: collections,
-    isLoading: isLoadingCollections,
-    error,
-    refetch,
+    data: userCollections,
+    isLoading: isLoadingUserCollections,
+    error: userCollectionsError,
+    refetch: refetchUserCollections,
   } = trpc.collection.getEnrichedCreatorCollections.useQuery(
     { creatorAddress: address || '' },
     {
@@ -49,12 +69,26 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
     },
   );
 
+  // Fetch all collections for admin view
+  const {
+    collections: allCollections,
+    isLoading: isLoadingAllCollections,
+    error: allCollectionsError,
+  } = useAllCollections();
+
+  // Determine which collections to use based on role
+  const collections = role === 'admin' ? allCollections : userCollections;
+  const isLoadingCollections =
+    role === 'admin' ? isLoadingAllCollections : isLoadingUserCollections;
+  const error = role === 'admin' ? allCollectionsError : userCollectionsError;
+  const refetch = role === 'admin' ? () => {} : refetchUserCollections;
+
   // Handle query state changes
   useEffect(() => {
-    if (!isLoadingCollections) {
+    if (!isLoadingCollections && (!isLoadingAllCollections || role !== 'admin')) {
       setIsLoading(false);
     }
-  }, [isLoadingCollections]);
+  }, [isLoadingCollections, isLoadingAllCollections, role]);
 
   useEffect(() => {
     // Set loading to false after a timeout even if query is still loading
@@ -68,19 +102,138 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
     }
   }, [address]);
 
+  // Define a type for our collection data
+  type CollectionData = {
+    collectionAddress: string;
+    contractURI: string;
+    name: string;
+    symbol: string;
+    totalSupply: bigint;
+    createdAt: bigint;
+    metadata?: any;
+    imageUrl?: string;
+  };
+
+  // Track state for tagged collections
+  const [taggedCollections, setTaggedCollections] = useState<
+    Array<{
+      collection: CollectionData;
+      isOwned: boolean;
+      ownerLoaded: boolean;
+    }>
+  >([]);
+
+  const [ownershipLoading, setOwnershipLoading] = useState(true);
+
+  // Prepare collection addresses for ownership query
+  const collectionAddresses = useMemo(() => {
+    return collections?.map((col) => col.collectionAddress) || [];
+  }, [collections]);
+
+  // Get collection owners once for tagging
+  const { data: ownershipData } = trpc.collection.getMultipleCollectionOwners.useQuery(
+    { collectionAddresses },
+    {
+      enabled: collectionAddresses.length > 0,
+    },
+  );
+
+  // Create tagged collections with ownership info
+  useEffect(() => {
+    if (!collections) {
+      setTaggedCollections([]);
+      return;
+    }
+
+    // Create a map for quick lookup
+    const ownershipMap: Record<string, boolean> = {};
+    const loadedMap: Record<string, boolean> = {};
+
+    if (address && ownershipData) {
+      ownershipData.forEach((item) => {
+        loadedMap[item.collectionAddress] = true;
+        if (item.owner) {
+          ownershipMap[item.collectionAddress] = item.owner.toLowerCase() === address.toLowerCase();
+        }
+      });
+    }
+
+    // Create tagged collections
+    const tagged = collections.map((collection) => ({
+      collection,
+      isOwned: ownershipMap[collection.collectionAddress] || false,
+      ownerLoaded: !!loadedMap[collection.collectionAddress],
+    }));
+
+    setTaggedCollections(tagged);
+    setOwnershipLoading(false);
+  }, [collections, address, ownershipData]);
+
+  // Create a mapping of collection address to owner status (for backward compatibility)
+  const collectionOwnership = useMemo(() => {
+    const ownershipMap: Record<string, boolean> = {};
+
+    taggedCollections.forEach((item) => {
+      ownershipMap[item.collection.collectionAddress] = item.isOwned;
+    });
+
+    return ownershipMap;
+  }, [taggedCollections]);
+
+  // Filter collections based on filters using tagged collections
+  const filteredTaggedCollections = useMemo(() => {
+    // Return early with empty array if no tagged collections
+    if (!taggedCollections.length) return [];
+
+    // Track start time for performance debugging
+    const startTime = performance.now();
+
+    const result = taggedCollections.filter((taggedItem) => {
+      const collection = taggedItem.collection;
+
+      // Apply search filter
+      const searchMatch =
+        !activeFilters?.search ||
+        collection.name?.toLowerCase().includes(activeFilters.search.toLowerCase()) ||
+        collection.collectionAddress.toLowerCase().includes(activeFilters.search.toLowerCase());
+
+      // Apply owner filter
+      let ownerMatch = true;
+      if (activeFilters?.ownerFilter !== 'all') {
+        // Use the pre-tagged ownership status
+        ownerMatch =
+          activeFilters?.ownerFilter === 'owned' ? taggedItem.isOwned : !taggedItem.isOwned;
+      }
+
+      return searchMatch && ownerMatch;
+    });
+
+    // Track end time for performance debugging
+    const endTime = performance.now();
+    console.log(`Filtering ${taggedCollections.length} collections took ${endTime - startTime}ms`);
+    console.log('Active filters:', activeFilters);
+
+    return result;
+  }, [taggedCollections, activeFilters?.search, activeFilters?.ownerFilter]);
+
+  // Extract just the collection data for the filtered collections
+  const filteredCollections = useMemo(() => {
+    return filteredTaggedCollections.map((item) => item.collection);
+  }, [filteredTaggedCollections]);
+
   // Calculate pagination info
-  const totalCollections = collections?.length || 0;
+  const totalCollections = filteredCollections.length || 0;
   const totalPages = Math.ceil(totalCollections / ITEMS_PER_PAGE);
 
-  // Get paginated collections
-  const paginatedCollections = useMemo(() => {
-    if (!collections) return [];
+  // Get paginated tagged collections
+  const paginatedTaggedCollections = useMemo(() => {
+    if (!filteredTaggedCollections.length) return [];
 
     const startIndex = (page - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
 
-    return collections.slice(startIndex, endIndex);
-  }, [collections, page]);
+    return filteredTaggedCollections.slice(startIndex, endIndex);
+  }, [filteredTaggedCollections, page]);
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -89,10 +242,11 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
     router.push(`${pathname}?${params.toString()}`);
   };
 
-  if (isLoading || isLoadingCollections) {
+  // Enhanced loading skeleton
+  const renderCollectionSkeleton = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
+        {[...Array(9)].map((_, i) => (
           <div
             key={i}
             className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden shadow-sm p-4"
@@ -121,13 +275,27 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
         ))}
       </div>
     );
+  };
+
+  if (isLoading || isLoadingCollections) {
+    return renderCollectionSkeleton();
+  }
+
+  // Show skeleton when filter is applied but ownership data is still loading
+  if (
+    ownershipLoading &&
+    (activeFilters?.ownerFilter === 'owned' || activeFilters?.ownerFilter === 'not-owned')
+  ) {
+    return renderCollectionSkeleton();
   }
 
   if (error) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
         <h3 className="text-xl font-bold text-white mb-2">Error Loading Collections</h3>
-        <p className="text-zinc-400 mb-6">{error.message || 'Failed to fetch your collections'}</p>
+        <p className="text-zinc-400 mb-6">
+          {(error || allCollectionsError)?.message || 'Failed to fetch collections'}
+        </p>
         <div className="flex justify-center gap-4">
           <button
             onClick={() => refetch()}
@@ -147,21 +315,13 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
     );
   }
 
-  if (!collections || collections.length === 0) {
+  if (!filteredCollections.length) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
         <div className="bg-[#0A0A0A] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f1f1f]">
           <ImagePlus className="h-8 w-8 text-white" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">No Collections Yet</h3>
-        <p className="text-zinc-400 mb-6">You haven&apos;t created any NFT collections yet.</p>
-        <Link
-          href={`${basePath}/new`}
-          className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
-        >
-          <ImagePlus className="h-4 w-4" />
-          Create Your First Collection
-        </Link>
+        <h3 className="text-xl font-bold text-white mb-2">No Collections Found</h3>
       </div>
     );
   }
@@ -169,22 +329,28 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        {paginatedCollections.map((collection) => (
-          <CollectionCard
-            key={collection.collectionAddress}
-            role={role}
-            collection={{
-              id: collection.collectionAddress,
-              address: collection.collectionAddress,
-              name: collection.name || 'Unnamed Collection',
-              description: collection.metadata?.description || 'No description available',
-              imageUrl: collection.imageUrl || '/assets/images/placeholders/image-placeholder.svg',
-              itemCount: Number(collection.totalSupply) || 0,
-              createdAt: new Date(Number(collection.createdAt) * 1000).toISOString(),
-              symbol: collection.symbol || 'NFT',
-            }}
-          />
-        ))}
+        {paginatedTaggedCollections.map((taggedItem) => {
+          const collection = taggedItem.collection;
+          return (
+            <CollectionCard
+              key={collection.collectionAddress}
+              role={role}
+              collection={{
+                id: collection.collectionAddress,
+                address: collection.collectionAddress,
+                name: collection.name || 'Unnamed Collection',
+                description: collection.metadata?.description || 'No description available',
+                imageUrl:
+                  collection.imageUrl || '/assets/images/placeholders/image-placeholder.svg',
+                itemCount: Number(collection.totalSupply) || 0,
+                createdAt: new Date(Number(collection.createdAt) * 1000).toISOString(),
+                symbol: collection.symbol || 'NFT',
+              }}
+              isOwner={taggedItem.isOwned}
+              ownerLoaded={taggedItem.ownerLoaded}
+            />
+          );
+        })}
       </div>
 
       {/* Pagination component */}

@@ -3,8 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Edit, MoreHorizontal, ExternalLink, ImagePlus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { shortenAddress } from '@/lib/utils/formatting';
+import { useAddress } from '@/lib/hooks/use-address';
+import { trpc } from '@/lib/api/trpc/client';
 
 interface CollectionCardProps {
   collection: {
@@ -18,9 +20,46 @@ interface CollectionCardProps {
     symbol: string;
   };
   role?: 'admin' | 'user'; // Add role prop to determine link paths
+  isOwner?: boolean; // Pre-determined ownership status
+  ownerLoaded?: boolean; // Whether ownership data is loaded
 }
 
-export function CollectionCard({ collection, role = 'user' }: CollectionCardProps) {
+export function CollectionCard({
+  collection,
+  role = 'user',
+  isOwner: preDeterminedOwnership,
+  ownerLoaded: ownershipPreloaded = false,
+}: CollectionCardProps) {
+  const { data: userAddress } = useAddress();
+  const [isOwner, setIsOwner] = useState<boolean>(preDeterminedOwnership || false);
+  const [isLoading, setIsLoading] = useState<boolean>(!ownershipPreloaded);
+
+  // Only fetch if ownership wasn't pre-determined
+  const { data: ownerData } = trpc.collection.getCollectionOwner.useQuery(
+    { collectionAddress: collection.address },
+    {
+      enabled: !!collection.address && !ownershipPreloaded,
+    },
+  );
+
+  // Check if user is owner whenever ownerData or userAddress changes
+  useEffect(() => {
+    // If ownership is pre-determined, use that value
+    if (ownershipPreloaded) {
+      setIsOwner(!!preDeterminedOwnership);
+      setIsLoading(false);
+      return;
+    }
+
+    // Otherwise, determine ownership from query
+    if (ownerData && userAddress) {
+      setIsOwner(ownerData.toLowerCase() === userAddress.toLowerCase());
+    } else {
+      setIsOwner(false);
+    }
+    setIsLoading(false);
+  }, [ownerData, userAddress, preDeterminedOwnership, ownershipPreloaded]);
+
   // Format creation date
   const formattedDate = (() => {
     try {
@@ -70,9 +109,17 @@ export function CollectionCard({ collection, role = 'user' }: CollectionCardProp
                   {collection.name || 'Unnamed Collection'}
                 </h3>
 
-                <span className="bg-[#1f1f1f] text-white text-xs px-2 py-1 rounded ml-2">
-                  {collection.itemCount || 0} NFTs
-                </span>
+                {isLoading ? (
+                  <div className="ml-2 flex items-center">
+                    <div className="h-4 bg-[#1f1f1f] rounded w-20 animate-pulse"></div>
+                  </div>
+                ) : (
+                  <span
+                    className={`text-xs px-2 py-1 rounded ml-2 ${isOwner ? 'bg-green-900 text-green-200' : 'bg-[#1f1f1f] text-white'}`}
+                  >
+                    {isOwner ? 'You are the owner' : 'You are not the owner'}
+                  </span>
+                )}
               </div>
 
               <p className="text-zinc-400 text-sm mb-2 line-clamp-2">
