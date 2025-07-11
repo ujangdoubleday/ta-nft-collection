@@ -19,15 +19,31 @@ export function UserLayout({ children }: UserLayoutProps) {
   // Get navigation links from the custom hook - we no longer need to pass isOwner
   const { links } = useNavigation();
 
-  // Add scroll detection
+  // Add scroll detection with improved logo animation
   useEffect(() => {
     const handleScroll = () => {
       // Add or remove .scrolled class based on scroll position
       if (window.scrollY > 64) {
         // Height of the navbar
         document.documentElement.classList.add('scrolled');
+
+        // Ensure logo animations are smooth
+        const logoElements = document.querySelectorAll('.logo-wrapper');
+        logoElements.forEach((logo) => {
+          logo.classList.add('logo-animating');
+        });
       } else {
         document.documentElement.classList.remove('scrolled');
+
+        // Remove animation class after transition completes
+        setTimeout(() => {
+          const logoElements = document.querySelectorAll('.logo-wrapper');
+          logoElements.forEach((logo) => {
+            if (!document.documentElement.classList.contains('scrolled')) {
+              logo.classList.remove('logo-animating');
+            }
+          });
+        }, 300);
       }
     };
 
