@@ -296,6 +296,95 @@ export const collectionRouter = router({
       }
     }),
 
+  getMultipleContractURIs: publicProcedure
+    .input(z.object({ contractAddresses: z.array(z.string()) }))
+    .query(async ({ input }) => {
+      const { contractAddresses } = input;
+
+      if (!contractAddresses || contractAddresses.length === 0) {
+        return [];
+      }
+
+      try {
+        const results = await Promise.all(
+          contractAddresses.map(async (address) => {
+            try {
+              // Read contract URI
+              const contractURI = await publicClient.readContract({
+                address: address as `0x${string}`,
+                abi: NFT_COLLECTION_ABI,
+                functionName: 'contractURI',
+              });
+
+              return {
+                contractAddress: address,
+                contractURI: contractURI as string,
+              };
+            } catch (error) {
+              console.error(`Error fetching contract URI for ${address}:`, error);
+              return {
+                contractAddress: address,
+                contractURI: null,
+              };
+            }
+          }),
+        );
+
+        return results;
+      } catch (error) {
+        console.error('Error fetching multiple contract URIs:', error);
+        throw new Error('Failed to fetch contract URIs');
+      }
+    }),
+
+  getCollectionInfo: publicProcedure
+    .input(z.object({ contractAddress: z.string() }))
+    .query(async ({ input }) => {
+      const { contractAddress } = input;
+
+      if (!contractAddress) {
+        return null;
+      }
+
+      try {
+        // Read collection name
+        const name = await publicClient.readContract({
+          address: contractAddress as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          functionName: 'name',
+        });
+
+        // Read collection symbol
+        const symbol = await publicClient.readContract({
+          address: contractAddress as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          functionName: 'symbol',
+        });
+
+        // Read total supply
+        const totalSupply = await publicClient.readContract({
+          address: contractAddress as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          functionName: 'totalSupply',
+        });
+
+        // For createdAt, we don't have a direct way to get it from the contract
+        // We could fetch it from the blockchain by looking at the contract creation transaction
+        // For now, we'll use the current timestamp as a placeholder
+        const createdAt = Math.floor(Date.now() / 1000);
+
+        return {
+          name,
+          symbol,
+          totalSupply,
+          createdAt,
+        };
+      } catch (error) {
+        console.error(`Error fetching collection info for ${contractAddress}:`, error);
+        return null;
+      }
+    }),
+
   getCreationFee: publicProcedure.query(async () => {
     try {
       const creationFee = await publicClient.readContract({

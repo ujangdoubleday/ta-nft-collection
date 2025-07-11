@@ -1,5 +1,5 @@
-import { CollectionsContent } from '@/components/features/collections';
+import { AdminCollectionsContent } from '@/components/features/admin/collections';
 
 export default function AdminCollectionsPage() {
-  return <CollectionsContent role="admin" />;
+  return <AdminCollectionsContent />;
 }

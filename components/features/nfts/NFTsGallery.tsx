@@ -4,7 +4,7 @@ import { NFTCard } from './NFTCard';
 import { ImagePlus } from 'lucide-react';
 import Link from 'next/link';
 import {
-  Pagination,
+  PaginationNav,
   PaginationContent,
   PaginationItem,
   PaginationLink,
@@ -96,7 +96,7 @@ export function NFTsGallery({
 
       {/* Pagination controls */}
       {totalPages > 1 && onPageChange && (
-        <Pagination>
+        <PaginationNav>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
@@ -136,7 +136,7 @@ export function NFTsGallery({
               />
             </PaginationItem>
           </PaginationContent>
-        </Pagination>
+        </PaginationNav>
       )}
     </div>
   );

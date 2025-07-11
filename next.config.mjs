@@ -43,7 +43,7 @@ const baseConfig = {
       'gateway.pinata.cloud',
       'ipfs.io',
       'dweb.link',
-      'cyan-dead-reptile-256.mypinata.cloud',
+      process.env.NEXT_PUBLIC_GATEWAY_URL,
       'eth-sepolia.g.alchemy.com',
       'res.cloudinary.com',
     ],

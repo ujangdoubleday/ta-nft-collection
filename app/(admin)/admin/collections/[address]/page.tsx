@@ -1,4 +1,4 @@
-import { CollectionDetailContent } from '@/components/features/user/collections/detail';
+import { CollectionDetailContent } from '@/components/features/collections/detail';
 
 type Params = Promise<{ address: string }>;
 
@@ -8,7 +8,7 @@ export default async function Page(props: { params: Params }) {
 
   return (
     <>
-      <CollectionDetailContent address={address} />
+      <CollectionDetailContent address={address} role="admin" />
     </>
   );
 }

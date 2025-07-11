@@ -7,7 +7,7 @@ import { ImagePlus } from 'lucide-react';
 import Link from 'next/link';
 import { trpc } from '@/lib/api/trpc/client';
 import {
-  Pagination,
+  PaginationNav,
   PaginationContent,
   PaginationItem,
   PaginationLink,
@@ -189,7 +189,7 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
 
       {/* Pagination component */}
       {totalPages > 1 && (
-        <Pagination>
+        <PaginationNav>
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
@@ -229,7 +229,7 @@ export function CollectionsList({ role = 'user' }: CollectionsListProps) {
               />
             </PaginationItem>
           </PaginationContent>
-        </Pagination>
+        </PaginationNav>
       )}
     </div>
   );

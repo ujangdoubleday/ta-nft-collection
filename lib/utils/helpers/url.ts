@@ -11,18 +11,33 @@ export function formatIPFSUrl(url: string): string {
     return url;
   }
 
+  // Get the gateway URL from environment variable
+  const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL;
+
   // Convert IPFS URL to HTTP gateway URL
   if (url.startsWith('ipfs://')) {
     const ipfsHash = url.replace('ipfs://', '');
-    return `https://cyan-dead-reptile-256.mypinata.cloud/ipfs/${ipfsHash}`;
+    return `https://${gatewayUrl}/ipfs/${ipfsHash}`;
   }
 
   // If it's just an IPFS hash
   if (url.startsWith('Qm') || url.startsWith('bafy')) {
-    return `https://cyan-dead-reptile-256.mypinata.cloud/ipfs/${url}`;
+    return `https://${gatewayUrl}/ipfs/${url}`;
   }
 
   return url;
+}
+
+/**
+ * Converts an IPFS URL to an HTTP URL
+ * @param url The IPFS URL to convert
+ * @returns An HTTP URL
+ */
+export function ipfsToHttp(url: string): string {
+  if (!url) return '';
+
+  // Use the existing formatIPFSUrl function for consistency
+  return formatIPFSUrl(url);
 }
 
 /**

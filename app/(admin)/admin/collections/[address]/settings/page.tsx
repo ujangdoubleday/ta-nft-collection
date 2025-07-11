@@ -1,4 +1,5 @@
 import { NotOwnerMessage } from '@/components/features/collections';
+import { CollectionSettingsContent } from '@/components/features/collections/settings';
 import { serverClient } from '@/lib/api/trpc/server-client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth/next-auth/options';
@@ -27,11 +28,5 @@ export default async function Page(props: { params: Params }) {
     return <NotOwnerMessage collectionAddress={address} isAdmin={true} />;
   }
 
-  // TODO: Replace with actual settings component when available
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Collection Settings</h1>
-      <p>Settings for collection: {address}</p>
-    </div>
-  );
+  return <CollectionSettingsContent address={address} role="admin" />;
 }
