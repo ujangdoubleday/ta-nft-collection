@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { trpc } from '@/lib/api/trpc/client';
 import { useAddress } from '@/lib/hooks/use-address';
@@ -12,6 +14,7 @@ export function useOwnerNFTs() {
   // Get all collection addresses from factory
   const { data: collectionAddresses, isLoading: isLoadingCollections } =
     trpc.factoryConfig.getAllCollections.useQuery(undefined, { enabled: mounted });
+  // console.log('collectionAddresses:', collectionAddresses);
 
   // Fetch NFTs owned by the current address across all collections using tRPC
   const {

@@ -32,9 +32,9 @@ export function useNFTsByContractAddress(contractAddress: string) {
     if (isError && retryCount < maxRetries) {
       const timer = setTimeout(
         () => {
-          console.log(
-            `Retrying blockchain NFT fetch for ${contractAddress} (attempt ${retryCount + 1}/${maxRetries})`,
-          );
+          // console.log(
+          //   `Retrying blockchain NFT fetch for ${contractAddress} (attempt ${retryCount + 1}/${maxRetries})`,
+          // );
           setRetryCount((prev) => prev + 1);
           refetch();
         },
