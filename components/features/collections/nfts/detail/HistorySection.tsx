@@ -14,15 +14,15 @@ interface HistorySectionProps {
 }
 
 export function HistorySection({ contractAddress, tokenId, history = [] }: HistorySectionProps) {
-  // Add debug logging
-  useEffect(() => {
-    console.log('HistorySection props:', { contractAddress, tokenId });
-    console.log(
-      'Is contractAddress valid:',
-      contractAddress && typeof contractAddress === 'string' && contractAddress.startsWith('0x'),
-    );
-    console.log('Is tokenId valid:', tokenId && typeof tokenId === 'string');
-  }, [contractAddress, tokenId]);
+  // // Add debug logging
+  // useEffect(() => {
+  //   console.log('HistorySection props:', { contractAddress, tokenId });
+  //   console.log(
+  //     'Is contractAddress valid:',
+  //     contractAddress && typeof contractAddress === 'string' && contractAddress.startsWith('0x'),
+  //   );
+  //   console.log('Is tokenId valid:', tokenId && typeof tokenId === 'string');
+  // }, [contractAddress, tokenId]);
 
   // Ensure contractAddress is properly formatted
   const formattedAddress =
@@ -33,15 +33,15 @@ export function HistorySection({ contractAddress, tokenId, history = [] }: Histo
   // Fetch transfer history from blockchain
   const { history: blockchainHistory, isLoading, error } = useNFTHistory(formattedAddress, tokenId);
 
-  // Add debug logging for hook results
-  useEffect(() => {
-    console.log('useNFTHistory results:', {
-      blockchainHistory,
-      isLoading,
-      error,
-      historyLength: blockchainHistory?.length,
-    });
-  }, [blockchainHistory, isLoading, error]);
+  // // Add debug logging for hook results
+  // useEffect(() => {
+  //   console.log('useNFTHistory results:', {
+  //     blockchainHistory,
+  //     isLoading,
+  //     error,
+  //     historyLength: blockchainHistory?.length,
+  //   });
+  // }, [blockchainHistory, isLoading, error]);
 
   // Use blockchain history if available, otherwise fallback to provided history
   const displayHistory = blockchainHistory?.length > 0 ? blockchainHistory : history;

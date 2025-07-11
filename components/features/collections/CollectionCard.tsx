@@ -1,12 +1,12 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { Edit, MoreHorizontal, ExternalLink, ImagePlus, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { shortenAddress } from '@/lib/utils/formatting';
 import { useAddress } from '@/lib/hooks/use-address';
 import { trpc } from '@/lib/api/trpc/client';
+import { NextImage } from '@/components/shared/NextImage';
 
 interface CollectionCardProps {
   collection: {
@@ -72,6 +72,9 @@ export function CollectionCard({
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
 
+  // Generate placeholder URL for the API
+  const placeholderUrl = `/api/placeholder?url=${encodeURIComponent(collection.imageUrl)}&id=${collection.address}`;
+
   return (
     <>
       <Link href={`${basePath}/${collection.address}`} className="">
@@ -81,18 +84,15 @@ export function CollectionCard({
             <div className="flex-shrink-0">
               <div className="relative w-20 h-20 bg-[#0A0A0A] rounded-lg overflow-hidden">
                 {collection.imageUrl ? (
-                  <Image
+                  <NextImage
                     src={collection.imageUrl}
                     alt={collection.name}
                     fill
                     sizes="(max-width: 768px) 80px, 80px"
                     className="object-cover"
-                    onError={(e) => {
-                      // Fallback to placeholder if image fails to load
-                      (e.target as HTMLImageElement).src =
-                        '/assets/images/placeholders/image-placeholder.svg';
-                    }}
-                    priority={false}
+                    fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+                    blurDataURL={placeholderUrl}
+                    placeholderType="blur"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A0A]">

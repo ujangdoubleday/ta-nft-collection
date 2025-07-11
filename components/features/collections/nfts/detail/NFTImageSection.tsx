@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { NFTItem } from './types';
+import { NextImage } from '@/components/shared/NextImage';
 
 interface NFTImageSectionProps {
   nft: NFTItem;
@@ -10,19 +10,20 @@ interface NFTImageSectionProps {
 }
 
 export function NFTImageSection({ nft, isOwner = false }: NFTImageSectionProps) {
+  // Generate placeholder URL for the API
+  const placeholderUrl = `/api/placeholder?url=${encodeURIComponent(nft.imageUrl)}&id=${nft.id}`;
+
   return (
     <div className="w-full md:w-1/2">
       <div className="relative aspect-square bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden">
-        <Image
+        <NextImage
           src={nft.imageUrl}
           alt={nft.name}
           fill
           className="object-contain"
-          onError={(e) => {
-            // Fallback to placeholder if image fails to load
-            (e.target as HTMLImageElement).src =
-              '/assets/images/placeholders/image-placeholder.svg';
-          }}
+          fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+          blurDataURL={placeholderUrl}
+          placeholderType="blur"
         />
       </div>
     </div>
