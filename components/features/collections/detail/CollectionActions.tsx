@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ImagePlus, ExternalLink, Settings, Cog } from 'lucide-react';
 import { EnrichedCollectionInfo } from '@/lib/blockchain/utils/collection';
+import { useCollectionContext } from '@/components/features/layout/user/UserLayout';
 
 interface CollectionActionsProps {
   collection: EnrichedCollectionInfo;
@@ -10,70 +11,47 @@ interface CollectionActionsProps {
 }
 
 export function CollectionActions({ collection, role = 'user' }: CollectionActionsProps) {
-  // External link to blockchain explorer
-  const blockExplorerUrl = collection?.collectionAddress
-    ? `https://sepolia.etherscan.io/address/${collection.collectionAddress}`
-    : '#';
+  // Always call the hook unconditionally
+  const collectionContext = useCollectionContext();
+  // Then conditionally use its value
+  const isOwner = role === 'admin' ? true : collectionContext.isOwner;
 
-  // Determine the base path based on role
+  // Base path for links based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
+  const collectionAddress = collection?.collectionAddress || '';
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Link
-          href={`${basePath}/${collection.collectionAddress}/mint`}
-          className="flex items-center gap-3 bg-[#111111] border border-[#1f1f1f] rounded-md p-4 hover:border-white transition-colors"
-        >
-          <div className="bg-[#1f1f1f] p-2 rounded-full">
-            <ImagePlus className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <p className="text-white font-medium">Mint New NFT</p>
-            <p className="text-gray-400 text-sm">Create a new NFT in this collection</p>
-          </div>
-        </Link>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* View NFTs */}
+      <Link
+        href={`${basePath}/${collectionAddress}/nfts`}
+        className="flex flex-col items-center justify-center p-6 bg-[#111111] border border-[#1f1f1f] rounded-lg hover:bg-[#1a1a1a] transition-colors"
+      >
+        <ExternalLink className="h-8 w-8 text-white mb-3" />
+        <span className="text-white font-medium">View NFTs</span>
+      </Link>
 
+      {/* Mint NFT - Only show if user is owner */}
+      {isOwner && (
         <Link
-          href={`${basePath}/${collection.collectionAddress}/nfts`}
-          className="flex items-center gap-3 bg-[#111111] border border-[#1f1f1f] rounded-md p-4 hover:border-white transition-colors"
+          href={`${basePath}/${collectionAddress}/mint`}
+          className="flex flex-col items-center justify-center p-6 bg-[#111111] border border-[#1f1f1f] rounded-lg hover:bg-[#1a1a1a] transition-colors"
         >
-          <div className="bg-[#1f1f1f] p-2 rounded-full">
-            <Settings className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <p className="text-white font-medium">View NFTs</p>
-            <p className="text-gray-400 text-sm">Browse all NFTs in this collection</p>
-          </div>
+          <ImagePlus className="h-8 w-8 text-white mb-3" />
+          <span className="text-white font-medium">Mint NFT</span>
         </Link>
-        <a
-          href={blockExplorerUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-3 bg-[#111111] border border-[#1f1f1f] rounded-md p-4 hover:border-white transition-colors"
-        >
-          <div className="bg-[#1f1f1f] p-2 rounded-full">
-            <ExternalLink className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <p className="text-white font-medium">View on Explorer</p>
-            <p className="text-gray-400 text-sm">See on blockchain explorer</p>
-          </div>
-        </a>
+      )}
 
+      {/* Collection Settings - Only show if user is owner */}
+      {isOwner && (
         <Link
-          href={`${basePath}/${collection.collectionAddress}/settings`}
-          className="flex items-center gap-3 bg-[#111111] border border-[#1f1f1f] rounded-md p-4 hover:border-white transition-colors"
+          href={`${basePath}/${collectionAddress}/settings`}
+          className="flex flex-col items-center justify-center p-6 bg-[#111111] border border-[#1f1f1f] rounded-lg hover:bg-[#1a1a1a] transition-colors"
         >
-          <div className="bg-[#1f1f1f] p-2 rounded-full">
-            <Cog className="h-5 w-5 text-white" />
-          </div>
-          <div>
-            <p className="text-white font-medium">Settings</p>
-            <p className="text-gray-400 text-sm">Manage collection settings</p>
-          </div>
+          <Settings className="h-8 w-8 text-white mb-3" />
+          <span className="text-white font-medium">Settings</span>
         </Link>
-      </div>
+      )}
     </div>
   );
 }
