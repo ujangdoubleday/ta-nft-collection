@@ -6,6 +6,7 @@ import { CollectionActions } from './CollectionActions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { trpc } from '@/lib/api/trpc/client';
 import { EnrichedCollectionInfo } from '@/lib/blockchain/utils/collection';
+import { useCollectionContext } from '@/components/features/layout/user/UserLayout';
 
 interface CollectionDetailContentProps {
   address: string;
@@ -32,6 +33,11 @@ export function CollectionDetailContent({ address, role = 'user' }: CollectionDe
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Always call the hook unconditionally
+  const collectionContext = useCollectionContext();
+  // Then conditionally use its value
+  const isOwner = role === 'admin' ? false : collectionContext.isOwner;
 
   const {
     data: contractData,
