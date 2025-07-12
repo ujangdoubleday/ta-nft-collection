@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { PlusCircle, Grid3x3, Image, User } from 'lucide-react';
+import { PlusCircle, Grid3x3, Image } from 'lucide-react';
 
 export function DashboardActions() {
   const router = useRouter();
@@ -22,13 +22,6 @@ export function DashboardActions() {
       primary: false,
     },
     {
-      title: 'Edit Profile',
-      description: 'Update your profile settings',
-      icon: <User className="h-5 w-5" />,
-      onClick: () => router.push('/user/profile'),
-      primary: false,
-    },
-    {
       title: 'View NFTs',
       description: 'Browse all your owned NFTs',
       icon: <Image className="h-5 w-5" />,
@@ -41,7 +34,7 @@ export function DashboardActions() {
     <div>
       <h2 className="text-mb font-bold text-white mb-3">Quick Actions</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {actions.map((action, index) => (
           <ActionCard key={index} {...action} />
         ))}

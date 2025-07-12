@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { PlusCircle, Grid3x3, Settings, Users } from 'lucide-react';
+import { Grid3x3, Settings, Users, DollarSign } from 'lucide-react';
 
 export function DashboardActions() {
   const router = useRouter();
@@ -29,10 +29,10 @@ export function DashboardActions() {
       primary: false,
     },
     {
-      title: 'Create Collection',
-      description: 'Create a new NFT collection',
-      icon: <PlusCircle className="h-5 w-5" />,
-      onClick: () => router.push('/admin/collections/new'),
+      title: 'Fees',
+      description: 'Manage platform fees and withdrawals',
+      icon: <DollarSign className="h-5 w-5" />,
+      onClick: () => router.push('/admin/fees'),
       primary: false,
     },
   ];

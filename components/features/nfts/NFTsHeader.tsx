@@ -32,7 +32,7 @@ export function NFTsHeader({
   const basePath = role === 'admin' ? '/admin/nfts' : '/user/nfts';
 
   // Determine the title based on role and showAll flag
-  const title = role === 'admin' ? 'All NFTs' : showAll ? 'All NFTs' : 'My NFTs';
+  const title = role === 'admin' ? 'All NFTs' : showAll ? 'My Created NFTs' : 'My NFTs';
 
   const toggleFilter = () => {
     onFilterToggle(!isFilterOpen);

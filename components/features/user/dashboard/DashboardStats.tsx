@@ -2,46 +2,88 @@
 
 import { useState, useEffect } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
+import { trpc } from '@/lib/api/trpc/client';
+import { useUserCollections } from '@/components/features/nfts/hooks';
 
 export function DashboardStats() {
   const { data: address } = useAddress();
   const [isLoading, setIsLoading] = useState(true);
 
-  // Placeholder stats - in a real application these would be fetched from an API
+  // Get collections created by the user
+  const { collections: userCollections, isLoading: isLoadingUserCollections } =
+    useUserCollections();
+
+  // Get all collection addresses
+  const { data: allCollectionAddresses } = trpc.factoryConfig.getAllCollections.useQuery();
+
+  // Get NFTs owned by the user
+  const { data: ownedNFTs } = trpc.nft.getByOwner.useQuery(
+    {
+      ownerAddress: address || '',
+      contractAddresses: allCollectionAddresses || [],
+    },
+    { enabled: !!address && !!allCollectionAddresses && allCollectionAddresses.length > 0 },
+  );
+
+  // Get collections owned by the user
+  const { data: ownedCollections } = trpc.collection.getOwnerCollections.useQuery(
+    { ownerAddress: address || '' },
+    { enabled: !!address },
+  );
+
+  // Get NFTs from user's collections (created NFTs)
+  const { data: createdNFTs } = trpc.nft.getAllNFTs.useQuery(
+    {
+      contractAddresses: userCollections?.map((c) => c.address) || [],
+      limit: 500,
+    },
+    {
+      enabled: !!userCollections && userCollections.length > 0,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  );
+
+  // Stats state
   const [stats, setStats] = useState({
-    totalCollections: 0,
-    totalNFTs: 0,
-    recentActivity: 0,
-    createdAt: new Date().toLocaleDateString(),
+    collectionsCreated: 0,
+    nftsCreated: 0,
+    collectionsOwned: 0,
+    nftsOwned: 0,
   });
 
   useEffect(() => {
-    // Simulate loading stats
+    // Update stats when data is available
     if (address) {
       const timer = setTimeout(() => {
         setStats({
-          totalCollections: 3,
-          totalNFTs: 12,
-          recentActivity: 5,
-          createdAt: new Date().toLocaleDateString(),
+          collectionsCreated: userCollections?.length || 0,
+          nftsCreated: createdNFTs?.length || 0,
+          collectionsOwned: ownedCollections?.length || 0,
+          nftsOwned: ownedNFTs?.length || 0,
         });
         setIsLoading(false);
       }, 1000);
 
       return () => clearTimeout(timer);
     }
-  }, [address]);
+  }, [address, userCollections, createdNFTs, ownedCollections, ownedNFTs]);
 
   return (
     <div>
       <h2 className="text-mb font-bold text-white mb-3">Stats</h2>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard
-          title="Total Collections"
-          value={stats.totalCollections.toString()}
+          title="Collections Created"
+          value={stats.collectionsCreated.toString()}
           isLoading={isLoading}
         />
-        <StatCard title="Total NFTs" value={stats.totalNFTs.toString()} isLoading={isLoading} />
+        <StatCard title="NFTs Created" value={stats.nftsCreated.toString()} isLoading={isLoading} />
+        <StatCard
+          title="Collections Owned"
+          value={stats.collectionsOwned.toString()}
+          isLoading={isLoading}
+        />
+        <StatCard title="NFTs Owned" value={stats.nftsOwned.toString()} isLoading={isLoading} />
       </div>
     </div>
   );

@@ -5,6 +5,22 @@ import { publicClient } from '@/lib/blockchain/viem';
 import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
 
 export const blocklistRouter = router({
+  // Get blocklist count
+  getBlocklistCount: publicProcedure.query(async () => {
+    try {
+      const count = await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'getBlocklistCount',
+      });
+
+      return Number(count);
+    } catch (error) {
+      console.error('Error getting blocklist count:', error);
+      return 0;
+    }
+  }),
+
   // Get all blocklisted addresses
   getBlocklist: publicProcedure.query(async () => {
     try {

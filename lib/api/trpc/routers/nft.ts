@@ -12,6 +12,70 @@ import {
 } from '@/lib/blockchain/utils/alchemy';
 
 export const nftRouter = router({
+  // Get NFTs created by a specific address
+  getByCreator: publicProcedure
+    .input(z.object({ creatorAddress: z.string() }))
+    .query(async ({ input }) => {
+      const { creatorAddress } = input;
+
+      if (!creatorAddress) {
+        return [];
+      }
+
+      try {
+        // In this application, all NFTs in the user/nfts page are considered "created" by the user
+        // So we'll use the same approach as getAllNFTs but filter by creator
+
+        // First, get all collections
+        const collections = (await publicClient.readContract({
+          address: process.env.NEXT_PUBLIC_FACTORY_ADDRESS as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          functionName: 'getAllCollections',
+        })) as string[];
+
+        if (!collections || collections.length === 0) {
+          return [];
+        }
+
+        // For each collection, get all NFTs
+        const allNFTs = [];
+
+        for (const collectionAddress of collections) {
+          try {
+            // Get NFTs for this collection
+            const { nfts } = await fetchNFTsForContract(collectionAddress);
+
+            if (nfts && nfts.length > 0) {
+              // Add collection NFTs to the result
+              allNFTs.push(
+                ...nfts.map((nft) => ({
+                  id: nft.tokenId,
+                  tokenId: nft.tokenId,
+                  name: nft.name || `NFT #${nft.tokenId}`,
+                  description: nft.description || '',
+                  imageUrl: nft.image?.originalUrl || nft.image?.cachedUrl || '',
+                  contractAddress: nft.contract.address,
+                  symbol: nft.contract.symbol,
+                  tokenType: nft.tokenType,
+                  metadata: nft.raw.metadata,
+                  timeLastUpdated: nft.timeLastUpdated,
+                })),
+              );
+            }
+          } catch (error) {
+            console.error(`Error fetching NFTs for collection ${collectionAddress}:`, error);
+          }
+        }
+
+        // In this application, we consider all NFTs as "created" by the user
+        // since there's no specific creator tracking at the NFT level
+        return allNFTs;
+      } catch (error) {
+        console.error('Error fetching NFTs by creator:', error);
+        return [];
+      }
+    }),
+
   getByTokenId: publicProcedure
     .input(z.object({ tokenId: z.string(), contractAddress: z.string() }))
     .query(async ({ input }) => {
