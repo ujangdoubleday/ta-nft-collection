@@ -10,7 +10,7 @@ interface UseOwnerNFTsProps {
 
 /**
  * Hook to fetch all NFTs owned by the current user across all collections
- * @param showAll When true, fetches all NFTs instead of just the user's own NFTs
+ * @param showAll When true, fetches all NFTs from collections created by the user instead of just the user's own NFTs
  */
 export function useOwnerNFTs(props?: UseOwnerNFTsProps) {
   const { showAll = false } = props || {};
@@ -22,7 +22,20 @@ export function useOwnerNFTs(props?: UseOwnerNFTsProps) {
   const { data: collectionAddresses, isLoading: isLoadingCollections } =
     trpc.factoryConfig.getAllCollections.useQuery(undefined, { enabled: mounted });
 
-  // If showAll is true, use getAllNFTs instead of getByOwner
+  // Get collections created by the user when showAll is true
+  const { data: userCollections, isLoading: isLoadingUserCollections } =
+    trpc.collection.getCreatorCollections.useQuery(
+      { creatorAddress: address || '' },
+      {
+        enabled: showAll && !!address && mounted,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+      },
+    );
+
+  // Extract collection addresses created by the user
+  const userCollectionAddresses = userCollections?.map((c) => c.collectionAddress) || [];
+
+  // If showAll is true, use getAllNFTs with user's collection addresses instead of all collections
   const {
     data: allNFTs,
     isLoading: isLoadingAllNFTs,
@@ -30,11 +43,15 @@ export function useOwnerNFTs(props?: UseOwnerNFTsProps) {
     refetch: refetchAllNFTs,
   } = trpc.nft.getAllNFTs.useQuery(
     {
-      contractAddresses: collectionAddresses || [],
+      contractAddresses: showAll ? userCollectionAddresses : collectionAddresses || [],
       limit: 500, // Limit the number of NFTs to prevent performance issues
     },
     {
-      enabled: showAll && mounted && !!collectionAddresses && collectionAddresses.length > 0,
+      enabled:
+        showAll &&
+        mounted &&
+        ((!!userCollectionAddresses && userCollectionAddresses.length > 0) ||
+          (!!collectionAddresses && collectionAddresses.length > 0)),
     },
   );
 
@@ -82,7 +99,9 @@ export function useOwnerNFTs(props?: UseOwnerNFTsProps) {
   // Use the appropriate data based on showAll flag
   const nfts = showAll ? allNFTs : ownedNFTs;
   const isLoading =
-    isLoadingCollections || (showAll ? isLoadingAllNFTs : isLoadingOwnedNFTs) || !mounted;
+    isLoadingCollections ||
+    (showAll ? isLoadingAllNFTs || isLoadingUserCollections : isLoadingOwnedNFTs) ||
+    !mounted;
   const error = showAll ? allNFTsError : ownedNFTsError;
 
   return {
