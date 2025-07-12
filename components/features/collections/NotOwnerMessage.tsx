@@ -19,21 +19,14 @@ export const NotOwnerMessage: React.FC<NotOwnerMessageProps> = ({
     : `/user/collections/${collectionAddress}`;
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4">
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-8 max-w-md w-full text-center">
-        <div className="flex justify-center mb-4">
-          <ShieldAlert className="h-12 w-12 text-red-500" />
-        </div>
-        <h2 className="text-2xl font-bold mb-3 text-red-700 dark:text-red-400">Access Denied</h2>
-        <p className="mb-6 text-gray-700 dark:text-gray-300">
-          You don&apos;t have permission to access this page. Only the collection owner can perform
-          this action.
-        </p>
-        <div className="flex justify-center">
-          <Button asChild variant="outline">
-            <Link href={backUrl}>Back to Collection</Link>
-          </Button>
-        </div>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+      <div className="bg-black text-white rounded-xl p-6 w-full max-w-sm text-center shadow-lg border border-white/10">
+        <ShieldAlert className="h-10 w-10 mx-auto mb-4 text-white" />
+        <h2 className="text-lg font-semibold mb-2">Access Denied</h2>
+        <p className="text-sm mb-4">You are not the owner of this collection.</p>
+        <Button asChild variant="ghost" className="border-white text-white hover:bg-white/10">
+          <Link href={backUrl}>Back</Link>
+        </Button>
       </div>
     </div>
   );
