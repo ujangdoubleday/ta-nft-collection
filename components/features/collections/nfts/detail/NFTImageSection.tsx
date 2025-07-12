@@ -10,9 +10,6 @@ interface NFTImageSectionProps {
 }
 
 export function NFTImageSection({ nft, isOwner = false }: NFTImageSectionProps) {
-  // Generate placeholder URL for the API
-  const placeholderUrl = `/api/placeholder?url=${encodeURIComponent(nft.imageUrl)}&id=${nft.id}`;
-
   return (
     <div className="w-full md:w-1/2">
       <div className="relative aspect-square bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden">
@@ -22,7 +19,6 @@ export function NFTImageSection({ nft, isOwner = false }: NFTImageSectionProps) 
           fill
           className="object-contain"
           fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
-          blurDataURL={placeholderUrl}
           placeholderType="blur"
         />
       </div>

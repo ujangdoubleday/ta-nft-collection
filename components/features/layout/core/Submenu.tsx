@@ -210,7 +210,7 @@ export function Submenu(props: SubmenuProps) {
                   tabList:
                     'gap-1 w-full relative rounded-none p-0 border-none transition-all duration-300',
                   cursor: 'w-full h-[2px] bg-white bottom-[-5px]',
-                  tab: 'max-w-fit px-2 py-2 transition-all duration-300 ease-out mb-2 z-10 relative',
+                  tab: 'max-w-fit px-2 py-2 transition-all duration-300 ease-out mb-2 z-10 hover:text-white relative',
                   tabContent:
                     'group-data-[selected=true]:text-white text-gray-400 transition-all duration-300 hover:text-white',
                 }}

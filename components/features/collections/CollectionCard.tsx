@@ -72,9 +72,6 @@ export function CollectionCard({
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
 
-  // Generate placeholder URL for the API
-  const placeholderUrl = `/api/placeholder?url=${encodeURIComponent(collection.imageUrl)}&id=${collection.address}`;
-
   return (
     <>
       <Link href={`${basePath}/${collection.address}`} className="">
@@ -91,7 +88,6 @@ export function CollectionCard({
                     sizes="(max-width: 768px) 80px, 80px"
                     className="object-cover"
                     fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
-                    blurDataURL={placeholderUrl}
                     placeholderType="blur"
                   />
                 ) : (

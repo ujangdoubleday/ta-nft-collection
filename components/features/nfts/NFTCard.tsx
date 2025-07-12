@@ -59,9 +59,6 @@ export function NFTCard({ nft, role = 'user' }: NFTCardProps) {
 
   const imageUrl = getImageUrl();
 
-  // Generate placeholder URL for the API
-  const placeholderUrl = `/api/placeholder?url=${encodeURIComponent(imageUrl)}&id=${nft.contractAddress}-${tokenId}`;
-
   return (
     <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden hover:shadow-md transition-all">
       {/* NFT Image */}
@@ -75,7 +72,6 @@ export function NFTCard({ nft, role = 'user' }: NFTCardProps) {
             className="object-cover"
             onError={() => setImageError(true)}
             fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
-            blurDataURL={placeholderUrl}
             placeholderType="blur"
           />
         </div>
