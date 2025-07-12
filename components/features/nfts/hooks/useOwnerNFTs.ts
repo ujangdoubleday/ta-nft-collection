@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { trpc } from '@/lib/api/trpc/client';
 import { useAddress } from '@/lib/hooks/use-address';
 
@@ -10,6 +10,7 @@ import { useAddress } from '@/lib/hooks/use-address';
 export function useOwnerNFTs() {
   const { data: address } = useAddress();
   const [mounted, setMounted] = useState(false);
+  const trpcUtils = trpc.useUtils();
 
   // Get all collection addresses from factory
   const { data: collectionAddresses, isLoading: isLoadingCollections } =
@@ -21,7 +22,7 @@ export function useOwnerNFTs() {
     data: nfts,
     isLoading: isLoadingNFTs,
     error,
-    refetch,
+    refetch: originalRefetch,
   } = trpc.nft.getByOwner.useQuery(
     {
       ownerAddress: address || '',
@@ -32,6 +33,20 @@ export function useOwnerNFTs() {
       staleTime: 1000 * 60 * 5, // 5 minutes
     },
   );
+
+  // Custom refetch function that maintains existing data during refresh
+  const refetch = useCallback(async () => {
+    try {
+      // Invalidate the queries
+      await trpcUtils.invalidate();
+
+      // Then perform the refetch
+      return originalRefetch();
+    } catch (err) {
+      console.error('Error during refetch:', err);
+      throw err;
+    }
+  }, [address, collectionAddresses, originalRefetch, trpcUtils]);
 
   // Handle client-side rendering
   useEffect(() => {

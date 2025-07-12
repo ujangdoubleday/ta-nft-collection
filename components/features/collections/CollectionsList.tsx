@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
 import { CollectionCard } from './CollectionCard';
 import { ImagePlus } from 'lucide-react';
@@ -30,6 +30,7 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const utils = trpc.useContext();
 
   // Parse page number from URL or default to 1
   const page = Number(searchParams.get('page') || '1');
@@ -54,6 +55,26 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
 
+  // Function to refresh all collection data
+  const refreshCollectionData = useCallback(async () => {
+    if (!address) return;
+
+    setIsLoading(true);
+    try {
+      // Invalidate and refetch all collection-related queries
+      await Promise.all([
+        utils.collection.getEnrichedCreatorCollections.invalidate({ creatorAddress: address }),
+        utils.collection.getCreatorCollections.invalidate({ creatorAddress: address }),
+        utils.factoryConfig.getAllCollections.invalidate(),
+        utils.collection.getMultipleCollectionOwners.invalidate(),
+      ]);
+    } catch (error) {
+      console.error('Error refreshing collections data:', error);
+    } finally {
+      setTimeout(() => setIsLoading(false), 500);
+    }
+  }, [address, utils]);
+
   // Fetch user collections using trpc
   const {
     data: userCollections,
@@ -74,6 +95,7 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
     collections: allCollections,
     isLoading: isLoadingAllCollections,
     error: allCollectionsError,
+    refetch: refetchAllCollections,
   } = useAllCollections();
 
   // Determine which collections to use based on role
@@ -81,7 +103,7 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
   const isLoadingCollections =
     role === 'admin' ? isLoadingAllCollections : isLoadingUserCollections;
   const error = role === 'admin' ? allCollectionsError : userCollectionsError;
-  const refetch = role === 'admin' ? () => {} : refetchUserCollections;
+  const refetch = role === 'admin' ? refetchAllCollections : refetchUserCollections;
 
   // Handle query state changes
   useEffect(() => {
@@ -291,7 +313,7 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
       role === 'admin');
 
   // Render empty state if we have data and it's empty
-  if (hasEmptyCollections && !isLoading) {
+  if (hasEmptyCollections && !isLoading && ownershipLoading) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
         <div className="bg-[#0A0A0A] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f1f1f]">

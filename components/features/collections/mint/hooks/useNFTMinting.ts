@@ -75,10 +75,12 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
           console.error('Error refreshing metadata via tRPC:', refreshError);
         }
 
-        const revalidateResponse = await fetch('/api/revalidate?tag=collections');
-        if (!revalidateResponse.ok) {
-          console.error('Failed to revalidate collections page');
-        }
+        // await fetch(`/api/revalidate?path=/user/collections/${contractAddress}/nfts&type=page`);
+        // await fetch(`/api/revalidate?path=/admin/collections/${contractAddress}/nfts&type=page`);
+
+        // if (!revalidateResponse.ok) {
+        //   console.error('Failed to revalidate collections page');
+        // }
 
         if (address) {
           await utils.collection.getEnrichedCreatorCollections.invalidate({

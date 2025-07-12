@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAddress } from '@/lib/hooks/use-address';
 
-export function OverviewStats() {
+export function DashboardStats() {
   const { data: address } = useAddress();
   const [isLoading, setIsLoading] = useState(true);
 

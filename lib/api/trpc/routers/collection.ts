@@ -403,6 +403,13 @@ export const collectionRouter = router({
           functionName: 'totalSupply',
         });
 
+        // Read max supply
+        const maxSupply = await publicClient.readContract({
+          address: contractAddress as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          functionName: 'maxSupply',
+        });
+
         // For createdAt, we don't have a direct way to get it from the contract
         // We could fetch it from the blockchain by looking at the contract creation transaction
         // For now, we'll use the current timestamp as a placeholder
@@ -412,6 +419,7 @@ export const collectionRouter = router({
           name,
           symbol,
           totalSupply,
+          maxSupply,
           createdAt,
         };
       } catch (error) {
@@ -477,11 +485,27 @@ export const collectionRouter = router({
                 functionName: 'contractURI',
               });
 
+              // Read total supply
+              const totalSupply = await publicClient.readContract({
+                address: address as `0x${string}`,
+                abi: NFT_COLLECTION_ABI,
+                functionName: 'totalSupply',
+              });
+
+              // Read max supply
+              const maxSupply = await publicClient.readContract({
+                address: address as `0x${string}`,
+                abi: NFT_COLLECTION_ABI,
+                functionName: 'maxSupply',
+              });
+
               const result = {
                 contractAddress: address,
                 name: name as string,
                 symbol: symbol as string,
                 contractURI: contractURI as string,
+                totalSupply: totalSupply as bigint,
+                maxSupply: maxSupply as bigint,
               };
 
               // console.log(`Successfully fetched collection info for ${address}: ${name}`);
@@ -493,6 +517,8 @@ export const collectionRouter = router({
                 name: 'Unknown Collection',
                 symbol: 'UNK',
                 contractURI: '',
+                totalSupply: BigInt(0),
+                maxSupply: BigInt(0),
               };
             }
           }),

@@ -20,7 +20,7 @@ import { NavigationLink } from '@/components/features/layout/core/Submenu';
 export const mainNavigationLinks: NavigationLink[] = [
   {
     href: '/user',
-    label: 'Overview',
+    label: 'Dashboard',
     icon: React.createElement(Home, { className: 'h-4 w-4' }),
     isActive: (pathname) => pathname === '/user',
   },
@@ -51,7 +51,7 @@ export const mainNavigationLinks: NavigationLink[] = [
 export const adminNavigationLinks: NavigationLink[] = [
   {
     href: '/admin',
-    label: 'Overview',
+    label: 'Dashboard',
     icon: React.createElement(Home, { className: 'h-4 w-4' }),
     isActive: (pathname) => pathname === '/admin',
   },
@@ -104,7 +104,7 @@ export const createCollectionNavigationLinks = (collectionAddress: string): Navi
   return [
     {
       href: `/user/collections/${collectionAddress}`,
-      label: 'Details',
+      label: 'Overview',
       icon: React.createElement(LayoutGrid, { className: 'h-4 w-4' }),
       isActive: (pathname) => pathname === `/user/collections/${collectionAddress}`,
     },
@@ -137,7 +137,7 @@ export const createAdminCollectionNavigationLinks = (
   return [
     {
       href: `/admin/collections/${collectionAddress}`,
-      label: 'Details',
+      label: 'Overview',
       icon: React.createElement(LayoutGrid, { className: 'h-4 w-4' }),
       isActive: (pathname) => pathname === `/admin/collections/${collectionAddress}`,
     },

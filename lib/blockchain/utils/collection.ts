@@ -15,6 +15,7 @@ export interface CollectionInfo {
   name: string;
   symbol: string;
   totalSupply: bigint;
+  maxSupply: bigint;
   createdAt: bigint;
 }
 
@@ -115,7 +116,8 @@ export function safeParseCollectionInfo(info: any): CollectionInfo | null {
         name: info[2] || 'Unnamed Collection',
         symbol: info[3] || 'UNKNOWN',
         totalSupply: BigInt(info[4] || 0),
-        createdAt: BigInt(info[5] || 0),
+        maxSupply: BigInt(info[5] || 0),
+        createdAt: BigInt(info[6] || 0),
       };
     }
     // Handle object format (direct object from contract)
@@ -127,6 +129,8 @@ export function safeParseCollectionInfo(info: any): CollectionInfo | null {
         symbol: info.symbol || 'UNKNOWN',
         totalSupply:
           typeof info.totalSupply === 'bigint' ? info.totalSupply : BigInt(info.totalSupply || 0),
+        maxSupply:
+          typeof info.maxSupply === 'bigint' ? info.maxSupply : BigInt(info.maxSupply || 0), // Add maxSupply parsing
         createdAt:
           typeof info.createdAt === 'bigint' ? info.createdAt : BigInt(info.createdAt || 0),
       };
@@ -151,7 +155,7 @@ export async function fetchCreatorCollections(
   if (!creatorAddress || !NFT_FACTORY_ADDRESS) return [];
 
   try {
-    console.log(`Fetching collections for creator: ${creatorAddress}`);
+    // console.log(`Fetching collections for creator: ${creatorAddress}`);
 
     // Call the contract method to get collections by creator
     let collectionsInfo;
@@ -256,7 +260,7 @@ export async function fetchCreatorCollectionsBasic(
   if (!creatorAddress || !NFT_FACTORY_ADDRESS) return [];
 
   try {
-    console.log(`Fetching collections for creator: ${creatorAddress}`);
+    // console.log(`Fetching collections for creator: ${creatorAddress}`);
 
     // Call the contract method to get collections by creator
     let collectionsInfo;
