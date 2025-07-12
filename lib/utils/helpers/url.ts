@@ -21,7 +21,7 @@ export function formatIPFSUrl(url: string): string {
   }
 
   // Get the gateway URL from environment variable
-  const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'cyan-dead-reptile-256.mypinata.cloud';
+  const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'reen-added-cattle-346.mypinata.cloud';
 
   // Handle different IPFS URL formats
   if (url.startsWith('ipfs://ipfs/')) {
