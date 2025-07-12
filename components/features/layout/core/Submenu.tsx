@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Tabs, Tab } from '@heroui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Types for better type safety
 export interface NavigationLink {
@@ -33,6 +34,7 @@ export interface SubmenuProps {
   onLogout?: () => void | Promise<void>;
   className?: string;
   containerClassName?: string;
+  isLoading?: boolean;
 }
 
 // Default active link checker
@@ -57,6 +59,7 @@ export function Submenu(props: SubmenuProps) {
     onLogout,
     className = '',
     containerClassName = '',
+    isLoading = false,
   } = props;
 
   const pathname = usePathname();
@@ -201,33 +204,40 @@ export function Submenu(props: SubmenuProps) {
                 />
               )}
 
-              <Tabs
-                selectedKey={getActiveTabIndex().toString()}
-                onSelectionChange={(key) => handleTabChange(parseInt(key as string))}
-                aria-label="Navigation"
-                variant="underlined"
-                classNames={{
-                  tabList:
-                    'smr gap-1 w-full relative -mx-8 rounded-none p-0 border-none transition-all duration-300 hover:text-white',
-                  cursor: 'w-full h-[2px] bg-white bottom-[-9px] hover:text-white',
-                  tab: 'max-w-fit px-2 py-2 transition-all duration-300 ease-out hover:text-white relative',
-                  tabContent:
-                    'group-data-[selected=true]:text-white text-gray-400 transition-all duration-300 hover:text-white',
-                }}
-              >
-                {links.map((link, index) => (
-                  <Tab
-                    key={index.toString()}
-                    title={
-                      <div className="flex items-center gap-2 text-sm font-sans">
-                        <span className="flex-shrink-0">{link.icon}</span>
-                        <span className="whitespace-nowrap">{link.label}</span>
-                      </div>
-                    }
-                    className="hover-effect active-effect"
-                  />
-                ))}
-              </Tabs>
+              {isLoading ? (
+                <div className="flex gap-4 items-center">
+                  <Skeleton className="h-8 w-20 bg-[#1f1f1f]" />
+                  <Skeleton className="h-8 w-20 bg-[#1f1f1f]" />
+                </div>
+              ) : (
+                <Tabs
+                  selectedKey={getActiveTabIndex().toString()}
+                  onSelectionChange={(key) => handleTabChange(parseInt(key as string))}
+                  aria-label="Navigation"
+                  variant="underlined"
+                  classNames={{
+                    tabList:
+                      'smr gap-1 w-full relative -mx-8 rounded-none p-0 border-none transition-all duration-300 hover:text-white',
+                    cursor: 'w-full h-[2px] bg-white bottom-[-9px] hover:text-white',
+                    tab: 'max-w-fit px-2 py-2 transition-all duration-300 ease-out hover:text-white relative',
+                    tabContent:
+                      'group-data-[selected=true]:text-white text-gray-400 transition-all duration-300 hover:text-white',
+                  }}
+                >
+                  {links.map((link, index) => (
+                    <Tab
+                      key={index.toString()}
+                      title={
+                        <div className="flex items-center gap-2 text-sm font-sans">
+                          <span className="flex-shrink-0">{link.icon}</span>
+                          <span className="whitespace-nowrap">{link.label}</span>
+                        </div>
+                      }
+                      className="hover-effect active-effect"
+                    />
+                  ))}
+                </Tabs>
+              )}
             </div>
           </div>
 
