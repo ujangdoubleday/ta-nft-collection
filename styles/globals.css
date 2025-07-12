@@ -339,13 +339,21 @@ code {
 
   html.scrolled .submenu {
     position: fixed;
-    height: 3.1rem;
+    height: 3.6rem;
     padding-top: 0.8rem;
     padding-bottom: 0.3rem;
+    margin-left: 0;
+    margin-right: 0;
     top: 0;
     left: 0;
     width: 100%;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  html.scrolled .submenu .smr {
+    margin-left: 0rem;
+    margin-right: 0rem;
+  
   }
 
   html.scrolled .submenu .nav-link {
