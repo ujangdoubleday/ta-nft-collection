@@ -12,10 +12,17 @@ interface NFTsHeaderProps {
   role?: 'admin' | 'user';
   onFilterToggle: (isOpen: boolean) => void;
   onRefresh?: () => Promise<void>;
+  showAll?: boolean;
+  isFilterOpen?: boolean;
 }
 
-export function NFTsHeader({ role = 'user', onFilterToggle, onRefresh }: NFTsHeaderProps) {
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+export function NFTsHeader({
+  role = 'user',
+  onFilterToggle,
+  onRefresh,
+  showAll = false,
+  isFilterOpen = false,
+}: NFTsHeaderProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const router = useRouter();
   const utils = trpc.useContext();
@@ -24,10 +31,11 @@ export function NFTsHeader({ role = 'user', onFilterToggle, onRefresh }: NFTsHea
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/nfts' : '/user/nfts';
 
+  // Determine the title based on role and showAll flag
+  const title = role === 'admin' ? 'All NFTs' : showAll ? 'All NFTs' : 'My NFTs';
+
   const toggleFilter = () => {
-    const newState = !isFilterOpen;
-    setIsFilterOpen(newState);
-    onFilterToggle(newState);
+    onFilterToggle(!isFilterOpen);
   };
 
   const handleRefresh = async () => {
@@ -75,9 +83,7 @@ export function NFTsHeader({ role = 'user', onFilterToggle, onRefresh }: NFTsHea
     <div className="mb-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">
-            {role === 'admin' ? 'All NFTs' : 'My NFTs'}
-          </h1>
+          <h1 className="text-2xl font-bold text-white">{title}</h1>
         </div>
         <div className="flex gap-2">
           <Button
