@@ -49,7 +49,7 @@ const baseConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'cyan-dead-reptile-256.mypinata.cloud',
+        hostname: 'green-added-cattle-346.mypinata.cloud',
       },
       {
         protocol: 'https',
