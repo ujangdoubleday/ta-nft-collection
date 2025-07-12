@@ -48,10 +48,10 @@ export async function createPinataFolder(name: string) {
     }
 
     try {
-      console.log(`Creating Pinata group using SDK: ${name}`);
+      // console.log(`Creating Pinata group using SDK: ${name}`);
 
       const group = await pinataSDK.groups.public.create({ name });
-      console.log('Pinata group created:', group);
+      // console.log('Pinata group created:', group);
 
       return {
         id: group.id,
@@ -85,7 +85,7 @@ export async function getPinataFolders() {
 
     try {
       const groups = await pinataSDK.groups.public.list();
-      console.log('Pinata groups fetched:', groups);
+      // console.log('Pinata groups fetched:', groups);
 
       // Handle different response structures
       if (groups && typeof groups === 'object') {
@@ -140,7 +140,7 @@ export async function uploadFileToPinata(fileBuffer: Buffer, fileName: string, f
 
       // Upload to specific group if folder ID is provided
       if (folderId && !folderId.startsWith('folder_')) {
-        console.log(`Uploading file to Pinata group: ${folderId}`);
+        // console.log(`Uploading file to Pinata group: ${folderId}`);
 
         uploadResult = await pinataSDK.upload.public.file(file as File, {
           groupId: folderId,
@@ -150,7 +150,7 @@ export async function uploadFileToPinata(fileBuffer: Buffer, fileName: string, f
         uploadResult = await pinataSDK.upload.public.file(file as File);
       }
 
-      console.log('File uploaded to Pinata successfully:', uploadResult);
+      // console.log('File uploaded to Pinata successfully:', uploadResult);
 
       return {
         cid: uploadResult.cid,
@@ -199,7 +199,7 @@ export async function uploadMetadataToPinata(metadata: any, name: string, folder
 
       // Upload to specific group if folder ID is provided
       if (folderId && !folderId.startsWith('folder_')) {
-        console.log(`Uploading metadata to Pinata group: ${folderId}`);
+        // console.log(`Uploading metadata to Pinata group: ${folderId}`);
 
         uploadResult = await pinataSDK.upload.public.file(file as File, {
           groupId: folderId,
@@ -209,7 +209,7 @@ export async function uploadMetadataToPinata(metadata: any, name: string, folder
         uploadResult = await pinataSDK.upload.public.file(file as File);
       }
 
-      console.log('Metadata uploaded to Pinata successfully:', uploadResult);
+      // console.log('Metadata uploaded to Pinata successfully:', uploadResult);
 
       return {
         cid: uploadResult.cid,
