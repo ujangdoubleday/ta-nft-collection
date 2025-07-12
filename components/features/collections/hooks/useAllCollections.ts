@@ -15,6 +15,7 @@ export function useAllCollections() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [collections, setCollections] = useState<EnrichedCollectionInfo[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
   const utils = trpc.useContext();
 
   // Fetch all collection addresses from the factory
@@ -43,7 +44,7 @@ export function useAllCollections() {
     }
 
     try {
-      setIsLoading(true);
+      setIsProcessing(true);
 
       // Create a map of collection addresses to their contract URIs
       const uriMap = new Map<string, string>();
@@ -130,14 +131,19 @@ export function useAllCollections() {
       console.error('Error enriching collections:', err);
       setError(err instanceof Error ? err : new Error('Unknown error occurred'));
     } finally {
+      setIsProcessing(false);
       setIsLoading(false);
     }
   }, [collectionAddresses, contractURIs, isLoadingAddresses, isLoadingURIs]);
 
   // Run enrichment when dependencies change
   useEffect(() => {
-    enrichCollections();
-  }, [enrichCollections]);
+    if (isLoadingAddresses || isLoadingURIs) {
+      setIsLoading(true);
+    } else if (collectionAddresses && contractURIs) {
+      enrichCollections();
+    }
+  }, [enrichCollections, collectionAddresses, contractURIs, isLoadingAddresses, isLoadingURIs]);
 
   // Function to refetch all data
   const refetch = useCallback(async () => {
@@ -158,13 +164,13 @@ export function useAllCollections() {
       console.error('Error refetching collections:', err);
       setError(err instanceof Error ? err : new Error('Failed to refetch collections'));
     } finally {
-      setIsLoading(false);
+      // We don't set isLoading to false here because enrichCollections will do that
     }
   }, [utils, refetchAddresses, refetchURIs, enrichCollections]);
 
   return {
     collections,
-    isLoading: isLoading || isLoadingAddresses || isLoadingURIs,
+    isLoading: isLoading || isLoadingAddresses || isLoadingURIs || isProcessing,
     error: error || addressesError || urisError,
     refetch,
   };

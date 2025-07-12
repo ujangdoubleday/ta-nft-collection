@@ -15,9 +15,10 @@ import { trpc } from '@/lib/api/trpc/client';
 
 interface NFTsContentProps {
   role?: 'admin' | 'user';
+  showAll?: boolean;
 }
 
-export function NFTsContent({ role = 'user' }: NFTsContentProps) {
+export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps) {
   const [mounted, setMounted] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
@@ -43,7 +44,7 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
     isLoading: isLoadingUserNFTs,
     error: userNFTsError,
     refetch: refetchUserNFTs,
-  } = useOwnerNFTs();
+  } = useOwnerNFTs({ showAll });
 
   const {
     nfts: adminNfts = [],
@@ -241,7 +242,13 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
   ) {
     return (
       <div className="space-y-6">
-        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
+        <NFTsHeader
+          role={role}
+          onFilterToggle={handleFilterToggle}
+          onRefresh={handleRefresh}
+          showAll={showAll}
+          isFilterOpen={isFilterPanelOpen}
+        />
         <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
           <h3 className="text-xl font-bold text-white mb-4">Loading NFTs</h3>
           <p className="text-zinc-400 mb-6">
@@ -265,7 +272,13 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
   if (error && !isRefreshing && cachedNFTs.length === 0) {
     return (
       <div className="space-y-6">
-        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
+        <NFTsHeader
+          role={role}
+          onFilterToggle={handleFilterToggle}
+          onRefresh={handleRefresh}
+          showAll={showAll}
+          isFilterOpen={isFilterPanelOpen}
+        />
         <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
           <div className="mx-auto w-12 h-12 rounded-full bg-red-900/20 flex items-center justify-center mb-4">
             <AlertCircle className="h-6 w-6 text-red-500" />
@@ -288,7 +301,13 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
   if (validNFTs.length === 0 && !isRefreshing && cachedNFTs.length === 0) {
     return (
       <div className="space-y-6">
-        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
+        <NFTsHeader
+          role={role}
+          onFilterToggle={handleFilterToggle}
+          onRefresh={handleRefresh}
+          showAll={showAll}
+          isFilterOpen={isFilterPanelOpen}
+        />
         <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
           <div className="mx-auto w-12 h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center mb-4">
             <Bug className="h-6 w-6 text-white" />
@@ -308,7 +327,13 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
   if (filteredNFTs.length === 0 && validNFTs.length > 0) {
     return (
       <div className="space-y-6">
-        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
+        <NFTsHeader
+          role={role}
+          onFilterToggle={handleFilterToggle}
+          onRefresh={handleRefresh}
+          showAll={showAll}
+          isFilterOpen={isFilterPanelOpen}
+        />
         {isFilterPanelOpen && (
           <NFTFilterPanel
             isOpen={isFilterPanelOpen}
@@ -332,7 +357,13 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
 
   return (
     <div className="space-y-6">
-      <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
+      <NFTsHeader
+        role={role}
+        onFilterToggle={handleFilterToggle}
+        onRefresh={handleRefresh}
+        showAll={showAll}
+        isFilterOpen={isFilterPanelOpen}
+      />
 
       {isFilterPanelOpen && (
         <NFTFilterPanel

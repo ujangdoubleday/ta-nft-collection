@@ -99,9 +99,12 @@ export const adminNavigationLinks: NavigationLink[] = [
 ];
 
 // Collection specific navigation links generator
-export const createCollectionNavigationLinks = (collectionAddress: string): NavigationLink[] => {
-  // Semua link ditampilkan tanpa memperhatikan apakah user adalah owner atau tidak
-  return [
+export const createCollectionNavigationLinks = (
+  collectionAddress: string,
+  isOwner: boolean = false,
+): NavigationLink[] => {
+  // Base links that are always shown regardless of ownership
+  const baseLinks: NavigationLink[] = [
     {
       href: `/user/collections/${collectionAddress}`,
       label: 'Overview',
@@ -114,6 +117,10 @@ export const createCollectionNavigationLinks = (collectionAddress: string): Navi
       icon: React.createElement(Images, { className: 'h-4 w-4' }),
       isActive: (pathname) => pathname.includes('/nfts') && !pathname.includes('/mint'),
     },
+  ];
+
+  // Owner-only links
+  const ownerLinks: NavigationLink[] = [
     {
       href: `/user/collections/${collectionAddress}/mint`,
       label: 'Mint NFT',
@@ -127,14 +134,18 @@ export const createCollectionNavigationLinks = (collectionAddress: string): Navi
       isActive: (pathname) => pathname.includes('/settings'),
     },
   ];
+
+  // Return all links if user is owner, otherwise just return base links
+  return isOwner ? [...baseLinks, ...ownerLinks] : baseLinks;
 };
 
 // Admin collection specific navigation links generator
 export const createAdminCollectionNavigationLinks = (
   collectionAddress: string,
+  isOwner: boolean = false,
 ): NavigationLink[] => {
-  // Semua link ditampilkan tanpa memperhatikan apakah admin adalah owner atau tidak
-  return [
+  // Base links that are always shown regardless of ownership
+  const baseLinks: NavigationLink[] = [
     {
       href: `/admin/collections/${collectionAddress}`,
       label: 'Overview',
@@ -147,6 +158,10 @@ export const createAdminCollectionNavigationLinks = (
       icon: React.createElement(Images, { className: 'h-4 w-4' }),
       isActive: (pathname) => pathname.includes('/nfts') && !pathname.includes('/mint'),
     },
+  ];
+
+  // Owner-only links
+  const ownerLinks: NavigationLink[] = [
     {
       href: `/admin/collections/${collectionAddress}/mint`,
       label: 'Mint NFT',
@@ -160,6 +175,9 @@ export const createAdminCollectionNavigationLinks = (
       isActive: (pathname) => pathname.includes('/settings'),
     },
   ];
+
+  // Return all links if user is owner, otherwise just return base links
+  return isOwner ? [...baseLinks, ...ownerLinks] : baseLinks;
 };
 
 // Test function untuk debugging - minimal logging

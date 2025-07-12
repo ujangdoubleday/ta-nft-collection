@@ -31,7 +31,8 @@ export interface UseNavigationProps {
   isOwner?: boolean;
 }
 
-export function useNavigation(): UseNavigationReturn {
+export function useNavigation(props?: UseNavigationProps): UseNavigationReturn {
+  const { isOwner = false } = props || {};
   const pathname = usePathname();
   const [collectionAddress, setCollectionAddress] = useState<string | null>(null);
 
@@ -49,9 +50,9 @@ export function useNavigation(): UseNavigationReturn {
     }
   }, [pathname]);
 
-  // We always show all links, isOwner doesn't matter anymore
+  // Filter collection navigation links based on ownership status
   const links = collectionAddress
-    ? createCollectionNavigationLinks(collectionAddress)
+    ? createCollectionNavigationLinks(collectionAddress, isOwner)
     : mainNavigationLinks;
 
   return {
@@ -62,7 +63,8 @@ export function useNavigation(): UseNavigationReturn {
 }
 
 // Updated admin navigation hook
-export function useAdminNavigation(): UseNavigationReturn {
+export function useAdminNavigation(props?: UseNavigationProps): UseNavigationReturn {
+  const { isOwner = false } = props || {};
   const pathname = usePathname();
   const [collectionAddress, setCollectionAddress] = useState<string | null>(null);
 
@@ -83,9 +85,9 @@ export function useAdminNavigation(): UseNavigationReturn {
     }
   }, [pathname]);
 
-  // We always show all links, isOwner doesn't matter anymore
+  // Filter admin collection navigation links based on ownership status
   const links = collectionAddress
-    ? createAdminCollectionNavigationLinks(collectionAddress)
+    ? createAdminCollectionNavigationLinks(collectionAddress, isOwner)
     : adminNavigationLinks;
 
   return {

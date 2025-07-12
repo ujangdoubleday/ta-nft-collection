@@ -302,18 +302,21 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
 
   // Check if we have collections data but it's empty
   const hasEmptyCollections =
-    (collections !== undefined && Array.isArray(collections) && collections.length === 0) ||
-    (userCollections !== undefined &&
-      Array.isArray(userCollections) &&
-      userCollections.length === 0 &&
-      role === 'user') ||
-    (allCollections !== undefined &&
-      Array.isArray(allCollections) &&
-      allCollections.length === 0 &&
-      role === 'admin');
+    !isLoading &&
+    !isLoadingCollections &&
+    !ownershipLoading &&
+    ((collections !== undefined && Array.isArray(collections) && collections.length === 0) ||
+      (userCollections !== undefined &&
+        Array.isArray(userCollections) &&
+        userCollections.length === 0 &&
+        role === 'user') ||
+      (allCollections !== undefined &&
+        Array.isArray(allCollections) &&
+        allCollections.length === 0 &&
+        role === 'admin'));
 
   // Render empty state if we have data and it's empty
-  if (hasEmptyCollections && !isLoading && ownershipLoading) {
+  if (hasEmptyCollections) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
         <div className="bg-[#0A0A0A] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f1f1f]">
@@ -334,19 +337,8 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
     );
   }
 
-  // Only show skeleton for a short period
-  if (isLoading && isLoadingCollections) {
-    return renderCollectionSkeleton();
-  }
-
-  // Show skeleton when filter is applied but ownership data is still loading
-  if (
-    ownershipLoading &&
-    collections !== undefined &&
-    Array.isArray(collections) &&
-    collections.length > 0 &&
-    (activeFilters?.ownerFilter === 'owned' || activeFilters?.ownerFilter === 'not-owned')
-  ) {
+  // Only show skeleton while loading
+  if (isLoading || isLoadingCollections || ownershipLoading) {
     return renderCollectionSkeleton();
   }
 
