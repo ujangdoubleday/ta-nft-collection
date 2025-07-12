@@ -171,11 +171,11 @@ export function Submenu(props: SubmenuProps) {
     }
   };
 
-  const submenuClasses = `submenu bg-[#0A0A0A] border-b border-[#1f1f1f] w-full px-4 transition-all h-[2.27rem] duration-300 ${className}`;
+  const submenuClasses = `submenu bg-[#0A0A0A] w-full transition-all duration-300 ${className}`;
 
   return (
     <div className={submenuClasses}>
-      <Container className={containerClassName}>
+      <Container className={`${containerClassName} border-b border-[#1f1f1f] h-[2.8rem]`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {showLogo && (
@@ -188,12 +188,12 @@ export function Submenu(props: SubmenuProps) {
               {/* Custom hover background that follows the mouse */}
               {hoverPosition && (
                 <div
-                  className="absolute rounded-md bg-[#1f1f1f] transition-all duration-300 ease-out"
+                  className="absolute rounded-sm bg-[#1f1f1f] hover:text-white transition-all duration-300 ease-out"
                   style={{
                     left: `${hoverPosition.left}px`,
                     width: `${hoverPosition.width}px`,
-                    height: '28px',
-                    top: '2px',
+                    height: '35px',
+                    top: '-1px',
                     opacity: hoverPosition.opacity,
                     pointerEvents: 'none',
                     zIndex: 0,
@@ -208,9 +208,9 @@ export function Submenu(props: SubmenuProps) {
                 variant="underlined"
                 classNames={{
                   tabList:
-                    'gap-1 w-full relative rounded-none p-0 border-none transition-all duration-300',
-                  cursor: 'w-full h-[2px] bg-white bottom-[-5px]',
-                  tab: 'max-w-fit px-2 py-2 transition-all duration-300 ease-out mb-2 z-10 hover:text-white relative',
+                    'smr gap-1 w-full relative -mx-8 rounded-none p-0 border-none transition-all duration-300 hover:text-white',
+                  cursor: 'w-full h-[2px] bg-white bottom-[-9px] hover:text-white',
+                  tab: 'max-w-fit px-2 py-2 transition-all duration-300 ease-out hover:text-white relative',
                   tabContent:
                     'group-data-[selected=true]:text-white text-gray-400 transition-all duration-300 hover:text-white',
                 }}
