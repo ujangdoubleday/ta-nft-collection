@@ -1,3 +1,5 @@
+'use client';
+
 import { useWalletWagmi as useWallet } from '../hooks/useWallet';
 import { formatAddress } from '@/lib/utils';
 import { redirect } from 'next/navigation';
