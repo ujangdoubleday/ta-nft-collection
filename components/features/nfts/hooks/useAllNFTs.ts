@@ -201,14 +201,30 @@ export function useAllNFTs() {
   // Function to refetch all NFTs
   const refetch = async () => {
     // console.log('Admin NFTs - Refetching data');
-    setMounted(false);
-    setAllNFTs([]);
+    setIsLoadingNFTs(true);
     setError(null);
 
-    // Small delay to ensure the effect runs again
-    setTimeout(() => {
-      setMounted(true);
-    }, 100);
+    // Keep the existing NFTs data during refetch
+    const currentNFTs = allNFTs;
+
+    try {
+      // Invalidate the queries
+      await trpcUtils.invalidate();
+
+      // If we have no current NFTs, reset mounted to trigger a complete refetch
+      if (!currentNFTs || currentNFTs.length === 0) {
+        setMounted(false);
+        // Small delay to ensure the effect runs again
+        setTimeout(() => {
+          setMounted(true);
+        }, 100);
+      }
+    } catch (err) {
+      console.error('Error during refetch:', err);
+      setError(err instanceof Error ? err : new Error('Failed to refetch NFTs'));
+    } finally {
+      setIsLoadingNFTs(false);
+    }
   };
 
   return {

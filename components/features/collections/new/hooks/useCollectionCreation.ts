@@ -159,11 +159,12 @@ export function useCollectionCreation() {
           ]);
 
           // Optionally revalidate on-demand
-          try {
-            await fetch('/api/revalidate?tag=collections');
-          } catch (err) {
-            console.error('Error revalidating:', err);
-          }
+          // try {
+          //   await fetch('/api/revalidate?path=/user/collections&type=page');
+          //   await fetch('/api/revalidate?path=/admin/collections&type=page');
+          // } catch (err) {
+          //   console.error('Error revalidating:', err);
+          // }
         }
       }
     } catch (error) {
