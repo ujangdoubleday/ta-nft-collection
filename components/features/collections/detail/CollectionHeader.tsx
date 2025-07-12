@@ -36,11 +36,6 @@ export function CollectionHeader({ collection }: CollectionHeaderProps) {
     ? `https://sepolia.etherscan.io/address/${collection.collectionAddress}`
     : '#';
 
-  // Generate placeholder URL for the API
-  const placeholderUrl = collection?.collectionAddress
-    ? `/api/placeholder?id=${collection.collectionAddress}`
-    : `/api/placeholder?id=collection-header`;
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-6">
@@ -53,7 +48,6 @@ export function CollectionHeader({ collection }: CollectionHeaderProps) {
             sizes="(max-width: 768px) 100vw, 192px"
             className="object-cover"
             fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
-            blurDataURL={placeholderUrl}
             placeholderType="blur"
           />
         </div>

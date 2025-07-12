@@ -82,10 +82,6 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
         return Promise.all(
           blockchainNfts.map(async (nft) => {
             try {
-              // Generate placeholder using the API route instead of direct function call
-              const placeholderUrl = `/api/placeholder?url=${encodeURIComponent(formatIPFSUrl(nft.imageUrl)) || 'default'}`;
-              const placeholder = placeholderUrl;
-
               // Format image URL if it's an IPFS URL
               const image = nft.imageUrl ? formatIPFSUrl(nft.imageUrl) : '';
               let processedImageUrl = image;
@@ -94,8 +90,6 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
               return {
                 id: nft.tokenId,
                 image: processedImageUrl,
-                blurhash: placeholder,
-                placeholder,
                 contractAddress: nft.contractAddress,
                 tokenId: nft.tokenId,
                 name: nft.name,

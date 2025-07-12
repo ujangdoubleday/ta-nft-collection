@@ -24,8 +24,5 @@ export * from './breadcrumbs';
 // Export helpers for URL handling
 export * from './url';
 
-// Export plaiceholder utility
-export * from './plaiceholder';
-
 // Export revalidation utility
 export * from './revalidation';

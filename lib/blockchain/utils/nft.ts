@@ -119,9 +119,6 @@ export type CollectionItem = {
  * @returns Promise with the processed CollectionItem
  */
 export const processAlchemyNFT = async (nft: AlchemyNFT): Promise<CollectionItem> => {
-  // Generate placeholder URL using the API instead of direct function call
-  let placeholder = `/api/placeholder?id=${nft.tokenId || 'default'}`;
-
   // Get the best available image URL
   let imageUrl = '';
   if (nft.raw?.metadata.image) {
@@ -134,11 +131,6 @@ export const processAlchemyNFT = async (nft: AlchemyNFT): Promise<CollectionItem
 
   // Format the image URL if it's an IPFS URL
   const image = imageUrl ? formatIPFSUrl(imageUrl) : '';
-
-  // If we have an image URL, use it for a better placeholder
-  if (image) {
-    placeholder = `/api/placeholder?url=${encodeURIComponent(image)}`;
-  }
 
   // Process attributes
   let attributes: Record<string, string> = { rarity: 'Common' };
@@ -159,8 +151,6 @@ export const processAlchemyNFT = async (nft: AlchemyNFT): Promise<CollectionItem
     name: nft.name || `NFT #${nft.tokenId}`,
     type: attributes.type || 'Digital Art',
     image,
-    blurhash: placeholder,
-    placeholder,
     contractAddress: nft.contract.address,
     tokenId: nft.tokenId,
     attributes,

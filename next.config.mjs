@@ -1,16 +1,11 @@
-import withBundleAnalyzer from '@next/bundle-analyzer'
-import withPlaiceholder from '@plaiceholder/next'
-
-const withAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === 'true',
-})
-
 /** @type {import('next').NextConfig} */
 const baseConfig = {
   reactStrictMode: true,
   experimental: {
     authInterrupts: true,
   },
+  // Turbopack configuration
+  turbopack: {},
   // Add headers configuration for cookie handling
   async headers() {
     return [
@@ -37,20 +32,35 @@ const baseConfig = {
       },
     ]
   },
-  // Configure allowed image domains
+  // Configure allowed image domains using remotePatterns instead of domains
   images: {
-    domains: [
-      'gateway.pinata.cloud',
-      'ipfs.io',
-      'dweb.link',
-      'cyan-dead-reptile-256.mypinata.cloud',
-      'eth-sepolia.g.alchemy.com',
-      'res.cloudinary.com',
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'gateway.pinata.cloud',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ipfs.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'dweb.link',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cyan-dead-reptile-256.mypinata.cloud',
+      },
+      {
+        protocol: 'https',
+        hostname: 'eth-sepolia.g.alchemy.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
     ],
   }
 }
 
-// Apply plaiceholder and bundle analyzer
-const nextConfig = withPlaiceholder(withAnalyzer(baseConfig))
-
-export default nextConfig
+export default baseConfig

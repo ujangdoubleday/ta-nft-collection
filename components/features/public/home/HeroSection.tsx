@@ -49,7 +49,6 @@ export function HeroSection() {
                 height={500}
                 className="h-full w-full object-cover rounded-lg"
                 placeholderType="blur"
-                blurDataURL="/api/placeholder?id=hero-cat-image"
               />
             </div>
           </motion.div>
