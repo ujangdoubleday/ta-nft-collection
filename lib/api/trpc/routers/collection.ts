@@ -11,6 +11,151 @@ import { NFT_COLLECTION_ABI, NFT_FACTORY_ABI } from '@/lib/blockchain/abi';
 import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
 
 export const collectionRouter = router({
+  // Get collections owned by a specific address
+  getOwnerCollections: publicProcedure
+    .input(z.object({ ownerAddress: z.string() }))
+    .query(async ({ input }) => {
+      const { ownerAddress } = input;
+
+      if (!ownerAddress) {
+        return [];
+      }
+
+      try {
+        // First get all collections
+        const collections = (await publicClient.readContract({
+          address: NFT_FACTORY_ADDRESS,
+          abi: NFT_FACTORY_ABI,
+          functionName: 'getAllCollections',
+        })) as string[];
+
+        // Filter collections owned by the specified address
+        const ownedCollections = await Promise.all(
+          collections.map(async (collectionAddress) => {
+            try {
+              // Get the owner of each collection
+              const owner = await publicClient.readContract({
+                address: collectionAddress as `0x${string}`,
+                abi: NFT_COLLECTION_ABI,
+                functionName: 'owner',
+              });
+
+              // Check if the owner matches the input address
+              const isOwner =
+                owner && ownerAddress
+                  ? (owner as string).toLowerCase() === ownerAddress.toLowerCase()
+                  : false;
+
+              if (isOwner) {
+                // Get basic collection info
+                const name = await publicClient.readContract({
+                  address: collectionAddress as `0x${string}`,
+                  abi: NFT_COLLECTION_ABI,
+                  functionName: 'name',
+                });
+
+                const symbol = await publicClient.readContract({
+                  address: collectionAddress as `0x${string}`,
+                  abi: NFT_COLLECTION_ABI,
+                  functionName: 'symbol',
+                });
+
+                const contractURI = await publicClient.readContract({
+                  address: collectionAddress as `0x${string}`,
+                  abi: NFT_COLLECTION_ABI,
+                  functionName: 'contractURI',
+                });
+
+                return {
+                  collectionAddress,
+                  name: name as string,
+                  symbol: symbol as string,
+                  contractURI: contractURI as string,
+                  owner: owner as string,
+                };
+              }
+
+              return null;
+            } catch (error) {
+              console.error(`Error checking owner for collection ${collectionAddress}:`, error);
+              return null;
+            }
+          }),
+        );
+
+        // Filter out null values (collections not owned by the address)
+        return ownedCollections.filter(Boolean);
+      } catch (error) {
+        console.error('Error fetching owned collections:', error);
+        return [];
+      }
+    }),
+
+  // Get total supply of NFTs in a collection
+  getTotalSupply: publicProcedure
+    .input(z.object({ collectionAddress: z.string() }))
+    .query(async ({ input }) => {
+      const { collectionAddress } = input;
+
+      if (!collectionAddress) {
+        return 0;
+      }
+
+      try {
+        const totalSupply = await publicClient.readContract({
+          address: collectionAddress as `0x${string}`,
+          abi: NFT_COLLECTION_ABI,
+          functionName: 'totalSupply',
+        });
+
+        return Number(totalSupply);
+      } catch (error) {
+        console.error(`Error getting total supply for collection ${collectionAddress}:`, error);
+        return 0;
+      }
+    }),
+
+  // Get total supply of all NFTs across all collections
+  getTotalNFTsCount: publicProcedure.query(async () => {
+    try {
+      // First get all collections
+      const collections = (await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'getAllCollections',
+      })) as `0x${string}`[];
+
+      if (!collections || collections.length === 0) {
+        return 0;
+      }
+
+      // Then get total supply for each collection
+      const supplyPromises = collections.map(async (collectionAddress) => {
+        try {
+          const totalSupply = await publicClient.readContract({
+            address: collectionAddress,
+            abi: NFT_COLLECTION_ABI,
+            functionName: 'totalSupply',
+          });
+
+          return Number(totalSupply);
+        } catch (error) {
+          console.error(`Error getting total supply for collection ${collectionAddress}:`, error);
+          return 0;
+        }
+      });
+
+      // Sum up all the supplies
+      const supplies = await Promise.all(supplyPromises);
+      const totalNFTs = supplies.reduce((sum, supply) => sum + supply, 0);
+
+      return totalNFTs;
+    } catch (error) {
+      console.error('Error getting total NFTs count:', error);
+      return 0;
+    }
+  }),
+
   getCreatorCollections: publicProcedure
     .input(z.object({ creatorAddress: z.string() }))
     .query(async ({ input }) => {

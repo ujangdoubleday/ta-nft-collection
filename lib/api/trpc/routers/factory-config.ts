@@ -7,6 +7,35 @@ import { NFT_FACTORY_ADDRESS } from '@/lib/blockchain';
 import { checkContractPaused, getContractBalance } from '@/lib/blockchain/utils/alchemy';
 
 export const factoryConfigRouter = router({
+  // Get factory stats
+  getFactoryStats: publicProcedure.query(async () => {
+    try {
+      const stats = await publicClient.readContract({
+        address: NFT_FACTORY_ADDRESS,
+        abi: NFT_FACTORY_ABI,
+        functionName: 'getFactoryStats',
+      });
+
+      // Stats are returned as an array of 4 BigInts
+      const statsArray = stats as bigint[];
+
+      return {
+        totalCollections: Number(statsArray[0]),
+        collectedFee: statsArray[1],
+        creationFee: statsArray[2],
+        factoryBalance: statsArray[3],
+      };
+    } catch (error) {
+      console.error('Error getting factory stats:', error);
+      return {
+        totalCollections: 0,
+        collectedFee: BigInt(0),
+        creationFee: BigInt(0),
+        factoryBalance: BigInt(0),
+      };
+    }
+  }),
+
   // Get creation fee
   getCreationFee: publicProcedure.query(async () => {
     try {
