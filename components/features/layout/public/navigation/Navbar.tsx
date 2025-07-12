@@ -11,10 +11,9 @@ export function Navbar() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.MouseEvent) => {
+  const handleLogin = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    // Navigate to login after showing spinner
     setTimeout(() => {
       router.push('/api/auth/login');
     }, 300);
@@ -30,7 +29,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={handleLogin}
+            onClick={(e) => handleLogin(e)}
             className="bg-black text-white rounded-md border border-zinc-600 text-[15px] hover:bg-zinc-800 font-medium shadow-sm flex items-center justify-center w-9 h-9"
           >
             {isLoading ? <Spinner size="sm" /> : <User size={18} />}

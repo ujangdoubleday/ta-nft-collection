@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { useSearchParams, usePathname } from 'next/navigation';
 import { NFTFilterPanel } from './FilterPanel';
 import { NFTsHeader } from './NFTsHeader';
-import { simplifyNFTForLogging } from '@/lib/blockchain/utils/alchemy';
+import { Suspense } from 'react';
 
 interface NFTsContentProps {
   role?: 'admin' | 'user';
@@ -268,7 +268,7 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
             {error.message || 'There was a problem loading NFTs. Please try again.'}
           </p>
           <button
-            onClick={handleRefresh}
+            onClick={() => handleRefresh()}
             className="bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
           >
             Try Again
@@ -297,16 +297,18 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
       <div className="animate-fade-in">
         <NFTsHeader role={role} onFilterToggle={handleFilterToggle} />
 
-        <NFTFilterPanel
-          isOpen={isFilterPanelOpen}
-          role={role}
-          onFilterChange={handleFilterChange}
-          collections={collectionOptions}
-        />
+        <Suspense>
+          <NFTFilterPanel
+            isOpen={isFilterPanelOpen}
+            role={role}
+            onFilterChange={handleFilterChange}
+            collections={collectionOptions}
+          />
+        </Suspense>
 
         <div className="flex justify-end mb-4">
           <button
-            onClick={handleRefresh}
+            onClick={() => handleRefresh()}
             disabled={isRefreshing}
             className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
               isRefreshing ? 'opacity-70' : ''

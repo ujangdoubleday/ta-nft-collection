@@ -86,7 +86,7 @@ export function EmergencyWithdraw({
                 size="lg"
                 disabled={isLoading || isWithdrawing || !isOwner || contractBalance === 0}
                 className="w-full"
-                onClick={handleEmergencyWithdraw}
+                onClick={() => handleEmergencyWithdraw()}
               >
                 {isWithdrawing ? (
                   <div className="flex items-center justify-center gap-2">

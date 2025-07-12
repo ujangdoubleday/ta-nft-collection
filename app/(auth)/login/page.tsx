@@ -122,7 +122,7 @@ export default function LoginPage() {
             </div>
           ) : (
             <button
-              onClick={handleWalletButtonClick}
+              onClick={() => handleWalletButtonClick()}
               className="w-full py-3 px-4 bg-white text-black hover:bg-zinc-200 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-3"
               aria-label="Connect wallet"
             >

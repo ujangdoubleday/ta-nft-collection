@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CollectionsList } from '@/components/features/collections/CollectionsList';
 import { CollectionsHeader } from '@/components/features/collections/CollectionsHeader';
 import { FilterPanel, CollectionFilters } from '@/components/features/collections/FilterPanel';
+import { Suspense } from 'react';
 
 export function AdminCollectionsContent() {
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
@@ -28,14 +29,15 @@ export function AdminCollectionsContent() {
   return (
     <div className="space-y-6">
       <CollectionsHeader role="admin" onFilterToggle={handleFilterToggle} />
-      <FilterPanel
-        isOpen={isFilterPanelOpen}
-        role="admin"
-        onFilterChange={handleFilterChange}
-        initialFilters={emptyFilters}
-      />
-
-      <CollectionsList role="admin" />
+      <Suspense>
+        <FilterPanel
+          isOpen={isFilterPanelOpen}
+          role="admin"
+          onFilterChange={handleFilterChange}
+          initialFilters={emptyFilters}
+        />
+        <CollectionsList role="admin" />
+      </Suspense>
     </div>
   );
 }

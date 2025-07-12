@@ -60,7 +60,7 @@ export function WalletModalContent({
           </DialogHeader>
           <div className="flex flex-col mt-4 space-y-4">
             <Button
-              onClick={onConnectAction}
+              onClick={() => onConnectAction()}
               disabled={isConnecting}
               size="lg"
               className="bg-white text-zinc-900 hover:bg-zinc-100 hover:text-zinc-900 py-6 font-medium shadow-md border border-zinc-200"
@@ -110,7 +110,7 @@ export function WalletModalContent({
 
             <div className="flex gap-3">
               <Button
-                onClick={onAuthenticateAction}
+                onClick={() => onAuthenticateAction()}
                 disabled={isAuthenticating}
                 className="flex-1 bg-white text-zinc-900 hover:bg-zinc-100 hover:text-zinc-900 border border-zinc-200"
               >
@@ -124,7 +124,7 @@ export function WalletModalContent({
                 )}
               </Button>
               <Button
-                onClick={onCancelSignAction}
+                onClick={() => onCancelSignAction()}
                 disabled={isAuthenticating}
                 variant="outline"
                 className="bg-transparent text-white hover:text-white hover:bg-zinc-800 border border-zinc-700"
@@ -165,7 +165,7 @@ export function WalletModalContent({
                 <div className="flex items-center">
                   <span className="font-mono text-sm mr-2">{safeFormatAddress(address)}</span>
                   <button
-                    onClick={onCopyAddressAction}
+                    onClick={() => onCopyAddressAction()}
                     className="bg-zinc-700 hover:bg-zinc-600 rounded-md p-1.5 transition-colors"
                   >
                     {copied ? (
@@ -190,7 +190,7 @@ export function WalletModalContent({
             </div>
 
             <Button
-              onClick={onDisconnectAction}
+              onClick={() => onDisconnectAction()}
               className="w-full bg-white text-zinc-900 hover:bg-zinc-100 hover:text-zinc-900 border border-zinc-200"
             >
               <LogOut className="w-4 h-4" /> Disconnect Wallet

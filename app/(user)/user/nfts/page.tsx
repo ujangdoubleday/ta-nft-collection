@@ -1,5 +1,8 @@
 import { NFTsContent } from '@/components/features/nfts';
+import { Suspense } from 'react';
 
 export default function NFTsPage() {
-  return <NFTsContent />;
+  <Suspense>
+    <NFTsContent />
+  </Suspense>;
 }

@@ -90,17 +90,17 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
     }
   }, [isLoadingCollections, isLoadingAllCollections, role]);
 
+  // Set loading to false after data is loaded or after timeout
   useEffect(() => {
     // Set loading to false after a timeout even if query is still loading
     // to prevent infinite loading state in case of errors
-    if (address) {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 5000);
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+      setOwnershipLoading(false); // Also set ownership loading to false after timeout
+    }, 3000); // Reduced timeout to 3 seconds
 
-      return () => clearTimeout(timer);
-    }
-  }, [address]);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Define a type for our collection data
   type CollectionData = {
@@ -140,8 +140,9 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
 
   // Create tagged collections with ownership info
   useEffect(() => {
-    if (!collections) {
+    if (!collections || collections.length === 0) {
       setTaggedCollections([]);
+      setOwnershipLoading(false); // Set to false when no collections
       return;
     }
 
@@ -277,13 +278,51 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
     );
   };
 
-  if (isLoading || isLoadingCollections) {
+  // Check if we have collections data but it's empty
+  const hasEmptyCollections =
+    (collections !== undefined && Array.isArray(collections) && collections.length === 0) ||
+    (userCollections !== undefined &&
+      Array.isArray(userCollections) &&
+      userCollections.length === 0 &&
+      role === 'user') ||
+    (allCollections !== undefined &&
+      Array.isArray(allCollections) &&
+      allCollections.length === 0 &&
+      role === 'admin');
+
+  // Render empty state if we have data and it's empty
+  if (hasEmptyCollections && !isLoading) {
+    return (
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
+        <div className="bg-[#0A0A0A] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f1f1f]">
+          <ImagePlus className="h-8 w-8 text-white" />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-2">No Collections Found</h3>
+        <p className="text-zinc-400 mb-6">
+          You don&apos;t have any collections yet. Create your first collection to get started.
+        </p>
+        <Link
+          href={`${basePath}/new`}
+          className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
+        >
+          <ImagePlus className="h-4 w-4" />
+          Create New Collection
+        </Link>
+      </div>
+    );
+  }
+
+  // Only show skeleton for a short period
+  if (isLoading && isLoadingCollections) {
     return renderCollectionSkeleton();
   }
 
   // Show skeleton when filter is applied but ownership data is still loading
   if (
     ownershipLoading &&
+    collections !== undefined &&
+    Array.isArray(collections) &&
+    collections.length > 0 &&
     (activeFilters?.ownerFilter === 'owned' || activeFilters?.ownerFilter === 'not-owned')
   ) {
     return renderCollectionSkeleton();
@@ -322,6 +361,9 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
           <ImagePlus className="h-8 w-8 text-white" />
         </div>
         <h3 className="text-xl font-bold text-white mb-2">No Collections Found</h3>
+        <p className="text-zinc-400 mb-6">
+          No collections match your current filters. Try adjusting your search criteria.
+        </p>
       </div>
     );
   }

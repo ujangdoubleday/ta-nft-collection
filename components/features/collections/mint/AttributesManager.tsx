@@ -33,7 +33,7 @@ export const AttributesManager = ({ attributes, setAttributes }: AttributesManag
         <label className="block text-white text-sm font-medium">Attributes</label>
         <button
           type="button"
-          onClick={addAttribute}
+          onClick={() => addAttribute()}
           className="flex items-center gap-1 text-white text-xs bg-[#1f1f1f] hover:bg-[#2a2a2a] py-1 px-2 rounded-md"
         >
           <Plus className="h-3 w-3" />

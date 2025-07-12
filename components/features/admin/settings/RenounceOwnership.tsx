@@ -182,7 +182,7 @@ export function RenounceOwnership({ isLoading }: RenounceOwnershipProps) {
               <Button
                 type="button"
                 variant="destructive"
-                onClick={handleRenounceOwnership}
+                onClick={() => handleRenounceOwnership()}
                 disabled={isRenouncing || !isConfirmed}
               >
                 {isRenouncing ? (

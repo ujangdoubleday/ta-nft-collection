@@ -204,7 +204,7 @@ export function RenounceCollectionOwnership({
               <Button
                 type="button"
                 variant="destructive"
-                onClick={handleRenounceOwnership}
+                onClick={() => handleRenounceOwnership()}
                 disabled={isRenouncing || !isConfirmed}
               >
                 {isRenouncing ? (

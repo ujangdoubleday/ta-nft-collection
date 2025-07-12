@@ -248,7 +248,7 @@ export function Submenu(props: SubmenuProps) {
                         {address ? shortenAddress(address) : '0x...'}
                       </span>
                       <button
-                        onClick={copyToClipboard}
+                        onClick={() => copyToClipboard()}
                         className="p-1.5 rounded hover:bg-[#1f1f1f] transition-colors"
                         title="Copy address"
                       >
@@ -263,7 +263,7 @@ export function Submenu(props: SubmenuProps) {
                   <hr className="my-2 border-[#1f1f1f]" />
                   <DropdownMenuItem
                     className="flex items-center gap-2 cursor-pointer hover:bg-[#1f1f1f] transition-colors"
-                    onClick={handleLogout}
+                    onClick={() => handleLogout()}
                   >
                     <LogOut className="h-4 w-4" />
                     <span>Disconnect Wallet</span>
