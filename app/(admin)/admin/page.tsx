@@ -1,5 +1,5 @@
-import { OverviewContent } from '@/components/features/admin/overview';
+import { DashboardContent } from '@/components/features/admin/dashboard';
 
 export default async function Page() {
-  return <OverviewContent />;
+  return <DashboardContent />;
 }

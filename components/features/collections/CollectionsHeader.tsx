@@ -6,6 +6,8 @@ import { useAddress } from '@/lib/hooks/use-address';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Filter } from 'lucide-react';
 
 interface CollectionsHeaderProps {
   role?: 'admin' | 'user';
@@ -29,16 +31,22 @@ export function CollectionsHeader({ role = 'user', onFilterToggle }: Collections
     if (!address || isRefreshing) return;
 
     setIsRefreshing(true);
-    toast.info('Refreshing collections...');
+    // toast.info('Refreshing collections...');
 
     try {
       // Invalidate and refetch collections data
       await Promise.all([
         utils.collection.getEnrichedCreatorCollections.invalidate({ creatorAddress: address }),
         utils.collection.getCreatorCollections.invalidate({ creatorAddress: address }),
-        // Call revalidate API to update cached data
-        fetch('/api/revalidate?tag=collections'),
+        // Fix: Use the correct method name
+        utils.factoryConfig.getAllCollections.invalidate(),
+        utils.collection.getMultipleCollectionOwners.invalidate(),
+        // Call revalidate API with path parameter and page type
+        fetch(`/api/revalidate?path=${basePath}&type=page`),
       ]);
+
+      // Use router.refresh() to refresh the current page
+      router.refresh();
       toast.success('Collections refreshed successfully!');
     } catch (error) {
       console.error('Error refreshing collections:', error);
@@ -80,16 +88,16 @@ export function CollectionsHeader({ role = 'user', onFilterToggle }: Collections
             </button>
           )}
 
-          <button
+          <Button
             onClick={() => handleFilterClick()}
-            className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
-              isFilterOpen ? 'bg-zinc-200' : ''
-            }`}
-            aria-label="Filter collections"
+            variant="outline"
+            className={`flex items-center gap-2 text-sm ${
+              isFilterOpen ? 'opacity-70' : ''
+            } bg-white text-black hover:bg-zinc-200 hover:text-black`}
           >
-            <FilterIcon className="h-4 w-4" />
-            Filter
-          </button>
+            <Filter className="h-4 w-4" />
+            {isFilterOpen ? 'Hide Filters' : 'Filter'}
+          </Button>
 
           <button
             onClick={() => handleRefresh()}

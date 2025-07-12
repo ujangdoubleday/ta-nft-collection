@@ -22,11 +22,14 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
   const [mounted, setMounted] = useState(false);
   const [processingError, setProcessingError] = useState<Error | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  // Add cached NFTs state
+  const [cachedNFTs, setCachedNFTs] = useState<any[]>([]);
   const router = useRouter();
   const utils = trpc.useContext();
 
   // Determine the base path based on role
   const basePath = role === 'admin' ? '/admin/collections' : '/user/collections';
+  const nftsPath = `${basePath}/${address}/nfts`;
 
   // Handle client-side rendering
   useEffect(() => {
@@ -70,17 +73,28 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
     isLoading: isLoadingNFTs,
     error: nftsError,
     isError: isNftsError,
+    refetch: refetchNFTs,
   } = useNFTsByContractAddress(address);
+
+  // Cache NFTs when they are loaded
+  useEffect(() => {
+    if (blockchainNfts && blockchainNfts.length > 0 && !isLoadingNFTs) {
+      setCachedNFTs(blockchainNfts);
+    }
+  }, [blockchainNfts, isLoadingNFTs]);
+
+  // Use cached NFTs during refresh
+  const effectiveNFTs = isRefreshing ? cachedNFTs : blockchainNfts;
 
   // Transform blockchain NFTs to CollectionItem format
   const { data: processedNfts, isLoading: isProcessingNfts } = useQuery({
-    queryKey: ['processed-blockchain-nfts', address, blockchainNfts?.length],
+    queryKey: ['processed-blockchain-nfts', address, effectiveNFTs?.length],
     queryFn: async () => {
-      if (!blockchainNfts || blockchainNfts.length === 0) return [];
+      if (!effectiveNFTs || effectiveNFTs.length === 0) return [];
 
       try {
         return Promise.all(
-          blockchainNfts.map(async (nft) => {
+          effectiveNFTs.map(async (nft) => {
             try {
               // Format image URL if it's an IPFS URL
               const image = nft.imageUrl ? formatIPFSUrl(nft.imageUrl) : '';
@@ -114,7 +128,7 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
         return [];
       }
     },
-    enabled: !!blockchainNfts && blockchainNfts.length > 0,
+    enabled: !!effectiveNFTs && effectiveNFTs.length > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
   });
@@ -143,19 +157,19 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
     if (isRefreshing) return;
 
     setIsRefreshing(true);
-    toast.info('Refreshing NFTs...');
 
     try {
       // Invalidate and refetch NFTs data
       await Promise.all([
         utils.collection.getContractURI.invalidate({ contractAddress: address as `0x${string}` }),
-        // Call revalidate API to update cached data
-        fetch('/api/revalidate?tag=nft'),
+        refetchNFTs(),
+        // Call revalidate API with path parameter and page type
+        fetch(`/api/revalidate?path=${nftsPath}&type=page`),
       ]);
 
       // Force client-side refresh
       router.refresh();
-      toast.success('NFTs refreshed successfully!');
+      toast.info('NFTs refreshed successfully!');
     } catch (error) {
       console.error('Error refreshing NFTs:', error);
       toast.error('Failed to refresh NFTs. Please try again.');
@@ -164,10 +178,10 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
         setIsRefreshing(false);
       }, 1000); // Add slight delay to show the refresh animation
     }
-  }, [address, isRefreshing, router, utils.collection.getContractURI]);
+  }, [address, isRefreshing, router, utils.collection.getContractURI, refetchNFTs, nftsPath]);
 
   // Show loading state during SSR or while fetching data
-  if (isLoading) {
+  if (isLoading && !isRefreshing && cachedNFTs.length === 0) {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-2 mb-6">
@@ -195,7 +209,11 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
   }
 
   // Show error state
-  if (contractError || metadataError || nftsError || isNftsError || processingError) {
+  if (
+    (contractError || metadataError || nftsError || isNftsError || processingError) &&
+    !isRefreshing &&
+    cachedNFTs.length === 0
+  ) {
     return (
       <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
         <div className="text-center py-12">

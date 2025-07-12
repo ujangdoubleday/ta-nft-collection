@@ -11,6 +11,7 @@ import { useSearchParams, usePathname } from 'next/navigation';
 import { NFTFilterPanel } from './FilterPanel';
 import { NFTsHeader } from './NFTsHeader';
 import { Suspense } from 'react';
+import { trpc } from '@/lib/api/trpc/client';
 
 interface NFTsContentProps {
   role?: 'admin' | 'user';
@@ -20,11 +21,15 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
   const [mounted, setMounted] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  // Add cached NFTs state to prevent empty state during refresh
+  const [cachedNFTs, setCachedNFTs] = useState<any[]>([]);
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const utils = trpc.useContext();
 
-  console.log(`NFTs Content - Rendering with role: ${role}`);
+  // Determine the base path based on role
+  const basePath = role === 'admin' ? '/admin/nfts' : '/user/nfts';
 
   // Parse page number and filters from URL
   const page = Number(searchParams.get('page') || '1');
@@ -62,16 +67,12 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
   const error = role === 'admin' ? adminNFTsError : userNFTsError;
   const refetch = role === 'admin' ? refetchAdminNFTs : refetchUserNFTs;
 
-  // console.log(`NFTs Content - ${role} NFTs count:`, nfts?.length || 0);
-
-  // Log sample of NFTs for debugging
-  // useEffect(() => {
-  //   if (role === 'admin' && adminNfts && adminNfts.length > 0) {
-  //     console.log('Admin NFTs found. Sample of first NFT:', adminNfts[0]);
-  //   } else if (role === 'admin') {
-  //     console.log('No admin NFTs found yet.');
-  //   }
-  // }, [role, adminNfts]);
+  // Cache NFTs when they are loaded
+  useEffect(() => {
+    if (nfts && nfts.length > 0 && !isLoading) {
+      setCachedNFTs(nfts);
+    }
+  }, [nfts, isLoading]);
 
   // Format collections for filter panel based on role
   const collectionOptions = useMemo(() => {
@@ -86,11 +87,14 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
     }
   }, [role, adminCollections, userCollections]);
 
+  // Use cached NFTs during refresh or when loading
+  const effectiveNFTs = isRefreshing || isLoading ? cachedNFTs : nfts;
+
   // Verify NFT data is valid before filtering
   const validNFTs = useMemo(() => {
-    if (!nfts || nfts.length === 0) return [];
+    if (!effectiveNFTs || effectiveNFTs.length === 0) return [];
 
-    return nfts.filter((nft) => {
+    return effectiveNFTs.filter((nft) => {
       // Check for required properties
       const isValid =
         nft &&
@@ -104,7 +108,7 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
 
       return isValid;
     });
-  }, [nfts]);
+  }, [effectiveNFTs]);
 
   // Filter NFTs based on search and collection filter
   const filteredNFTs = useMemo(() => {
@@ -112,10 +116,6 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
       console.log('No valid NFTs to filter');
       return [];
     }
-
-    // console.log(
-    //   `Filtering ${validNFTs.length} NFTs with search: "${searchQuery}", collection: "${collectionFilter}"`,
-    // );
 
     const filtered = validNFTs.filter((nft) => {
       try {
@@ -138,7 +138,6 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
       }
     });
 
-    // console.log(`Filtered NFTs count: ${filtered.length}`);
     return filtered;
   }, [validNFTs, searchQuery, collectionFilter]);
 
@@ -150,9 +149,6 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
     const endIndex = startIndex + ITEMS_PER_PAGE;
 
     const paginated = filteredNFTs.slice(startIndex, endIndex);
-    // console.log(
-    //   `Paginated NFTs: ${paginated.length} (page ${page} of ${Math.ceil(filteredNFTs.length / ITEMS_PER_PAGE)})`,
-    // );
     return paginated;
   }, [filteredNFTs, page]);
 
@@ -174,14 +170,12 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
 
   // Handle filter changes (for backward compatibility)
   const handleFilterChange = (filters: any) => {
-    // console.log('Filters changed:', filters);
     // We're using URL params, so no need to update state here
   };
 
   // Handle client-side rendering
   useEffect(() => {
     setMounted(true);
-    // console.log('NFTs Content - Component mounted');
   }, []);
 
   // Handle refresh button click
@@ -189,12 +183,17 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
     if (isRefreshing) return;
 
     setIsRefreshing(true);
-    toast.info('Refreshing NFTs...');
 
     try {
-      await refetch();
+      // Invalidate and refetch NFTs data
+      await Promise.all([
+        utils.factoryConfig.getAllCollections.invalidate(),
+        refetch(),
+        // Call revalidate API with path parameter and page type
+        fetch(`/api/revalidate?path=${basePath}&type=page`),
+      ]);
+
       router.refresh();
-      toast.success('NFTs refreshed successfully!');
     } catch (error) {
       console.error('Error refreshing NFTs:', error);
       toast.error('Failed to refresh NFTs. Please try again.');
@@ -206,7 +205,7 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
   };
 
   // Show loading state
-  if (!mounted || isLoading) {
+  if (!mounted || (isLoading && !isRefreshing && cachedNFTs.length === 0)) {
     return (
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
@@ -233,10 +232,16 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
   }
 
   // Show loading progress for admin view
-  if (role === 'admin' && progress && progress.loaded < progress.total) {
+  if (
+    role === 'admin' &&
+    progress &&
+    progress.loaded < progress.total &&
+    !isRefreshing &&
+    cachedNFTs.length === 0
+  ) {
     return (
       <div className="space-y-6">
-        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} />
+        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
         <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
           <h3 className="text-xl font-bold text-white mb-4">Loading NFTs</h3>
           <p className="text-zinc-400 mb-6">
@@ -256,21 +261,22 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
     );
   }
 
-  // Show error state if there was a problem loading NFTs
-  if (error) {
+  // Show error state
+  if (error && !isRefreshing && cachedNFTs.length === 0) {
     return (
       <div className="space-y-6">
-        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} />
+        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
         <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <div className="mx-auto w-12 h-12 rounded-full bg-red-900/20 flex items-center justify-center mb-4">
+            <AlertCircle className="h-6 w-6 text-red-500" />
+          </div>
           <h3 className="text-xl font-bold text-white mb-2">Error Loading NFTs</h3>
-          <p className="text-zinc-400 mb-6">
-            {error.message || 'There was a problem loading NFTs. Please try again.'}
-          </p>
+          <p className="text-zinc-400 mb-6">{error.message || 'Failed to fetch NFTs'}</p>
           <button
             onClick={() => handleRefresh()}
-            className="bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
           >
+            <RefreshCw className="h-4 w-4" />
             Try Again
           </button>
         </div>
@@ -278,70 +284,72 @@ export function NFTsContent({ role = 'user' }: NFTsContentProps) {
     );
   }
 
-  // Show debug button in development mode
-  // const showDebugData = () => {
-  //   console.log('Debug - Raw NFTs:', nfts);
+  // Show empty state if no NFTs found and not refreshing and no cached NFTs
+  if (validNFTs.length === 0 && !isRefreshing && cachedNFTs.length === 0) {
+    return (
+      <div className="space-y-6">
+        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
+          <div className="mx-auto w-12 h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center mb-4">
+            <Bug className="h-6 w-6 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No NFTs Found</h3>
+          <p className="text-zinc-400 mb-6">
+            {role === 'admin'
+              ? "There are no NFTs in the system yet. Collections may exist but don't have any NFTs minted."
+              : "You don't own any NFTs yet. Try minting or purchasing some NFTs first."}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
-  //   if (nfts && nfts.length > 0) {
-  //     console.log('Debug - First NFT Structure:', nfts[0]);
-  //     console.log('Debug - Simplified NFT:', simplifyNFTForLogging(nfts[0]));
-  //   }
-
-  //   console.log('Debug - NFT Keys:', nfts && nfts.length > 0 ? Object.keys(nfts[0]) : 'No NFTs');
-
-  //   toast.info('Debug data logged to console. Check browser devtools.');
-  // };
-
-  return (
-    <>
-      <div className="animate-fade-in">
-        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} />
-
-        <Suspense>
+  // Show filtered empty state if no NFTs match filters and not refreshing
+  if (filteredNFTs.length === 0 && validNFTs.length > 0) {
+    return (
+      <div className="space-y-6">
+        <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
+        {isFilterPanelOpen && (
           <NFTFilterPanel
             isOpen={isFilterPanelOpen}
-            role={role}
-            onFilterChange={handleFilterChange}
             collections={collectionOptions}
+            onFilterChange={handleFilterChange}
+            initialFilters={{ search: searchQuery, collectionFilter: collectionFilter }}
           />
-        </Suspense>
-
-        <div className="flex justify-end mb-4">
-          <button
-            onClick={() => handleRefresh()}
-            disabled={isRefreshing}
-            className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
-              isRefreshing ? 'opacity-70' : ''
-            }`}
-            aria-label="Refresh NFTs"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-
-          {/* {process.env.NODE_ENV !== 'production' && (
-          <button
-            onClick={showDebugData}
-            className="ml-2 bg-purple-600 text-white hover:bg-purple-700 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2"
-            aria-label="Debug NFT Data"
-          >
-            <Bug className="h-4 w-4" />
-            Debug
-          </button>
-        )} */}
+        )}
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
+          <div className="mx-auto w-12 h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center mb-4">
+            <Bug className="h-6 w-6 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No Matching NFTs</h3>
+          <p className="text-zinc-400 mb-6">
+            No NFTs match your current filters. Try adjusting your search or filter criteria.
+          </p>
         </div>
-
-        <NFTsGallery
-          nfts={paginatedNFTs}
-          error={error}
-          onRefresh={handleRefresh}
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-          role={role}
-          totalCount={filteredNFTs.length}
-        />
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <NFTsHeader role={role} onFilterToggle={handleFilterToggle} onRefresh={handleRefresh} />
+
+      {isFilterPanelOpen && (
+        <NFTFilterPanel
+          isOpen={isFilterPanelOpen}
+          collections={collectionOptions}
+          onFilterChange={handleFilterChange}
+          initialFilters={{ search: searchQuery, collectionFilter: collectionFilter }}
+        />
+      )}
+
+      <NFTsGallery
+        nfts={paginatedNFTs}
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        role={role}
+      />
+    </div>
   );
 }

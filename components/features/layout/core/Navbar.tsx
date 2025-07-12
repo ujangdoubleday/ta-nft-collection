@@ -196,23 +196,23 @@ export function Navbar({ config, className = '' }: NavbarProps) {
         });
 
         // Add mint page breadcrumb
-        if (pathParts.length >= 4 && pathParts[3] === 'mint') {
-          breadcrumbs.push({
-            href: `/user/collections/${collectionAddress}/mint`,
-            label: 'Mint',
-            isCurrentPage: true,
-          });
-        }
-        // Add settings page breadcrumb
-        else if (pathParts.length >= 4 && pathParts[3] === 'settings') {
-          breadcrumbs.push({
-            href: `/user/collections/${collectionAddress}/settings`,
-            label: 'Settings',
-            isCurrentPage: true,
-          });
-        }
+        // if (pathParts.length >= 4 && pathParts[3] === 'mint') {
+        //   breadcrumbs.push({
+        //     href: `/user/collections/${collectionAddress}/mint`,
+        //     label: 'Mint',
+        //     isCurrentPage: true,
+        //   });
+        // }
+        // // Add settings page breadcrumb
+        // else if (pathParts.length >= 4 && pathParts[3] === 'settings') {
+        //   breadcrumbs.push({
+        //     href: `/user/collections/${collectionAddress}/settings`,
+        //     label: 'Settings',
+        //     isCurrentPage: true,
+        //   });
+        // }
         // Add NFT detail page breadcrumb
-        else if (pathParts.length >= 5 && pathParts[3] === 'nfts' && pathParts[4]) {
+        if (pathParts.length >= 5 && pathParts[3] === 'nfts' && pathParts[4]) {
           const nftId = pathParts[4];
           breadcrumbs.push({
             href: `/user/collections/${collectionAddress}/nfts/${nftId}`,
@@ -244,23 +244,23 @@ export function Navbar({ config, className = '' }: NavbarProps) {
           });
 
           // Add mint page breadcrumb
-          if (pathParts.length >= 4 && pathParts[3] === 'mint') {
-            breadcrumbs.push({
-              href: `/admin/collections/${collectionAddress}/mint`,
-              label: 'Mint',
-              isCurrentPage: true,
-            });
-          }
+          // if (pathParts.length >= 4 && pathParts[3] === 'mint') {
+          //   breadcrumbs.push({
+          //     href: `/admin/collections/${collectionAddress}/mint`,
+          //     label: 'Mint',
+          //     isCurrentPage: true,
+          //   });
+          // }
           // Add settings page breadcrumb
-          else if (pathParts.length >= 4 && pathParts[3] === 'settings') {
-            breadcrumbs.push({
-              href: `/admin/collections/${collectionAddress}/settings`,
-              label: 'Settings',
-              isCurrentPage: true,
-            });
-          }
+          // else if (pathParts.length >= 4 && pathParts[3] === 'settings') {
+          //   breadcrumbs.push({
+          //     href: `/admin/collections/${collectionAddress}/settings`,
+          //     label: 'Settings',
+          //     isCurrentPage: true,
+          //   });
+          // }
           // Add NFT detail page breadcrumb
-          else if (pathParts.length >= 5 && pathParts[3] === 'nfts' && pathParts[4]) {
+          if (pathParts.length >= 5 && pathParts[3] === 'nfts' && pathParts[4]) {
             const nftId = pathParts[4];
             breadcrumbs.push({
               href: `/admin/collections/${collectionAddress}/nfts/${nftId}`,

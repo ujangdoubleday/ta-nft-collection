@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { CollectionHeader } from './CollectionHeader';
-import { CollectionStats } from './CollectionStats';
 import { CollectionActions } from './CollectionActions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { trpc } from '@/lib/api/trpc/client';
@@ -19,6 +18,7 @@ interface CollectionData {
   name: string;
   symbol: string;
   totalSupply: bigint;
+  maxSupply: bigint;
   createdAt: bigint;
   contractURI: string;
   metadata: Record<string, any>;
@@ -77,6 +77,10 @@ export function CollectionDetailContent({ address, role = 'user' }: CollectionDe
         : metadata?.name || 'Unnamed Collection',
     symbol: Array.isArray(collectionInfo) && collectionInfo[1] ? String(collectionInfo[1]) : 'NFT',
     totalSupply:
+      Array.isArray(collectionInfo) && collectionInfo[2]
+        ? BigInt(String(collectionInfo[2]))
+        : BigInt(0),
+    maxSupply:
       Array.isArray(collectionInfo) && collectionInfo[3]
         ? BigInt(String(collectionInfo[3]))
         : BigInt(0),
@@ -143,16 +147,8 @@ export function CollectionDetailContent({ address, role = 'user' }: CollectionDe
 
       {/* Stats and Actions in Side-by-Side Layout */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Collection Stats - Left Side */}
-        <div className="lg:w-5/12">
-          <h2 className="text-md font-bold text-white mb-3">Recent Activity</h2>
-          <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
-            <CollectionStats collection={collectionData as unknown as EnrichedCollectionInfo} />
-          </div>
-        </div>
-
         {/* Collection Actions - Right Side */}
-        <div className="lg:w-7/12">
+        <div className="lg:w-full">
           <h2 className="text-md font-bold text-white mb-4">Collection Actions</h2>
           <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
             <CollectionActions
