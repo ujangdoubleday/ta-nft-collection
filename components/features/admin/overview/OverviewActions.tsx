@@ -61,7 +61,7 @@ interface ActionCardProps {
 function ActionCard({ title, description, icon, onClick, primary = false }: ActionCardProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={() => onClick()}
       className={`flex flex-col items-start p-4 rounded-lg border transition-all text-left h-full
         ${
           primary

@@ -448,7 +448,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
               <Button
                 key={index}
                 variant={action.variant || 'default'}
-                onClick={action.onClick}
+                onClick={() => action.onClick()}
                 className="flex items-center gap-2"
               >
                 {action.icon}
@@ -521,7 +521,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
                             : '0x...'}
                         </span>
                         <button
-                          onClick={copyToClipboard}
+                          onClick={() => copyToClipboard()}
                           className="p-1.5 rounded transition-colors"
                           style={{ backgroundColor: 'transparent' }}
                           onMouseEnter={(e) => {
@@ -550,7 +550,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
 
                   <DropdownMenuItem
                     className="flex items-center gap-2 cursor-pointer transition-colors"
-                    onClick={handleLogout}
+                    onClick={() => handleLogout()}
                     style={{ backgroundColor: 'transparent' }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor =
@@ -591,7 +591,10 @@ export function Navbar({ config, className = '' }: NavbarProps) {
                     >
                       Cancel
                     </Button>
-                    <Button onClick={handleSetUsername} disabled={setUsernameMutation.isPending}>
+                    <Button
+                      onClick={() => handleSetUsername()}
+                      disabled={setUsernameMutation.isPending}
+                    >
                       {setUsernameMutation.isPending ? 'Saving...' : 'Save'}
                     </Button>
                   </DialogFooter>

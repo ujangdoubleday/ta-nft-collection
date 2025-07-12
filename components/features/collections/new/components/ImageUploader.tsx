@@ -36,7 +36,7 @@ export function ImageUploader({ imagePreview, onImageChange }: ImageUploaderProp
             />
             <button
               type="button"
-              onClick={handleRemoveImage}
+              onClick={() => handleRemoveImage()}
               className="absolute top-2 right-2 p-1 bg-[#0A0A0A] border border-[#1f1f1f] rounded-full"
             >
               <X className="h-4 w-4 text-white" />

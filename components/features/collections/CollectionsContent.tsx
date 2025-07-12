@@ -6,6 +6,7 @@ import { useAddress } from '@/lib/hooks/use-address';
 import { useWallet } from '@/lib/hooks/wallet';
 import { CollectionsHeader } from './CollectionsHeader';
 import { FilterPanel, CollectionFilters } from './FilterPanel';
+import { Suspense } from 'react';
 
 interface CollectionsContentProps {
   role?: 'admin' | 'user';
@@ -114,7 +115,7 @@ export function CollectionsContent({ role = 'user' }: CollectionsContentProps) {
           Please connect your wallet to view and manage your NFT collections.
         </p>
         <button
-          onClick={handleConnect}
+          onClick={() => handleConnect()}
           className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-6 rounded-md transition-colors font-medium"
         >
           Connect Wallet
@@ -132,7 +133,7 @@ export function CollectionsContent({ role = 'user' }: CollectionsContentProps) {
           Please sign a message to verify you are the owner of this wallet to view your collections.
         </p>
         <button
-          onClick={handleAuthenticate}
+          onClick={() => handleAuthenticate()}
           className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-6 rounded-md transition-colors font-medium"
         >
           Sign Message
@@ -151,13 +152,15 @@ export function CollectionsContent({ role = 'user' }: CollectionsContentProps) {
   return (
     <div className="animate-fade-in">
       <CollectionsHeader role={role} onFilterToggle={handleFilterToggle} />
-      <FilterPanel
-        isOpen={isFilterPanelOpen}
-        role={role}
-        onFilterChange={handleFilterChange}
-        initialFilters={emptyFilters}
-      />
-      <CollectionsList role={role} />
+      <Suspense>
+        <FilterPanel
+          isOpen={isFilterPanelOpen}
+          role={role}
+          onFilterChange={handleFilterChange}
+          initialFilters={emptyFilters}
+        />
+        <CollectionsList role={role} />
+      </Suspense>
     </div>
   );
 }

@@ -28,7 +28,7 @@ export function NFTsHeader({ role = 'user', onFilterToggle }: NFTsHeaderProps) {
         </div>
         <div className="flex gap-2">
           <Button
-            onClick={toggleFilter}
+            onClick={() => toggleFilter()}
             variant="outline"
             className={`flex items-center gap-2 text-sm ${
               isFilterOpen ? 'bg-white text-black' : 'bg-[#0A0A0A] text-white border-[#1f1f1f]'

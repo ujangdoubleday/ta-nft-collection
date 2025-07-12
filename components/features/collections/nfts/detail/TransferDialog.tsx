@@ -144,11 +144,16 @@ export function TransferDialog({
           )}
         </div>
         <DialogFooter>
-          <Button type="button" className="hover:bg-zinc-800" variant="ghost" onClick={onClose}>
+          <Button
+            type="button"
+            className="hover:bg-zinc-800"
+            variant="ghost"
+            onClick={() => onClose()}
+          >
             Cancel
           </Button>
           <Button
-            onClick={handleTransfer}
+            onClick={() => handleTransfer()}
             disabled={buttonDisabled}
             className="bg-white text-black hover:bg-zinc-300 hover:text-black"
           >

@@ -21,7 +21,7 @@ export function AuthRequired({ isConnected, onConnect }: AuthRequiredProps) {
             : 'Please authenticate your wallet to create collections.'}
         </p>
         <button
-          onClick={onConnect}
+          onClick={() => onConnect()}
           className="bg-white text-black hover:bg-zinc-200 py-2 px-6 rounded-md transition-colors text-sm font-medium inline-flex items-center gap-2"
         >
           {!isConnected ? 'Connect Wallet' : 'Authenticate Wallet'}

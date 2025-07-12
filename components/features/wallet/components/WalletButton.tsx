@@ -84,7 +84,7 @@ export const WalletButton = () => {
       <Dialog open={isWalletModalOpen} onOpenChange={handleDialogOpenChange}>
         <DialogTrigger asChild>
           <Button
-            onClick={handleWalletButtonClick}
+            onClick={() => handleWalletButtonClick()}
             variant="outline"
             className="bg-white text-zinc-900 border border-zinc-200 text-[15px] hover:bg-zinc-100 hover:text-zinc-900 font-medium shadow-sm"
           >

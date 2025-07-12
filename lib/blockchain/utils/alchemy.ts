@@ -509,7 +509,7 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
       id: 1,
     };
 
-    console.log('Alchemy API request:', JSON.stringify(requestBody, null, 2));
+    // console.log('Alchemy API request:', JSON.stringify(requestBody, null, 2));
 
     // Using the proper Alchemy JSON-RPC API endpoint
     const response = await fetch(`https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`, {
@@ -528,7 +528,7 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
     }
 
     const data = await response.json();
-    console.log('Alchemy API response:', JSON.stringify(data, null, 2));
+    // console.log('Alchemy API response:', JSON.stringify(data, null, 2));
 
     if (data.error) {
       console.error('Alchemy API returned error:', data.error);

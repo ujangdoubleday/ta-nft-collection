@@ -113,7 +113,7 @@ export function NFTGallery({
         <p className="text-zinc-400 mb-6">{error.message || 'Failed to fetch NFTs'}</p>
         <div className="flex justify-center gap-4">
           <button
-            onClick={handleRefresh}
+            onClick={() => handleRefresh()}
             className="inline-flex items-center gap-2 bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] text-white py-2 px-4 rounded-md transition-colors text-sm font-medium"
           >
             Try Again

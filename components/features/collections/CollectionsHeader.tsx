@@ -71,7 +71,7 @@ export function CollectionsHeader({ role = 'user', onFilterToggle }: Collections
         <div className="flex items-center gap-2">
           {role === 'admin' && (
             <button
-              onClick={handleCreateClick}
+              onClick={() => handleCreateClick()}
               className="bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2"
               aria-label="Create new collection"
             >
@@ -81,7 +81,7 @@ export function CollectionsHeader({ role = 'user', onFilterToggle }: Collections
           )}
 
           <button
-            onClick={handleFilterClick}
+            onClick={() => handleFilterClick()}
             className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
               isFilterOpen ? 'bg-zinc-200' : ''
             }`}
@@ -92,7 +92,7 @@ export function CollectionsHeader({ role = 'user', onFilterToggle }: Collections
           </button>
 
           <button
-            onClick={handleRefresh}
+            onClick={() => handleRefresh()}
             disabled={isRefreshing}
             className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
               isRefreshing ? 'opacity-70' : ''

@@ -162,7 +162,7 @@ export function EmergencyPause({
                   size="lg"
                   disabled={isLoading || isUnpauseLoading || isUnpausing || !isOwner}
                   className="w-full"
-                  onClick={handleEmergencyUnpause}
+                  onClick={() => handleEmergencyUnpause()}
                 >
                   {isUnpausing ? (
                     <div className="flex items-center justify-center gap-2">
@@ -179,7 +179,7 @@ export function EmergencyPause({
                   size="lg"
                   disabled={isLoading || isPauseLoading || isPausing || !isOwner}
                   className="w-full"
-                  onClick={handleEmergencyPause}
+                  onClick={() => handleEmergencyPause()}
                 >
                   {isPausing ? (
                     <div className="flex items-center justify-center gap-2">
