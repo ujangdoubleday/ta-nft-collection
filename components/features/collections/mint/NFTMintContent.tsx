@@ -184,16 +184,6 @@ export function NFTMintContent({ contractAddress, role = 'user', isOwner }: NFTM
           isMinting={mintingState.isMinting}
           mintSuccess={mintingState.mintSuccess}
         />
-
-        {/* Error display */}
-        {mintingState.error && (
-          <>
-            <h3 className="mt-4 text-white text-sm font-medium mb-2">Error:</h3>
-            <div className="p-4 bg-black/50 border border-zinc-800 rounded-md">
-              <p className="text-white text-sm break-words">{mintingState.error.message}</p>
-            </div>
-          </>
-        )}
       </div>
     </>
   );

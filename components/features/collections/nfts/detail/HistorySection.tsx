@@ -5,7 +5,7 @@ import { shortenAddress } from '@/lib/utils/formatting';
 import { getEtherscanLink } from './utils';
 import { HistoryItem } from './types';
 import { useNFTHistory } from '@/lib/blockchain/hooks';
-import { useEffect } from 'react';
+import Spinner from '@/components/ui/spinner';
 
 interface HistorySectionProps {
   contractAddress: string;
@@ -51,16 +51,11 @@ export function HistorySection({ contractAddress, tokenId, history = [] }: Histo
       <div className="flex items-center gap-2 mb-3">
         <Clock className="h-4 w-4 text-white" />
         <h3 className="text-white font-medium">History</h3>
-        {/* Add debug display */}
-        <span className="text-xs text-zinc-500">
-          {formattedAddress ? formattedAddress.substring(0, 6) : 'Invalid'}-{tokenId || 'No ID'}
-        </span>
       </div>
       <div className="overflow-x-auto">
         {isLoading ? (
           <div className="flex justify-center items-center py-6">
-            <Loader2 className="h-6 w-6 text-white animate-spin mr-2" />
-            <span className="text-zinc-400">Loading transaction history...</span>
+            <Spinner size="sm" color="white" />
           </div>
         ) : (
           <table className="min-w-full text-sm">
