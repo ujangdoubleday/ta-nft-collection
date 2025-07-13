@@ -9,6 +9,8 @@ import { useRenounceOwnership } from '@/lib/blockchain/hooks/useNFTFactoryWrite'
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ExternalLink } from 'lucide-react';
+import { signOut } from 'next-auth/react';
+import { useWallet } from '@/lib/hooks/wallet';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +33,7 @@ export function RenounceOwnership({ isLoading }: RenounceOwnershipProps) {
     { address: address || '' },
     { enabled: !!address },
   );
+  const { disconnect } = useWallet();
 
   // Renounce ownership
   const {
@@ -73,7 +76,17 @@ export function RenounceOwnership({ isLoading }: RenounceOwnershipProps) {
       if (result.hash) {
         setRenounceTxHash(result.hash);
         setRenounceSuccess('Ownership renounced successfully');
+
+        // Revalidate the settings page
+        await fetch('/api/revalidate?path=/admin/settings&type=page').catch((err) =>
+          console.error('Error revalidating settings page:', err),
+        );
+
         setTimeout(() => setRenounceDialogOpen(false), 3000);
+
+        // Logout after renouncing ownership
+        signOut({ callbackUrl: '/' });
+        await disconnect();
       } else if (result.error) {
         setRenounceError(result.error.message);
       }
@@ -133,24 +146,6 @@ export function RenounceOwnership({ isLoading }: RenounceOwnershipProps) {
                 />
               </div>
             </div>
-
-            {renounceError_ && (
-              <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                {renounceError_}
-              </div>
-            )}
-
-            {renounceError && (
-              <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                {renounceError.message}
-              </div>
-            )}
-
-            {renounceSuccess && (
-              <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded mb-4">
-                {renounceSuccess}
-              </div>
-            )}
 
             {renounceTxHash && (
               <Alert className="mb-4 bg-black/40 border border-zinc-800">

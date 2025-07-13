@@ -9,8 +9,6 @@ import { useTransferOwnership } from '@/lib/blockchain/hooks/useNFTFactoryWrite'
 import { signOut } from 'next-auth/react';
 import { useWallet } from '@/lib/hooks/wallet';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ExternalLink } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -111,7 +109,15 @@ export function TransferOwnership({ isLoading }: TransferOwnershipProps) {
         setTransferTxHash(result.hash);
         setTransferSuccess('Ownership transfer initiated successfully');
         setNewOwnerAddress('');
+
+        // Revalidate the settings page
+        await fetch('/api/revalidate?path=/admin/settings&type=page').catch((err) =>
+          console.error('Error revalidating settings page:', err),
+        );
+
         setTimeout(() => setTransferDialogOpen(false), 3000);
+
+        // Logout after ownership transfer
         signOut({ callbackUrl: '/' });
         await disconnect();
       } else if (result.error) {
@@ -167,30 +173,6 @@ export function TransferOwnership({ isLoading }: TransferOwnershipProps) {
                 <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
                   {transferError.message}
                 </div>
-              )}
-
-              {transferSuccess && (
-                <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded mb-4">
-                  {transferSuccess}
-                </div>
-              )}
-
-              {transferTxHash && (
-                <Alert className="mb-4 bg-black/40 border border-zinc-800">
-                  <AlertDescription className="flex items-center justify-between">
-                    <span className="text-xs text-zinc-300 truncate">
-                      Transaction: {transferTxHash.slice(0, 10)}...{transferTxHash.slice(-8)}
-                    </span>
-                    <a
-                      href={`https://sepolia.etherscan.io/tx/${transferTxHash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 flex items-center"
-                    >
-                      View <ExternalLink size={12} className="ml-1" />
-                    </a>
-                  </AlertDescription>
-                </Alert>
               )}
 
               <DialogFooter>
