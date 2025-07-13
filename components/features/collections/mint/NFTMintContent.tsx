@@ -6,13 +6,13 @@ import { NFTMintHeader } from './NFTMintHeader';
 import { ImageUploader } from './ImageUploader';
 import { AttributesManager } from './AttributesManager';
 import { NFTForm } from './NFTForm';
-import { MintSuccess } from './MintSuccess';
 import { LoadingState } from './LoadingState';
 import { ErrorState } from './ErrorState';
 import { useNFTMinting } from './hooks/useNFTMinting';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import { MintingTimeline, MintConfirmationDialog } from './components';
 
 interface NFTMintContentProps {
   contractAddress: string;
@@ -23,6 +23,7 @@ interface NFTMintContentProps {
 export function NFTMintContent({ contractAddress, role = 'user', isOwner }: NFTMintContentProps) {
   const [mounted, setMounted] = useState(false);
   const [collectionName, setCollectionName] = useState('Unnamed Collection');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const router = useRouter();
 
   const utils = trpc.useContext();
@@ -72,6 +73,36 @@ export function NFTMintContent({ contractAddress, role = 'user', isOwner }: NFTM
     }
   }, [metadataResult, contractData]);
 
+  // Redirect to NFTs page when minting is successful after a delay
+  useEffect(() => {
+    if (mintingState.mintSuccess) {
+      // Short delay to ensure the user sees the "Complete" step
+      const redirectTimer = setTimeout(() => {
+        router.push(`${basePath}/${contractAddress}/nfts`);
+      }, 2000);
+
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [mintingState.mintSuccess, router, basePath, contractAddress]);
+
+  // Wrapper function to call handleMint without arguments
+  const handleConfirmMint = () => {
+    // Create a synthetic event
+    const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
+    mintingState.handleMint(syntheticEvent);
+  };
+
+  // Handle form submission to show confirmation dialog
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!mintingState.nftName || !mintingState.nftDescription || !mintingState.imagePreview) {
+      return;
+    }
+
+    setShowConfirmDialog(true);
+  };
+
   if (!mounted || isLoading) {
     return <LoadingState />;
   }
@@ -95,18 +126,19 @@ export function NFTMintContent({ contractAddress, role = 'user', isOwner }: NFTM
     );
   }
 
-  if (mintingState.mintSuccess) {
-    return (
-      <MintSuccess
-        contractAddress={contractAddress}
-        onMintAnother={mintingState.resetForm}
-        basePath={basePath}
-      />
-    );
-  }
-
   return (
     <>
+      {/* Confirmation Dialog */}
+      <MintConfirmationDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        onConfirm={handleConfirmMint}
+        nftName={mintingState.nftName}
+        nftDescription={mintingState.nftDescription}
+        imagePreview={mintingState.imagePreview}
+        attributes={mintingState.attributes}
+      />
+
       <NFTMintHeader
         collectionName={collectionName}
         contractAddress={contractAddress}
@@ -119,10 +151,11 @@ export function NFTMintContent({ contractAddress, role = 'user', isOwner }: NFTM
           setNftName={mintingState.setNftName}
           nftDescription={mintingState.nftDescription}
           setNftDescription={mintingState.setNftDescription}
-          onSubmit={mintingState.handleMint}
+          onSubmit={handleSubmit}
           isMinting={mintingState.isMinting}
           isUploading={mintingState.isUploading}
           isMintLoading={mintingState.isMintLoading}
+          mintSuccess={mintingState.mintSuccess}
           address={mintingState.address}
         >
           {/* Left Column - Image Upload */}
@@ -131,6 +164,7 @@ export function NFTMintContent({ contractAddress, role = 'user', isOwner }: NFTM
               imagePreview={mintingState.imagePreview}
               setImagePreview={mintingState.setImagePreview}
               setImageFile={mintingState.setImageFile}
+              disabled={mintingState.isMinting || mintingState.mintSuccess}
             />
           </div>
 
@@ -138,8 +172,28 @@ export function NFTMintContent({ contractAddress, role = 'user', isOwner }: NFTM
           <AttributesManager
             attributes={mintingState.attributes}
             setAttributes={mintingState.setAttributes}
+            disabled={mintingState.isMinting || mintingState.mintSuccess}
           />
         </NFTForm>
+      </div>
+
+      {/* Display minting timeline */}
+      <div className="max-w-full">
+        <MintingTimeline
+          processingStep={mintingState.processingStep}
+          isMinting={mintingState.isMinting}
+          mintSuccess={mintingState.mintSuccess}
+        />
+
+        {/* Error display */}
+        {mintingState.error && (
+          <>
+            <h3 className="mt-4 text-white text-sm font-medium mb-2">Error:</h3>
+            <div className="p-4 bg-black/50 border border-zinc-800 rounded-md">
+              <p className="text-white text-sm break-words">{mintingState.error.message}</p>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

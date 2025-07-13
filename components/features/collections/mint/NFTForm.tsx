@@ -10,6 +10,7 @@ interface NFTFormProps {
   isMinting: boolean;
   isUploading: boolean;
   isMintLoading: boolean;
+  mintSuccess: boolean;
   address: string | null;
 }
 
@@ -23,8 +24,13 @@ export const NFTForm = ({
   isMinting,
   isUploading,
   isMintLoading,
+  mintSuccess,
   address,
 }: NFTFormProps) => {
+  // Button should show loading state during minting OR after success (until redirect)
+  const isLoading = isMinting || isUploading || isMintLoading || mintSuccess;
+  const buttonText = mintSuccess ? 'Redirecting...' : isLoading ? 'Minting...' : 'Mint NFT';
+
   return (
     <form onSubmit={onSubmit}>
       <div className="flex flex-col lg:flex-row gap-8">
@@ -44,6 +50,7 @@ export const NFTForm = ({
               placeholder="Enter NFT name"
               className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-2 px-3 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
               required
+              disabled={isLoading}
             />
           </div>
 
@@ -59,16 +66,17 @@ export const NFTForm = ({
               rows={4}
               className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-2 px-3 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
               required
+              disabled={isLoading}
             />
           </div>
 
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={isMinting || isUploading || isMintLoading || !address}
+              disabled={isLoading || !address}
               className="bg-white text-black hover:bg-zinc-200 py-2 px-6 rounded-md transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isMinting || isUploading || isMintLoading ? 'Minting...' : 'Mint NFT'}
+              {buttonText}
             </button>
           </div>
         </div>
