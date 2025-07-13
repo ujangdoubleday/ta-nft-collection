@@ -8,16 +8,15 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session || !session.user?.address) {
-      const redirectUrl = new URL('/login', request.url);
-      redirectUrl.searchParams.set('callback', request.nextUrl.pathname);
-      return NextResponse.redirect(redirectUrl);
+      const callback = request.nextUrl.pathname;
+      return NextResponse.redirect(`/login?callback=${encodeURIComponent(callback)}`);
     }
 
     const walletAddress = session.user.address;
     const role = await getUserRole(walletAddress);
     const redirectPath = role === 'admin' ? '/admin' : '/user';
 
-    return NextResponse.redirect(new URL(redirectPath, request.nextUrl.origin));
+    return NextResponse.redirect(redirectPath);
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
