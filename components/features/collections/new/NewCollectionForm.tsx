@@ -38,7 +38,6 @@ export function NewCollectionForm({ routePrefix }: NewCollectionFormProps) {
     isCreating,
     createSuccess,
     createdAddress,
-    errorMessage,
     processingStep,
     address,
     isConnected,
@@ -156,16 +155,6 @@ export function NewCollectionForm({ routePrefix }: NewCollectionFormProps) {
       <div className="max-w-full">
         {/* Using the updated timeline component */}
         <CreationTimeline processingStep={processingStep} isCreating={isCreating} />
-
-        {/* Simple error message display */}
-        {errorMessage && (
-          <>
-            <h3 className="mt-4 text-white text-sm font-medium mb-2">Error:</h3>
-            <div className="p-4 bg-black/50 border border-zinc-800 rounded-md">
-              <p className="text-white text-sm break-words">{errorMessage}</p>
-            </div>
-          </>
-        )}
       </div>
     </>
   );

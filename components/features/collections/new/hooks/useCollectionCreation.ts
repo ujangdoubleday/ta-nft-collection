@@ -6,6 +6,7 @@ import { usePinataUpload } from '@/lib/hooks/usePinataUpload';
 import { useNFTFactory } from '@/lib/blockchain/hooks';
 import { trpc } from '@/lib/api/trpc/client';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export function useCollectionCreation() {
   const router = useRouter();
@@ -26,7 +27,6 @@ export function useCollectionCreation() {
   const [isCreating, setIsCreating] = useState(false);
   const [createSuccess, setCreateSuccess] = useState(false);
   const [createdAddress, setCreatedAddress] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [processingStep, setProcessingStep] = useState('');
 
   // Prevent navigation during creation process or after success (until redirect)
@@ -65,18 +65,14 @@ export function useCollectionCreation() {
   useEffect(() => {
     // If not connected, don't show any errors yet
     if (!isConnected) {
-      setErrorMessage(null);
       return;
     }
 
     // If connected but not authenticated
     if (isConnected && !isAuthenticated) {
-      setErrorMessage('Please authenticate your wallet to create collections');
+      toast.error('Please authenticate your wallet to create collections');
       return;
     }
-
-    // Clear error if properly connected and authenticated
-    setErrorMessage(null);
   }, [isConnected, isAuthenticated]);
 
   const handleImageChange = (file: File | null) => {
@@ -113,13 +109,12 @@ export function useCollectionCreation() {
 
     // Validate fields
     if (!name || !symbol || !description || !coverImage) {
-      setErrorMessage('Please fill all required fields and upload an image');
+      toast.error('Please fill all required fields and upload an image');
       return;
     }
 
     try {
       setIsCreating(true);
-      setErrorMessage(null);
 
       // Step 1: Create folder on Pinata
       setProcessingStep('Creating IPFS folder...');
@@ -204,6 +199,7 @@ export function useCollectionCreation() {
         setCreateSuccess(true);
         setCreatedAddress(blockchainResult.hash);
         setProcessingStep('Collection created successfully!');
+        toast.success('Collection created successfully!');
       }
     } catch (error) {
       console.error('Error creating collection:', error);
@@ -216,17 +212,17 @@ export function useCollectionCreation() {
           error.message.includes('user rejected transaction') ||
           error.message.includes('User rejected the request')
         ) {
-          setErrorMessage('Transaction was rejected. Please approve the transaction to continue.');
+          toast.error('Transaction was rejected. Please approve the transaction to continue.');
         } else if (error.message.includes('insufficient funds')) {
-          setErrorMessage('Insufficient funds in your wallet to complete this transaction.');
+          toast.error('Insufficient funds in your wallet to complete this transaction.');
         } else if (error.message.includes('gas')) {
-          setErrorMessage('Error with transaction gas. Please check your wallet settings.');
+          toast.error('Error with transaction gas. Please check your wallet settings.');
         } else if (error.message.includes('nonce')) {
-          setErrorMessage('Transaction nonce error. Please reset your wallet or try again.');
+          toast.error('Transaction nonce error. Please reset your wallet or try again.');
         } else if (error.message.includes('network')) {
-          setErrorMessage('Network error. Please check your connection.');
+          toast.error('Network error. Please check your connection.');
         } else if (error.message.includes('timeout')) {
-          setErrorMessage('Transaction timed out. The network may be congested.');
+          toast.error('Transaction timed out. The network may be congested.');
         } else {
           // For other errors, extract a shorter version
           let shortMessage = error.message;
@@ -244,10 +240,10 @@ export function useCollectionCreation() {
             }
           }
 
-          setErrorMessage(shortMessage);
+          toast.error(shortMessage);
         }
       } else {
-        setErrorMessage('Unknown error creating collection. Please try again later.');
+        toast.error('Unknown error creating collection. Please try again later.');
       }
     } finally {
       // Only reset isCreating if there was an error
@@ -274,7 +270,7 @@ export function useCollectionCreation() {
     isCreating,
     createSuccess,
     createdAddress,
-    errorMessage,
+
     processingStep,
     address,
     isConnected,
