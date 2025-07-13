@@ -142,8 +142,22 @@ export function useAllCollections() {
       setIsLoading(true);
     } else if (collectionAddresses && contractURIs) {
       enrichCollections();
+    } else if (collectionAddresses && collectionAddresses.length === 0) {
+      // If we have an empty array of collection addresses, we're done loading
+      setIsLoading(false);
     }
   }, [enrichCollections, collectionAddresses, contractURIs, isLoadingAddresses, isLoadingURIs]);
+
+  // Add a safety timeout to prevent infinite loading
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     if (isLoading) {
+  //       setIsLoading(false);
+  //     }
+  //   }, 5000); // 5 second timeout
+
+  //   return () => clearTimeout(timer);
+  // }, [isLoading]);
 
   // Function to refetch all data
   const refetch = useCallback(async () => {

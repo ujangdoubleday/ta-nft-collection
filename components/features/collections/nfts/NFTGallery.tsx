@@ -28,13 +28,15 @@ interface ApiNFT {
   updatedAt?: Date;
 }
 
-// Type guard function to check if NFT is from API or CollectionItem
-function isApiNFT(nft: ApiNFT | CollectionItem): nft is ApiNFT {
-  // Check if it has metadata or image object properties that are specific to API NFTs
+// Type guard to check if an NFT is from the API
+function isApiNFT(nft: any): nft is ApiNFT {
   return (
-    ('metadata' in nft ||
-      (typeof nft.image === 'object' && nft.image !== null && 'originalUrl' in nft.image)) &&
-    'contractAddress' in nft
+    nft &&
+    typeof nft === 'object' &&
+    'tokenId' in nft &&
+    'contractAddress' in nft &&
+    (('imageUrl' in nft && typeof nft.imageUrl === 'string') ||
+      ('image' in nft && typeof nft.image === 'object'))
   );
 }
 
@@ -43,6 +45,7 @@ interface NFTGalleryProps {
   nfts?: CollectionItem[];
   onRefresh?: () => void;
   role?: 'admin' | 'user';
+  totalCount?: number;
 }
 
 export function NFTGallery({
@@ -50,6 +53,7 @@ export function NFTGallery({
   nfts: propNfts,
   onRefresh,
   role = 'user',
+  totalCount,
 }: NFTGalleryProps) {
   const [mounted, setMounted] = useState(false);
 
@@ -150,10 +154,16 @@ export function NFTGallery({
     );
   }
 
+  // Determine the count message
+  const countMessage =
+    totalCount !== undefined && totalCount !== nfts.length
+      ? `Showing ${nfts.length} of ${totalCount} NFTs`
+      : `Showing ${nfts.length} NFTs`;
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <p className="text-zinc-400 text-sm">Showing {nfts.length} NFTs</p>
+        <p className="text-zinc-400 text-sm">{countMessage}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

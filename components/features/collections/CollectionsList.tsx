@@ -193,15 +193,15 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
   }, [collections, address, ownershipData]);
 
   // Create a mapping of collection address to owner status (for backward compatibility)
-  const collectionOwnership = useMemo(() => {
-    const ownershipMap: Record<string, boolean> = {};
+  // const collectionOwnership = useMemo(() => {
+  //   const ownershipMap: Record<string, boolean> = {};
 
-    taggedCollections.forEach((item) => {
-      ownershipMap[item.collection.collectionAddress] = item.isOwned;
-    });
+  //   taggedCollections.forEach((item) => {
+  //     ownershipMap[item.collection.collectionAddress] = item.isOwned;
+  //   });
 
-    return ownershipMap;
-  }, [taggedCollections]);
+  //   return ownershipMap;
+  // }, [taggedCollections]);
 
   // Filter collections based on filters using tagged collections
   const filteredTaggedCollections = useMemo(() => {
@@ -209,7 +209,7 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
     if (!taggedCollections.length) return [];
 
     // Track start time for performance debugging
-    const startTime = performance.now();
+    // const startTime = performance.now();
 
     const result = taggedCollections.filter((taggedItem) => {
       const collection = taggedItem.collection;
@@ -231,10 +231,10 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
       return searchMatch && ownerMatch;
     });
 
-    // Track end time for performance debugging
-    const endTime = performance.now();
-    console.log(`Filtering ${taggedCollections.length} collections took ${endTime - startTime}ms`);
-    console.log('Active filters:', activeFilters);
+    // // Track end time for performance debugging
+    // const endTime = performance.now();
+    // console.log(`Filtering ${taggedCollections.length} collections took ${endTime - startTime}ms`);
+    // console.log('Active filters:', activeFilters);
 
     return result;
   }, [taggedCollections, activeFilters?.search, activeFilters?.ownerFilter]);
@@ -304,7 +304,6 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
   const hasEmptyCollections =
     !isLoading &&
     !isLoadingCollections &&
-    !ownershipLoading &&
     ((collections !== undefined && Array.isArray(collections) && collections.length === 0) ||
       (userCollections !== undefined &&
         Array.isArray(userCollections) &&
@@ -313,7 +312,10 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
       (allCollections !== undefined &&
         Array.isArray(allCollections) &&
         allCollections.length === 0 &&
-        role === 'admin'));
+        role === 'admin') ||
+      (role === 'admin' &&
+        !isLoadingAllCollections &&
+        (!allCollections || allCollections.length === 0)));
 
   // Render empty state if we have data and it's empty
   if (hasEmptyCollections) {
