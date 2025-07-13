@@ -46,16 +46,6 @@ export async function signInWithEthereum(
         // Verify session was properly set
         const session = await getSession();
 
-        if (session?.user) {
-          // Add session token to localStorage as backup
-          try {
-            localStorage.setItem('lastAuthAddress', session.user.address as string);
-            localStorage.setItem('lastAuthTime', new Date().toISOString());
-          } catch (e) {
-            // Silently handle localStorage errors
-          }
-        }
-
         // Force a page reload to ensure session is properly loaded
         window.location.href = callbackUrl;
         return { success: true, error: null, response };
