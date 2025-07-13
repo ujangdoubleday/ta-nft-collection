@@ -9,11 +9,10 @@ import { EmergencyPause } from './EmergencyPause';
 import { trpc } from '@/lib/api/trpc/client';
 import { useAccount } from 'wagmi';
 import Spinner from '@/components/ui/spinner';
+import { toast } from 'sonner';
 
 export function EmergencyContent() {
-  const [error, setError] = useState('');
   const [txHash, setTxHash] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
 
   const { address } = useAccount();
@@ -34,6 +33,20 @@ export function EmergencyContent() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Function to show error toast
+  const showError = (error: string) => {
+    if (error && error.trim() !== '') {
+      toast.error(error);
+    }
+  };
+
+  // Function to show success toast
+  const showSuccess = (message: string) => {
+    if (message && message.trim() !== '') {
+      toast.success(message);
+    }
+  };
 
   // Skeleton component for loading state
   const LoadingSkeleton = () => (
@@ -86,8 +99,8 @@ export function EmergencyContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Emergency Withdraw Component */}
             <EmergencyWithdraw
-              setError={setError}
-              setSuccessMessage={setSuccessMessage}
+              setError={showError}
+              setSuccessMessage={showSuccess}
               setTxHash={setTxHash}
               isOwner={!!isOwner}
               isLoading={isDataLoading}
@@ -96,8 +109,8 @@ export function EmergencyContent() {
 
             {/* Emergency Pause Component */}
             <EmergencyPause
-              setError={setError}
-              setSuccessMessage={setSuccessMessage}
+              setError={showError}
+              setSuccessMessage={showSuccess}
               setTxHash={setTxHash}
               isOwner={!!isOwner}
               isLoading={isDataLoading}
@@ -105,39 +118,24 @@ export function EmergencyContent() {
             />
           </div>
 
-          {/* Status Messages */}
-          <div>
-            {error && (
-              <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                {error}
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded mb-4">
-                {successMessage}
-              </div>
-            )}
-
-            {/* Transaction Hash */}
-            {txHash && (
-              <Alert className="bg-black/40 border border-zinc-800">
-                <AlertDescription className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-300 truncate">
-                    Transaction: {txHash.slice(0, 10)}...{txHash.slice(-8)}
-                  </span>
-                  <a
-                    href={`https://sepolia.etherscan.io/tx/${txHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 flex items-center"
-                  >
-                    View on Sepolia <ExternalLink size={12} className="ml-1" />
-                  </a>
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
+          {/* Transaction Hash */}
+          {txHash && (
+            <Alert className="bg-black/40 border border-zinc-800">
+              <AlertDescription className="flex items-center justify-between">
+                <span className="text-xs text-zinc-300 truncate">
+                  Transaction: {txHash.slice(0, 10)}...{txHash.slice(-8)}
+                </span>
+                <a
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 flex items-center"
+                >
+                  View on Sepolia <ExternalLink size={12} className="ml-1" />
+                </a>
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
       )}
     </div>

@@ -50,18 +50,32 @@ export function EmergencyPause({
       setTxHash(pauseTxHash);
       setSuccessMessage('Contract paused successfully');
       utils.factoryConfig.isPaused.invalidate();
+      utils.factoryConfig.getContractBalance.invalidate();
+
+      // Revalidate the emergency page
+      fetch('/api/revalidate?path=/admin/emergency&type=page').catch((err) =>
+        console.error('Error revalidating emergency page:', err),
+      );
+
       setIsPausing(false);
     }
-  }, [pauseTxHash, isPausing, setTxHash, setSuccessMessage, utils.factoryConfig.isPaused]);
+  }, [pauseTxHash, isPausing, setTxHash, setSuccessMessage, utils.factoryConfig]);
 
   useEffect(() => {
     if (unpauseTxHash && isUnpausing) {
       setTxHash(unpauseTxHash);
       setSuccessMessage('Contract unpaused successfully');
       utils.factoryConfig.isPaused.invalidate();
+      utils.factoryConfig.getContractBalance.invalidate();
+
+      // Revalidate the emergency page
+      fetch('/api/revalidate?path=/admin/emergency&type=page').catch((err) =>
+        console.error('Error revalidating emergency page:', err),
+      );
+
       setIsUnpausing(false);
     }
-  }, [unpauseTxHash, isUnpausing, setTxHash, setSuccessMessage, utils.factoryConfig.isPaused]);
+  }, [unpauseTxHash, isUnpausing, setTxHash, setSuccessMessage, utils.factoryConfig]);
 
   // Watch for errors
   useEffect(() => {
@@ -86,9 +100,11 @@ export function EmergencyPause({
 
     try {
       setIsPausing(true);
-      setError('');
-      setSuccessMessage('');
-      setTxHash('');
+
+      // Don't clear messages until we have a result
+      // setError('');
+      // setSuccessMessage('');
+      // setTxHash('');
 
       // Call the contract function
       const result = await pauseContract();
@@ -112,9 +128,11 @@ export function EmergencyPause({
 
     try {
       setIsUnpausing(true);
-      setError('');
-      setSuccessMessage('');
-      setTxHash('');
+
+      // Don't clear messages until we have a result
+      // setError('');
+      // setSuccessMessage('');
+      // setTxHash('');
 
       // Call the contract function
       const result = await unpauseContract();
