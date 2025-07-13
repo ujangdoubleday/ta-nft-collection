@@ -7,8 +7,8 @@ import { useAccount } from 'wagmi';
 import { useTransferOwnership } from '@/lib/blockchain/hooks/useNFTCollectionWrite';
 import { useCollectionOwner } from '@/lib/blockchain/hooks/useNFTCollection';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -26,13 +26,16 @@ interface TransferCollectionOwnershipProps {
   collectionAddress: string;
   isLoading: boolean;
   onTransferComplete?: (hash: string) => void;
+  role?: 'admin' | 'user';
 }
 
 export function TransferCollectionOwnership({
   collectionAddress,
   isLoading,
   onTransferComplete,
+  role = 'user',
 }: TransferCollectionOwnershipProps) {
+  const router = useRouter();
   const { address } = useAccount();
 
   // Get current owner
@@ -56,8 +59,6 @@ export function TransferCollectionOwnership({
 
   const [newOwnerAddress, setNewOwnerAddress] = useState('');
   const [transferDialogOpen, setTransferDialogOpen] = useState(false);
-  const [transferError_, setTransferError] = useState('');
-  const [transferSuccess, setTransferSuccess] = useState('');
   const [transferTxHash, setTransferTxHash] = useState('');
   const [addressError, setAddressError] = useState('');
 
@@ -102,17 +103,14 @@ export function TransferCollectionOwnership({
 
   const handleTransferOwnership = async (e: React.FormEvent) => {
     e.preventDefault();
-    setTransferError('');
-    setTransferSuccess('');
-    setTransferTxHash('');
 
     if (!isOwner) {
-      setTransferError('Only the collection owner can transfer ownership');
+      toast.error('Only the collection owner can transfer ownership');
       return;
     }
 
     if (!newOwnerAddress || newOwnerAddress.length !== ETH_ADDRESS_LENGTH) {
-      setTransferError('Please enter a valid Ethereum address');
+      toast.error('Please enter a valid Ethereum address');
       return;
     }
 
@@ -122,7 +120,7 @@ export function TransferCollectionOwnership({
       if (result.hash) {
         const hash = result.hash;
         setTransferTxHash(hash);
-        setTransferSuccess('Ownership transfer initiated successfully');
+        toast.success('Ownership transfer initiated successfully');
         setNewOwnerAddress('');
 
         // Call the callback if provided
@@ -130,12 +128,25 @@ export function TransferCollectionOwnership({
           onTransferComplete(hash);
         }
 
-        setTimeout(() => setTransferDialogOpen(false), 3000);
+        // Revalidate both admin and user collection paths
+        fetch(`/api/revalidate?path=/admin/collections/${collectionAddress}&type=page`).catch(
+          (err) => console.error('Error revalidating admin collection page:', err),
+        );
+        fetch(`/api/revalidate?path=/user/collections/${collectionAddress}&type=page`).catch(
+          (err) => console.error('Error revalidating user collection page:', err),
+        );
+
+        // Close dialog and redirect after a brief delay
+        setTimeout(() => {
+          setTransferDialogOpen(false);
+          // Redirect to the appropriate collection page based on role
+          router.push(`/${role}/collections/${collectionAddress}`);
+        }, 1500);
       } else if (result.error) {
-        setTransferError(result.error.message);
+        toast.error(result.error.message || 'Failed to transfer ownership');
       }
     } catch (err: any) {
-      setTransferError(err.message || 'Failed to transfer ownership');
+      toast.error(err.message || 'Failed to transfer ownership');
     }
   };
 
@@ -173,42 +184,6 @@ export function TransferCollectionOwnership({
                 />
                 {addressError && <p className="text-xs text-red-400 mt-1">{addressError}</p>}
               </div>
-
-              {transferError_ && (
-                <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                  {transferError_}
-                </div>
-              )}
-
-              {transferError && (
-                <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                  {transferError.message}
-                </div>
-              )}
-
-              {transferSuccess && (
-                <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded mb-4">
-                  {transferSuccess}
-                </div>
-              )}
-
-              {transferTxHash && (
-                <Alert className="mb-4 bg-black/40 border border-zinc-800">
-                  <AlertDescription className="flex items-center justify-between">
-                    <span className="text-xs text-zinc-300 truncate">
-                      Transaction: {transferTxHash.slice(0, 10)}...{transferTxHash.slice(-8)}
-                    </span>
-                    <a
-                      href={`https://sepolia.etherscan.io/tx/${transferTxHash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 flex items-center"
-                    >
-                      View <ExternalLink size={12} className="ml-1" />
-                    </a>
-                  </AlertDescription>
-                </Alert>
-              )}
 
               <DialogFooter>
                 <Button

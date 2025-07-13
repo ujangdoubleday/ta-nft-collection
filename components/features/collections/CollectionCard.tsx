@@ -42,6 +42,8 @@ export function CollectionCard({
     },
   );
 
+  // const image = `https://${collection.imageUrl}`;
+
   // Check if user is owner whenever ownerData or userAddress changes
   useEffect(() => {
     // If ownership is pre-determined, use that value
@@ -99,32 +101,32 @@ export function CollectionCard({
             </div>
 
             {/* Collection Info - Right Side */}
-            <div className="flex-grow">
-              <div className="flex items-start justify-between mb-1">
-                <h3 className="font-bold text-white hover:text-zinc-300 transition-colors truncate max-w-[70%]">
+            <div className="flex-grow min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-1 gap-1">
+                <h3 className="font-bold text-white hover:text-zinc-300 transition-colors break-words pr-2 max-w-full">
                   {collection.name || 'Unnamed Collection'}
                 </h3>
 
                 {isLoading ? (
-                  <div className="ml-2 flex items-center">
-                    <div className="h-4 bg-[#1f1f1f] rounded w-20 animate-pulse"></div>
-                  </div>
+                  <div className="flex-shrink-0 h-4 bg-[#1f1f1f] rounded w-20 animate-pulse"></div>
                 ) : (
                   <span
-                    className={`text-xs px-2 py-1 rounded ml-2 ${isOwner ? 'bg-green-900 text-green-200' : 'bg-[#1f1f1f] text-white'}`}
+                    className={`text-xs px-2 py-1 rounded flex-shrink-0 ${isOwner ? 'bg-green-900 text-green-200' : 'bg-[#1f1f1f] text-white'}`}
                   >
                     {isOwner ? 'You are the owner' : 'You are not the owner'}
                   </span>
                 )}
               </div>
 
-              <p className="text-zinc-400 text-sm mb-2 line-clamp-2">
+              <p className="text-zinc-400 text-sm mb-2 break-words">
                 {collection.description || 'No description available'}
               </p>
 
-              <div className="flex items-center justify-between text-xs text-zinc-500">
-                <span title={collection.address}>{shortenAddress(collection.address, 6)}</span>
-                <span>Created {formattedDate}</span>
+              <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
+                <span title={collection.address} className="flex-shrink-0">
+                  {shortenAddress(collection.address, 6)}
+                </span>
+                <span className="flex-shrink-0">Created {formattedDate}</span>
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import Spinner from '@/components/ui/spinner';
 import { useAccount } from 'wagmi';
 import { useEmergencyWithdraw } from '@/lib/blockchain/hooks/useNFTFactoryWrite';
+import { trpc } from '@/lib/api/trpc/client';
 
 interface EmergencyWithdrawProps {
   setError: (error: string) => void;
@@ -25,6 +26,9 @@ export function EmergencyWithdraw({
 }: EmergencyWithdrawProps) {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const { address } = useAccount();
+
+  // Get tRPC utils for invalidating queries
+  const utils = trpc.useContext();
 
   // Get contract functions
   const { emergencyWithdraw } = useEmergencyWithdraw();
@@ -47,6 +51,14 @@ export function EmergencyWithdraw({
       if (result.hash) {
         setTxHash(result.hash);
         setSuccessMessage('Funds withdrawn successfully');
+
+        // Invalidate contract balance query
+        utils.factoryConfig.getContractBalance.invalidate();
+
+        // Revalidate the emergency page
+        fetch('/api/revalidate?path=/admin/emergency&type=page').catch((err) =>
+          console.error('Error revalidating emergency page:', err),
+        );
       } else if (result.error) {
         setError(result.error.message);
       }

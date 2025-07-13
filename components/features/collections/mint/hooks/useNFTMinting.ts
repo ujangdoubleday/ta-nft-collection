@@ -9,6 +9,7 @@ import { subscribeToContractEvents } from '@/lib/blockchain/utils/alchemy';
 import { decodeEventLog, parseAbiItem } from 'viem';
 import { disconnectWebSocket } from '@/lib/blockchain/alchemy/config';
 import { useTrpc } from '@/lib/hooks/use-trpc';
+import { toast } from 'sonner';
 
 // Event signature for Transfer event
 const TRANSFER_EVENT_SIGNATURE = 'Transfer(address,address,uint256)';
@@ -190,6 +191,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
               refreshNFTData(event.tokenId).then(() => {
                 setMintSuccess(true);
                 setProcessingStep('NFT minted successfully!');
+                toast.success('NFT minted successfully!');
 
                 // Only reset isMinting if there was an error
                 // If successful, keep it true until redirect happens
@@ -227,16 +229,19 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
     setError(null);
 
     if (!contractAddress || !imageFile || !address) {
+      toast.error('Please select an image for your NFT and connect your wallet');
       setError(new Error('Please select an image for your NFT and connect your wallet'));
       return;
     }
 
     if (!nftName.trim()) {
+      toast.error('Name is required');
       setError(new Error('Name is required'));
       return;
     }
 
     if (!nftDescription.trim()) {
+      toast.error('Description is required');
       setError(new Error('Description is required'));
       return;
     }
@@ -292,6 +297,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
             console.log('Using fallback: Event detection timed out');
             setProcessingStep('NFT minted successfully (fallback)');
             setMintSuccess(true);
+            toast.success('NFT minted successfully!');
             // Don't reset isMinting here to keep the button in loading state
           }
         }, 30000);
@@ -300,6 +306,8 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
       }
     } catch (err) {
       console.error('Mint process error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error during minting';
+      toast.error(errorMessage);
       setError(err instanceof Error ? err : new Error('Unknown error during minting'));
       setIsMinting(false);
     }

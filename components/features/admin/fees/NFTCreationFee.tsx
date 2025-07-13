@@ -1,53 +1,40 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useNFTFactoryConfig } from '@/lib/blockchain/hooks/useNFTFactoryConfig';
-import Spinner from '@/components/ui/spinner';
-import { Button } from '@/components/ui/button';
 import { trpc } from '@/lib/api/trpc/client';
 import { useAccount } from 'wagmi';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useSetCreationFee } from '@/lib/blockchain/hooks/useNFTFactoryWrite';
+import { formatEther, parseEther } from 'viem';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import Spinner from '@/components/ui/spinner';
 
 export function NFTCreationFee() {
   const [isLoading, setIsLoading] = useState(true);
-  const {
-    creationFee,
-    isLoadingFee,
-    isUpdating,
-    updateCreationFee,
-    error: updateError,
-    transactionHash,
-  } = useNFTFactoryConfig();
-
   const { address } = useAccount();
+  const utils = trpc.useContext();
   const { data: isOwner, isLoading: isCheckingOwner } = trpc.factoryConfig.isOwner.useQuery(
     { address: address || '' },
     { enabled: !!address },
   );
 
-  // Fee update
-  const [newFee, setNewFee] = useState('0');
-  const [error, setError] = useState('');
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  // Get current creation fee
+  const { data: creationFeeData, isLoading: isLoadingFee } =
+    trpc.factoryConfig.getCreationFee.useQuery();
 
-  // Update newFee when creationFee changes
-  useEffect(() => {
-    if (creationFee) {
-      setNewFee(creationFee);
-    }
-  }, [creationFee]);
+  // Update creation fee
+  const { setCreationFee, isLoading: isUpdatingFee, error: feeError } = useSetCreationFee();
+  const [newFee, setNewFee] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -57,22 +44,40 @@ export function NFTCreationFee() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Monitor for errors
+  useEffect(() => {
+    if (feeError) {
+      toast.error(feeError.message || 'Failed to update fee');
+    }
+  }, [feeError]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccessMessage('');
 
     if (!isOwner) {
-      setError('Only the contract owner can update creation fee');
+      toast.error('Only the contract owner can update creation fee');
       return;
     }
 
     try {
-      await updateCreationFee(newFee);
-      setSuccessMessage('Fee updated successfully');
-      setDialogOpen(false);
-    } catch (err) {
-      setError('Failed to update creation fee. Please try again.');
+      const result = await setCreationFee(parseEther(newFee));
+
+      if (result.hash) {
+        // Invalidate tRPC queries to refresh data
+        utils.factoryConfig.getCreationFee.invalidate();
+
+        // Revalidate the fees page
+        fetch('/api/revalidate?path=/admin/fees&type=page').catch((err) =>
+          console.error('Error revalidating fees page:', err),
+        );
+
+        toast.success('Fee updated successfully');
+        setTimeout(() => setDialogOpen(false), 2000);
+      } else if (result.error) {
+        toast.error(result.error.message || 'Failed to update fee');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to update creation fee. Please try again.');
       console.error('Error setting fee:', err);
     }
   };
@@ -88,7 +93,9 @@ export function NFTCreationFee() {
               <div className="h-6 bg-[#1f1f1f] rounded w-1/3 animate-pulse"></div>
             ) : (
               <div className="flex justify-between items-center">
-                <p className="text-base font-medium text-white">{creationFee} ETH</p>
+                <p className="text-base font-medium text-white">
+                  {creationFeeData?.fee || '0'} ETH
+                </p>
               </div>
             )}
           </div>
@@ -122,45 +129,9 @@ export function NFTCreationFee() {
                     onChange={(e) => setNewFee(e.target.value)}
                     className="bg-black border border-zinc-800 text-white"
                     placeholder="Enter new fee in ETH"
-                    disabled={isUpdating}
+                    disabled={isUpdatingFee}
                   />
                 </div>
-
-                {error && (
-                  <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                    {error}
-                  </div>
-                )}
-
-                {updateError && (
-                  <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                    {updateError.message}
-                  </div>
-                )}
-
-                {successMessage && (
-                  <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded mb-4">
-                    {successMessage}
-                  </div>
-                )}
-
-                {transactionHash && (
-                  <Alert className="mb-4 bg-black/40 border border-zinc-800">
-                    <AlertDescription className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-300 truncate">
-                        Transaction: {transactionHash.slice(0, 10)}...{transactionHash.slice(-8)}
-                      </span>
-                      <a
-                        href={`https://sepolia.etherscan.io/tx/${transactionHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 flex items-center"
-                      >
-                        View <ExternalLink size={12} className="ml-1" />
-                      </a>
-                    </AlertDescription>
-                  </Alert>
-                )}
 
                 <DialogFooter>
                   <Button
@@ -168,13 +139,14 @@ export function NFTCreationFee() {
                     className="hover:bg-zinc-800"
                     variant="ghost"
                     onClick={() => setDialogOpen(false)}
+                    disabled={isUpdatingFee}
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isUpdating}>
-                    {isUpdating ? (
+                  <Button type="submit" disabled={isUpdatingFee}>
+                    {isUpdatingFee ? (
                       <div className="flex items-center justify-center gap-2">
-                        <Spinner size="md" color="black" />
+                        <Spinner size="sm" color="black" />
                         <span>Updating...</span>
                       </div>
                     ) : (

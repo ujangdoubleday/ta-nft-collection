@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ImagePlus, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ImagePlus, RefreshCw, Search } from 'lucide-react';
 import { NFTGallery } from './NFTGallery';
 import { trpc } from '@/lib/api/trpc/client';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,6 +12,7 @@ import { formatIPFSUrl } from '@/lib/utils/helpers/url';
 import { CollectionItem } from '@/lib/blockchain/utils/nft';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { FilterPanel, NFTFilters } from './FilterPanel';
 
 interface CollectionNFTsContentProps {
   address: string;
@@ -22,6 +23,8 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
   const [mounted, setMounted] = useState(false);
   const [processingError, setProcessingError] = useState<Error | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   // Add cached NFTs state
   const [cachedNFTs, setCachedNFTs] = useState<any[]>([]);
   const router = useRouter();
@@ -148,6 +151,19 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
     };
   }, [address, metadata, collectionInfo, processedNfts]);
 
+  // Filter NFTs based on search query
+  const filteredNFTs = useMemo(() => {
+    if (!processedNfts || processedNfts.length === 0) return [];
+
+    if (!searchQuery) return processedNfts;
+
+    return processedNfts.filter((nft) => {
+      const nameMatch = nft.name && nft.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const tokenIdMatch = nft.tokenId && nft.tokenId.toString().includes(searchQuery);
+      return nameMatch || tokenIdMatch;
+    });
+  }, [processedNfts, searchQuery]);
+
   // Determine if we're still loading
   const isLoading =
     !mounted || isLoadingContract || isLoadingMetadata || isLoadingNFTs || isProcessingNfts;
@@ -179,6 +195,16 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
       }, 1000); // Add slight delay to show the refresh animation
     }
   }, [address, isRefreshing, router, utils.collection.getContractURI, refetchNFTs, nftsPath]);
+
+  // Handle filter toggle
+  const handleFilterToggle = () => {
+    setIsFilterPanelOpen(!isFilterPanelOpen);
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (filters: NFTFilters) => {
+    setSearchQuery(filters.search);
+  };
 
   // Show loading state during SSR or while fetching data
   if (isLoading && !isRefreshing && cachedNFTs.length === 0) {
@@ -230,6 +256,65 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
   // Get collection name from metadata or fallback to contract name
   const collectionName = collectionData?.name || 'Unnamed Collection';
 
+  // Show filtered empty state if no NFTs match filters
+  if (filteredNFTs.length === 0 && processedNfts && processedNfts.length > 0) {
+    return (
+      <>
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white">NFTs</h1>
+              <p className="text-zinc-400">All NFTs in Collection: {collectionName}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleFilterToggle}
+                className={`bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
+                  isFilterPanelOpen ? 'bg-[#1f1f1f]' : ''
+                }`}
+                aria-label="Toggle filter panel"
+              >
+                <Search className="h-4 w-4" />
+                Search
+              </button>
+              <button
+                onClick={() => handleRefresh()}
+                disabled={isRefreshing}
+                className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
+                  isRefreshing ? 'opacity-70' : ''
+                }`}
+                aria-label="Refresh NFTs"
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <div className="h-px w-full bg-[#1f1f1f] mt-6"></div>
+        </div>
+
+        {isFilterPanelOpen && (
+          <FilterPanel
+            isOpen={isFilterPanelOpen}
+            onFilterChange={handleFilterChange}
+            initialFilters={{ search: searchQuery }}
+          />
+        )}
+
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
+          <div className="mx-auto w-12 h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center mb-4">
+            <Search className="h-6 w-6 text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No Matching NFTs</h3>
+          <p className="text-zinc-400 mb-6">
+            No NFTs match your search query. Try adjusting your search criteria.
+          </p>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="mb-8">
@@ -238,27 +323,48 @@ export function CollectionNFTsContent({ address, role = 'user' }: CollectionNFTs
             <h1 className="text-3xl font-bold text-white">NFTs</h1>
             <p className="text-zinc-400">All NFTs in Collection: {collectionName}</p>
           </div>
-          <button
-            onClick={() => handleRefresh()}
-            disabled={isRefreshing}
-            className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
-              isRefreshing ? 'opacity-70' : ''
-            }`}
-            aria-label="Refresh NFTs"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleFilterToggle}
+              className={`bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
+                isFilterPanelOpen ? 'bg-[#1f1f1f]' : ''
+              }`}
+              aria-label="Toggle filter panel"
+            >
+              <Search className="h-4 w-4" />
+              Search
+            </button>
+            <button
+              onClick={() => handleRefresh()}
+              disabled={isRefreshing}
+              className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
+                isRefreshing ? 'opacity-70' : ''
+              }`}
+              aria-label="Refresh NFTs"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         </div>
 
         <div className="h-px w-full bg-[#1f1f1f] mt-6"></div>
       </div>
 
+      {isFilterPanelOpen && (
+        <FilterPanel
+          isOpen={isFilterPanelOpen}
+          onFilterChange={handleFilterChange}
+          initialFilters={{ search: searchQuery }}
+        />
+      )}
+
       <NFTGallery
         collectionAddress={address}
-        nfts={processedNfts || []}
+        nfts={filteredNFTs}
         onRefresh={handleRefresh}
         role={role}
+        totalCount={processedNfts?.length}
       />
     </>
   );

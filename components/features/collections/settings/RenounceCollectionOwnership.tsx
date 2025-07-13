@@ -9,6 +9,8 @@ import { useCollectionOwner } from '@/lib/blockchain/hooks/useNFTCollection';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +24,7 @@ interface RenounceCollectionOwnershipProps {
   collectionAddress: string;
   isLoading: boolean;
   onRenounceComplete?: (hash: string) => void;
+  role?: 'admin' | 'user';
 }
 
 // Confirmation text that user needs to type
@@ -31,7 +34,9 @@ export function RenounceCollectionOwnership({
   collectionAddress,
   isLoading,
   onRenounceComplete,
+  role = 'user',
 }: RenounceCollectionOwnershipProps) {
+  const router = useRouter();
   const { address } = useAccount();
 
   // Get current owner
@@ -54,8 +59,6 @@ export function RenounceCollectionOwnership({
   } = useRenounceOwnership();
 
   const [renounceDialogOpen, setRenounceDialogOpen] = useState(false);
-  const [renounceError_, setRenounceError] = useState('');
-  const [renounceSuccess, setRenounceSuccess] = useState('');
   const [renounceTxHash, setRenounceTxHash] = useState('');
 
   // Confirmation input
@@ -68,17 +71,13 @@ export function RenounceCollectionOwnership({
   }, [confirmationText]);
 
   const handleRenounceOwnership = async () => {
-    setRenounceError('');
-    setRenounceSuccess('');
-    setRenounceTxHash('');
-
     if (!isOwner) {
-      setRenounceError('Only the collection owner can renounce ownership');
+      toast.error('Only the collection owner can renounce ownership');
       return;
     }
 
     if (!isConfirmed) {
-      setRenounceError('Please type the confirmation text exactly');
+      toast.error('Please type the confirmation text exactly');
       return;
     }
 
@@ -88,19 +87,32 @@ export function RenounceCollectionOwnership({
       if (result.hash) {
         const hash = result.hash;
         setRenounceTxHash(hash);
-        setRenounceSuccess('Ownership renounced successfully');
+        toast.success('Ownership renounced successfully');
 
         // Call the callback if provided
         if (onRenounceComplete) {
           onRenounceComplete(hash);
         }
 
-        setTimeout(() => setRenounceDialogOpen(false), 3000);
+        // Revalidate both admin and user collection paths
+        fetch(`/api/revalidate?path=/admin/collections/${collectionAddress}&type=page`).catch(
+          (err) => console.error('Error revalidating admin collection page:', err),
+        );
+        fetch(`/api/revalidate?path=/user/collections/${collectionAddress}&type=page`).catch(
+          (err) => console.error('Error revalidating user collection page:', err),
+        );
+
+        // Close dialog and redirect after a brief delay
+        setTimeout(() => {
+          setRenounceDialogOpen(false);
+          // Redirect to the collections list page based on role
+          router.push(`/${role}/collections/${collectionAddress}`);
+        }, 1500);
       } else if (result.error) {
-        setRenounceError(result.error.message);
+        toast.error(result.error.message || 'Failed to renounce ownership');
       }
     } catch (err: any) {
-      setRenounceError(err.message || 'Failed to renounce ownership');
+      toast.error(err.message || 'Failed to renounce ownership');
     }
   };
 
@@ -155,42 +167,6 @@ export function RenounceCollectionOwnership({
                 />
               </div>
             </div>
-
-            {renounceError_ && (
-              <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                {renounceError_}
-              </div>
-            )}
-
-            {renounceError && (
-              <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                {renounceError.message}
-              </div>
-            )}
-
-            {renounceSuccess && (
-              <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded mb-4">
-                {renounceSuccess}
-              </div>
-            )}
-
-            {renounceTxHash && (
-              <Alert className="mb-4 bg-black/40 border border-zinc-800">
-                <AlertDescription className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-300 truncate">
-                    Transaction: {renounceTxHash.slice(0, 10)}...{renounceTxHash.slice(-8)}
-                  </span>
-                  <a
-                    href={`https://sepolia.etherscan.io/tx/${renounceTxHash}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 flex items-center"
-                  >
-                    View <ExternalLink size={12} className="ml-1" />
-                  </a>
-                </AlertDescription>
-              </Alert>
-            )}
 
             <DialogFooter>
               <Button
