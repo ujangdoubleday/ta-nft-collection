@@ -41,6 +41,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
   const [txHash, setTxHash] = useState<string | null>(null);
   const [transferEvent, setTransferEvent] = useState<NFTTransferEvent | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [processingStep, setProcessingStep] = useState('');
 
   // Refs to prevent unnecessary re-renders
   const hasSetupWebsocket = useRef(false);
@@ -55,6 +56,62 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
   // Create the mutation hook
   const refreshMetadataMutation = nft.refreshNFTMetadata.useMutation();
 
+  // Prevent navigation during minting process or after success (until redirect)
+  const preventNavigation = useCallback(
+    (e: PopStateEvent) => {
+      if (isMinting || mintSuccess) {
+        // This will prevent the navigation and keep the user on the current page
+        e.preventDefault();
+        // Push the current URL back to the history to cancel the navigation
+        window.history.pushState(null, '', window.location.href);
+        // Show an alert to inform the user
+        const message = isMinting
+          ? 'NFT minting is in progress. Please wait until the process is complete.'
+          : 'NFT minted successfully. Please wait for redirect.';
+        alert(message);
+      }
+    },
+    [isMinting, mintSuccess],
+  );
+
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Add event listener for popstate (browser back/forward)
+      window.addEventListener('popstate', preventNavigation);
+
+      // Push initial state to enable popstate detection
+      window.history.pushState(null, '', window.location.href);
+
+      return () => {
+        window.removeEventListener('popstate', preventNavigation);
+      };
+    }
+  }, [preventNavigation]);
+
+  // Add navigation warning when minting is in progress or completed but not yet redirected
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isMinting || mintSuccess) {
+        // Standard way to show a confirmation dialog before leaving
+        const message = isMinting
+          ? 'NFT minting is in progress. Are you sure you want to leave?'
+          : 'NFT minted successfully. Please wait for redirect. Are you sure you want to leave?';
+        e.preventDefault();
+        e.returnValue = message; // Required for Chrome
+        return message; // For other browsers
+      }
+    };
+
+    // Add event listener for page unload/refresh
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      // Clean up event listener
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [isMinting, mintSuccess]);
+
   // Memoized refresh function that only runs once per creation
   const refreshNFTData = useCallback(
     async (tokenId: string) => {
@@ -62,6 +119,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
 
       try {
         hasRefreshedData.current = true;
+        setProcessingStep('Refreshing NFT metadata...');
         console.log('Refreshing NFT data...');
 
         try {
@@ -87,6 +145,8 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
             creatorAddress: address,
           });
         }
+
+        setProcessingStep('NFT minted successfully!');
       } catch (error) {
         console.error('Error refreshing NFT data:', error);
         hasRefreshedData.current = false;
@@ -100,6 +160,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
     if (!contractAddress || !txHash || hasSetupWebsocket.current) return;
 
     hasSetupWebsocket.current = true;
+    setProcessingStep('Waiting for blockchain confirmation...');
     console.log('Setting up real-time blockchain monitoring...');
 
     const unsubscribe = subscribeToContractEvents(
@@ -128,7 +189,13 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
 
               refreshNFTData(event.tokenId).then(() => {
                 setMintSuccess(true);
-                setIsMinting(false);
+                setProcessingStep('NFT minted successfully!');
+
+                // Only reset isMinting if there was an error
+                // If successful, keep it true until redirect happens
+                if (error) {
+                  setIsMinting(false);
+                }
 
                 if (redirectTimeout.current) {
                   clearTimeout(redirectTimeout.current);
@@ -153,7 +220,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
       }
       disconnectWebSocket();
     };
-  }, [txHash, address, refreshNFTData, contractAddress]);
+  }, [txHash, address, refreshNFTData, contractAddress, error]);
 
   const handleMint = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,6 +247,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
     try {
       // The key is to call uploadToPinata directly with the NFT file and minimal metadata
       // This will use the backend upload.ts route which handles proper metadata creation
+      setProcessingStep('Uploading NFT to IPFS...');
       console.log('Uploading NFT to IPFS...');
 
       const filteredAttributes = attributes.filter((attr) => attr.trait_type && attr.value);
@@ -205,6 +273,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
       }
 
       // Mint the NFT with the metadata URL
+      setProcessingStep('Minting NFT on blockchain...');
       console.log('Minting NFT with metadata URL:', uploadResult.metadata.url);
       const result = await mintNFT(contractAddress, address, uploadResult.metadata.url);
 
@@ -214,14 +283,16 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
 
       if (result.hash) {
         setTxHash(result.hash);
+        setProcessingStep('Transaction submitted, waiting for confirmation...');
         console.log('Mint transaction submitted:', result.hash);
 
         // Set a fallback timer in case the event listener doesn't catch the event
         const fallbackTimer = setTimeout(() => {
           if (!transferEvent && !mintSuccess) {
             console.log('Using fallback: Event detection timed out');
+            setProcessingStep('NFT minted successfully (fallback)');
             setMintSuccess(true);
-            setIsMinting(false);
+            // Don't reset isMinting here to keep the button in loading state
           }
         }, 30000);
 
@@ -244,6 +315,8 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
     setTxHash(null);
     setTransferEvent(null);
     setError(null);
+    setProcessingStep('');
+    setIsMinting(false);
   };
 
   // Cleanup on unmount
@@ -252,6 +325,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
       if (redirectTimeout.current) {
         clearTimeout(redirectTimeout.current);
       }
+      disconnectWebSocket();
     };
   }, []);
 
@@ -262,17 +336,20 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
     setNftDescription,
     imagePreview,
     setImagePreview,
+    imageFile,
+    setImageFile,
     attributes,
     setAttributes,
     isMinting,
     mintSuccess,
-    imageFile,
-    setImageFile,
-    handleMint,
-    resetForm,
+    txHash,
+    transferEvent,
+    error,
+    processingStep,
     isUploading,
     isMintLoading,
     address,
-    error,
+    handleMint,
+    resetForm,
   };
 };
