@@ -34,6 +34,7 @@ export function CollectionOwnershipManagement({
           collectionAddress={address}
           isLoading={isLoading}
           onTransferComplete={(hash) => setTransferTxHash(hash)}
+          role={role}
         />
       </div>
 
@@ -43,6 +44,7 @@ export function CollectionOwnershipManagement({
           collectionAddress={address}
           isLoading={isLoading}
           onRenounceComplete={(hash) => setRenounceTxHash(hash)}
+          role={role}
         />
       </div>
 
