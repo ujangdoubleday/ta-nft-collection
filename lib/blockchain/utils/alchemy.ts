@@ -482,13 +482,13 @@ export const fetchNFTByTokenId = async (
  */
 export async function getTransferHistory(contractAddress: string, tokenId: string) {
   try {
-    console.log(`Fetching transfer history for NFT: ${contractAddress} Token ID: ${tokenId}`);
+    // console.log(`Fetching transfer history for NFT: ${contractAddress} Token ID: ${tokenId}`);
 
     // Convert tokenId to numeric for comparison if not in hex format
     const numericTokenId = tokenId.startsWith('0x')
       ? tokenId
       : `0x${parseInt(tokenId).toString(16).padStart(64, '0')}`;
-    console.log(`Looking for token ID: ${tokenId} (hex: ${numericTokenId})`);
+    // console.log(`Looking for token ID: ${tokenId} (hex: ${numericTokenId})`);
 
     // Build request body
     const requestBody = {
@@ -537,7 +537,7 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
 
     // Extract transfers from the result
     const transfers = data.result?.transfers || [];
-    console.log(`Found ${transfers.length} total transfers for contract`);
+    // console.log(`Found ${transfers.length} total transfers for contract`);
 
     // Filter for the specific token ID
     const filteredTransfers = transfers
@@ -550,9 +550,9 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
 
           // Compare with our token ID
           const isMatch = transferTokenIdLower === numericTokenIdLower;
-          console.log(
-            `Comparing: Transfer tokenId: ${transferTokenIdLower}, Looking for: ${numericTokenIdLower}, Match: ${isMatch}`,
-          );
+          // console.log(
+          //   `Comparing: Transfer tokenId: ${transferTokenIdLower}, Looking for: ${numericTokenIdLower}, Match: ${isMatch}`,
+          // );
 
           return isMatch;
         }
@@ -563,9 +563,9 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
           const numericTokenIdLower = numericTokenId.toLowerCase();
 
           const isMatch = transferTokenIdLower === numericTokenIdLower;
-          console.log(
-            `Fallback - Comparing TokenId: ${transferTokenIdLower}, Looking for: ${numericTokenIdLower}, Match: ${isMatch}`,
-          );
+          // console.log(
+          //   `Fallback - Comparing TokenId: ${transferTokenIdLower}, Looking for: ${numericTokenIdLower}, Match: ${isMatch}`,
+          // );
 
           return isMatch;
         }
@@ -582,7 +582,7 @@ export async function getTransferHistory(contractAddress: string, tokenId: strin
         };
       });
 
-    console.log(`Found ${filteredTransfers.length} transfers for token ${tokenId}`);
+    // console.log(`Found ${filteredTransfers.length} transfers for token ${tokenId}`);
     return filteredTransfers;
   } catch (error) {
     console.error('Error getting transfer history:', error);
