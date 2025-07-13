@@ -30,9 +30,26 @@ export function NextImage({
   const [isLoading, setIsLoading] = useState(true);
   const [_error, setError] = useState(false);
 
+  // Ensure URL has proper protocol
+  const ensureProtocol = (url: string): string => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    if (url.startsWith('/')) return url; // Local URLs starting with / are fine
+    if (url.startsWith('data:')) return url; // Data URLs are fine
+
+    // Add https:// to URLs that don't have a protocol and aren't relative
+    return `https://${url}`;
+  };
+
   // Reset state when src changes
   useEffect(() => {
-    setImgSrc(src ? (typeof src === 'string' ? src : '') : '');
+    if (!src) {
+      setImgSrc('');
+      return;
+    }
+
+    const processedSrc = typeof src === 'string' ? ensureProtocol(src) : '';
+    setImgSrc(processedSrc);
     setIsLoading(true);
     setError(false);
   }, [src]);
