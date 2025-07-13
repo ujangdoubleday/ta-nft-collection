@@ -8,6 +8,7 @@ import { useWithdrawFees } from '@/lib/blockchain/hooks/useNFTFactoryWrite';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ExternalLink } from 'lucide-react';
 import { parseEther } from 'viem';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ const ETH_ADDRESS_LENGTH = 42; // 0x + 40 hex characters
 export function WithdrawFees() {
   const [isLoading, setIsLoading] = useState(true);
   const { address } = useAccount();
+  const utils = trpc.useContext();
   const { data: isOwner, isLoading: isCheckingOwner } = trpc.factoryConfig.isOwner.useQuery(
     { address: address || '' },
     { enabled: !!address },
@@ -40,8 +42,6 @@ export function WithdrawFees() {
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
-  const [withdrawError, setWithdrawError] = useState('');
-  const [withdrawSuccess, setWithdrawSuccess] = useState('');
   const [withdrawTxHash, setWithdrawTxHash] = useState('');
   const [addressError, setAddressError] = useState('');
 
@@ -94,22 +94,20 @@ export function WithdrawFees() {
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
-    setWithdrawError('');
-    setWithdrawSuccess('');
     setWithdrawTxHash('');
 
     if (!isOwner) {
-      setWithdrawError('Only the contract owner can withdraw fees');
+      toast.error('Only the contract owner can withdraw fees');
       return;
     }
 
     if (!withdrawAddress || withdrawAddress.length !== ETH_ADDRESS_LENGTH) {
-      setWithdrawError('Please enter a valid Ethereum address');
+      toast.error('Please enter a valid Ethereum address');
       return;
     }
 
     if (!withdrawAmount || parseFloat(withdrawAmount) <= 0) {
-      setWithdrawError('Please enter a valid amount');
+      toast.error('Please enter a valid amount');
       return;
     }
 
@@ -121,15 +119,25 @@ export function WithdrawFees() {
 
       if (result.hash) {
         setWithdrawTxHash(result.hash);
-        setWithdrawSuccess('Withdrawal initiated successfully');
+        toast.success('Withdrawal initiated successfully');
         setWithdrawAddress('');
         setWithdrawAmount('');
-        setTimeout(() => setWithdrawDialogOpen(false), 3000);
+
+        // Invalidate tRPC queries to refresh data
+        utils.factoryConfig.getContractBalance.invalidate();
+        utils.factoryConfig.getTotalFeesCollected.invalidate();
+
+        // Revalidate the fees page
+        fetch('/api/revalidate?path=/admin/fees&type=page').catch((err) =>
+          console.error('Error revalidating fees page:', err),
+        );
+
+        setTimeout(() => setWithdrawDialogOpen(false), 2000);
       } else if (result.error) {
-        setWithdrawError(result.error.message);
+        toast.error(result.error.message || 'Failed to withdraw fees');
       }
     } catch (err: any) {
-      setWithdrawError(err.message || 'Failed to withdraw fees');
+      toast.error(err.message || 'Failed to withdraw fees');
     }
   };
 
@@ -205,18 +213,6 @@ export function WithdrawFees() {
                     <p className="text-xs text-zinc-500 mt-1">Max: {contractBalance} ETH</p>
                   </div>
                 </div>
-
-                {withdrawError && (
-                  <div className="bg-red-900/20 border border-red-900/30 text-red-400 px-4 py-3 rounded mb-4">
-                    {withdrawError}
-                  </div>
-                )}
-
-                {withdrawSuccess && (
-                  <div className="bg-green-900/20 border border-green-900/30 text-green-400 px-4 py-3 rounded mb-4">
-                    {withdrawSuccess}
-                  </div>
-                )}
 
                 {withdrawTxHash && (
                   <Alert className="mb-4 bg-black/40 border border-zinc-800">
