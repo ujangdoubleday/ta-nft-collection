@@ -62,24 +62,28 @@ async function getAuthStatus(request: NextRequest): Promise<AuthStatus> {
 export async function middleware(request: NextRequest) {
   try {
     const { isAuthenticated, token } = await getAuthStatus(request);
+    const origin = request.nextUrl.origin;
 
     if (request.nextUrl.pathname.startsWith('/user')) {
       if (!isAuthenticated) {
         const callback = request.nextUrl.pathname;
-        return NextResponse.redirect(`/login?callback=${encodeURIComponent(callback)}`);
+        const loginUrl = new URL(`/login?callback=${encodeURIComponent(callback)}`, origin);
+        return NextResponse.redirect(loginUrl);
       }
     }
 
     if (request.nextUrl.pathname.startsWith('/login')) {
       if (isAuthenticated) {
-        return NextResponse.redirect('/api/auth/login');
+        const authLoginUrl = new URL('/api/auth/login', origin);
+        return NextResponse.redirect(authLoginUrl);
       }
     }
 
     return NextResponse.next();
   } catch (error) {
     console.error('Error in middleware:', error);
-    return NextResponse.redirect('/');
+    const homeUrl = new URL('/', request.nextUrl.origin);
+    return NextResponse.redirect(homeUrl);
   }
 }
 

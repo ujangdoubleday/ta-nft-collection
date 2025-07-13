@@ -4,7 +4,8 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 // Get the domain for cookies - fix for production
 const getProductionDomain = () => {
   if (process.env.NODE_ENV === 'production') {
-    if (process.env.NEXTAUTH_URL) {
+    // First check if NEXTAUTH_URL exists and is not empty
+    if (process.env.NEXTAUTH_URL && process.env.NEXTAUTH_URL.trim() !== '') {
       try {
         const url = new URL(process.env.NEXTAUTH_URL);
         // Only return domain if not localhost
@@ -13,10 +14,13 @@ const getProductionDomain = () => {
         }
       } catch (error) {
         console.error('Invalid NEXTAUTH_URL:', error);
+        // Return undefined to use default domain behavior
         return undefined;
       }
+    } else {
+      console.warn('NEXTAUTH_URL is not set or is empty, using default domain behavior');
     }
-    // If no NEXTAUTH_URL set, don't set domain (will use current domain)
+    // If no valid NEXTAUTH_URL set, don't set domain (will use current domain)
     return undefined;
   }
   return undefined;
