@@ -9,27 +9,8 @@ import { useSession, signOut, getCsrfToken } from 'next-auth/react';
 import { sepolia } from 'wagmi/chains';
 import { trpc } from '@/lib/api/trpc/client';
 
-// Local storage keys
-const DISCONNECTED_KEY = 'wallet_disconnected';
-
 // Helper to check if code is running in browser
 const isBrowser = typeof window !== 'undefined';
-
-// Safe localStorage access
-const getFromStorage = (key: string): string | null => {
-  if (!isBrowser) return null;
-  return localStorage.getItem(key);
-};
-
-const setToStorage = (key: string, value: string): void => {
-  if (!isBrowser) return;
-  localStorage.setItem(key, value);
-};
-
-const removeFromStorage = (key: string): void => {
-  if (!isBrowser) return;
-  localStorage.removeItem(key);
-};
 
 // Wallet state interface
 interface WalletState {
@@ -55,14 +36,6 @@ export function useWalletWagmi() {
     isAuthenticated: false,
     isAuthenticating: false,
   });
-
-  // Update state with localStorage values after mount
-  useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      manuallyDisconnected: getFromStorage(DISCONNECTED_KEY) === 'true',
-    }));
-  }, []);
 
   // Wagmi hooks
   const { address, isConnected } = useAccount();
@@ -146,8 +119,6 @@ export function useWalletWagmi() {
         error: null,
       }));
 
-      removeFromStorage(DISCONNECTED_KEY);
-
       // First try to switch to Sepolia network
       try {
         await switchToSepolia();
@@ -204,8 +175,6 @@ export function useWalletWagmi() {
         manuallyDisconnected: true,
         error: null,
       }));
-
-      setToStorage(DISCONNECTED_KEY, 'true');
     } catch (error: any) {
       console.error('Error disconnecting:', error);
     }
