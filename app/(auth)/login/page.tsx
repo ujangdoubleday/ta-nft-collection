@@ -101,7 +101,7 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-4">
       <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold mb-2 text-white">Sign to App</h1>
+        <h1 className="text-2xl font-bold mb-2 text-white">Connect Your Wallet to Continue</h1>
       </div>
       <div className="max-w-md w-full bg-zinc-900 border border-zinc-800 rounded-xl p-8 shadow-lg animate-fade-in">
         <div className="space-y-6">
