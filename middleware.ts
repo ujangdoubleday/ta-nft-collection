@@ -63,35 +63,10 @@ export async function middleware(request: NextRequest) {
   try {
     const { isAuthenticated, token } = await getAuthStatus(request);
 
-    // Check if the path is in admin protected route group
-    // if (request.nextUrl.pathname.startsWith('/admin')) {
-    //   if (!isAuthenticated) {
-    //     return NextResponse.redirect(new URL('/', request.url));
-    //   }
-
-    //   // Check if user is admin (only if we have a real token with address)
-    //   if (token && 'address' in token) {
-    //     const isAdmin = isAdminWallet(token.address as string);
-
-    //     if (!isAdmin) {
-    //       return NextResponse.redirect(new URL('/', request.url));
-    //     }
-    //   } else {
-    //     // No address in token, not an admin
-    //     return NextResponse.redirect(new URL('/', request.url));
-    //   }
-
-    //   // Admin is authenticated, allow access without rewriting
-    //   return NextResponse.next();
-    // }
-
-    // Handle user routes that require authentication
     if (request.nextUrl.pathname.startsWith('/user')) {
       if (!isAuthenticated) {
-        // Redirect to unauthorized page with callback parameter
-        const redirectUrl = new URL('/login', request.url);
-        redirectUrl.searchParams.set('callback', request.nextUrl.pathname);
-        return NextResponse.redirect(redirectUrl);
+        const callback = request.nextUrl.pathname;
+        return NextResponse.redirect(`/login?callback=${encodeURIComponent(callback)}`);
       }
     }
 
@@ -104,7 +79,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   } catch (error) {
     console.error('Error in middleware:', error);
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect('/');
   }
 }
 
