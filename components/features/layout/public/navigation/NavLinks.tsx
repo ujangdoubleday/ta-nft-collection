@@ -1,29 +1,26 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useAdmin } from '@/lib/hooks/use-admin';
 import { useSession } from 'next-auth/react';
+import { useNavbar } from './Navbar';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // Shared links data
 const useNavLinks = () => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const { isTransparent } = useNavbar();
   const { isAdmin } = useAdmin();
   const { data: session } = useSession();
   const isAuthenticated = !!session?.user;
 
   const isActive = (path: string) => {
     if (path === '/') {
-      return pathname === path;
+      return pathname === '/' || pathname === '';
     }
     return pathname.startsWith(path);
   };
@@ -40,46 +37,118 @@ const useNavLinks = () => {
     links.push({ href: '/dashboard', label: 'Admin' });
   }
 
-  return { links, pathname, isActive, isOpen, setIsOpen, isAuthenticated, isAdmin };
+  return { links, pathname, isActive, isOpen, setIsOpen, isAuthenticated, isAdmin, isTransparent };
 };
 
 // Mobile menu component
 export const MobileNav = () => {
   const { links, pathname, isOpen, setIsOpen } = useNavLinks();
 
+  // Animation variants for the menu icon
+  const topBarVariants = {
+    open: { rotate: 45, y: 7 },
+    closed: { rotate: 0, y: 0 },
+  };
+
+  const middleBarVariants = {
+    open: { opacity: 0 },
+    closed: { opacity: 1 },
+  };
+
+  const bottomBarVariants = {
+    open: { rotate: -45, y: -5 },
+    closed: { rotate: 0, y: 0 },
+  };
+
   return (
-    <div className="md:hidden flex items-center justify-center">
-      <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger className="bg-zinc-900/80 backdrop-blur-sm text-white p-2 border border-zinc-700/50 rounded-lg hover:bg-zinc-800/80 hover:border-zinc-600/70 transition-all duration-200">
-          <Menu className="h-4 w-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="w-48 bg-black/95 backdrop-blur-lg border border-zinc-800/60 text-white shadow-2xl rounded-xl mt-2"
-        >
-          {links.map((link) => (
-            <DropdownMenuItem key={link.href} asChild onClick={() => setIsOpen(false)}>
-              <Link
-                href={link.href}
-                className={`w-full px-4 py-3 text-white hover:bg-zinc-800/60 rounded-lg transition-all duration-200 ${
-                  pathname === link.href
-                    ? 'font-semibold bg-zinc-800/40 text-white'
-                    : 'text-zinc-300'
-                }`}
-              >
-                {link.label}
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+    <div className="md:hidden">
+      {/* Hamburger Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative z-[9999] p-2 focus:outline-none"
+        aria-label="Toggle menu"
+      >
+        <div className="w-6 h-5 flex flex-col justify-between">
+          <motion.span
+            className="w-full h-0.5 bg-white rounded-full"
+            variants={topBarVariants}
+            animate={isOpen ? 'open' : 'closed'}
+            transition={{ duration: 0.3 }}
+          />
+          <motion.span
+            className="w-full h-0.5 bg-white rounded-full"
+            variants={middleBarVariants}
+            animate={isOpen ? 'open' : 'closed'}
+            transition={{ duration: 0.3 }}
+          />
+          <motion.span
+            className="w-full h-0.5 bg-white rounded-full"
+            variants={bottomBarVariants}
+            animate={isOpen ? 'open' : 'closed'}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
+      </button>
+
+      {/* Fullscreen Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/95 backdrop-blur-lg z-[9998] flex items-center justify-center"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+            }}
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{
+              type: 'spring',
+              stiffness: 300,
+              damping: 30,
+            }}
+          >
+            <motion.nav className="flex flex-col items-center justify-center w-full h-full">
+              {links.map((link, index) => (
+                <motion.div
+                  key={link.href}
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                    transition: {
+                      delay: 0.1 + index * 0.1,
+                    },
+                  }}
+                  className="w-full text-center py-6"
+                >
+                  <Link
+                    href={link.href}
+                    onClick={() => setIsOpen(false)}
+                    className={`text-3xl font-medium ${
+                      pathname === link.href ? 'text-white' : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
 
 // Vercel-style Desktop navigation component
 export const NavLinks = () => {
-  const { links, pathname } = useNavLinks();
+  const { links, pathname, isActive } = useNavLinks();
   const navRef = useRef<HTMLElement | null>(null);
   const linkRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
 
@@ -87,8 +156,14 @@ export const NavLinks = () => {
     <nav className="hidden md:flex items-center" ref={navRef}>
       <div className="flex items-center h-full gap-1">
         {links.map((link) => {
-          const isActive =
-            link.href === '/' ? pathname === link.href : pathname.startsWith(link.href);
+          const active = isActive(link.href);
+
+          // Define styles for links
+          const linkTextStyle = {
+            color: active ? '#ffffff' : 'rgba(255, 255, 255, 0.8)',
+            textShadow: '0px 1px 2px rgba(0,0,0,0.5)',
+            fontWeight: active ? 500 : 400,
+          };
 
           return (
             <Link
@@ -97,23 +172,15 @@ export const NavLinks = () => {
                 linkRefs.current[link.href] = el;
               }}
               href={link.href}
-              className={`group relative px-3 py-3 text-base transition-all duration-200 text-white font-medium
-                ${isActive ? 'text-white' : 'text-zinc-300 hover:text-white'}
-              `}
+              className="group relative px-2 lg:px-3 py-3 text-sm lg:text-base transition-all duration-200"
             >
-              {/* Hover background box (shows on hover AND when active) */}
-              <span
-                className={`absolute inset-x-0 top-1.5 bottom-1.5 -mx-1 rounded-md transition-all duration-200
-                  ${
-                    isActive
-                      ? 'group-hover:bg-zinc-700/50'
-                      : 'bg-transparent group-hover:bg-zinc-700/50'
-                  }
-                `}
-              />
+              {/* Hover background box (only shows on hover, never when active) */}
+              <span className="absolute inset-x-0 top-2 bottom-2 -mx-1 rounded-md transition-all duration-200 opacity-0 group-hover:opacity-100 bg-white/10" />
 
               {/* Text content */}
-              <span className="relative z-10">{link.label}</span>
+              <span className="relative z-10" style={linkTextStyle}>
+                {link.label}
+              </span>
             </Link>
           );
         })}
