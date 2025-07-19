@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { NextImage } from '@/components/shared/NextImage';
 
@@ -21,11 +23,20 @@ export const Logo = ({ linkDisabled = false, className = '', isClone = false }: 
     />
   );
 
-  const wrapperClass = `logo-wrapper ${className}`;
+  const logoStyle = {
+    transition: 'all 0.3s ease',
+  };
+
+  const hoverStyle = {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  };
 
   if (linkDisabled) {
     return (
-      <div className={`flex items-center focus:bg-zinc-800/50 rounded-md p-1 ${wrapperClass}`}>
+      <div
+        className="flex items-center rounded-md p-1 logo-wrapper hover:bg-opacity-20"
+        style={logoStyle}
+      >
         {LogoImage}
       </div>
     );
@@ -34,7 +45,8 @@ export const Logo = ({ linkDisabled = false, className = '', isClone = false }: 
   return (
     <Link
       href="/"
-      className={`flex items-center focus:bg-zinc-800/50 rounded-md p-1 ${wrapperClass}`}
+      className="flex items-center rounded-md p-1 logo-wrapper hover:bg-white/20"
+      style={logoStyle}
     >
       {LogoImage}
     </Link>
