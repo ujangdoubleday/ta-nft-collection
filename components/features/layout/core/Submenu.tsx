@@ -182,7 +182,7 @@ export function Submenu(props: SubmenuProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {showLogo && (
-              <div className="submenu-logo flex-shrink-0 flex items-center opacity-0 transition-opacity duration-300">
+              <div className="submenu-logo flex-shrink-0 pl-3 flex items-center opacity-0 transition-opacity duration-300">
                 {logoComponent || <Logo linkDisabled={false} isClone={true} />}
               </div>
             )}
