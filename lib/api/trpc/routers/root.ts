@@ -6,6 +6,7 @@ import { redisRouter } from './redis';
 import { factoryConfigRouter } from './factory-config';
 import { blocklistRouter } from './blocklist';
 import { userRouter } from './user';
+import { requestRouter } from './request';
 
 export const appRouter = router({
   nft: nftRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   factoryConfig: factoryConfigRouter,
   blocklist: blocklistRouter,
   user: userRouter,
+  request: requestRouter,
 });
 
 // Export type router type signature,

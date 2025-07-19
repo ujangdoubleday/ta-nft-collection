@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { publicProcedure, router } from '../server';
-import { userRedis } from '@/lib/api/services/redis';
+import { userRedis } from '@/lib/api/services/redis/user';
 
 export const userRouter = router({
   setUsername: publicProcedure
