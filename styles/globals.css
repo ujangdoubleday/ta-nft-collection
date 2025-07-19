@@ -111,7 +111,12 @@
 }
 
 @keyframes slideInFromBottom {
-  from { transform: translateY(50px); opacity: 0; }
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInFromTop {
+  from { transform: translateY(-20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
@@ -306,35 +311,51 @@ code {
 /* Scroll behavior for the navbar and submenu */
 @media (min-width: 640px) {
   .navbar {
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+    transform: translateY(0);
   }
 
   .navbar .logo-container {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     z-index: 60;
+    will-change: transform, opacity;
   }
 
   .submenu {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     position: sticky;
     top: 0;
     z-index: 50;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    will-change: transform, opacity, box-shadow;
   }
 
   .submenu-logo, .submenu-user {
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+    transform: translateY(-20px);
   }
 
   .submenu-nav {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: margin, transform;
   }
 
   /* Styles when scrolling */
   html.scrolled .navbar {
     transform: translateY(-100%);
     opacity: 0;
+  }
+
+  /* Styles when scrolling back up */
+  html:not(.scrolled) .navbar {
+    transform: translateY(0);
+    opacity: 1;
+    animation: slideInFromBottom 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   html.scrolled .submenu {
@@ -347,13 +368,12 @@ code {
     top: 0;
     left: 0;
     width: 100%;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.1);
   }
 
   html.scrolled .submenu .smr {
     margin-left: 0rem;
     margin-right: 0rem;
-  
   }
 
   html.scrolled .submenu .nav-link {
@@ -362,7 +382,7 @@ code {
     display: inline-flex; /* inline-flex */
     align-items: center; /* items-center */
     gap: 0.5rem; /* gap-2 */
-    transition: color 0.15s ease-in-out; /* transition-colors */
+    transition: color 0.2s ease-in-out; /* transition-colors */
     padding: 0.25rem 0.5rem; /* px-2 py-1 */
     position: relative; /* relative */
   }
@@ -370,26 +390,31 @@ code {
   html.scrolled .submenu-logo, 
   html.scrolled .submenu-user {
     opacity: 1;
-    animation: fadeIn 0.3s ease-out;
+    transform: translateY(0);
+    animation: slideInFromTop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   html.scrolled .submenu-nav {
     margin-left: 0.75rem;
     justify-content: flex-start;
+    transform: translateY(0);
   }
 
   /* Add padding to the content when submenu is fixed */
   html.scrolled .content-wrapper {
     padding-top: 3.5rem;
+    transition: padding-top 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Logo Animation */
   .logo-wrapper {
     position: relative;
+    overflow: hidden;
   }
 
   .navbar .logo-wrapper .logo-main {
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
   }
 
   .submenu .logo-wrapper .logo-clone {
@@ -398,8 +423,9 @@ code {
     left: 0;
     opacity: 0;
     transform: translateY(-20px);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 60;
+    will-change: transform, opacity;
   }
 
   html.scrolled .navbar .logo-wrapper .logo-main {
