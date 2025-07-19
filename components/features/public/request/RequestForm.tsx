@@ -132,8 +132,8 @@ export function RequestForm() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-2">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        <div className="space-y-1 sm:space-y-2">
           <label htmlFor="email" className="block text-sm font-medium text-white">
             Email
           </label>
@@ -143,19 +143,19 @@ export function RequestForm() {
             value={email}
             onChange={handleEmailChange}
             placeholder="your@email.com"
-            className="w-full bg-black border border-zinc-800 text-white placeholder:text-zinc-500 focus:border-white focus:ring-white"
+            className="w-full bg-black border border-zinc-800 text-white placeholder:text-zinc-500 focus:border-white focus:ring-white text-sm sm:text-base"
             disabled={isSubmitting}
             aria-invalid={!!emailError}
             aria-describedby={emailError ? 'email-error' : undefined}
           />
           {emailError && (
-            <p id="email-error" className="text-sm text-red-500 mt-1">
+            <p id="email-error" className="text-xs sm:text-sm text-red-500 mt-1">
               {emailError}
             </p>
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1 sm:space-y-2">
           <label htmlFor="address" className="block text-sm font-medium text-white">
             Ethereum Address
           </label>
@@ -165,13 +165,13 @@ export function RequestForm() {
             value={address}
             onChange={handleAddressChange}
             placeholder="0x123..."
-            className="w-full bg-black border border-zinc-800 text-white placeholder:text-zinc-500 focus:border-white focus:ring-white"
+            className="w-full bg-black border border-zinc-800 text-white placeholder:text-zinc-500 focus:border-white focus:ring-white text-sm sm:text-base"
             disabled={isSubmitting}
             aria-invalid={!!addressError}
             aria-describedby={addressError ? 'address-error' : undefined}
           />
           {addressError && (
-            <p id="address-error" className="text-sm text-red-500 mt-1">
+            <p id="address-error" className="text-xs sm:text-sm text-red-500 mt-1">
               {addressError}
             </p>
           )}
@@ -180,12 +180,12 @@ export function RequestForm() {
         <Button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-white text-black hover:bg-zinc-200 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
+          className="w-full bg-white text-black hover:bg-zinc-200 focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black text-sm sm:text-base py-2 sm:py-2.5"
         >
           {isSubmitting ? (
             <>
               <Spinner size="sm" color="black" />
-              Submitting...
+              <span className="ml-2">Submitting...</span>
             </>
           ) : (
             'Submit Request'
