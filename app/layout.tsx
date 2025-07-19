@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <title>XYZ: Digital Art Creator</title>
         <meta name="description" content="Create, Mint & Own Digital Masterpieces" />
       </head>
-      <body className="min-h-screen bg-[#000000] antialiased font-sans">
+      <body className="min-h-screen antialiased font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>
