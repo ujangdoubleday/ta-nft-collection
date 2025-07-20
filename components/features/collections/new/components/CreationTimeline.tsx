@@ -62,9 +62,9 @@ export function CreationTimeline({ processingStep, isCreating }: CreationTimelin
   if (currentStep === 0) return null;
 
   return (
-    <div className="mt-4 mb-4">
-      <div className="p-4 rounded-lg overflow-hidden">
-        <Timeline className="px-2 py-1">
+    <div className="mt-3 sm:mt-4 mb-3 sm:mb-4">
+      <div className="p-3 sm:p-4 rounded-lg overflow-hidden overflow-x-auto">
+        <Timeline className="px-1 sm:px-2 py-1 min-w-[300px]">
           {steps.map((step) => (
             <TimelineItem
               key={step.id}
@@ -76,9 +76,10 @@ export function CreationTimeline({ processingStep, isCreating }: CreationTimelin
                 isCreating && currentStep === step.id ? (
                   <Spinner size="sm" color="white" />
                 ) : currentStep > step.id ? (
-                  <Check className="h-3.5 w-3.5 text-white" />
+                  <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-white" />
                 ) : null
               }
+              className="text-xs sm:text-sm"
             />
           ))}
         </Timeline>

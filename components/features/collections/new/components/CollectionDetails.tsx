@@ -23,8 +23,11 @@ export function CollectionDetails({
 }: CollectionDetailsProps) {
   return (
     <>
-      <div className="mb-4">
-        <label htmlFor="name" className="block text-white mb-2 text-sm font-medium">
+      <div className="mb-3 sm:mb-4">
+        <label
+          htmlFor="name"
+          className="block text-white mb-1.5 sm:mb-2 text-xs sm:text-sm font-medium"
+        >
           Collection Name
         </label>
         <input
@@ -33,13 +36,16 @@ export function CollectionDetails({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Enter collection name"
-          className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-2 px-3 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
+          className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-1.5 sm:py-2 px-2.5 sm:px-3 text-sm sm:text-base text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
           required
         />
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="symbol" className="block text-white mb-2 text-sm font-medium">
+      <div className="mb-3 sm:mb-4">
+        <label
+          htmlFor="symbol"
+          className="block text-white mb-1.5 sm:mb-2 text-xs sm:text-sm font-medium"
+        >
           Collection Symbol
         </label>
         <input
@@ -48,17 +54,20 @@ export function CollectionDetails({
           value={symbol}
           onChange={(e) => setSymbol(e.target.value.toUpperCase())}
           placeholder="Enter collection symbol (e.g. PIXEL)"
-          className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-2 px-3 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
+          className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-1.5 sm:py-2 px-2.5 sm:px-3 text-sm sm:text-base text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
           required
           maxLength={6}
         />
-        <p className="text-zinc-500 text-xs mt-1">
+        <p className="text-zinc-500 text-[10px] sm:text-xs mt-1">
           A short symbol for your collection (max 6 characters)
         </p>
       </div>
 
-      <div className="mb-4">
-        <label htmlFor="maxSupply" className="block text-white mb-2 text-sm font-medium">
+      <div className="mb-3 sm:mb-4">
+        <label
+          htmlFor="maxSupply"
+          className="block text-white mb-1.5 sm:mb-2 text-xs sm:text-sm font-medium"
+        >
           Maximum Supply
         </label>
         <input
@@ -67,18 +76,21 @@ export function CollectionDetails({
           value={maxSupply}
           onChange={(e) => setMaxSupply(e.target.value)}
           placeholder="Enter maximum supply (e.g. 100)"
-          className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-2 px-3 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
+          className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-1.5 sm:py-2 px-2.5 sm:px-3 text-sm sm:text-base text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
           required
           min="1"
           max="10000"
         />
-        <p className="text-zinc-500 text-xs mt-1">
+        <p className="text-zinc-500 text-[10px] sm:text-xs mt-1">
           Maximum number of NFTs that can be minted in this collection
         </p>
       </div>
 
-      <div className="mb-6">
-        <label htmlFor="description" className="block text-white mb-2 text-sm font-medium">
+      <div className="mb-4 sm:mb-6">
+        <label
+          htmlFor="description"
+          className="block text-white mb-1.5 sm:mb-2 text-xs sm:text-sm font-medium"
+        >
           Description
         </label>
         <textarea
@@ -87,7 +99,7 @@ export function CollectionDetails({
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Enter collection description"
           rows={4}
-          className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-2 px-3 text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
+          className="w-full bg-[#0A0A0A] border border-[#1f1f1f] rounded-md py-1.5 sm:py-2 px-2.5 sm:px-3 text-sm sm:text-base text-white placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-white"
           required
         ></textarea>
       </div>

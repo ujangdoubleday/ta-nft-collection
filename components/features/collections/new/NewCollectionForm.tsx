@@ -119,9 +119,9 @@ export function NewCollectionForm({ routePrefix }: NewCollectionFormProps) {
         fee={creationFeeData?.fee}
       />
 
-      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-6">
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 sm:p-6">
         <form onSubmit={handleSubmit}>
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
             {/* Left Column - Image Upload */}
             <div className="w-full lg:w-1/3">
               <ImageUploader imagePreview={imagePreview} onImageChange={handleImageChange} />
@@ -152,7 +152,7 @@ export function NewCollectionForm({ routePrefix }: NewCollectionFormProps) {
           </div>
         </form>
       </div>
-      <div className="max-w-full">
+      <div className="max-w-full overflow-x-auto">
         {/* Using the updated timeline component */}
         <CreationTimeline processingStep={processingStep} isCreating={isCreating} />
       </div>
