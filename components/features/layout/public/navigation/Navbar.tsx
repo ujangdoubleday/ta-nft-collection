@@ -33,7 +33,7 @@ export function Navbar() {
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
     backdropFilter: 'blur(8px)',
     WebkitBackdropFilter: 'blur(8px)',
-    zIndex: 9999,
+    zIndex: 10000, // Higher than mobile menu z-index
     borderBottom: 'transparent',
     position: 'fixed' as const,
     top: 0,

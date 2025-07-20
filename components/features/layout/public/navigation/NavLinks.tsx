@@ -65,7 +65,7 @@ export const MobileNav = () => {
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative z-[9999] p-2 focus:outline-none"
+        className="relative z-[10001] p-2 focus:outline-none"
         aria-label="Toggle menu"
       >
         <div className="w-6 h-5 flex flex-col justify-between">
@@ -90,19 +90,19 @@ export const MobileNav = () => {
         </div>
       </button>
 
-      {/* Fullscreen Menu */}
+      {/* Content-only Menu - Positioned below navbar */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 bg-black/95 backdrop-blur-lg z-[9998] flex items-center justify-center"
+            className="fixed bg-black/95 backdrop-blur-lg z-[9998] flex items-center justify-center md:hidden"
             style={{
               position: 'fixed',
-              top: 0,
+              top: '4rem', // Start below navbar (navbar height is 4rem)
               left: 0,
               right: 0,
               bottom: 0,
               width: '100vw',
-              height: '100vh',
+              height: 'calc(100vh - 4rem)', // Subtract navbar height from total height
             }}
             initial={{ opacity: 0, x: '100%' }}
             animate={{ opacity: 1, x: 0 }}
