@@ -70,8 +70,8 @@ export function DashboardStats() {
 
   return (
     <div>
-      <h2 className="text-mb font-bold text-white mb-3">Stats</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <h2 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">Stats</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <StatCard
           title="Collections Created"
           value={stats.collectionsCreated.toString()}
@@ -97,12 +97,12 @@ interface StatCardProps {
 
 function StatCard({ title, value, isLoading = false }: StatCardProps) {
   return (
-    <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 shadow-sm">
-      <h3 className="text-sm font-medium text-gray-400">{title}</h3>
+    <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-3 sm:p-4 shadow-sm">
+      <h3 className="text-xs sm:text-sm font-medium text-gray-400">{title}</h3>
       {isLoading ? (
-        <div className="h-7 w-16 bg-[#1f1f1f] rounded animate-pulse mt-1"></div>
+        <div className="h-6 sm:h-7 w-12 sm:w-16 bg-[#1f1f1f] rounded animate-pulse mt-1"></div>
       ) : (
-        <p className="text-2xl font-bold text-white mt-1">{value}</p>
+        <p className="text-xl sm:text-2xl font-bold text-white mt-1">{value}</p>
       )}
     </div>
   );

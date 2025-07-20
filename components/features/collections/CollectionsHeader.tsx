@@ -71,19 +71,19 @@ export function CollectionsHeader({ role = 'user', onFilterToggle }: Collections
   };
 
   return (
-    <div className="mb-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="mb-6 sm:mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white">{title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">{title}</h1>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 mt-2 sm:mt-0">
           {role === 'admin' && (
             <button
               onClick={() => handleCreateClick()}
-              className="bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2"
+              className="bg-white text-black hover:bg-zinc-200 py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-md transition-colors text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2"
               aria-label="Create new collection"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Create Collection
             </button>
           )}
@@ -91,29 +91,31 @@ export function CollectionsHeader({ role = 'user', onFilterToggle }: Collections
           <Button
             onClick={() => handleFilterClick()}
             variant="outline"
-            className={`flex items-center gap-2 text-sm ${
+            className={`flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm py-1.5 sm:py-2 h-auto ${
               isFilterOpen ? 'opacity-70' : ''
             } bg-white text-black hover:bg-zinc-200 hover:text-black`}
           >
-            <Filter className="h-4 w-4" />
+            <Filter className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             {isFilterOpen ? 'Hide Filters' : 'Filter'}
           </Button>
 
           <button
             onClick={() => handleRefresh()}
             disabled={isRefreshing}
-            className={`bg-white text-black hover:bg-zinc-200 py-2 px-3 rounded-md transition-colors text-sm font-medium flex items-center gap-2 ${
+            className={`bg-white text-black hover:bg-zinc-200 py-1.5 sm:py-2 px-2.5 sm:px-3 rounded-md transition-colors text-xs sm:text-sm font-medium flex items-center gap-1.5 sm:gap-2 ${
               isRefreshing ? 'opacity-70' : ''
             }`}
             aria-label="Refresh collections"
           >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isRefreshing ? 'animate-spin' : ''}`}
+            />
             Refresh
           </button>
         </div>
       </div>
 
-      <div className="h-px w-full bg-[#1f1f1f] mt-6"></div>
+      <div className="h-px w-full bg-[#1f1f1f] mt-4 sm:mt-6"></div>
     </div>
   );
 }

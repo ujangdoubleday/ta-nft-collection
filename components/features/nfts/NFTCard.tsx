@@ -68,7 +68,7 @@ export function NFTCard({ nft, role = 'user' }: NFTCardProps) {
             src={imageUrl}
             alt={name}
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
             onError={() => setImageError(true)}
             fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
@@ -77,14 +77,14 @@ export function NFTCard({ nft, role = 'user' }: NFTCardProps) {
         </div>
 
         {/* NFT Info */}
-        <div className="p-3">
-          <h3 className="font-medium text-white hover:text-zinc-300 transition-colors truncate">
+        <div className="p-2 sm:p-3">
+          <h3 className="font-medium text-sm sm:text-base text-white hover:text-zinc-300 transition-colors truncate">
             {name}
           </h3>
 
-          <div className="flex items-center justify-between mt-1 text-xs text-zinc-500">
+          <div className="flex items-center justify-between mt-1 text-[10px] sm:text-xs text-zinc-500">
             <span>Token ID: {tokenId}</span>
-            <span className="truncate max-w-[120px]" title={nft.contractAddress}>
+            <span className="truncate max-w-[100px] sm:max-w-[120px]" title={nft.contractAddress}>
               {shortenAddress(nft.contractAddress, 4)}
             </span>
           </div>

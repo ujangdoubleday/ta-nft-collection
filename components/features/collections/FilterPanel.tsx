@@ -107,52 +107,52 @@ export function FilterPanel({
   }
 
   return (
-    <div className="mb-6 bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 animate-in fade-in duration-300">
-      <div className="space-y-4">
+    <div className="mb-4 sm:mb-6 bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-3 sm:p-4 animate-in fade-in duration-300">
+      <div className="space-y-3 sm:space-y-4">
         {/* Search filter */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Search className="absolute left-2.5 sm:left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-zinc-500" />
           <Input
             placeholder="Search collections..."
             value={searchQuery}
             onChange={handleSearchChange}
-            className="pl-10 bg-[#0A0A0A] border-[#1f1f1f] text-white"
+            className="pl-8 sm:pl-10 py-1.5 sm:py-2 h-8 sm:h-10 text-xs sm:text-sm bg-[#0A0A0A] border-[#1f1f1f] text-white"
           />
         </div>
 
         {/* Owner filter */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2">
           <button
             onClick={() => handleOwnerFilterChange('all')}
-            className={`py-1 px-3 rounded-md text-sm flex items-center gap-1 ${
+            className={`py-1 px-2 sm:px-3 rounded-md text-xs sm:text-sm flex items-center gap-1 ${
               ownerFilter === 'all'
                 ? 'bg-white text-black'
                 : 'bg-[#1f1f1f] text-white hover:bg-zinc-800'
             }`}
           >
-            <Users className="h-3 w-3" />
+            <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
             All
           </button>
           <button
             onClick={() => handleOwnerFilterChange('owned')}
-            className={`py-1 px-3 rounded-md text-sm flex items-center gap-1 ${
+            className={`py-1 px-2 sm:px-3 rounded-md text-xs sm:text-sm flex items-center gap-1 ${
               ownerFilter === 'owned'
                 ? 'bg-white text-black'
                 : 'bg-[#1f1f1f] text-white hover:bg-zinc-800'
             }`}
           >
-            <UserCheck className="h-3 w-3" />
+            <UserCheck className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
             Owned by me
           </button>
           <button
             onClick={() => handleOwnerFilterChange('not-owned')}
-            className={`py-1 px-3 rounded-md text-sm flex items-center gap-1 ${
+            className={`py-1 px-2 sm:px-3 rounded-md text-xs sm:text-sm flex items-center gap-1 ${
               ownerFilter === 'not-owned'
                 ? 'bg-white text-black'
                 : 'bg-[#1f1f1f] text-white hover:bg-zinc-800'
             }`}
           >
-            <Users className="h-3 w-3" />
+            <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
             Not owned by me
           </button>
         </div>

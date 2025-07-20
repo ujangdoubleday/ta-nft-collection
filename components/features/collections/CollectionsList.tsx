@@ -268,29 +268,29 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
   // Enhanced loading skeleton
   const renderCollectionSkeleton = () => {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         {[...Array(9)].map((_, i) => (
           <div
             key={i}
-            className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden shadow-sm p-4"
+            className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden shadow-sm p-3 sm:p-4"
           >
-            <div className="flex gap-4">
+            <div className="flex gap-3 sm:gap-4">
               {/* Collection Image Skeleton - Left Side */}
               <div className="flex-shrink-0">
-                <div className="w-20 h-20 bg-[#1f1f1f] rounded-lg animate-pulse"></div>
+                <div className="w-16 sm:w-20 h-16 sm:h-20 bg-[#1f1f1f] rounded-lg animate-pulse"></div>
               </div>
 
               {/* Collection Info Skeleton - Right Side */}
               <div className="flex-grow">
                 <div className="flex items-start justify-between mb-2">
-                  <div className="h-5 bg-[#1f1f1f] rounded w-3/5 animate-pulse"></div>
-                  <div className="h-5 bg-[#1f1f1f] rounded w-1/5 animate-pulse"></div>
+                  <div className="h-4 sm:h-5 bg-[#1f1f1f] rounded w-3/5 animate-pulse"></div>
+                  <div className="h-4 sm:h-5 bg-[#1f1f1f] rounded w-1/5 animate-pulse"></div>
                 </div>
-                <div className="h-4 bg-[#1f1f1f] rounded w-full animate-pulse mb-2"></div>
-                <div className="h-4 bg-[#1f1f1f] rounded w-4/5 animate-pulse mb-2"></div>
+                <div className="h-3 sm:h-4 bg-[#1f1f1f] rounded w-full animate-pulse mb-2"></div>
+                <div className="h-3 sm:h-4 bg-[#1f1f1f] rounded w-4/5 animate-pulse mb-2"></div>
                 <div className="flex items-center justify-between">
-                  <div className="h-3 bg-[#1f1f1f] rounded w-1/4 animate-pulse"></div>
-                  <div className="h-3 bg-[#1f1f1f] rounded w-1/4 animate-pulse"></div>
+                  <div className="h-2 sm:h-3 bg-[#1f1f1f] rounded w-1/4 animate-pulse"></div>
+                  <div className="h-2 sm:h-3 bg-[#1f1f1f] rounded w-1/4 animate-pulse"></div>
                 </div>
               </div>
             </div>
@@ -320,19 +320,19 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
   // Render empty state if we have data and it's empty
   if (hasEmptyCollections) {
     return (
-      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
-        <div className="bg-[#0A0A0A] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f1f1f]">
-          <ImagePlus className="h-8 w-8 text-white" />
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 sm:p-8 text-center">
+        <div className="bg-[#0A0A0A] w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-[#1f1f1f]">
+          <ImagePlus className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">No Collections Found</h3>
-        <p className="text-zinc-400 mb-6">
+        <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No Collections Found</h3>
+        <p className="text-zinc-400 mb-4 sm:mb-6 text-sm sm:text-base">
           You don&apos;t have any collections yet. Create your first collection to get started.
         </p>
         <Link
           href={`${basePath}/new`}
-          className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
+          className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-1.5 sm:py-2 px-3 sm:px-4 rounded-md transition-colors text-sm font-medium"
         >
-          <ImagePlus className="h-4 w-4" />
+          <ImagePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           Create New Collection
         </Link>
       </div>
@@ -346,23 +346,23 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
 
   if (error) {
     return (
-      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
-        <h3 className="text-xl font-bold text-white mb-2">Error Loading Collections</h3>
-        <p className="text-zinc-400 mb-6">
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 sm:p-8 text-center">
+        <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Error Loading Collections</h3>
+        <p className="text-zinc-400 mb-4 sm:mb-6 text-sm sm:text-base">
           {(error || allCollectionsError)?.message || 'Failed to fetch collections'}
         </p>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-3 sm:gap-4">
           <button
             onClick={() => refetch()}
-            className="inline-flex items-center gap-2 bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] text-white py-2 px-4 rounded-md transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 bg-[#0A0A0A] border border-[#1f1f1f] hover:bg-[#1f1f1f] text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-md transition-colors text-sm font-medium"
           >
             Try Again
           </button>
           <Link
             href={`${basePath}/new`}
-            className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-1.5 sm:py-2 px-3 sm:px-4 rounded-md transition-colors text-sm font-medium"
           >
-            <ImagePlus className="h-4 w-4" />
+            <ImagePlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Create New Collection
           </Link>
         </div>
@@ -372,12 +372,12 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
 
   if (!filteredCollections.length) {
     return (
-      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
-        <div className="bg-[#0A0A0A] w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-[#1f1f1f]">
-          <ImagePlus className="h-8 w-8 text-white" />
+      <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 sm:p-8 text-center">
+        <div className="bg-[#0A0A0A] w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4 border border-[#1f1f1f]">
+          <ImagePlus className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
         </div>
-        <h3 className="text-xl font-bold text-white mb-2">No Collections Found</h3>
-        <p className="text-zinc-400 mb-6">
+        <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No Collections Found</h3>
+        <p className="text-zinc-400 mb-4 sm:mb-6 text-sm sm:text-base">
           No collections match your current filters. Try adjusting your search criteria.
         </p>
       </div>
@@ -386,7 +386,7 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
         {paginatedTaggedCollections.map((taggedItem) => {
           const collection = taggedItem.collection;
           return (
@@ -414,7 +414,7 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
       {/* Pagination component */}
       {totalPages > 1 && (
         <PaginationNav>
-          <PaginationContent>
+          <PaginationContent className="overflow-x-auto py-1">
             <PaginationItem>
               <PaginationPrevious
                 href="#"

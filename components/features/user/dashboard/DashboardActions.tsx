@@ -32,9 +32,9 @@ export function DashboardActions() {
 
   return (
     <div>
-      <h2 className="text-mb font-bold text-white mb-3">Quick Actions</h2>
+      <h2 className="text-lg sm:text-xl font-bold text-white mb-2 sm:mb-3">Quick Actions</h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
         {actions.map((action, index) => (
           <ActionCard key={index} {...action} />
         ))}
@@ -55,18 +55,22 @@ function ActionCard({ title, description, icon, onClick, primary = false }: Acti
   return (
     <button
       onClick={() => onClick()}
-      className={`flex flex-col items-start p-4 rounded-lg border transition-all text-left h-full
+      className={`flex flex-col items-start p-3 sm:p-4 rounded-lg border transition-all text-left h-full
         ${
           primary
             ? 'bg-[#0A0A0A] text-white border-[#1f1f1f] hover:bg-zinc-900 hover:border-zinc-600'
             : 'bg-[#0A0A0A] text-white border-[#1f1f1f] hover:border-gray-700 hover:bg-zinc-900'
         }`}
     >
-      <div className={`p-2 rounded-full mb-3 ${primary ? 'bg-[#1f1f1f]' : 'bg-[#1f1f1f]'}`}>
+      <div
+        className={`p-1.5 sm:p-2 rounded-full mb-2 sm:mb-3 ${primary ? 'bg-[#1f1f1f]' : 'bg-[#1f1f1f]'}`}
+      >
         {icon}
       </div>
-      <h3 className="font-medium text-base mb-1 text-white">{title}</h3>
-      <p className={`text-sm ${primary ? 'text-gray-300' : 'text-gray-400'}`}>{description}</p>
+      <h3 className="font-medium text-sm sm:text-base mb-0.5 sm:mb-1 text-white">{title}</h3>
+      <p className={`text-xs sm:text-sm ${primary ? 'text-gray-300' : 'text-gray-400'}`}>
+        {description}
+      </p>
     </button>
   );
 }

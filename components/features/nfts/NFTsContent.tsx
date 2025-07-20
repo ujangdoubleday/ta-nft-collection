@@ -208,22 +208,22 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
   // Show loading state
   if (!mounted || (isLoading && !isRefreshing && cachedNFTs.length === 0)) {
     return (
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-8 w-24" />
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <Skeleton className="h-7 sm:h-8 w-32 sm:w-40" />
+          <Skeleton className="h-7 sm:h-8 w-20 sm:w-24" />
         </div>
-        <div className="h-px w-full bg-[#1f1f1f] mb-6"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="h-px w-full bg-[#1f1f1f] mb-4 sm:mb-6"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           {[...Array(9)].map((_, i) => (
             <div
               key={i}
               className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden"
             >
               <Skeleton className="w-full aspect-square" />
-              <div className="p-3 space-y-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
+              <div className="p-2 sm:p-3 space-y-1 sm:space-y-2">
+                <Skeleton className="h-3 sm:h-4 w-3/4" />
+                <Skeleton className="h-2 sm:h-3 w-1/2" />
               </div>
             </div>
           ))}
@@ -241,7 +241,7 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
     cachedNFTs.length === 0
   ) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <NFTsHeader
           role={role}
           onFilterToggle={handleFilterToggle}
@@ -249,12 +249,12 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
           showAll={showAll}
           isFilterOpen={isFilterPanelOpen}
         />
-        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
-          <h3 className="text-xl font-bold text-white mb-4">Loading NFTs</h3>
-          <p className="text-zinc-400 mb-6">
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 sm:p-8 text-center">
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Loading NFTs</h3>
+          <p className="text-zinc-400 mb-4 sm:mb-6 text-sm sm:text-base">
             Loading collections: {progress.loaded} of {progress.total}
           </p>
-          <div className="w-full h-2 bg-[#1f1f1f] rounded-full overflow-hidden">
+          <div className="w-full h-1.5 sm:h-2 bg-[#1f1f1f] rounded-full overflow-hidden">
             <div
               className="h-full bg-white"
               style={{
@@ -271,7 +271,7 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
   // Show error state
   if (error && !isRefreshing && cachedNFTs.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <NFTsHeader
           role={role}
           onFilterToggle={handleFilterToggle}
@@ -279,17 +279,19 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
           showAll={showAll}
           isFilterOpen={isFilterPanelOpen}
         />
-        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-red-900/20 flex items-center justify-center mb-4">
-            <AlertCircle className="h-6 w-6 text-red-500" />
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 sm:p-8 text-center">
+          <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-red-900/20 flex items-center justify-center mb-3 sm:mb-4">
+            <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-red-500" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Error Loading NFTs</h3>
-          <p className="text-zinc-400 mb-6">{error.message || 'Failed to fetch NFTs'}</p>
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">Error Loading NFTs</h3>
+          <p className="text-zinc-400 mb-4 sm:mb-6 text-sm sm:text-base">
+            {error.message || 'Failed to fetch NFTs'}
+          </p>
           <button
             onClick={() => handleRefresh()}
-            className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-2 px-4 rounded-md transition-colors text-sm font-medium"
+            className="inline-flex items-center gap-2 bg-white text-black hover:bg-zinc-200 py-1.5 sm:py-2 px-3 sm:px-4 rounded-md transition-colors text-sm font-medium"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Try Again
           </button>
         </div>
@@ -300,7 +302,7 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
   // Show empty state if no NFTs found and not refreshing and no cached NFTs
   if (validNFTs.length === 0 && !isRefreshing && cachedNFTs.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <NFTsHeader
           role={role}
           onFilterToggle={handleFilterToggle}
@@ -308,12 +310,12 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
           showAll={showAll}
           isFilterOpen={isFilterPanelOpen}
         />
-        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center mb-4">
-            <Bug className="h-6 w-6 text-white" />
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 sm:p-8 text-center">
+          <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center mb-3 sm:mb-4">
+            <Bug className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No NFTs Found</h3>
-          <p className="text-zinc-400 mb-6">
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No NFTs Found</h3>
+          <p className="text-zinc-400 mb-4 sm:mb-6 text-sm sm:text-base">
             {role === 'admin'
               ? "There are no NFTs in the system yet. Collections may exist but don't have any NFTs minted."
               : "You don't own any NFTs yet. Try minting or purchasing some NFTs first."}
@@ -326,7 +328,7 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
   // Show filtered empty state if no NFTs match filters and not refreshing
   if (filteredNFTs.length === 0 && validNFTs.length > 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <NFTsHeader
           role={role}
           onFilterToggle={handleFilterToggle}
@@ -342,12 +344,12 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
             initialFilters={{ search: searchQuery, collectionFilter: collectionFilter }}
           />
         )}
-        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-8 text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center mb-4">
-            <Bug className="h-6 w-6 text-white" />
+        <div className="bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg p-4 sm:p-8 text-center">
+          <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#1f1f1f] flex items-center justify-center mb-3 sm:mb-4">
+            <Bug className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No Matching NFTs</h3>
-          <p className="text-zinc-400 mb-6">
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">No Matching NFTs</h3>
+          <p className="text-zinc-400 mb-4 sm:mb-6 text-sm sm:text-base">
             No NFTs match your current filters. Try adjusting your search or filter criteria.
           </p>
         </div>
@@ -356,7 +358,7 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <NFTsHeader
         role={role}
         onFilterToggle={handleFilterToggle}

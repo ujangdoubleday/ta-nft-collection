@@ -77,24 +77,24 @@ export function CollectionCard({
   return (
     <>
       <Link href={`${basePath}/${collection.address}`} className="">
-        <div className="group bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden hover:bg-zinc-900 hover:border-zinc-600  duration-300 shadow-sm hover:shadow-md transition-all p-4">
-          <div className="flex gap-4">
+        <div className="group bg-[#0A0A0A] border border-[#1f1f1f] rounded-lg overflow-hidden hover:bg-zinc-900 hover:border-zinc-600 duration-300 shadow-sm hover:shadow-md transition-all p-3 sm:p-4">
+          <div className="flex gap-3 sm:gap-4">
             {/* Collection Image - Left Side */}
             <div className="flex-shrink-0">
-              <div className="relative w-20 h-20 bg-[#0A0A0A] rounded-lg overflow-hidden">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-20 bg-[#0A0A0A] rounded-lg overflow-hidden">
                 {collection.imageUrl ? (
                   <NextImage
                     src={collection.imageUrl}
                     alt={collection.name}
                     fill
-                    sizes="(max-width: 768px) 80px, 80px"
+                    sizes="(max-width: 640px) 64px, 80px"
                     className="object-cover"
                     fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
                     placeholderType="blur"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center bg-[#0A0A0A]">
-                    <ImagePlus className="h-8 w-8 text-white" />
+                    <ImagePlus className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
                   </div>
                 )}
               </div>
@@ -103,30 +103,32 @@ export function CollectionCard({
             {/* Collection Info - Right Side */}
             <div className="flex-grow min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-1 gap-1">
-                <h3 className="font-bold text-white hover:text-zinc-300 transition-colors break-words pr-2 max-w-full">
+                <h3 className="font-bold text-sm sm:text-base text-white hover:text-zinc-300 transition-colors break-words pr-2 max-w-full">
                   {collection.name || 'Unnamed Collection'}
                 </h3>
 
                 {isLoading ? (
-                  <div className="flex-shrink-0 h-4 bg-[#1f1f1f] rounded w-20 animate-pulse"></div>
+                  <div className="flex-shrink-0 h-3 sm:h-4 bg-[#1f1f1f] rounded w-16 sm:w-20 animate-pulse"></div>
                 ) : (
                   <span
-                    className={`text-xs px-2 py-1 rounded flex-shrink-0 ${isOwner ? 'bg-green-900 text-green-200' : 'bg-[#1f1f1f] text-white'}`}
+                    className={`text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded flex-shrink-0 ${isOwner ? 'bg-green-900 text-green-200' : 'bg-[#1f1f1f] text-white'}`}
                   >
                     {isOwner ? 'You are the owner' : 'You are not the owner'}
                   </span>
                 )}
               </div>
 
-              <p className="text-zinc-400 text-sm mb-2 break-words">
+              <p className="text-zinc-400 text-xs sm:text-sm mb-1 sm:mb-2 break-words line-clamp-2">
                 {collection.description || 'No description available'}
               </p>
 
               <div className="flex flex-wrap gap-2 text-xs text-zinc-500">
-                <span title={collection.address} className="flex-shrink-0">
+                <span title={collection.address} className="flex-shrink-0 text-[10px] sm:text-xs">
                   {shortenAddress(collection.address, 6)}
                 </span>
-                <span className="flex-shrink-0">Created {formattedDate}</span>
+                <span className="flex-shrink-0 text-[10px] sm:text-xs">
+                  Created {formattedDate}
+                </span>
               </div>
             </div>
           </div>
