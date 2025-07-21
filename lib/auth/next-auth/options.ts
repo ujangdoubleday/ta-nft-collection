@@ -1,27 +1,18 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 
-// Get the domain for cookies - fix for production
 const getProductionDomain = () => {
   if (process.env.VERCEL_ENV === 'production') {
-    // First check if NEXTAUTH_URL exists and is not empty
     if (process.env.NEXTAUTH_URL && process.env.NEXTAUTH_URL.trim() !== '') {
       try {
         const url = new URL(process.env.NEXTAUTH_URL);
-        // Only return domain if not localhost
         if (!url.hostname.includes('localhost')) {
           return url.hostname;
         }
       } catch (error) {
         console.error('Invalid NEXTAUTH_URL:', error);
-        // Return undefined to use default domain behavior
-        return undefined;
       }
-    } else {
-      console.warn('NEXTAUTH_URL is not set or is empty, using default domain behavior');
     }
-    // If no valid NEXTAUTH_URL set, don't set domain (will use current domain)
-    return undefined;
   }
   return undefined;
 };
@@ -45,30 +36,25 @@ export const authOptions: NextAuthOptions = {
             return null;
           }
 
-          try {
-            const message = credentials.message;
-            const signature = credentials.signature;
+          const message = credentials.message;
+          const signature = credentials.signature;
 
-            const addressMatch = message.match(/([0][xX][0-9a-fA-F]{40})/);
-            if (!addressMatch) {
-              console.error('No valid address found in message');
-              return null;
-            }
-
-            const address = addressMatch[1];
-
-            const user = {
-              id: address,
-              address,
-              name: `${address.slice(0, 6)}...${address.slice(-4)}`,
-            };
-
-            // console.log('User authorized:', user);
-            return user;
-          } catch (error) {
-            console.error('Error in signature verification:', error);
+          const addressMatch = message.match(/([0][xX][0-9a-fA-F]{40})/);
+          if (!addressMatch) {
+            console.error('No valid address found in message');
             return null;
           }
+
+          const address = addressMatch[1];
+
+          const user = {
+            id: address,
+            address,
+            name: `${address.slice(0, 6)}...${address.slice(-4)}`,
+          };
+
+          // console.log('User authorized successfully:', { id: user.id, address: user.address });
+          return user;
         } catch (error) {
           console.error('Error in authorize:', error);
           return null;
@@ -89,7 +75,8 @@ export const authOptions: NextAuthOptions = {
         sameSite: isProduction ? 'none' : 'lax',
         path: '/',
         secure: isProduction,
-        domain: cookieDomain,
+        // Only set domain if we have a valid production domain
+        ...(cookieDomain && { domain: cookieDomain }),
       },
     },
     callbackUrl: {
@@ -99,7 +86,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: isProduction ? 'none' : 'lax',
         path: '/',
         secure: isProduction,
-        domain: cookieDomain,
+        ...(cookieDomain && { domain: cookieDomain }),
       },
     },
     csrfToken: {
@@ -109,32 +96,44 @@ export const authOptions: NextAuthOptions = {
         sameSite: isProduction ? 'none' : 'lax',
         path: '/',
         secure: isProduction,
-        domain: cookieDomain,
+        ...(cookieDomain && { domain: cookieDomain }),
       },
     },
   },
   callbacks: {
     async session({ session, token }) {
-      // console.log('Session callback - token:', token);
+      // console.log('Session callback:', {
+      //   tokenSub: token.sub,
+      //   tokenAddress: (token as any).address,
+      //   sessionUserId: session.user?.id
+      // });
+
       if (token.sub && session.user) {
         session.user.id = token.sub;
-        session.user.address = token.address as string;
+        session.user.address = (token as any).address as string;
       }
-      // console.log('Session callback - session:', session);
       return session;
     },
     async jwt({ token, user }) {
-      // console.log('JWT callback - user:', user);
+      // console.log('JWT callback:', {
+      //   hasUser: !!user,
+      //   userAddress: user?.address,
+      //   tokenSub: token.sub
+      // });
+
       if (user) {
         token.address = user.address;
+        // Ensure token.sub is set
+        if (!token.sub) {
+          token.sub = user.id;
+        }
       }
-      // console.log('JWT callback - token:', token);
       return token;
     },
   },
   pages: {
-    signIn: '/', // Redirect to home page for sign in
-    error: '/', // Redirect to home page on error
+    signIn: '/login',
+    error: '/login',
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.VERCEL_ENV === 'development',

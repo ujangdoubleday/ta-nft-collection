@@ -10,52 +10,79 @@ interface AuthStatus {
 }
 
 async function getAuthStatus(request: NextRequest): Promise<AuthStatus> {
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-    // secureCookie: process.env.NODE_ENV === 'production',
-    secureCookie: request.headers.get('x-forwarded-proto') === 'https',
-  });
+  try {
+    const isProduction = process.env.VERCEL_ENV === 'production';
 
-  if (token && 'address' in token) {
-    return { isAuthenticated: true, token };
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: isProduction,
+      cookieName: 'next-auth.session-token',
+    });
+
+    // console.log('Middleware - Token check:', {
+    //   hasToken: !!token,
+    //   tokenSub: token?.sub,
+    //   tokenAddress: (token as any)?.address,
+    //   pathname: request.nextUrl.pathname,
+    // });
+
+    if (token) {
+      if (token.sub || (token as any).address) {
+        return { isAuthenticated: true, token };
+      }
+    }
+
+    return { isAuthenticated: false, token: null };
+  } catch (error) {
+    console.error('Error getting auth status:', error);
+    return { isAuthenticated: false, token: null };
   }
-
-  if (token && typeof (token as any).sub === 'string') {
-    return { isAuthenticated: true, token };
-  }
-
-  return { isAuthenticated: false, token: null };
 }
 
 export async function middleware(request: NextRequest) {
   try {
     const { isAuthenticated, token } = await getAuthStatus(request);
     const origin = request.nextUrl.origin;
+    const pathname = request.nextUrl.pathname;
 
-    if (request.nextUrl.pathname.startsWith('/user')) {
+    console.log('Middleware execution:', {
+      pathname,
+      isAuthenticated,
+      hasToken: !!token,
+    });
+
+    if (pathname.startsWith('/user')) {
       if (!isAuthenticated) {
-        const callback = request.nextUrl.pathname;
+        const callback = pathname;
         const loginUrl = new URL(`/login?returnTo=${encodeURIComponent(callback)}`, origin);
         return NextResponse.redirect(loginUrl);
       }
+      console.log('User route access granted');
     }
 
-    if (request.nextUrl.pathname.startsWith('/login')) {
+    if (pathname.startsWith('/login')) {
       if (isAuthenticated) {
-        const authLoginUrl = new URL('/api/auth/login', origin);
-        return NextResponse.redirect(authLoginUrl);
+        const returnTo = request.nextUrl.searchParams.get('returnTo') || '/';
+        const redirectUrl = new URL(returnTo, origin);
+        return NextResponse.redirect(redirectUrl);
       }
     }
 
     return NextResponse.next();
   } catch (error) {
-    console.error('Error in middleware:', error);
-    const homeUrl = new URL('/', request.nextUrl.origin);
-    return NextResponse.redirect(homeUrl);
+    console.error('Critical error in middleware:', error);
+    return NextResponse.next();
   }
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/admin', '/user', '/user/:path*', '/api/auth/login'],
+  matcher: [
+    '/admin/:path*',
+    '/admin',
+    '/user/:path*',
+    '/user',
+    '/login',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };
