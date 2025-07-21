@@ -442,9 +442,9 @@ export function UserLayout({ children }: UserLayoutProps) {
                 href: '/',
               },
               user: {
-                showUsername: true,
+                showUsername: false,
                 showAddress: true,
-                enableUsernameEdit: true,
+                enableUsernameEdit: false,
               },
               breadcrumbs: {
                 enabled: true,
