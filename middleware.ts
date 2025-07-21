@@ -13,7 +13,8 @@ async function getAuthStatus(request: NextRequest): Promise<AuthStatus> {
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,
-    secureCookie: process.env.NODE_ENV === 'production',
+    // secureCookie: process.env.NODE_ENV === 'production',
+    secureCookie: request.headers.get('x-forwarded-proto') === 'https',
   });
 
   if (token && 'address' in token) {
