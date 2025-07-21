@@ -14,7 +14,7 @@ export default function LoginPage() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callback = searchParams.get('callback') || '/api/auth/login';
+  const callback = searchParams.get('returnTo') || '/api/auth/login';
 
   // Add NextAuth session hook
   const { data: session, status } = useSession();
