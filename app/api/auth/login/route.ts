@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
     if (!session || !session.user?.address) {
       const callback = request.nextUrl.pathname;
       const loginUrl = new URL(`/login`, request.nextUrl.origin);
-      loginUrl.searchParams.set('callback', callback);
+      loginUrl.searchParams.set('returnTo', callback);
       return NextResponse.redirect(loginUrl);
     }
 
