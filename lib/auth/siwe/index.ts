@@ -39,7 +39,7 @@ export async function signInWithEthereum(
 
     if (response?.ok) {
       // In production, try to ensure session is fully established
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.VERCEL_ENV === 'production') {
         // Force a longer delay in production to ensure session is set properly
         await new Promise((resolve) => setTimeout(resolve, 1500));
 

@@ -246,7 +246,7 @@ export function useWalletWagmi() {
       }
 
       // In production, don't return immediately - the page will reload via window.location
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.VERCEL_ENV === 'production') {
         return true;
       }
 

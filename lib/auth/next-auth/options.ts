@@ -3,7 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 
 // Get the domain for cookies - fix for production
 const getProductionDomain = () => {
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env.VERCEL_ENV === 'production') {
     // First check if NEXTAUTH_URL exists and is not empty
     if (process.env.NEXTAUTH_URL && process.env.NEXTAUTH_URL.trim() !== '') {
       try {
@@ -27,7 +27,7 @@ const getProductionDomain = () => {
 };
 
 const cookieDomain = getProductionDomain();
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.VERCEL_ENV === 'production';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -137,5 +137,5 @@ export const authOptions: NextAuthOptions = {
     error: '/', // Redirect to home page on error
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.VERCEL_ENV === 'development',
 };
