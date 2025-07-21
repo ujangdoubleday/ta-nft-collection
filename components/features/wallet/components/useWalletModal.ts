@@ -26,9 +26,9 @@ export const useWalletModal = () => {
   const [showSuccessNotification, setShowSuccessNotification] = useState(false);
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState(
-    'Your wallet has been connected and authenticated successfully!',
-  );
+  // const [successMessage, setSuccessMessage] = useState(
+  //   'Your wallet has been connected and authenticated successfully!',
+  // );
   const [previousAuthState, setPreviousAuthState] = useState(false);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
@@ -76,8 +76,8 @@ export const useWalletModal = () => {
       setIsCreatingAccount(false);
       setWalletModalStep('details');
 
-      setSuccessMessage('Your wallet has been connected and authenticated successfully!');
-      setShowSuccessNotification(true);
+      // setSuccessMessage('Your wallet has been connected and authenticated successfully!');
+      // setShowSuccessNotification(true);
       setIsWalletModalOpen(false);
 
       setRedirectPath(null);
@@ -187,7 +187,7 @@ export const useWalletModal = () => {
       if (!success) {
         resetWalletStates();
       } else {
-        toast.info('Wallet connected. Please sign the message to authenticate.');
+        // toast.info('Wallet connected. Please sign the message to authenticate.');
       }
     },
   });
@@ -215,6 +215,7 @@ export const useWalletModal = () => {
         setIsWalletModalOpen(false);
         toast.error('Authentication failed');
       } else {
+        toast.success('Your wallet has been connected and authenticated successfully!');
         setIsWalletModalOpen(false);
       }
     },
@@ -277,9 +278,9 @@ export const useWalletModal = () => {
 
   const handleDisconnect = (): Promise<void> => {
     try {
-      toast.info('Signing out...');
+      // toast.info('Signing out...');
       return disconnectMutation.mutateAsync().then(() => {
-        toast.success('Signed out successfully');
+        // toast.success('Signed out successfully');
       });
     } catch (error) {
       return Promise.resolve();
@@ -338,7 +339,7 @@ export const useWalletModal = () => {
     showSuccessNotification,
     showErrorNotification,
     errorMessage,
-    successMessage,
+    // successMessage,
     isCreatingAccount,
     isDisconnecting,
     logMessages,

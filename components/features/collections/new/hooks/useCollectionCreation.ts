@@ -118,8 +118,8 @@ export function useCollectionCreation() {
 
       // Step 1: Create folder on Pinata
       setProcessingStep('Creating IPFS folder...');
-      const shortAddress = address?.slice(0, 6) + '...' + address?.slice(-4);
-      const folderName = `${name.toLowerCase().replace(/\s+/g, '-')}-${shortAddress}`;
+      const timestamp = Date.now();
+      const folderName = `${name.toLowerCase().replace(/\s+/g, '-')}-${timestamp}`;
       let folder = null;
 
       try {

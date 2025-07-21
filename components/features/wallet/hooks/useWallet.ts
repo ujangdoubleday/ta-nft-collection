@@ -200,7 +200,7 @@ export function useWalletWagmi() {
       const csrfToken = await getCsrfToken();
       if (!csrfToken) throw new Error('Failed to get CSRF token');
 
-      const statement = `Sign in to MyNFTs.exe with your Ethereum account.\nThis signature doesn't cost gas and securely identifies you.`;
+      const statement = `Sign in with your Ethereum account.\nThis signature doesn't cost gas and securely identifies you.`;
       const message = await createSiweMessage(address, statement);
       const signature = await signMessageAsync({ message });
 
