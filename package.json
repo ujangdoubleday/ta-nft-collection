@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "find:unused": "next-unused",
-    "prepare": "husky",
+    "prepare": "node -e \"if (!process.env.CI) require('husky').install()\"",
     "build:dev": "next build && next start",
     "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
     "deploy:routescan": "npx hardhat run scripts/deploy.js --network routescan",
