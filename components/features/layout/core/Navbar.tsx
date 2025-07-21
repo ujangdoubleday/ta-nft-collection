@@ -101,10 +101,10 @@ const DEFAULT_CONFIG: NavbarConfig = {
     href: '/',
   },
   user: {
-    showUsername: true,
+    showUsername: false,
     showAddress: true,
-    enableUsernameEdit: true,
-    usernamePrefix: 'user-',
+    enableUsernameEdit: false,
+    usernamePrefix: 'User',
     addressDisplayLength: 6,
   },
   breadcrumbs: {
@@ -344,8 +344,7 @@ export function Navbar({ config, className = '' }: NavbarProps) {
   };
 
   const displayUsername =
-    username ||
-    (address ? `${mergedConfig.user?.usernamePrefix || 'user-'}${shortenAddress(address, 4)}` : '');
+    username || (address ? `${mergedConfig.user?.usernamePrefix || 'User'}` : '');
 
   return (
     <div

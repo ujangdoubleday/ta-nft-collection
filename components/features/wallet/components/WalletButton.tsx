@@ -21,7 +21,7 @@ export const WalletButton = () => {
     showSuccessNotification,
     showErrorNotification,
     errorMessage,
-    successMessage,
+    // successMessage,
     address,
     isConnected,
     isConnecting,
@@ -63,12 +63,12 @@ export const WalletButton = () => {
   }, []);
 
   // Show toast notifications when state changes
-  useEffect(() => {
-    if (isMounted && showSuccessNotification && !isDisconnecting) {
-      toast.success(successMessage);
-      handleCloseSuccessNotification();
-    }
-  }, [showSuccessNotification, successMessage, isDisconnecting, isMounted]);
+  // useEffect(() => {
+  //   if (isMounted && showSuccessNotification && !isDisconnecting) {
+  //     toast.success(successMessage);
+  //     handleCloseSuccessNotification();
+  //   }
+  // }, [showSuccessNotification, successMessage, isDisconnecting, isMounted]);
 
   useEffect(() => {
     if (isMounted && showErrorNotification && !isDisconnecting) {
