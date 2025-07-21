@@ -10,7 +10,7 @@ interface AuthProviderProps {
 export function AuthProvider({ children }: AuthProviderProps) {
   return (
     <SessionProvider
-      refetchInterval={process.env.NODE_ENV === 'production' ? 300 : 0}
+      refetchInterval={process.env.VERCEL_ENV === 'production' ? 300 : 0}
       refetchOnWindowFocus={true}
       refetchWhenOffline={false}
     >

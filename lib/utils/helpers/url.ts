@@ -10,7 +10,7 @@ export function formatIPFSUrl(url: string): string {
   url = url.trim();
 
   // Add debugging
-  const isDev = process.env.NODE_ENV !== 'production';
+  const isDev = process.env.VERCEL_ENV !== 'production';
   if (isDev) {
     console.log('Formatting URL:', url);
   }
