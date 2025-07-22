@@ -93,7 +93,7 @@ export function CollectionDetailContent({ address, role = 'user' }: CollectionDe
     createdAt: BigInt(Math.floor(Date.now() / 1000)),
     contractURI: typeof contractURI === 'string' ? contractURI : '',
     metadata: metadata || {},
-    imageUrl: imageUrl || '/assets/images/placeholders/image-placeholder.svg',
+    imageUrl: imageUrl || '/assets/images/placeholders/placeholder_loading.gif',
   };
 
   // Handle loading state

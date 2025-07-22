@@ -89,7 +89,7 @@ export function CollectionCard({
                     fill
                     sizes="(max-width: 640px) 64px, 80px"
                     className="object-cover"
-                    fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+                    fallbackSrc="/assets/images/placeholders/placeholder_loading.gif"
                     placeholderType="blur"
                   />
                 ) : (

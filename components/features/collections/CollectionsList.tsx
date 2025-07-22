@@ -399,7 +399,7 @@ export function CollectionsList({ role = 'user', filters }: CollectionsListProps
                 name: collection.name || 'Unnamed Collection',
                 description: collection.metadata?.description || 'No description available',
                 imageUrl:
-                  collection.imageUrl || '/assets/images/placeholders/image-placeholder.svg',
+                  collection.imageUrl || '/assets/images/placeholders/placeholder_loading.gif',
                 itemCount: Number(collection.totalSupply) || 0,
                 createdAt: new Date(Number(collection.createdAt) * 1000).toISOString(),
                 symbol: collection.symbol || 'NFT',

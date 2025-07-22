@@ -35,15 +35,17 @@ export function NFTCard({ nft, role = 'user' }: NFTCardProps) {
 
   // Process the image URL to ensure it's properly formatted - handle different formats
   const getImageUrl = (): string => {
-    if (imageError) return '/assets/images/placeholders/image-placeholder.svg';
+    if (imageError) return '/assets/images/placeholders/placeholder_loading.gif';
 
     // Try different possible image formats
     if (nft.metadata?.image) {
       return formatIPFSUrl(nft.metadata.image);
+      // return '/assets/images/placeholders/placeholder_loading.gif';
     }
 
     if (nft.imageUrl) {
       return formatIPFSUrl(nft.imageUrl);
+      // return '/assets/images/placeholders/placeholder_loading.gif';
     }
 
     if (nft.image?.originalUrl) {
@@ -54,7 +56,7 @@ export function NFTCard({ nft, role = 'user' }: NFTCardProps) {
       return nft.image.cachedUrl;
     }
 
-    return '/assets/images/placeholders/image-placeholder.svg';
+    return '/assets/images/placeholders/placeholder_loading.gif';
   };
 
   const imageUrl = getImageUrl();
@@ -71,7 +73,7 @@ export function NFTCard({ nft, role = 'user' }: NFTCardProps) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
             onError={() => setImageError(true)}
-            fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+            fallbackSrc="/assets/images/placeholders/placeholder_loading.gif"
             placeholderType="blur"
           />
         </div>

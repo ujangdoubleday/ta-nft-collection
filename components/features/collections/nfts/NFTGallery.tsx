@@ -211,7 +211,7 @@ export function NFTGallery({
                 tokenId: tokenId,
                 name: name,
                 description: description || '',
-                imageUrl: imageUrl || '/assets/images/placeholders/image-placeholder.svg',
+                imageUrl: imageUrl || '/assets/images/placeholders/placeholder_loading.gif',
                 owner: owner || '',
                 creator: '',
                 mintedAt: createdAt ? new Date(createdAt).toISOString() : new Date().toISOString(),

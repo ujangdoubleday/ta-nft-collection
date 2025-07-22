@@ -236,7 +236,7 @@ export async function fetchCreatorCollections(
         // Process the image URL if it exists
         const imageUrl = metadata.image
           ? ipfsToHttp(metadata.image)
-          : '/assets/images/placeholders/image-placeholder.svg';
+          : '/assets/images/placeholders/placeholder_loading.gif';
 
         return {
           ...collection,

@@ -298,7 +298,7 @@ export const collectionRouter = router({
           // Process the image URL if it exists
           const imageUrl = metadata.image
             ? ipfsToHttp(metadata.image)
-            : '/assets/images/placeholders/image-placeholder.svg';
+            : '/assets/images/placeholders/placeholder_loading.gif';
 
           return {
             ...collection,
@@ -360,7 +360,7 @@ export const collectionRouter = router({
         // Process image URL if it exists
         const imageUrl = metadata.image
           ? ipfsToHttp(metadata.image)
-          : '/assets/images/placeholders/image-placeholder.svg';
+          : '/assets/images/placeholders/placeholder_loading.gif';
 
         return {
           metadata,
@@ -370,7 +370,7 @@ export const collectionRouter = router({
         console.error('Error fetching processed metadata:', error);
         return {
           metadata: {},
-          imageUrl: '/assets/images/placeholders/image-placeholder.svg',
+          imageUrl: '/assets/images/placeholders/placeholder_loading.gif',
         };
       }
     }),
