@@ -224,13 +224,39 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
     };
   }, [txHash, address, refreshNFTData, contractAddress, error]);
 
+  const handleImageChange = (file: File | null) => {
+    setImageFile(file);
+
+    if (file) {
+      // Validate file size before setting preview
+      if (file.size > 20 * 1024 * 1024) {
+        // 20MB limit
+        toast.error('Image size exceeds 20MB limit. Please choose a smaller image.');
+        setImageFile(null);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
+  };
+
   const handleMint = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
-    if (!contractAddress || !imageFile || !address) {
-      toast.error('Please select an image for your NFT and connect your wallet');
-      setError(new Error('Please select an image for your NFT and connect your wallet'));
+    if (!address) {
+      toast.error('Please connect your wallet');
+      return;
+    }
+
+    if (!imageFile) {
+      toast.error('Please upload an image');
+      setError(new Error('Image is required'));
       return;
     }
 
@@ -257,8 +283,7 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
 
       const filteredAttributes = attributes.filter((attr) => attr.trait_type && attr.value);
 
-      // This is the key change - use the direct uploadToPinata call with minimal metadata
-      // The server-side code in upload.ts will handle creating proper metadata structure
+      // Use the enhanced uploadToPinata which handles large files
       const uploadResult = await uploadToPinata(
         imageFile,
         {
@@ -306,9 +331,25 @@ export const useNFTMinting = (contractAddress: string, utils: any) => {
       }
     } catch (err) {
       console.error('Mint process error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error during minting';
+
+      // Improved error handling
+      let errorMessage = 'Unknown error during minting';
+
+      if (err instanceof Error) {
+        errorMessage = err.message;
+
+        // Check for specific errors
+        if (errorMessage.includes('413') || errorMessage.includes('Content Too Large')) {
+          errorMessage = 'Image file is too large. Please choose a smaller image (under 20MB).';
+        } else if (errorMessage.includes('User denied') || errorMessage.includes('rejected')) {
+          errorMessage = 'Transaction was rejected. Please approve the transaction to continue.';
+        } else if (errorMessage.includes('insufficient funds')) {
+          errorMessage = 'Insufficient funds in your wallet to complete this transaction.';
+        }
+      }
+
       toast.error(errorMessage);
-      setError(err instanceof Error ? err : new Error('Unknown error during minting'));
+      setError(err instanceof Error ? err : new Error(errorMessage));
       setIsMinting(false);
     }
   };
