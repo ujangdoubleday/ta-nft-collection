@@ -6,8 +6,9 @@ import { NextImage } from '@/components/shared/NextImage';
 
 interface ImageUploaderProps {
   imagePreview: string | null;
-  setImagePreview: (preview: string | null) => void;
-  setImageFile: (file: File | null) => void;
+  setImagePreview?: (preview: string | null) => void;
+  setImageFile?: (file: File | null) => void;
+  onImageChange?: (file: File | null) => void;
   disabled?: boolean;
 }
 
@@ -15,6 +16,7 @@ export const ImageUploader = ({
   imagePreview,
   setImagePreview,
   setImageFile,
+  onImageChange,
   disabled = false,
 }: ImageUploaderProps) => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,12 +24,28 @@ export const ImageUploader = ({
 
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      // Use the new onImageChange handler if provided (preferred)
+      if (onImageChange) {
+        onImageChange(file);
+      }
+      // Otherwise use the legacy approach
+      else if (setImageFile) {
+        setImageFile(file);
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImagePreview?.(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (onImageChange) {
+      onImageChange(null);
+    } else {
+      setImagePreview?.(null);
+      setImageFile?.(null);
     }
   };
 
@@ -49,10 +67,7 @@ export const ImageUploader = ({
             {!disabled && (
               <button
                 type="button"
-                onClick={() => {
-                  setImagePreview(null);
-                  setImageFile(null);
-                }}
+                onClick={handleRemoveImage}
                 className="absolute top-2 right-2 p-1 bg-[#0A0A0A] border border-[#1f1f1f] rounded-full"
               >
                 <X className="h-4 w-4 text-white" />
@@ -65,7 +80,7 @@ export const ImageUploader = ({
           >
             <Upload className="h-8 w-8 text-white mb-2" />
             <span className="text-white text-sm font-medium">Upload Image</span>
-            <span className="text-zinc-400 text-xs mt-1">PNG, JPG, SVG, GIF (Max 10MB)</span>
+            <span className="text-zinc-400 text-xs mt-1">PNG, JPG, SVG, GIF (Max 20MB)</span>
             <input
               type="file"
               accept="image/*"

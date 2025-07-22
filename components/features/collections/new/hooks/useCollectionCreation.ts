@@ -79,6 +79,14 @@ export function useCollectionCreation() {
     setCoverImage(file);
 
     if (file) {
+      // Validate file size before setting preview
+      if (file.size > 20 * 1024 * 1024) {
+        // 20MB limit
+        toast.error('Image size exceeds 20MB limit. Please choose a smaller image.');
+        setCoverImage(null);
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = () => {
         setImagePreview(reader.result as string);
@@ -134,6 +142,7 @@ export function useCollectionCreation() {
         throw new Error('Cover image is required');
       }
 
+      // Use the enhanced uploadToPinata which handles large files
       const uploadResult = await uploadToPinata(
         coverImage,
         {
@@ -223,6 +232,8 @@ export function useCollectionCreation() {
           toast.error('Network error. Please check your connection.');
         } else if (error.message.includes('timeout')) {
           toast.error('Transaction timed out. The network may be congested.');
+        } else if (error.message.includes('413') || error.message.includes('Content Too Large')) {
+          toast.error('Image file is too large. Please choose a smaller image (under 20MB).');
         } else {
           // For other errors, extract a shorter version
           let shortMessage = error.message;

@@ -4,9 +4,9 @@ import axios from 'axios';
 import { Readable } from 'stream';
 
 // Initialize Pinata client
-const pinataApiKey = process.env.PINATA_API_KEY;
+const pinataApiKey = process.env.PINATA_API_KEY || '';
 const pinataSecretApiKey = process.env.PINATA_SECRET_API_KEY;
-const pinataJWT = process.env.PINATA_JWT;
+const pinataJWT = process.env.PINATA_JWT || '';
 const gatewayUrl = process.env.NEXT_PUBLIC_GATEWAY_URL || 'https://gateway.pinata.cloud';
 
 // Check if credentials are available
