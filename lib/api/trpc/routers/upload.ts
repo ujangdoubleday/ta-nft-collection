@@ -49,6 +49,121 @@ export const uploadRouter = router({
       }
     }),
 
+  // New direct upload procedure that only returns CID
+  getUploadUrl: publicProcedure
+    .input(
+      z.object({
+        fileName: z.string(),
+        fileType: z.string(),
+        folderId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const { fileName, fileType, folderId } = input;
+
+        // Return a signed URL or direct upload endpoint
+        // This is a placeholder - implement according to your Pinata setup
+        return {
+          uploadUrl: `/api/upload/direct`,
+          fields: {
+            fileName,
+            fileType,
+            folderId: folderId || '',
+          },
+        };
+      } catch (error) {
+        console.error('Error generating upload URL:', error);
+        throw new Error(error instanceof Error ? error.message : 'Unknown error');
+      }
+    }),
+
+  // Create metadata with existing image CID
+  createMetadataWithCid: publicProcedure
+    .input(
+      z.object({
+        imageCid: z.string(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        folderId: z.string().optional(),
+        banner_image: z.string().optional(),
+        featured_image: z.string().optional(),
+        external_link: z.string().optional(),
+        external_url: z.string().optional(),
+        collaborators: z.array(z.string()).optional(),
+        attributes: z
+          .array(
+            z.object({
+              trait_type: z.string(),
+              value: z.string().or(z.number()),
+            }),
+          )
+          .optional(),
+        metadataType: z
+          .enum([METADATA_TYPE.COLLECTION, METADATA_TYPE.NFT])
+          .default(METADATA_TYPE.COLLECTION),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      try {
+        const {
+          imageCid,
+          name,
+          description,
+          folderId,
+          banner_image,
+          featured_image,
+          external_link,
+          external_url,
+          collaborators,
+          attributes,
+          metadataType,
+        } = input;
+
+        const imageUrl = `https://gateway.pinata.cloud/ipfs/${imageCid}`;
+
+        // Create and upload metadata based on type
+        let metadata;
+
+        if (metadataType === METADATA_TYPE.COLLECTION) {
+          // Collection metadata (contract level)
+          metadata = {
+            name: name || 'Collection',
+            description: description || '',
+            image: imageUrl,
+            banner_image: banner_image || '',
+            featured_image: featured_image || '',
+            external_link: external_link || '',
+            collaborators: collaborators || [],
+          };
+        } else {
+          // NFT metadata (token standard)
+          metadata = {
+            name: name || 'NFT',
+            description: description || '',
+            image: imageUrl,
+            external_url: external_url || external_link || '',
+            attributes: attributes || [],
+          };
+        }
+
+        // Upload metadata to Pinata
+        const metadataResult = await uploadMetadata(metadata, `metadata`, folderId);
+
+        return {
+          success: true,
+          image: {
+            cid: imageCid,
+            url: imageUrl,
+          },
+          metadata: metadataResult,
+        };
+      } catch (error) {
+        console.error('Error creating metadata:', error);
+        throw new Error(error instanceof Error ? error.message : 'Unknown error');
+      }
+    }),
+
   // Upload file to Pinata
   uploadToPinata: publicProcedure
     .input(
@@ -140,14 +255,18 @@ export const uploadRouter = router({
 
         // console.log(`Metadata uploaded successfully to IPFS. CID: ${metadataResult.cid}`);
 
+        // Return both image and metadata URLs
         return {
           success: true,
           image: result,
           metadata: metadataResult,
         };
       } catch (error) {
-        console.error('Upload error:', error);
-        throw new Error(error instanceof Error ? error.message : 'Unknown error');
+        console.error('Error uploading to Pinata:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
       }
     }),
 });
