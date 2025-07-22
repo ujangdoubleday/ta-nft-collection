@@ -5,7 +5,8 @@ import * as PinataAPI from './api';
 
 // Initialize Pinata SDK client
 const pinataJWT = process.env.PINATA_JWT;
-const pinataGateway = process.env.NEXT_PUBLIC_GATEWAY_URL || 'gateway.pinata.cloud';
+const pinataGateway =
+  process.env.NEXT_PUBLIC_GATEWAY_URL || 'green-added-cattle-346.mypinata.cloud';
 
 // Check if credentials are available
 if (!pinataJWT) {

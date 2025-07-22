@@ -1,17 +1,15 @@
 /** @type {import('next').NextConfig} */
 const baseConfig = {
   reactStrictMode: true,
+  serverExternalPackages: [],
   experimental: {
     authInterrupts: true,
-    serverComponentsExternalPackages: [],
-    // For Next.js 15, we need to set the serverActions.bodySizeLimit
     serverActions: {
       bodySizeLimit: '20mb',
     },
   },
-  // Turbopack configuration
+  
   turbopack: {},
-  // Add headers configuration for cookie handling
   async headers() {
     return [
       {
