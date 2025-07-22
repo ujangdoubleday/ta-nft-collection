@@ -17,7 +17,7 @@ export function NextImage({
   alt,
   width,
   height,
-  fallbackSrc = '/assets/images/placeholders/image-placeholder.svg',
+  fallbackSrc = '/assets/images/placeholders/placeholder_loading.gif',
   placeholderType = 'blur',
   wrapperClassName,
   className,

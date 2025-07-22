@@ -18,7 +18,7 @@ export function NFTImageSection({ nft, isOwner = false }: NFTImageSectionProps) 
           alt={nft.name}
           fill
           className="object-contain"
-          fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+          fallbackSrc="/assets/images/placeholders/placeholder_loading.gif"
           placeholderType="blur"
         />
       </div>

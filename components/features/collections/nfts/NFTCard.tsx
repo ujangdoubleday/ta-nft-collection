@@ -31,7 +31,7 @@ export function NFTCard({ nft, collectionAddress, role = 'user' }: NFTCardProps)
 
   // Process the image URL to ensure it's properly formatted
   const imageUrl = imageError
-    ? '/assets/images/placeholders/image-placeholder.svg'
+    ? '/assets/images/placeholders/placeholder_loading.gif'
     : formatIPFSUrl(nft.imageUrl);
 
   return (
@@ -46,7 +46,7 @@ export function NFTCard({ nft, collectionAddress, role = 'user' }: NFTCardProps)
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
             className="object-cover"
             onError={() => setImageError(true)}
-            fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+            fallbackSrc="/assets/images/placeholders/placeholder_loading.gif"
             placeholderType="blur"
           />
         </div>

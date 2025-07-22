@@ -80,12 +80,12 @@ export function CollectionHeader({ collection }: CollectionHeaderProps) {
         {/* Collection Image */}
         <div className="relative w-full md:w-48 h-48 bg-[#111111] rounded-lg overflow-hidden flex-shrink-0">
           <NextImage
-            src={collection?.imageUrl || '/assets/images/placeholders/image-placeholder.svg'}
+            src={collection?.imageUrl || '/assets/images/placeholders/placeholder_loading.gif'}
             alt={name}
             fill
             sizes="(max-width: 768px) 100vw, 192px"
             className="object-cover"
-            fallbackSrc="/assets/images/placeholders/image-placeholder.svg"
+            fallbackSrc="/assets/images/placeholders/placeholder_loading.gif"
             placeholderType="blur"
           />
         </div>

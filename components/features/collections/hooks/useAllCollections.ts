@@ -70,7 +70,7 @@ export function useAllCollections() {
               maxSupply: BigInt(0), // Add missing maxSupply property
               createdAt: BigInt(0),
               metadata: {},
-              imageUrl: '/assets/images/placeholders/image-placeholder.svg',
+              imageUrl: '/assets/images/placeholders/placeholder_loading.gif',
             };
           }
 
@@ -89,7 +89,7 @@ export function useAllCollections() {
             // Process the image URL if it exists
             const imageUrl = metadata.image
               ? ipfsToHttp(metadata.image)
-              : '/assets/images/placeholders/image-placeholder.svg';
+              : '/assets/images/placeholders/placeholder_loading.gif';
 
             return {
               collectionAddress: address,
@@ -113,7 +113,7 @@ export function useAllCollections() {
               maxSupply: BigInt(0), // Add missing maxSupply property
               createdAt: BigInt(0),
               metadata: {},
-              imageUrl: '/assets/images/placeholders/image-placeholder.svg',
+              imageUrl: '/assets/images/placeholders/placeholder_loading.gif',
             };
           }
         }),
