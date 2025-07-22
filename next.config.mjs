@@ -3,6 +3,11 @@ const baseConfig = {
   reactStrictMode: true,
   experimental: {
     authInterrupts: true,
+    serverComponentsExternalPackages: [],
+    // For Next.js 15, we need to set the serverActions.bodySizeLimit
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
   },
   // Turbopack configuration
   turbopack: {},
