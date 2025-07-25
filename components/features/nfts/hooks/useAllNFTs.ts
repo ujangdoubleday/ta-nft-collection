@@ -46,7 +46,7 @@ export function useAllNFTs() {
   } = trpc.nft.getAllNFTs.useQuery(
     {
       contractAddresses: collectionAddresses || [],
-      limit: 500, // Limit the number of NFTs to prevent performance issues
+      limit: 1000, // Increase limit to match server-side limit
     },
     {
       enabled: !!collectionAddresses && collectionAddresses.length > 0 && mounted,
