@@ -36,7 +36,7 @@ export function NFTsContent({ role = 'user', showAll = false }: NFTsContentProps
   const page = Number(searchParams.get('page') || '1');
   const searchQuery = searchParams.get('search') || '';
   const collectionFilter = searchParams.get('collection') || '';
-  const ITEMS_PER_PAGE = 9;
+  const ITEMS_PER_PAGE = 12; // Increased from 9 to show more NFTs per page
 
   // Use appropriate hook based on role
   const {
