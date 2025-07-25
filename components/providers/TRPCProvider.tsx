@@ -29,6 +29,8 @@ export function TRPCProvider({ children }: { children: React.ReactNode }) {
         httpBatchLink({
           url: '/api/trpc',
           transformer: superjson,
+          // Force all requests to use POST instead of GET
+          methodOverride: 'POST',
         }),
       ],
     }),

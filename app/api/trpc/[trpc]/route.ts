@@ -27,6 +27,8 @@ const handler = async (req: Request) => {
       req,
       router: appRouter,
       createContext: () => ({}),
+      // Allow method override to support POST requests for all operations
+      allowMethodOverride: true,
       // Add timeout for Next.js 15
       onError: ({ error }) => {
         console.error('tRPC error:', error);
