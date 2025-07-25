@@ -304,7 +304,7 @@ export const nftRouter = router({
     .input(
       z.object({
         contractAddresses: z.array(z.string()).optional(),
-        limit: z.number().optional().default(100),
+        limit: z.number().optional().default(1000), // Increase default limit to 1000
       }),
     )
     .query(async ({ input }) => {
@@ -316,8 +316,8 @@ export const nftRouter = router({
         // Jika tidak ada alamat kontrak, ambil dari semua koleksi
         let addresses = contractAddresses || [];
 
-        // Batasi jumlah alamat yang akan diproses
-        const addressesToProcess = addresses.slice(0, 10); // Process max 10 collections at once
+        // Process all addresses instead of limiting to just 10
+        const addressesToProcess = addresses;
 
         // console.log(
         //   `TRPC - Processing ${addressesToProcess.length} contract addresses for getAllNFTs`,
