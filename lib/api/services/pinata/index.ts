@@ -26,7 +26,8 @@ function createFileFromBuffer(
   mimeType = 'application/octet-stream',
 ) {
   // Create a blob from the buffer
-  const blob = new Blob([buffer], { type: mimeType });
+  const uint8 = new Uint8Array(buffer);
+  const blob = new Blob([uint8], { type: mimeType });
 
   // Add required File interface properties
   return Object.assign(blob, {
