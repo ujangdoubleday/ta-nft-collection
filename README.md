@@ -1,4 +1,4 @@
-# NFT-Next - NFT Creator Platform
+# NFT Creator Platform
 
 **IMPORTANT: This project is currently under heavy development**
 
@@ -29,7 +29,7 @@ This project has several known issues, including:
    ```bash
    bun install
    # OR
-   npm install
+   npm install --legacy-peer-deps
    ```
 
 3. **Configure environment variables**
