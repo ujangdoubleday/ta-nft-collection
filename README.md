@@ -29,7 +29,7 @@ This project has several known issues, including:
    ```bash
    bun install
    # OR
-   npm install
+   npm install --legacy-peer-deps
    ```
 
 3. **Configure environment variables**
