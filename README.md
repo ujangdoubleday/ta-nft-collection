@@ -1,4 +1,4 @@
-# NFT-Next - NFT Creator Platform
+# NFT Creator Platform
 
 **IMPORTANT: This project is currently under heavy development**
 
