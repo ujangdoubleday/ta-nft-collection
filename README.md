@@ -14,15 +14,14 @@ This project has several known issues, including:
 ### Prerequisites
 
 - Node.js 18+ or Bun runtime
-- PostgreSQL database
 
 ### Setup Instructions
 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/nft-next.git
-   cd nft-next
+   git clone git@github.com:ujangdoubleday/ta-nft-collection.git
+   cd ta-nft-collection
    ```
 
 2. **Install dependencies**
